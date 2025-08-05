@@ -1,0 +1,335 @@
+{
+  "current_mode": "testing",
+  "available_modes": [
+    "development",
+    "testing",
+    "debugging",
+    "refactoring",
+    "documentation",
+    "completion-verification"
+  ],
+  "tasks": [
+    {
+      "id": "project-setup-complete",
+      "title": "Project Setup Complete",
+      "description": "Infinite continue hook system has been initialized and is ready for use",
+      "mode": "development",
+      "priority": "high",
+      "status": "completed",
+      "success_criteria": [
+        "Hook system configured",
+        "Mode files available",
+        "Project structure created"
+      ],
+      "created": "2025-01-15T00:00:00Z",
+      "assigned_to": "setup-script"
+    },
+    {
+      "id": "begin-development-work",
+      "title": "Begin Development Work",
+      "description": "Start implementing your project features using the infinite continue system",
+      "mode": "development",
+      "priority": "medium",
+      "status": "completed",
+      "success_criteria": [
+        "First feature implemented",
+        "Basic tests added",
+        "Code quality maintained"
+      ],
+      "created": "2025-01-15T00:00:00Z",
+      "assigned_to": "claude"
+    },
+    {
+      "id": "review-unnecessary-files",
+      "title": "Review Unnecessary Files",
+      "description": "Identify and remove any unnecessary files including unused dependencies, temporary files, build artifacts, and outdated documentation",
+      "mode": "refactoring",
+      "priority": "medium",
+      "status": "completed",
+      "success_criteria": [
+        "All temporary and build files identified and removed",
+        "Unused dependencies removed from package files",
+        "Outdated documentation files cleaned up",
+        "Project directory contains only necessary files"
+      ],
+      "created": "2025-01-15T00:00:00Z",
+      "assigned_to": "claude"
+    },
+    {
+      "id": "review-unimplemented-code",
+      "title": "Review Unimplemented Source Code",
+      "description": "Find and complete any unimplemented source code including TODO comments, stub functions, placeholder methods, and incomplete features",
+      "mode": "development",
+      "priority": "high",
+      "status": "completed",
+      "success_criteria": [
+        "All TODO comments reviewed and resolved",
+        "No stub functions or placeholder methods remain",
+        "All incomplete features are either completed or documented as future work",
+        "Code is production-ready with no implementation gaps"
+      ],
+      "created": "2025-01-15T00:00:00Z",
+      "assigned_to": "claude"
+    },
+    {
+      "id": "review-test-errors",
+      "title": "Review Test Errors and Skipped Tests",
+      "description": "Fix all failing tests and implement any skipped or pending tests to ensure comprehensive test coverage",
+      "mode": "testing",
+      "priority": "high",
+      "status": "completed",
+      "success_criteria": [
+        "All test suites pass without errors",
+        "No skipped or pending tests remain",
+        "Test failures are fixed without breaking functionality",
+        "Test suite runs cleanly in CI/CD environment"
+      ],
+      "created": "2025-01-15T00:00:00Z",
+      "assigned_to": "claude"
+    },
+    {
+      "id": "review-missing-coverage",
+      "title": "Review Missing Test Coverage",
+      "description": "Identify and add tests for any code paths with missing coverage to reach the 95% coverage target",
+      "mode": "testing",
+      "priority": "medium",
+      "status": "completed",
+      "success_criteria": [
+        "Code coverage reaches 95% target",
+        "All critical code paths have test coverage",
+        "Edge cases and error conditions are tested",
+        "Coverage report shows no significant gaps"
+      ],
+      "created": "2025-01-15T00:00:00Z",
+      "assigned_to": "claude"
+    },
+    {
+      "id": "completion-verification-strike-1",
+      "title": "Strike 1/3: Initial Completion Review",
+      "description": "Perform comprehensive review of all completion criteria. Identify any gaps in documentation, features, testing, or code quality that prevent true project completion.",
+      "mode": "completion-verification",
+      "priority": "high",
+      "status": "completed",
+      "success_criteria": [
+        "All 4 completion criteria areas assessed (docs, features, tests, quality)",
+        "Gap analysis completed with specific issues identified",
+        "Priority areas for final cleanup identified",
+        "Verification documented with evidence of review depth"
+      ],
+      "created": "2025-07-22T19:37:46.217671+00:00",
+      "assigned_to": "claude"
+    },
+    {
+      "id": "completion-verification-strike-2",
+      "title": "Strike 2/3: Detailed Gap Resolution",
+      "description": "Address specific gaps identified in Strike 1 review. Focus on resolving documentation gaps, completing missing features, improving test coverage, and fixing quality issues.",
+      "mode": "completion-verification",
+      "priority": "high",
+      "status": "completed",
+      "success_criteria": [
+        "All previously identified gaps addressed or documented as acceptable",
+        "Documentation updated to reflect current implementation state",
+        "Test coverage meets or exceeds stated requirements",
+        "Code quality issues resolved or explicitly accepted"
+      ],
+      "created": "2025-07-22T19:37:46.217671+00:00",
+      "assigned_to": "claude"
+    },
+    {
+      "id": "completion-verification-strike-3",
+      "title": "Strike 3/3: Final Validation and Approval",
+      "description": "Perform final comprehensive validation that project meets all completion criteria. This is the last chance to identify any issues before project approval.",
+      "mode": "completion-verification",
+      "priority": "high",
+      "status": "completed",
+      "success_criteria": [
+        "All completion criteria demonstrably met with evidence",
+        "Project genuinely ready for production/delivery",
+        "No critical gaps remain in any area",
+        "Final sign-off provided with confidence in project completion"
+      ],
+      "created": "2025-07-22T19:37:46.217671+00:00",
+      "assigned_to": "claude"
+    },
+    {
+      "id": "research-era5-api-integration",
+      "title": "Research ERA5/Copernicus CDS API Integration",
+      "description": "Comprehensive research on ERA5 data access via Copernicus Climate Data Store (CDS) API including authentication, data formats, rate limits, and best practices",
+      "mode": "development",
+      "priority": "high",
+      "status": "pending",
+      "success_criteria": [
+        "CDS API authentication requirements and setup documented",
+        "ERA5 available variables and temporal/spatial resolutions catalogued",
+        "API rate limits, quotas, and usage patterns identified",
+        "Data formats (NetCDF, GRIB) and processing requirements understood",
+        "Example Python code for data retrieval working",
+        "Production implementation strategy documented"
+      ],
+      "created": "2025-07-22T20:15:00.000000+00:00",
+      "assigned_to": null
+    },
+    {
+      "id": "implement-era5-data-ingestion",
+      "title": "Implement ERA5 Climate Data Ingestion Service",
+      "description": "Build automated data ingestion service for ERA5 temperature and climate data from Copernicus Climate Data Store (CDS) based on research findings",
+      "mode": "development",
+      "priority": "high",
+      "status": "in_progress",
+      "success_criteria": [
+        "ERA5 API client implemented with authentication",
+        "Temperature data (2m, min, max) automatically downloaded",
+        "Data validation and quality checks implemented",
+        "Automated daily/monthly data updates working",
+        "Comprehensive tests with high coverage",
+        "Integration with existing CLI and models"
+      ],
+      "created": "2025-07-22T20:00:00.000000+00:00",
+      "assigned_to": "claude"
+    },
+    {
+      "id": "research-chirps-data-access",
+      "title": "Research CHIRPS Rainfall Data Access Methods",
+      "description": "Investigate CHIRPS precipitation data access including FTP servers, data formats, processing workflows, and integration patterns",
+      "mode": "development",
+      "priority": "high",
+      "status": "pending",
+      "success_criteria": [
+        "CHIRPS data sources and access methods documented",
+        "Data formats (NetCDF, GeoTIFF, binary) and structures analyzed",
+        "Temporal/spatial resolutions and coverage areas mapped",
+        "Download automation approaches and tools identified",
+        "Data processing and extraction workflows designed",
+        "Production implementation strategy documented"
+      ],
+      "created": "2025-07-22T20:15:00.000000+00:00",
+      "assigned_to": null
+    },
+    {
+      "id": "implement-chirps-rainfall-ingestion",
+      "title": "Implement CHIRPS Rainfall Data Ingestion Service",
+      "description": "Build automated ingestion for CHIRPS (Climate Hazards Group InfraRed Precipitation with Station data) rainfall data based on research findings",
+      "mode": "development",
+      "priority": "high",
+      "status": "pending",
+      "success_criteria": [
+        "CHIRPS data download service implemented",
+        "NetCDF/GeoTIFF processing pipeline created",
+        "Rainfall data extracted for target regions",
+        "Data harmonization with ERA5 timestamps",
+        "Comprehensive tests with high coverage",
+        "Integration with existing systems"
+      ],
+      "created": "2025-07-22T20:00:00.000000+00:00",
+      "assigned_to": null
+    },
+    {
+      "id": "research-malaria-atlas-project-api",
+      "title": "Research Malaria Atlas Project (MAP) Data Access",
+      "description": "Study MAP's data access methods, APIs, raster data formats, and vector surveillance data structures for malaria risk mapping",
+      "mode": "development",
+      "priority": "high",
+      "status": "pending",
+      "success_criteria": [
+        "MAP data portal and API endpoints documented",
+        "Available malaria datasets and risk maps catalogued",
+        "Raster data formats and coordinate systems understood",
+        "Vector occurrence data structure and metadata analyzed",
+        "Programmatic access methods and rate limits identified",
+        "Production implementation strategy documented"
+      ],
+      "created": "2025-07-22T20:15:00.000000+00:00",
+      "assigned_to": null
+    },
+    {
+      "id": "implement-malaria-atlas-ingestion",
+      "title": "Implement Malaria Atlas Project Data Integration",
+      "description": "Integrate historical malaria risk maps and incidence data from Malaria Atlas Project (MAP) based on research findings",
+      "mode": "development",
+      "priority": "high",
+      "status": "pending",
+      "success_criteria": [
+        "MAP API integration implemented",
+        "Historical malaria risk raster data imported",
+        "Vector occurrence data processed",
+        "Baseline risk maps for model training prepared",
+        "Comprehensive tests with high coverage",
+        "Integration with existing systems"
+      ],
+      "created": "2025-07-22T20:00:00.000000+00:00",
+      "assigned_to": null
+    },
+    {
+      "id": "research-worldpop-data-integration",
+      "title": "Research WorldPop Population Data Integration",
+      "description": "Analyze WorldPop's population data access including APIs, data formats, resolution options, and demographic variables available",
+      "mode": "development",
+      "priority": "medium",
+      "status": "pending",
+      "success_criteria": [
+        "WorldPop API and data portal access methods documented",
+        "Population dataset types and resolutions catalogued",
+        "Demographic variables (age, gender) availability assessed",
+        "Raster data formats and processing requirements understood",
+        "Integration with other geospatial data sources planned",
+        "Production implementation strategy documented"
+      ],
+      "created": "2025-07-22T20:15:00.000000+00:00",
+      "assigned_to": null
+    },
+    {
+      "id": "implement-worldpop-demographics",
+      "title": "Implement WorldPop Population Data Integration",
+      "description": "Integrate WorldPop population density and demographics data for population-at-risk calculations based on research findings",
+      "mode": "development",
+      "priority": "medium",
+      "status": "pending",
+      "success_criteria": [
+        "WorldPop data download service implemented",
+        "Population density rasters processed",
+        "Age-structured population data integrated",
+        "Population-at-risk metrics calculated",
+        "Comprehensive tests with high coverage",
+        "Integration with existing systems"
+      ],
+      "created": "2025-07-22T20:00:00.000000+00:00",
+      "assigned_to": null
+    },
+    {
+      "id": "research-modis-nasa-earthdata",
+      "title": "Research MODIS Data Access via NASA EarthData",
+      "description": "Investigate MODIS vegetation indices (NDVI/EVI) access through NASA EarthData including authentication, data formats, and processing tools",
+      "mode": "development",
+      "priority": "medium",
+      "status": "pending",
+      "success_criteria": [
+        "NASA EarthData authentication and access setup documented",
+        "MODIS products (MOD13, MYD13) and resolutions identified",
+        "NDVI/EVI data formats (HDF, NetCDF) and metadata understood",
+        "Cloud masking and quality assessment procedures documented",
+        "Automated download tools and Python libraries evaluated",
+        "Production implementation strategy documented"
+      ],
+      "created": "2025-07-22T20:15:00.000000+00:00",
+      "assigned_to": null
+    },
+    {
+      "id": "implement-modis-vegetation-data",
+      "title": "Implement MODIS Vegetation Indices Data Pipeline",
+      "description": "Build pipeline for MODIS NDVI/EVI vegetation indices data from NASA Earth Data based on research findings",
+      "mode": "development",
+      "priority": "medium",
+      "status": "pending",
+      "success_criteria": [
+        "NASA Earth Data API authentication setup",
+        "MODIS NDVI/EVI data download automated",
+        "Cloud masking and quality filtering implemented",
+        "16-day composite processing pipeline working",
+        "Comprehensive tests with high coverage",
+        "Integration with existing systems"
+      ],
+      "created": "2025-07-22T20:00:00.000000+00:00",
+      "assigned_to": null
+    }
+  ]
+}

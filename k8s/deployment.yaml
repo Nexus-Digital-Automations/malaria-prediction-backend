@@ -1,0 +1,431 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: malaria-predictor-api
+  namespace: malaria-prediction
+  labels:
+    app: malaria-predictor
+    component: api
+    version: v1.0.0
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: malaria-predictor
+      component: api
+  template:
+    metadata:
+      labels:
+        app: malaria-predictor
+        component: api
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: malaria-predictor
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+      initContainers:
+      - name: wait-for-db
+        image: postgres:15-alpine
+        env:
+        - name: DATABASE_HOST
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-database-secret
+              key: DATABASE_HOST
+        - name: DATABASE_PORT
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-database-secret
+              key: DATABASE_PORT
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-database-secret
+              key: DATABASE_USER
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-database-secret
+              key: DATABASE_PASSWORD
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for database to be ready..."
+          until pg_isready -h $DATABASE_HOST -p $DATABASE_PORT -U $DATABASE_USER; do
+            echo "Database not ready, waiting..."
+            sleep 2
+          done
+          echo "Database is ready!"
+      - name: wait-for-redis
+        image: redis:7-alpine
+        env:
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-redis-secret
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-redis-secret
+              key: REDIS_PORT
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for Redis to be ready..."
+          until redis-cli -h $REDIS_HOST -p $REDIS_PORT ping; do
+            echo "Redis not ready, waiting..."
+            sleep 2
+          done
+          echo "Redis is ready!"
+      - name: db-migrate
+        image: malaria-prediction-api:latest
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-database-secret
+              key: DATABASE_URL
+        envFrom:
+        - configMapRef:
+            name: malaria-predictor-config
+        command:
+        - sh
+        - -c
+        - |
+          echo "Running database migrations..."
+          alembic upgrade head
+          echo "Database migrations completed!"
+        volumeMounts:
+        - name: app-secrets
+          mountPath: /var/secrets
+          readOnly: true
+      containers:
+      - name: api
+        image: malaria-prediction-api:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-database-secret
+              key: DATABASE_URL
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-redis-secret
+              key: REDIS_URL
+        - name: SECURITY__SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-secrets
+              key: api_secret_key
+        - name: EXTERNAL_APIS__ERA5_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-api-keys
+              key: ERA5_API_KEY
+        - name: EXTERNAL_APIS__MODIS_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-api-keys
+              key: MODIS_API_KEY
+        - name: MONITORING__SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-api-keys
+              key: SENTRY_DSN
+              optional: true
+        - name: SECURITY__CORS_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: malaria-predictor-cors-config
+              key: cors_origins.json
+        envFrom:
+        - configMapRef:
+            name: malaria-predictor-config
+        volumeMounts:
+        - name: app-secrets
+          mountPath: /var/secrets
+          readOnly: true
+        - name: app-data
+          mountPath: /app/data
+        - name: app-models
+          mountPath: /app/models
+        - name: app-logs
+          mountPath: /app/logs
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health/startup
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+      volumes:
+      - name: app-secrets
+        projected:
+          sources:
+          - secret:
+              name: malaria-predictor-secrets
+          - secret:
+              name: malaria-predictor-database-secret
+          - secret:
+              name: malaria-predictor-redis-secret
+          - secret:
+              name: malaria-predictor-api-keys
+      - name: app-data
+        persistentVolumeClaim:
+          claimName: malaria-predictor-data-pvc
+      - name: app-models
+        persistentVolumeClaim:
+          claimName: malaria-predictor-models-pvc
+      - name: app-logs
+        emptyDir: {}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+      - key: "node.kubernetes.io/not-ready"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 300
+      - key: "node.kubernetes.io/unreachable"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 300
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: malaria-predictor-service
+  namespace: malaria-prediction
+  labels:
+    app: malaria-predictor
+    component: service
+    version: v1.0.0
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8000
+    targetPort: http
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+    protocol: TCP
+  selector:
+    app: malaria-predictor
+    component: api
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: malaria-predictor
+  namespace: malaria-prediction
+  labels:
+    app: malaria-predictor
+    component: serviceaccount
+    version: v1.0.0
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: malaria-predictor-data-pvc
+  namespace: malaria-prediction
+  labels:
+    app: malaria-predictor
+    component: data-storage
+    version: v1.0.0
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: fast-ssd
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: malaria-predictor-models-pvc
+  namespace: malaria-prediction
+  labels:
+    app: malaria-predictor
+    component: model-storage
+    version: v1.0.0
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: fast-ssd
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: malaria-predictor-ingress
+  namespace: malaria-prediction
+  labels:
+    app: malaria-predictor
+    component: ingress
+    version: v1.0.0
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.malaria-prediction.com"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+spec:
+  tls:
+  - hosts:
+    - api.malaria-prediction.com
+    secretName: malaria-predictor-tls-secret
+  rules:
+  - host: api.malaria-prediction.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: malaria-predictor-service
+            port:
+              number: 8000
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: malaria-predictor-hpa
+  namespace: malaria-prediction
+  labels:
+    app: malaria-predictor
+    component: autoscaler
+    version: v1.0.0
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: malaria-predictor-api
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: malaria-predictor-pdb
+  namespace: malaria-prediction
+  labels:
+    app: malaria-predictor
+    component: disruption-budget
+    version: v1.0.0
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: malaria-predictor
+      component: api

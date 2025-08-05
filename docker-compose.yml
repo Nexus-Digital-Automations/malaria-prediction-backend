@@ -1,0 +1,349 @@
+version: '3.8'
+
+# Docker Compose for Malaria Prediction Backend - Development Environment
+# Provides local development setup with all required services
+
+networks:
+  malaria-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  # Persistent storage for database
+  postgres_data:
+    driver: local
+
+  # Persistent storage for Redis
+  redis_data:
+    driver: local
+
+  # Shared volume for data files
+  data_volume:
+    driver: local
+
+  # Shared volume for model files
+  model_volume:
+    driver: local
+
+services:
+  # =============================================================================
+  # Database Service - TimescaleDB with PostGIS
+  # =============================================================================
+  database:
+    image: timescale/timescaledb-ha:pg15-latest
+    container_name: malaria-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: malaria_prediction
+      POSTGRES_USER: malaria_user
+      POSTGRES_PASSWORD: malaria_dev_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+      # TimescaleDB configuration
+      TIMESCALEDB_TELEMETRY: "off"
+      # PostGIS configuration
+      POSTGRES_MULTIPLE_EXTENSIONS: postgis,timescaledb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_database.py:/docker-entrypoint-initdb.d/01-init.sql:ro
+    networks:
+      malaria-network:
+        ipv4_address: 172.20.0.10
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U malaria_user -d malaria_prediction"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # =============================================================================
+  # Redis Cache Service
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: malaria-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      malaria-network:
+        ipv4_address: 172.20.0.11
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # =============================================================================
+  # FastAPI Application Service - Development Mode
+  # =============================================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    container_name: malaria-api
+    restart: unless-stopped
+    environment:
+      # Application configuration
+      ENVIRONMENT: development
+      DEBUG: "true"
+      LOG_LEVEL: debug
+
+      # Database configuration
+      DATABASE_URL: postgresql+asyncpg://malaria_user:malaria_dev_password@database:5432/malaria_prediction
+
+      # Redis configuration
+      REDIS_URL: redis://redis:6379/0
+
+      # API configuration
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      WORKERS: 1
+
+      # ML Model configuration
+      MODEL_PATH: /app/models
+      ENABLE_MODEL_CACHE: "true"
+
+      # Data source configuration
+      DATA_PATH: /app/data
+      ENABLE_DATA_CACHE: "true"
+
+      # External API configuration (for development, use test endpoints)
+      ERA5_API_KEY: ${ERA5_API_KEY:-test_key}
+      CHIRPS_API_ENDPOINT: ${CHIRPS_API_ENDPOINT:-https://data.chc.ucsb.edu/api/}
+      MODIS_API_KEY: ${MODIS_API_KEY:-test_key}
+      WORLDPOP_API_ENDPOINT: ${WORLDPOP_API_ENDPOINT:-https://hub.worldpop.org/}
+      MAP_API_ENDPOINT: ${MAP_API_ENDPOINT:-https://malariaatlas.org/}
+
+      # Security
+      SECRET_KEY: dev_secret_key_change_in_production
+
+      # Monitoring
+      ENABLE_METRICS: "true"
+      ENABLE_TRACING: "false"
+    ports:
+      - "8000:8000"
+      - "5678:5678"  # Debug port
+    volumes:
+      # Source code for hot reload
+      - ./src:/app/src:ro
+      - ./main.py:/app/main.py:ro
+      - ./scripts:/app/scripts:ro
+
+      # Data and models (persistent)
+      - data_volume:/app/data
+      - model_volume:/app/models
+
+      # Logs
+      - ./logs:/app/logs
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      malaria-network:
+        ipv4_address: 172.20.0.20
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/liveness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - "malaria.component=api"
+      - "malaria.environment=development"
+
+  # =============================================================================
+  # Celery Worker Service (for background tasks)
+  # =============================================================================
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: malaria-worker
+    restart: unless-stopped
+    command: celery -A malaria_predictor.workers.celery worker --loglevel=info --concurrency=2
+    environment:
+      # Inherit from API service
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql+asyncpg://malaria_user:malaria_dev_password@database:5432/malaria_prediction
+      REDIS_URL: redis://redis:6379/0
+
+      # Celery configuration
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+
+      # External API configuration
+      ERA5_API_KEY: ${ERA5_API_KEY:-test_key}
+      CHIRPS_API_ENDPOINT: ${CHIRPS_API_ENDPOINT:-https://data.chc.ucsb.edu/api/}
+      MODIS_API_KEY: ${MODIS_API_KEY:-test_key}
+      WORLDPOP_API_ENDPOINT: ${WORLDPOP_API_ENDPOINT:-https://hub.worldpop.org/}
+      MAP_API_ENDPOINT: ${MAP_API_ENDPOINT:-https://malariaatlas.org/}
+    volumes:
+      - ./src:/app/src:ro
+      - data_volume:/app/data
+      - model_volume:/app/models
+      - ./logs:/app/logs
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      malaria-network:
+        ipv4_address: 172.20.0.21
+    labels:
+      - "malaria.component=worker"
+      - "malaria.environment=development"
+
+  # =============================================================================
+  # Celery Beat Service (for scheduled tasks)
+  # =============================================================================
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: malaria-scheduler
+    restart: unless-stopped
+    command: celery -A malaria_predictor.workers.celery beat --loglevel=info --schedule=/tmp/celerybeat-schedule
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql+asyncpg://malaria_user:malaria_dev_password@database:5432/malaria_prediction
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    volumes:
+      - ./src:/app/src:ro
+      - data_volume:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      malaria-network:
+        ipv4_address: 172.20.0.22
+    labels:
+      - "malaria.component=scheduler"
+      - "malaria.environment=development"
+
+  # =============================================================================
+  # Nginx Reverse Proxy (Optional for development)
+  # =============================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: malaria-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+    networks:
+      malaria-network:
+        ipv4_address: 172.20.0.30
+    profiles:
+      - "with-nginx"
+    labels:
+      - "malaria.component=proxy"
+      - "malaria.environment=development"
+
+  # =============================================================================
+  # Development Tools and Utilities
+  # =============================================================================
+
+  # Database administration tool
+  adminer:
+    image: adminer:latest
+    container_name: malaria-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: database
+      ADMINER_DESIGN: pepa-linha
+    depends_on:
+      - database
+    networks:
+      malaria-network:
+        ipv4_address: 172.20.0.40
+    profiles:
+      - "dev-tools"
+    labels:
+      - "malaria.component=admin"
+      - "malaria.environment=development"
+
+  # Redis administration tool
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: malaria-redis-ui
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: "local:redis:6379"
+      HTTP_USER: admin
+      HTTP_PASSWORD: admin
+    depends_on:
+      - redis
+    networks:
+      malaria-network:
+        ipv4_address: 172.20.0.41
+    profiles:
+      - "dev-tools"
+    labels:
+      - "malaria.component=redis-ui"
+      - "malaria.environment=development"
+
+  # Jupyter notebook for data analysis
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: malaria-jupyter
+    restart: unless-stopped
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password=''
+    ports:
+      - "8888:8888"
+    environment:
+      JUPYTER_ENABLE_LAB: "yes"
+      DATABASE_URL: postgresql+asyncpg://malaria_user:malaria_dev_password@database:5432/malaria_prediction
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./src:/app/src
+      - ./notebooks:/app/notebooks
+      - data_volume:/app/data
+      - model_volume:/app/models
+    depends_on:
+      - database
+      - redis
+    networks:
+      malaria-network:
+        ipv4_address: 172.20.0.42
+    profiles:
+      - "dev-tools"
+    labels:
+      - "malaria.component=jupyter"
+      - "malaria.environment=development"

@@ -1,0 +1,362 @@
+# Prometheus Alert Rules for Malaria Prediction Backend
+# Comprehensive alerting covering API, ML models, system resources, and infrastructure
+
+groups:
+  # =============================================================================
+  # API Service Alerts
+  # =============================================================================
+  - name: malaria_api_alerts
+    rules:
+      - alert: APIServiceDown
+        expr: up{job="malaria-prediction-api"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: malaria-prediction-api
+          team: platform
+        annotations:
+          summary: "Malaria Prediction API service is down"
+          description: "The malaria prediction API service has been down for more than 30 seconds. Immediate action required."
+          runbook_url: "https://runbooks.malaria-prediction.com/api-service-down"
+
+      - alert: HighAPIErrorRate
+        expr: (sum(rate(malaria_api_requests_total{status_code=~"5.."}[5m])) / sum(rate(malaria_api_requests_total[5m]))) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          service: malaria-prediction-api
+          team: platform
+        annotations:
+          summary: "High error rate detected in Malaria Prediction API"
+          description: "API error rate is {{ $value | humanizePercentage }} which is above the 5% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/high-error-rate"
+
+      - alert: CriticalAPIErrorRate
+        expr: (sum(rate(malaria_api_requests_total{status_code=~"5.."}[5m])) / sum(rate(malaria_api_requests_total[5m]))) > 0.15
+        for: 1m
+        labels:
+          severity: critical
+          service: malaria-prediction-api
+          team: platform
+        annotations:
+          summary: "Critical error rate detected in Malaria Prediction API"
+          description: "API error rate is {{ $value | humanizePercentage }} which is above the critical 15% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/critical-error-rate"
+
+      - alert: HighAPIResponseTime
+        expr: histogram_quantile(0.95, sum(rate(malaria_api_request_duration_seconds_bucket[5m])) by (le)) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: malaria-prediction-api
+          team: platform
+        annotations:
+          summary: "High response time detected in Malaria Prediction API"
+          description: "95th percentile response time is {{ $value }}s which is above the 2s threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/high-response-time"
+
+      - alert: APIHighRequestRate
+        expr: sum(rate(malaria_api_requests_total[5m])) > 100
+        for: 5m
+        labels:
+          severity: info
+          service: malaria-prediction-api
+          team: platform
+        annotations:
+          summary: "High request rate to Malaria Prediction API"
+          description: "API is receiving {{ $value }} requests per second, which is above normal levels"
+          runbook_url: "https://runbooks.malaria-prediction.com/high-request-rate"
+
+  # =============================================================================
+  # ML Model Alerts
+  # =============================================================================
+  - name: malaria_ml_alerts
+    rules:
+      - alert: MLModelHighErrorRate
+        expr: (sum(rate(malaria_ml_model_errors_total[5m])) / sum(rate(malaria_ml_predictions_total[5m]))) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+          service: malaria-prediction-models
+          team: ml-ops
+        annotations:
+          summary: "High error rate detected in ML models"
+          description: "ML model error rate is {{ $value | humanizePercentage }} which is above the 1% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/ml-model-errors"
+
+      - alert: MLModelPerformanceDegradation
+        expr: histogram_quantile(0.95, sum(rate(malaria_ml_prediction_duration_seconds_bucket[5m])) by (le)) > 5
+        for: 3m
+        labels:
+          severity: warning
+          service: malaria-prediction-models
+          team: ml-ops
+        annotations:
+          summary: "ML model performance degradation detected"
+          description: "ML model P95 inference time is {{ $value }}s which is above the 5s threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/ml-performance-degradation"
+
+      - alert: MLModelAccuracyDrift
+        expr: malaria_ml_model_accuracy < 0.85
+        for: 15m
+        labels:
+          severity: warning
+          service: malaria-prediction-models
+          team: ml-ops
+        annotations:
+          summary: "ML model accuracy degradation detected"
+          description: "Model accuracy is {{ $value | humanizePercentage }} which is below the 85% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/model-accuracy-drift"
+
+      - alert: MLModelHighMemoryUsage
+        expr: malaria_ml_model_memory_usage_bytes / 1024 / 1024 > 2000
+        for: 10m
+        labels:
+          severity: warning
+          service: malaria-prediction-models
+          team: ml-ops
+        annotations:
+          summary: "High memory usage detected in ML models"
+          description: "ML model memory usage is {{ $value }}MB which is above the 2GB threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/ml-high-memory"
+
+  # =============================================================================
+  # System Resource Alerts
+  # =============================================================================
+  - name: malaria_system_alerts
+    rules:
+      - alert: SystemHighCPUUsage
+        expr: 100 - (avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: malaria-prediction-system
+          team: platform
+        annotations:
+          summary: "High CPU usage detected"
+          description: "Average CPU usage is {{ $value }}% which is above the 85% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/high-cpu-usage"
+
+      - alert: SystemCriticalCPUUsage
+        expr: 100 - (avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 2m
+        labels:
+          severity: critical
+          service: malaria-prediction-system
+          team: platform
+        annotations:
+          summary: "Critical CPU usage detected"
+          description: "Average CPU usage is {{ $value }}% which is above the critical 95% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/critical-cpu-usage"
+
+      - alert: SystemHighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: malaria-prediction-system
+          team: platform
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}% which is above the 85% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/high-memory-usage"
+
+      - alert: SystemCriticalMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+          service: malaria-prediction-system
+          team: platform
+        annotations:
+          summary: "Critical memory usage detected"
+          description: "Memory usage is {{ $value }}% which is above the critical 95% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/critical-memory-usage"
+
+      - alert: SystemHighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: malaria-prediction-system
+          team: platform
+        annotations:
+          summary: "High disk usage detected"
+          description: "Disk usage on {{ $labels.mountpoint }} is {{ $value }}% which is above the 85% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/high-disk-usage"
+
+      - alert: SystemHighLoadAverage
+        expr: node_load15 > (count(node_cpu_seconds_total{mode="idle"}) by (instance)) * 1.5
+        for: 10m
+        labels:
+          severity: warning
+          service: malaria-prediction-system
+          team: platform
+        annotations:
+          summary: "High system load average detected"
+          description: "15-minute load average is {{ $value }} which is high for this system"
+          runbook_url: "https://runbooks.malaria-prediction.com/high-load-average"
+
+  # =============================================================================
+  # Database Alerts
+  # =============================================================================
+  - name: malaria_database_alerts
+    rules:
+      - alert: DatabaseConnectionPoolExhaustion
+        expr: (malaria_system_db_connections_active / (malaria_system_db_connections_active + malaria_system_db_connections_idle)) > 0.9
+        for: 2m
+        labels:
+          severity: critical
+          service: malaria-prediction-database
+          team: platform
+        annotations:
+          summary: "Database connection pool near exhaustion"
+          description: "Database connection pool utilization is {{ $value | humanizePercentage }}"
+          runbook_url: "https://runbooks.malaria-prediction.com/db-connection-pool-exhaustion"
+
+      - alert: DatabaseHighQueryDuration
+        expr: pg_stat_activity_max_tx_duration{datname="malaria_prediction"} > 300
+        for: 5m
+        labels:
+          severity: warning
+          service: malaria-prediction-database
+          team: platform
+        annotations:
+          summary: "Long-running database query detected"
+          description: "Query has been running for {{ $value }}s which is above the 5 minute threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/long-running-query"
+
+      - alert: DatabaseDown
+        expr: up{job="postgres"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: malaria-prediction-database
+          team: platform
+        annotations:
+          summary: "Database is down"
+          description: "PostgreSQL database is not responding"
+          runbook_url: "https://runbooks.malaria-prediction.com/database-down"
+
+  # =============================================================================
+  # Cache Alerts
+  # =============================================================================
+  - name: malaria_cache_alerts
+    rules:
+      - alert: LowCacheHitRate
+        expr: malaria_system_cache_hit_rate < 0.8
+        for: 10m
+        labels:
+          severity: warning
+          service: malaria-prediction-cache
+          team: platform
+        annotations:
+          summary: "Low cache hit rate detected"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} which is below the 80% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/low-cache-hit-rate"
+
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: malaria-prediction-cache
+          team: platform
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis cache service is not responding"
+          runbook_url: "https://runbooks.malaria-prediction.com/redis-down"
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: malaria-prediction-cache
+          team: platform
+        annotations:
+          summary: "High Redis memory usage"
+          description: "Redis memory usage is {{ $value | humanizePercentage }} which is above the 90% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/redis-high-memory"
+
+  # =============================================================================
+  # Container and Infrastructure Alerts
+  # =============================================================================
+  - name: malaria_infrastructure_alerts
+    rules:
+      - alert: ContainerHighCPUUsage
+        expr: (rate(container_cpu_usage_seconds_total{name!~".*POD.*"}[5m]) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: malaria-prediction-containers
+          team: platform
+        annotations:
+          summary: "High CPU usage in container"
+          description: "Container {{ $labels.name }} CPU usage is {{ $value }}% which is above the 80% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/container-high-cpu"
+
+      - alert: ContainerHighMemoryUsage
+        expr: (container_memory_usage_bytes{name!~".*POD.*"} / container_spec_memory_limit_bytes{name!~".*POD.*"}) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: malaria-prediction-containers
+          team: platform
+        annotations:
+          summary: "High memory usage in container"
+          description: "Container {{ $labels.name }} memory usage is {{ $value }}% which is above the 85% threshold"
+          runbook_url: "https://runbooks.malaria-prediction.com/container-high-memory"
+
+      - alert: ContainerRestarting
+        expr: rate(container_start_time_seconds{name!~".*POD.*"}[10m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: malaria-prediction-containers
+          team: platform
+        annotations:
+          summary: "Container is restarting frequently"
+          description: "Container {{ $labels.name }} has restarted {{ $value }} times in the last 10 minutes"
+          runbook_url: "https://runbooks.malaria-prediction.com/container-restarting"
+
+  # =============================================================================
+  # Monitoring Infrastructure Alerts
+  # =============================================================================
+  - name: malaria_monitoring_alerts
+    rules:
+      - alert: PrometheusTargetDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: monitoring
+          team: platform
+        annotations:
+          summary: "Prometheus target is down"
+          description: "Target {{ $labels.instance }} for job {{ $labels.job }} has been down for more than 2 minutes"
+          runbook_url: "https://runbooks.malaria-prediction.com/prometheus-target-down"
+
+      - alert: PrometheusConfigReloadFailed
+        expr: prometheus_config_last_reload_successful == 0
+        for: 5m
+        labels:
+          severity: warning
+          service: monitoring
+          team: platform
+        annotations:
+          summary: "Prometheus configuration reload failed"
+          description: "Prometheus configuration reload has failed"
+          runbook_url: "https://runbooks.malaria-prediction.com/prometheus-config-reload-failed"
+
+      - alert: GrafanaDown
+        expr: up{job="grafana"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: monitoring
+          team: platform
+        annotations:
+          summary: "Grafana is down"
+          description: "Grafana dashboard service is not responding"
+          runbook_url: "https://runbooks.malaria-prediction.com/grafana-down"

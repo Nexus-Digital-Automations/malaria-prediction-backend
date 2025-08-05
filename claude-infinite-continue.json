@@ -1,0 +1,71 @@
+{
+  "project_path": "/Users/jeremyparker/Desktop/Claude Coding Projects/malaria-prediction",
+  "should_stop": false,
+  "created": "2025-07-22T19:22:02.845583+00:00",
+  "last_modified": "2025-07-22T19:22:02.845583+00:00",
+  "sessions": [],
+  "project_metadata": {
+    "name": "malaria-prediction",
+    "created": "2025-07-22T19:22:02.845583+00:00",
+    "last_modified": "2025-07-22T19:22:02.846259+00:00"
+  },
+  "agents": {},
+  "coordination": {
+    "total_active_agents": 0,
+    "last_stop_attempt": null,
+    "activity_log": []
+  },
+  "current_mode": "development",
+  "available_modes": [
+    "development",
+    "testing",
+    "debugging",
+    "refactoring",
+    "documentation",
+    "completion-verification"
+  ],
+  "mode_config": {
+    "development": {
+      "priority_checks": [
+        "linting",
+        "basic_tests"
+      ],
+      "feedback_style": "progress_focused",
+      "coverage_threshold": 80
+    },
+    "testing": {
+      "priority_checks": [
+        "full_test_suite",
+        "coverage"
+      ],
+      "feedback_style": "test_focused",
+      "coverage_threshold": 95
+    },
+    "debugging": {
+      "priority_checks": [
+        "error_analysis",
+        "stack_traces"
+      ],
+      "feedback_style": "diagnostic_focused",
+      "coverage_threshold": 95
+    },
+    "refactoring": {
+      "priority_checks": [
+        "complexity_analysis",
+        "code_quality"
+      ],
+      "feedback_style": "quality_focused",
+      "coverage_threshold": 95
+    },
+    "documentation": {
+      "priority_checks": [
+        "documentation_completeness",
+        "examples"
+      ],
+      "feedback_style": "documentation_focused",
+      "coverage_threshold": 95
+    }
+  },
+  "task_queue": [],
+  "mode_history": []
+}

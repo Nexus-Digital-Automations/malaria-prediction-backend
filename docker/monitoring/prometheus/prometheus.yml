@@ -1,0 +1,138 @@
+# Prometheus Configuration for Malaria Prediction Backend Monitoring
+# Comprehensive monitoring setup with service discovery and alerting
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'malaria-prediction'
+    environment: 'production'
+
+# Alert manager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Load alert rules
+rule_files:
+  - "alert-rules.yml"
+
+# Scrape configuration
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # Malaria Prediction API
+  - job_name: 'malaria-prediction-api'
+    static_configs:
+      - targets: ['api:8000']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+    honor_labels: true
+    params:
+      format: ['prometheus']
+
+  # System metrics via Node Exporter
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+    metrics_path: /metrics
+
+  # Container metrics via cAdvisor
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 15s
+    metrics_path: /metrics
+
+  # Database metrics via Postgres Exporter
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # Redis metrics via Redis Exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # Alertmanager metrics
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # Grafana metrics
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # Jaeger metrics
+  - job_name: 'jaeger'
+    static_configs:
+      - targets: ['jaeger:14269']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # Custom ML Model Metrics Endpoint
+  - job_name: 'ml-models'
+    static_configs:
+      - targets: ['api:8000']
+    scrape_interval: 30s
+    metrics_path: /ml/metrics
+    scrape_timeout: 15s
+
+  # Health Check Endpoints
+  - job_name: 'health-checks'
+    static_configs:
+      - targets: ['api:8000']
+    scrape_interval: 30s
+    metrics_path: /health/metrics
+    scrape_timeout: 10s
+
+  # External API Monitoring (if accessible)
+  - job_name: 'external-apis'
+    static_configs:
+      - targets: ['api:8000']
+    scrape_interval: 60s
+    metrics_path: /external/metrics
+    scrape_timeout: 30s
+
+# Storage configuration
+storage:
+  tsdb:
+    retention.time: 30d
+    retention.size: 10GB
+    wal-compression: true
+
+# Performance tuning
+query:
+  timeout: 30s
+  max_concurrency: 20
+  max_samples: 50000000
+
+# Web configuration
+web:
+  enable_lifecycle: true
+  enable_admin_api: true
+  max_connections: 512
+  read_timeout: 30s
+
+# Logging
+log:
+  level: info
+  format: logfmt

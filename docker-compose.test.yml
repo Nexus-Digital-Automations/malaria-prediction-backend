@@ -1,0 +1,468 @@
+# Docker Compose for Malaria Prediction Backend - Test Environment
+# Provides isolated test environment with all required services
+
+version: '3.8'
+
+networks:
+  test-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+
+volumes:
+  test_postgres_data:
+    driver: local
+  test_redis_data:
+    driver: local
+  test_data_volume:
+    driver: local
+  test_model_volume:
+    driver: local
+
+services:
+  # =============================================================================
+  # Test Database Service - TimescaleDB with PostGIS
+  # =============================================================================
+  test-database:
+    image: timescale/timescaledb-ha:pg15-latest
+    container_name: malaria-test-db
+    restart: "no"  # Don't restart in test environment
+    environment:
+      POSTGRES_DB: test_malaria_prediction
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+      # TimescaleDB configuration
+      TIMESCALEDB_TELEMETRY: "off"
+      # PostGIS configuration
+      POSTGRES_MULTIPLE_EXTENSIONS: postgis,timescaledb
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+    networks:
+      test-network:
+        ipv4_address: 172.25.0.10
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_malaria_prediction"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "malaria.component=database"
+      - "malaria.environment=test"
+
+  # =============================================================================
+  # Test Redis Cache Service
+  # =============================================================================
+  test-redis:
+    image: redis:7-alpine
+    container_name: malaria-test-redis
+    restart: "no"
+    command: >
+      redis-server
+      --appendonly no
+      --save ""
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "6380:6379"  # Different port to avoid conflicts
+    volumes:
+      - test_redis_data:/data
+    networks:
+      test-network:
+        ipv4_address: 172.25.0.11
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    labels:
+      - "malaria.component=cache"
+      - "malaria.environment=test"
+
+  # =============================================================================
+  # Test Application Service
+  # =============================================================================
+  test-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    container_name: malaria-test-api
+    restart: "no"
+    environment:
+      # Test environment configuration
+      ENVIRONMENT: test
+      DEBUG: "true"
+      LOG_LEVEL: debug
+      TESTING: "true"
+
+      # Test database configuration
+      DATABASE_URL: postgresql+asyncpg://test_user:test_password@test-database:5432/test_malaria_prediction
+
+      # Test Redis configuration
+      REDIS_URL: redis://test-redis:6379/0
+
+      # API configuration
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      WORKERS: 1
+
+      # Test ML Model configuration
+      MODEL_PATH: /app/test_models
+      ENABLE_MODEL_CACHE: "false"  # Disable caching in tests
+
+      # Test data configuration
+      DATA_PATH: /app/test_data
+      ENABLE_DATA_CACHE: "false"  # Disable caching in tests
+
+      # Mock external API configuration
+      ERA5_API_KEY: test_era5_key
+      CHIRPS_API_ENDPOINT: http://mock-api:9002/chirps
+      MODIS_API_KEY: test_modis_key
+      WORLDPOP_API_ENDPOINT: http://mock-api:9004/worldpop
+      MAP_API_ENDPOINT: http://mock-api:9005/map
+
+      # Test security
+      SECRET_KEY: test_secret_key_not_for_production
+
+      # Disable monitoring in tests
+      ENABLE_METRICS: "false"
+      ENABLE_TRACING: "false"
+
+      # Test-specific settings
+      PYTEST_RUNNING: "true"
+      SKIP_MODEL_LOADING: "true"  # Skip loading real models in tests
+    ports:
+      - "8001:8000"  # Different port to avoid conflicts
+    volumes:
+      # Source code for development
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./main.py:/app/main.py:ro
+
+      # Test data and models
+      - test_data_volume:/app/test_data
+      - test_model_volume:/app/test_models
+
+      # Test outputs
+      - ./test_outputs:/app/test_outputs
+    depends_on:
+      test-database:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    networks:
+      test-network:
+        ipv4_address: 172.25.0.20
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/liveness"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "malaria.component=api"
+      - "malaria.environment=test"
+
+  # =============================================================================
+  # Mock External API Service
+  # =============================================================================
+  mock-api:
+    build:
+      context: .
+      dockerfile: tests/fixtures/mock-api/Dockerfile
+    container_name: malaria-mock-api
+    restart: "no"
+    environment:
+      - MOCK_API_HOST=0.0.0.0
+      - MOCK_API_PORT=9000
+      - LOG_LEVEL=INFO
+    ports:
+      - "9000:9000"  # Main mock API port
+      - "9001:9001"  # ERA5 mock
+      - "9002:9002"  # CHIRPS mock
+      - "9003:9003"  # MODIS mock
+      - "9004:9004"  # WorldPop mock
+      - "9005:9005"  # MAP mock
+    volumes:
+      - ./tests/fixtures/data:/app/test_data:ro
+    networks:
+      test-network:
+        ipv4_address: 172.25.0.30
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    labels:
+      - "malaria.component=mock-api"
+      - "malaria.environment=test"
+
+  # =============================================================================
+  # Test Execution Service
+  # =============================================================================
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: malaria-test-runner
+    restart: "no"
+    environment:
+      # Test environment configuration
+      ENVIRONMENT: test
+      TESTING: "true"
+
+      # Test database configuration
+      DATABASE_URL: postgresql+asyncpg://test_user:test_password@test-database:5432/test_malaria_prediction
+
+      # Test Redis configuration
+      REDIS_URL: redis://test-redis:6379/0
+
+      # Test configuration
+      PYTEST_RUNNING: "true"
+      PYTHONPATH: /app/src:/app/tests
+
+      # Coverage configuration
+      COVERAGE_FILE: /app/test_outputs/.coverage
+      COVERAGE_HTML_DIR: /app/test_outputs/htmlcov
+    volumes:
+      # Source code and tests
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./pyproject.toml:/app/pyproject.toml:ro
+
+      # Test outputs (writable)
+      - ./test_outputs:/app/test_outputs
+      - ./test_reports:/app/test_reports
+    depends_on:
+      test-database:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+      mock-api:
+        condition: service_healthy
+    networks:
+      test-network:
+        ipv4_address: 172.25.0.40
+    command: >
+      sh -c "
+        echo 'Waiting for services to be ready...' &&
+        sleep 10 &&
+        echo 'Running database migrations...' &&
+        alembic upgrade head &&
+        echo 'Starting test execution...' &&
+        pytest tests/
+          --verbose
+          --tb=short
+          --cov=src/malaria_predictor
+          --cov-report=html:/app/test_outputs/htmlcov
+          --cov-report=xml:/app/test_outputs/coverage.xml
+          --cov-report=term-missing
+          --junit-xml=/app/test_reports/junit.xml
+          --html=/app/test_reports/report.html
+          --self-contained-html &&
+        echo 'Test execution completed!'
+      "
+    labels:
+      - "malaria.component=test-runner"
+      - "malaria.environment=test"
+
+  # =============================================================================
+  # Integration Test Service (for specific integration test scenarios)
+  # =============================================================================
+  integration-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: malaria-integration-tests
+    restart: "no"
+    environment:
+      ENVIRONMENT: test
+      TESTING: "true"
+      DATABASE_URL: postgresql+asyncpg://test_user:test_password@test-database:5432/test_malaria_prediction
+      REDIS_URL: redis://test-redis:6379/0
+      PYTHONPATH: /app/src:/app/tests
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./test_outputs:/app/test_outputs
+    depends_on:
+      test-database:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+      test-api:
+        condition: service_healthy
+      mock-api:
+        condition: service_healthy
+    networks:
+      test-network:
+        ipv4_address: 172.25.0.41
+    command: >
+      sh -c "
+        echo 'Running integration tests...' &&
+        pytest tests/integration/
+          --verbose
+          --tb=short
+          --cov=src/malaria_predictor
+          --cov-report=html:/app/test_outputs/integration_htmlcov
+          --cov-report=xml:/app/test_outputs/integration_coverage.xml
+          --junit-xml=/app/test_reports/integration_junit.xml &&
+        echo 'Integration tests completed!'
+      "
+    profiles:
+      - integration-tests
+    labels:
+      - "malaria.component=integration-tests"
+      - "malaria.environment=test"
+
+  # =============================================================================
+  # End-to-End Test Service
+  # =============================================================================
+  e2e-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: malaria-e2e-tests
+    restart: "no"
+    environment:
+      ENVIRONMENT: test
+      TESTING: "true"
+      DATABASE_URL: postgresql+asyncpg://test_user:test_password@test-database:5432/test_malaria_prediction
+      REDIS_URL: redis://test-redis:6379/0
+      API_BASE_URL: http://test-api:8000
+      PYTHONPATH: /app/src:/app/tests
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./test_outputs:/app/test_outputs
+    depends_on:
+      test-database:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+      test-api:
+        condition: service_healthy
+      mock-api:
+        condition: service_healthy
+    networks:
+      test-network:
+        ipv4_address: 172.25.0.42
+    command: >
+      sh -c "
+        echo 'Running end-to-end tests...' &&
+        pytest tests/e2e/
+          --verbose
+          --tb=short
+          --junit-xml=/app/test_reports/e2e_junit.xml &&
+        echo 'End-to-end tests completed!'
+      "
+    profiles:
+      - e2e-tests
+    labels:
+      - "malaria.component=e2e-tests"
+      - "malaria.environment=test"
+
+  # =============================================================================
+  # Performance Test Service
+  # =============================================================================
+  performance-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: malaria-performance-tests
+    restart: "no"
+    environment:
+      ENVIRONMENT: test
+      TESTING: "true"
+      DATABASE_URL: postgresql+asyncpg://test_user:test_password@test-database:5432/test_malaria_prediction
+      REDIS_URL: redis://test-redis:6379/0
+      API_BASE_URL: http://test-api:8000
+      PYTHONPATH: /app/src:/app/tests
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./test_outputs:/app/test_outputs
+    depends_on:
+      test-database:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+      test-api:
+        condition: service_healthy
+      mock-api:
+        condition: service_healthy
+    networks:
+      test-network:
+        ipv4_address: 172.25.0.43
+    command: >
+      sh -c "
+        echo 'Running performance tests...' &&
+        pytest tests/performance/
+          --verbose
+          --tb=short
+          --junit-xml=/app/test_reports/performance_junit.xml &&
+        echo 'Performance tests completed!'
+      "
+    profiles:
+      - performance-tests
+    labels:
+      - "malaria.component=performance-tests"
+      - "malaria.environment=test"
+
+  # =============================================================================
+  # Test Database Administration Tool (Optional)
+  # =============================================================================
+  test-adminer:
+    image: adminer:latest
+    container_name: malaria-test-adminer
+    restart: "no"
+    ports:
+      - "8082:8080"  # Different port for test environment
+    environment:
+      ADMINER_DEFAULT_SERVER: test-database
+      ADMINER_DESIGN: pepa-linha
+    depends_on:
+      - test-database
+    networks:
+      test-network:
+        ipv4_address: 172.25.0.50
+    profiles:
+      - test-tools
+    labels:
+      - "malaria.component=admin"
+      - "malaria.environment=test"
+
+  # =============================================================================
+  # Test Redis Administration Tool (Optional)
+  # =============================================================================
+  test-redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: malaria-test-redis-ui
+    restart: "no"
+    ports:
+      - "8083:8081"
+    environment:
+      REDIS_HOSTS: "test-redis:test-redis:6379"
+      HTTP_USER: test
+      HTTP_PASSWORD: test
+    depends_on:
+      - test-redis
+    networks:
+      test-network:
+        ipv4_address: 172.25.0.51
+    profiles:
+      - test-tools
+    labels:
+      - "malaria.component=redis-ui"
+      - "malaria.environment=test"

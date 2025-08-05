@@ -1,0 +1,334 @@
+[project]
+name = "malaria-predictor"
+version = "0.1.0"
+description = "AI-powered malaria outbreak prediction system using LSTM and Transformers with environmental data"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    {name = "Malaria Prediction Team", email = "team@malaria-predictor.org"}
+]
+keywords = ["malaria", "prediction", "ai", "lstm", "transformers", "environmental-data"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    # Web Framework
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+
+    # AI/ML Core
+    "torch>=2.1.0",
+    "transformers>=4.35.0",
+    "scikit-learn>=1.3.0",
+    "numpy>=1.24.0,<2.0.0",  # Pin to NumPy 1.x for compatibility with compiled extensions
+    "pandas>=2.1.0",
+    "pytorch-lightning>=2.1.0",
+    "optuna>=3.4.0",
+
+    # Data Processing & Validation
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.0.0",
+    "httpx>=0.25.0",
+    "aiofiles>=23.2.0",
+
+    # Security & Authentication
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.6",
+    "cryptography>=41.0.0",
+
+    # Database & Time-Series
+    "asyncpg>=0.29.0",
+    "sqlalchemy[asyncio]>=2.0.0",
+    "alembic>=1.12.0",
+
+    # Geospatial & Environmental Data
+    "geopandas>=0.14.0",
+    "rasterio>=1.3.0",
+    "xarray>=2023.10.0",
+    "netcdf4>=1.6.0",
+    "cdsapi>=0.6.1",
+    "cfgrib>=0.9.10.4",
+    "h5netcdf>=1.2.0",
+    "shapely>=2.0.0",
+
+    # Scheduling & Automation
+    "schedule>=1.2.0",
+
+    # Job Queue & Caching
+    "celery>=5.3.0",
+    "redis[hiredis]>=5.0.0",
+
+    # Monitoring & Logging
+    "mlflow>=2.8.0",
+    "structlog>=23.2.0",
+    "prometheus-client>=0.19.0",
+    "prometheus-fastapi-instrumentator>=6.1.0",
+
+    # Distributed Tracing
+    "opentelemetry-api>=1.21.0",
+    "opentelemetry-sdk>=1.21.0",
+    "opentelemetry-instrumentation-fastapi>=0.42b0",
+    "opentelemetry-instrumentation-asyncpg>=0.42b0",
+    "opentelemetry-instrumentation-redis>=0.42b0",
+    "opentelemetry-exporter-prometheus>=0.56b0",
+    "opentelemetry-exporter-jaeger>=1.21.0",
+
+    # Utilities
+    "python-dotenv>=1.0.0",
+    "typer>=0.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Code Quality
+    "ruff>=0.12.7",
+    "mypy>=1.7.0",
+
+    # Testing
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "aiosqlite>=0.19.0",  # For async SQLite testing
+
+    # Development Tools
+    "pre-commit>=3.5.0",
+    "ipython>=8.17.0",
+    "jupyter>=1.0.0",
+]
+
+# Performance testing dependencies
+performance = [
+    # Load Testing
+    "locust>=2.17.0",
+    "gevent>=23.9.0",
+
+    # System Monitoring
+    "psutil>=5.9.0",
+
+    # Additional Redis features
+    "redis[hiredis]>=5.0.0",
+
+    # YAML configuration
+    "PyYAML>=6.0.1",
+
+    # Template rendering
+    "Jinja2>=3.1.2",
+
+    # WebSocket support
+    "websockets>=12.0",
+
+    # Performance profiling
+    "py-spy>=0.3.14",
+    "memory-profiler>=0.61.0",
+]
+
+# Optional R integration for MAP data
+r-integration = [
+    "rpy2>=3.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/malaria-predictor"
+Repository = "https://github.com/your-org/malaria-predictor"
+Documentation = "https://malaria-predictor.readthedocs.io"
+
+[project.scripts]
+malaria-predictor = "malaria_predictor.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/malaria_predictor"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+exclude = [
+    # Configuration files
+    "TODO.json",
+    "*.json",
+    "*.toml",
+    "*.ini",
+    "*.cfg",
+    ".env",
+    ".env.template",
+    ".env.development",
+    ".env.production",
+    ".env.staging",
+    ".env.test",
+    "*.env",
+    # Docker files and directories
+    "Dockerfile*",
+    "docker-compose*.yml",
+    ".dockerignore",
+    "docker/",
+    # Kubernetes files
+    "k8s/",
+    "k8s/**/*",
+    # YAML files
+    "*.yml",
+    "*.yaml",
+    # Shell scripts and executables
+    "*.sh",
+    "*.bash",
+    "*.zsh",
+    "*.fish",
+    "*.bat",
+    "*.cmd",
+    "*.ps1",
+    # Documentation - Explicitly exclude all markdown files
+    "*.md",
+    "*.rst",
+    "*.txt",
+    "DOCKER_DEPLOYMENT.md",
+    "README.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "development/**/*.md",
+    "docs/",
+    "docs/**/*",
+    # Web files
+    "*.html",
+    "*.css",
+    "*.js",
+    "*.ts",
+    "*.jsx",
+    "*.tsx",
+    # Data and model files
+    "data/",
+    "models/",
+    "logs/",
+    "*.csv",
+    "*.json",
+    "*.xml",
+    "*.parquet",
+    "*.h5",
+    "*.hdf5",
+    "*.nc",
+    "*.grib",
+    "*.tif",
+    "*.tiff",
+    "*.geotiff",
+    "*.pkl",
+    "*.joblib",
+    "*.pt",
+    "*.pth",
+    "*.onnx",
+    "*.tflite",
+    # Build and cache directories
+    "build/",
+    "dist/",
+    ".cache/",
+    "__pycache__/",
+    ".pytest_cache/",
+    ".mypy_cache/",
+    ".ruff_cache/",
+    # Virtual environments
+    ".venv/",
+    "venv/",
+    # IDE files
+    ".vscode/",
+    ".idea/",
+    # Git files
+    ".git/",
+    # Claude Code files
+    "claude-infinite-continue.json",
+    "infinite-continue-hook.log",
+    "post-tool-linter-hook.log",
+    "Old TODO.json",
+    # Development directories - completely exclude these
+    "development/",
+    "development/**/*",
+    "modes/",
+    "modes/**/*",
+    # Documentation directories
+    "docs/",
+    "docs/**/*",
+    # HTML coverage reports
+    "htmlcov/",
+    # Lock files
+    "*.lock",
+    "uv.lock",
+    "poetry.lock",
+    "Pipfile.lock",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by formatter
+    "B008",  # do not perform function calls in argument defaults
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=src/malaria_predictor --cov-report=term-missing --cov-report=html"
+testpaths = [
+    "tests",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["src/malaria_predictor"]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
+
+[tool.bandit]
+exclude_dirs = ["tests", "migrations", ".venv", "venv", "performance", "scripts"]
+skips = ["B101", "B601", "B105", "B107"]  # Skip assert_used, shell_injection, and hardcoded_password warnings
+
+[dependency-groups]
+dev = [
+    "bandit>=1.8.6",
+]

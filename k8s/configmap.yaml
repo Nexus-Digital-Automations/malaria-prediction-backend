@@ -1,0 +1,277 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: malaria-predictor-config
+  namespace: malaria-prediction
+  labels:
+    app: malaria-predictor
+    component: config
+    version: v1.0.0
+data:
+  # Application Configuration
+  APP_NAME: "Malaria Prediction API"
+  VERSION: "0.1.0"
+  ENVIRONMENT: "production"
+  DEBUG: "false"
+  TESTING: "false"
+
+  # API Configuration
+  API_HOST: "0.0.0.0"
+  API_PORT: "8000"
+  API_PREFIX: "/api/v1"
+  WORKERS: "4"
+
+  # Security Settings (Non-sensitive)
+  SECURITY__JWT_ALGORITHM: "HS256"
+  SECURITY__JWT_EXPIRATION_HOURS: "24"
+  SECURITY__PASSWORD_MIN_LENGTH: "12"
+  SECURITY__RATE_LIMIT_PER_MINUTE: "100"
+  SECURITY__CORS_ALLOW_CREDENTIALS: "true"
+
+  # Database Settings (Non-sensitive)
+  DATABASE__ECHO: "false"
+  DATABASE__POOL_SIZE: "50"
+  DATABASE__MAX_OVERFLOW: "10"
+  DATABASE__POOL_TIMEOUT: "30"
+  DATABASE__POOL_RECYCLE: "3600"
+
+  # Redis Settings (Non-sensitive)
+  REDIS__MAX_CONNECTIONS: "100"
+  REDIS__SOCKET_TIMEOUT: "5"
+  REDIS__SOCKET_CONNECT_TIMEOUT: "5"
+  REDIS__CELERY_BROKER_DB: "1"
+  REDIS__CELERY_RESULT_DB: "2"
+
+  # External API Settings (Non-sensitive URLs)
+  EXTERNAL_APIS__ERA5_API_URL: "https://cds.climate.copernicus.eu/api/v2"
+  EXTERNAL_APIS__CHIRPS_API_ENDPOINT: "https://data.chc.ucsb.edu/api/"
+  EXTERNAL_APIS__MODIS_API_URL: "https://modis.gsfc.nasa.gov/data/"
+  EXTERNAL_APIS__WORLDPOP_API_ENDPOINT: "https://hub.worldpop.org/"
+  EXTERNAL_APIS__MAP_API_ENDPOINT: "https://malariaatlas.org/"
+  EXTERNAL_APIS__MAX_REQUESTS_PER_MINUTE: "100"
+  EXTERNAL_APIS__REQUEST_TIMEOUT: "30"
+  EXTERNAL_APIS__RETRY_ATTEMPTS: "3"
+  EXTERNAL_APIS__RETRY_DELAY: "5"
+
+  # ML Model Settings
+  ML_MODELS__STORAGE_PATH: "/app/models"
+  ML_MODELS__ENABLE_CACHE: "true"
+  ML_MODELS__CACHE_TTL: "3600"
+  ML_MODELS__MAX_MEMORY_USAGE: "8192"
+  ML_MODELS__DEVICE: "auto"
+  ML_MODELS__BATCH_SIZE: "64"
+
+  # Data Storage Settings
+  DATA__DIRECTORY: "/app/data"
+  DATA__ENABLE_CACHE: "true"
+  DATA__CACHE_TTL: "1800"
+  DATA__MAX_FILE_SIZE: "5368709120"
+  DATA__COMPRESSION_ENABLED: "true"
+  DATA__BACKUP_ENABLED: "true"
+  DATA__RETENTION_DAYS: "365"
+
+  # Monitoring Settings
+  MONITORING__ENABLE_METRICS: "true"
+  MONITORING__ENABLE_TRACING: "true"
+  MONITORING__ENABLE_PROFILING: "false"
+  MONITORING__LOG_LEVEL: "INFO"
+  MONITORING__LOG_FORMAT: "json"
+  MONITORING__METRICS_PORT: "9090"
+  MONITORING__HEALTH_CHECK_INTERVAL: "30"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: malaria-predictor-cors-config
+  namespace: malaria-prediction
+  labels:
+    app: malaria-predictor
+    component: cors-config
+    version: v1.0.0
+data:
+  # CORS Origins (Production - Update with actual domains)
+  cors_origins.json: |
+    [
+      "https://api.malaria-prediction.com",
+      "https://app.malaria-prediction.com",
+      "https://dashboard.malaria-prediction.com"
+    ]
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: malaria-predictor-nginx-config
+  namespace: malaria-prediction
+  labels:
+    app: malaria-predictor
+    component: nginx-config
+    version: v1.0.0
+data:
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        upstream malaria_api {
+            server malaria-predictor-service:8000;
+        }
+
+        server {
+            listen 80;
+            server_name api.malaria-prediction.com;
+
+            # Redirect HTTP to HTTPS
+            return 301 https://$server_name$request_uri;
+        }
+
+        server {
+            listen 443 ssl http2;
+            server_name api.malaria-prediction.com;
+
+            ssl_certificate /etc/ssl/certs/tls.crt;
+            ssl_certificate_key /etc/ssl/private/tls.key;
+            ssl_protocols TLSv1.2 TLSv1.3;
+            ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384;
+            ssl_prefer_server_ciphers off;
+
+            # Security headers
+            add_header X-Frame-Options DENY;
+            add_header X-Content-Type-Options nosniff;
+            add_header X-XSS-Protection "1; mode=block";
+            add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+
+            # API proxy
+            location / {
+                proxy_pass http://malaria_api;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_connect_timeout 30s;
+                proxy_send_timeout 30s;
+                proxy_read_timeout 30s;
+            }
+
+            # Health check
+            location /health {
+                proxy_pass http://malaria_api/health;
+                access_log off;
+            }
+        }
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: malaria-predictor-scripts
+  namespace: malaria-prediction
+  labels:
+    app: malaria-predictor
+    component: scripts
+    version: v1.0.0
+data:
+  entrypoint.sh: |
+    #!/bin/bash
+    set -e
+
+    # Wait for database to be ready
+    echo "Waiting for database..."
+    while ! pg_isready -h $DATABASE_HOST -p $DATABASE_PORT -U $DATABASE_USER; do
+      sleep 2
+    done
+    echo "Database is ready!"
+
+    # Wait for Redis to be ready
+    echo "Waiting for Redis..."
+    while ! redis-cli -h $REDIS_HOST -p $REDIS_PORT ping; do
+      sleep 2
+    done
+    echo "Redis is ready!"
+
+    # Run database migrations
+    echo "Running database migrations..."
+    alembic upgrade head
+
+    # Start the application
+    echo "Starting Malaria Prediction API..."
+    exec "$@"
+
+  healthcheck.sh: |
+    #!/bin/bash
+    set -e
+
+    # Check API health endpoint
+    curl -f http://localhost:8000/health/liveness || exit 1
+
+    # Check database connectivity
+    python -c "
+    import os
+    import asyncio
+    from sqlalchemy import create_engine, text
+
+    db_url = os.environ['DATABASE_URL'].replace('postgresql+asyncpg://', 'postgresql://')
+    engine = create_engine(db_url)
+
+    try:
+        with engine.connect() as conn:
+            conn.execute(text('SELECT 1'))
+        print('Database check: OK')
+    except Exception as e:
+        print(f'Database check failed: {e}')
+        exit(1)
+    "
+
+    # Check Redis connectivity
+    redis-cli -h $REDIS_HOST -p $REDIS_PORT ping || exit 1
+
+    echo "All health checks passed!"
+
+  backup.sh: |
+    #!/bin/bash
+    set -e
+
+    # Database backup
+    BACKUP_DATE=$(date +%Y%m%d_%H%M%S)
+    BACKUP_FILE="/app/backups/malaria_prediction_${BACKUP_DATE}.sql"
+
+    echo "Creating database backup: $BACKUP_FILE"
+    pg_dump $DATABASE_URL > $BACKUP_FILE
+
+    # Compress backup
+    gzip $BACKUP_FILE
+
+    # Clean old backups (keep last 30 days)
+    find /app/backups -name "*.sql.gz" -mtime +30 -delete
+
+    echo "Backup completed: ${BACKUP_FILE}.gz"
+
+  migrate.sh: |
+    #!/bin/bash
+    set -e
+
+    echo "Running database migrations..."
+
+    # Check if database is accessible
+    python -c "
+    import os
+    from sqlalchemy import create_engine
+
+    db_url = os.environ['DATABASE_URL'].replace('postgresql+asyncpg://', 'postgresql://')
+    engine = create_engine(db_url)
+
+    try:
+        with engine.connect():
+            print('Database connection successful')
+    except Exception as e:
+        print(f'Database connection failed: {e}')
+        exit(1)
+    "
+
+    # Run migrations
+    alembic upgrade head
+
+    echo "Database migrations completed successfully!"

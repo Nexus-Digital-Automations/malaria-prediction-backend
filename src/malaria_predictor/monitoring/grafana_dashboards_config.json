@@ -1,0 +1,557 @@
+{
+  "dashboards": [
+    {
+      "id": "malaria-prediction-api-overview",
+      "title": "Malaria Prediction API - Overview",
+      "description": "Main dashboard for monitoring the malaria prediction API",
+      "dashboard": {
+        "id": null,
+        "title": "Malaria Prediction API - Overview",
+        "tags": ["malaria", "prediction", "api", "overview"],
+        "timezone": "browser",
+        "refresh": "30s",
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "panels": [
+          {
+            "id": 1,
+            "title": "API Request Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(rate(malaria_api_requests_total[5m]))",
+                "legendFormat": "Requests/sec"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "reqps",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 50},
+                    {"color": "red", "value": 100}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "API Error Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(rate(malaria_api_requests_total{status_code=~\"4..|5..\"}[5m])) / sum(rate(malaria_api_requests_total[5m])) * 100",
+                "legendFormat": "Error Rate"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 1},
+                    {"color": "red", "value": 5}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Average Response Time",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, sum(rate(malaria_api_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+                "legendFormat": "95th percentile"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "ms",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 500},
+                    {"color": "red", "value": 1000}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+          },
+          {
+            "id": 4,
+            "title": "Active Connections",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "malaria_api_active_connections",
+                "legendFormat": "Active Connections"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "short",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 50},
+                    {"color": "red", "value": 100}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+          },
+          {
+            "id": 5,
+            "title": "Request Rate by Endpoint",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "sum(rate(malaria_api_requests_total[5m])) by (endpoint)",
+                "legendFormat": "{{endpoint}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "reqps",
+                "custom": {
+                  "drawStyle": "line",
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "fillOpacity": 10,
+                  "gradientMode": "none"
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 6,
+            "title": "Response Time Distribution",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.50, sum(rate(malaria_api_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+                "legendFormat": "50th percentile"
+              },
+              {
+                "expr": "histogram_quantile(0.95, sum(rate(malaria_api_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+                "legendFormat": "95th percentile"
+              },
+              {
+                "expr": "histogram_quantile(0.99, sum(rate(malaria_api_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+                "legendFormat": "99th percentile"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "ms",
+                "custom": {
+                  "drawStyle": "line",
+                  "lineInterpolation": "linear",
+                  "lineWidth": 2,
+                  "fillOpacity": 0,
+                  "gradientMode": "none"
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          }
+        ]
+      }
+    },
+    {
+      "id": "malaria-prediction-ml-models",
+      "title": "Malaria Prediction - ML Models",
+      "description": "Dashboard for monitoring ML model performance and predictions",
+      "dashboard": {
+        "id": null,
+        "title": "Malaria Prediction - ML Models",
+        "tags": ["malaria", "prediction", "ml", "models"],
+        "timezone": "browser",
+        "refresh": "30s",
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "panels": [
+          {
+            "id": 1,
+            "title": "Prediction Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(rate(malaria_ml_predictions_total[5m]))",
+                "legendFormat": "Predictions/sec"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "short",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 10},
+                    {"color": "red", "value": 50}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Model Error Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(rate(malaria_ml_model_errors_total[5m])) / sum(rate(malaria_ml_predictions_total[5m])) * 100",
+                "legendFormat": "Error Rate"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 0.1},
+                    {"color": "red", "value": 1}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Average Prediction Time",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, sum(rate(malaria_ml_prediction_duration_seconds_bucket[5m])) by (le)) * 1000",
+                "legendFormat": "95th percentile"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "ms",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 100},
+                    {"color": "red", "value": 500}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+          },
+          {
+            "id": 4,
+            "title": "Model Memory Usage",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(malaria_ml_model_memory_usage_bytes) / 1024 / 1024",
+                "legendFormat": "Memory Usage MB"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "decbytes",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 1000},
+                    {"color": "red", "value": 2000}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+          },
+          {
+            "id": 5,
+            "title": "Predictions by Model Type",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "sum(rate(malaria_ml_predictions_total[5m])) by (model_type)",
+                "legendFormat": "{{model_type}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "short",
+                "custom": {
+                  "drawStyle": "line",
+                  "lineInterpolation": "linear",
+                  "lineWidth": 2,
+                  "fillOpacity": 10,
+                  "gradientMode": "none"
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 6,
+            "title": "Prediction Confidence Distribution",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.50, sum(rate(malaria_ml_prediction_confidence_bucket[5m])) by (le))",
+                "legendFormat": "50th percentile"
+              },
+              {
+                "expr": "histogram_quantile(0.95, sum(rate(malaria_ml_prediction_confidence_bucket[5m])) by (le))",
+                "legendFormat": "95th percentile"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percentunit",
+                "min": 0,
+                "max": 1,
+                "custom": {
+                  "drawStyle": "line",
+                  "lineInterpolation": "linear",
+                  "lineWidth": 2,
+                  "fillOpacity": 0,
+                  "gradientMode": "none"
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          }
+        ]
+      }
+    },
+    {
+      "id": "malaria-prediction-system-health",
+      "title": "Malaria Prediction - System Health",
+      "description": "Dashboard for monitoring system resources and health",
+      "dashboard": {
+        "id": null,
+        "title": "Malaria Prediction - System Health",
+        "tags": ["malaria", "prediction", "system", "health"],
+        "timezone": "browser",
+        "refresh": "30s",
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "panels": [
+          {
+            "id": 1,
+            "title": "CPU Usage",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "100 - (avg(malaria_system_cpu_usage_percent) by (instance))",
+                "legendFormat": "CPU Usage %"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "min": 0,
+                "max": 100,
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 70},
+                    {"color": "red", "value": 90}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Memory Usage",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "malaria_system_memory_usage_percent",
+                "legendFormat": "Memory Usage %"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "min": 0,
+                "max": 100,
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 70},
+                    {"color": "red", "value": 85}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Database Connections",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "malaria_system_db_connections_active",
+                "legendFormat": "Active Connections"
+              },
+              {
+                "expr": "malaria_system_db_connections_idle",
+                "legendFormat": "Idle Connections"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "short",
+                "custom": {
+                  "drawStyle": "line",
+                  "lineInterpolation": "linear",
+                  "lineWidth": 2,
+                  "fillOpacity": 10,
+                  "gradientMode": "none"
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 4,
+            "title": "Cache Hit Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "malaria_system_cache_hit_rate * 100",
+                "legendFormat": "Cache Hit Rate"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": null},
+                    {"color": "yellow", "value": 80},
+                    {"color": "green", "value": 95}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          }
+        ]
+      }
+    }
+  ],
+  "alerts": [
+    {
+      "name": "API High Error Rate",
+      "condition": "sum(rate(malaria_api_requests_total{status_code=~\"5..\"}[5m])) / sum(rate(malaria_api_requests_total[5m])) > 0.05",
+      "for": "2m",
+      "labels": {
+        "severity": "warning",
+        "service": "malaria-prediction-api"
+      },
+      "annotations": {
+        "summary": "High error rate detected in Malaria Prediction API",
+        "description": "Error rate is {{ $value | humanizePercentage }} which is above the 5% threshold"
+      }
+    },
+    {
+      "name": "API High Response Time",
+      "condition": "histogram_quantile(0.95, sum(rate(malaria_api_request_duration_seconds_bucket[5m])) by (le)) > 1",
+      "for": "5m",
+      "labels": {
+        "severity": "warning",
+        "service": "malaria-prediction-api"
+      },
+      "annotations": {
+        "summary": "High response time detected in Malaria Prediction API",
+        "description": "95th percentile response time is {{ $value }}s which is above the 1s threshold"
+      }
+    },
+    {
+      "name": "ML Model High Error Rate",
+      "condition": "sum(rate(malaria_ml_model_errors_total[5m])) / sum(rate(malaria_ml_predictions_total[5m])) > 0.01",
+      "for": "2m",
+      "labels": {
+        "severity": "critical",
+        "service": "malaria-prediction-models"
+      },
+      "annotations": {
+        "summary": "High error rate detected in ML models",
+        "description": "ML model error rate is {{ $value | humanizePercentage }} which is above the 1% threshold"
+      }
+    },
+    {
+      "name": "System High CPU Usage",
+      "condition": "avg(malaria_system_cpu_usage_percent) > 80",
+      "for": "5m",
+      "labels": {
+        "severity": "warning",
+        "service": "malaria-prediction-system"
+      },
+      "annotations": {
+        "summary": "High CPU usage detected",
+        "description": "CPU usage is {{ $value }}% which is above the 80% threshold"
+      }
+    },
+    {
+      "name": "System High Memory Usage",
+      "condition": "malaria_system_memory_usage_percent > 85",
+      "for": "5m",
+      "labels": {
+        "severity": "critical",
+        "service": "malaria-prediction-system"
+      },
+      "annotations": {
+        "summary": "High memory usage detected",
+        "description": "Memory usage is {{ $value }}% which is above the 85% threshold"
+      }
+    },
+    {
+      "name": "Database Connection Pool Exhaustion",
+      "condition": "malaria_system_db_connections_active / (malaria_system_db_connections_active + malaria_system_db_connections_idle) > 0.9",
+      "for": "2m",
+      "labels": {
+        "severity": "critical",
+        "service": "malaria-prediction-database"
+      },
+      "annotations": {
+        "summary": "Database connection pool near exhaustion",
+        "description": "Database connection pool utilization is {{ $value | humanizePercentage }}"
+      }
+    },
+    {
+      "name": "Low Cache Hit Rate",
+      "condition": "malaria_system_cache_hit_rate < 0.8",
+      "for": "10m",
+      "labels": {
+        "severity": "warning",
+        "service": "malaria-prediction-cache"
+      },
+      "annotations": {
+        "summary": "Low cache hit rate detected",
+        "description": "Cache hit rate is {{ $value | humanizePercentage }} which is below the 80% threshold"
+      }
+    }
+  ]
+}

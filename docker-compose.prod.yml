@@ -1,0 +1,432 @@
+version: '3.8'
+
+# Docker Compose for Malaria Prediction Backend - Production Environment
+# Optimized for production deployment with security, scalability, and monitoring
+
+networks:
+  malaria-network:
+    driver: bridge
+    internal: false
+  malaria-internal:
+    driver: bridge
+    internal: true
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  data_volume:
+    driver: local
+  model_volume:
+    driver: local
+  logs_volume:
+    driver: local
+  nginx_cache:
+    driver: local
+
+secrets:
+  db_password:
+    external: true
+  redis_password:
+    external: true
+  api_secret_key:
+    external: true
+  era5_api_key:
+    external: true
+  modis_api_key:
+    external: true
+
+services:
+  # =============================================================================
+  # Database Service - TimescaleDB with PostGIS (Production)
+  # =============================================================================
+  database:
+    image: timescale/timescaledb-ha:pg15-latest
+    container_name: malaria-db-prod
+    restart: always
+    environment:
+      POSTGRES_DB: malaria_prediction
+      POSTGRES_USER: malaria_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+      TIMESCALEDB_TELEMETRY: "off"
+      POSTGRES_MULTIPLE_EXTENSIONS: postgis,timescaledb
+      # Performance tuning
+      POSTGRES_SHARED_PRELOAD_LIBRARIES: timescaledb
+      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_SHARED_BUFFERS: 256MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 1GB
+      POSTGRES_WORK_MEM: 4MB
+    secrets:
+      - db_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - logs_volume:/var/log/postgresql
+    networks:
+      - malaria-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U malaria_user -d malaria_prediction"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    labels:
+      - "malaria.component=database"
+      - "malaria.environment=production"
+
+  # =============================================================================
+  # Redis Cache Service (Production)
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: malaria-redis-prod
+    restart: always
+    command: >
+      redis-server
+      --requirepass $(cat /run/secrets/redis_password)
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    secrets:
+      - redis_password
+    volumes:
+      - redis_data:/data
+    networks:
+      - malaria-internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "--pass", "$(cat /run/secrets/redis_password)", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+    labels:
+      - "malaria.component=redis"
+      - "malaria.environment=production"
+
+  # =============================================================================
+  # FastAPI Application Service - Production
+  # =============================================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    image: malaria-prediction-api:latest
+    container_name: malaria-api-prod
+    restart: always
+    environment:
+      ENVIRONMENT: production
+      DEBUG: "false"
+      LOG_LEVEL: info
+
+      # Database configuration
+      DATABASE_URL: postgresql+asyncpg://malaria_user:$(cat /run/secrets/db_password)@database:5432/malaria_prediction
+      DATABASE_POOL_SIZE: 20
+      DATABASE_MAX_OVERFLOW: 0
+
+      # Redis configuration
+      REDIS_URL: redis://:$(cat /run/secrets/redis_password)@redis:6379/0
+
+      # API configuration
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      WORKERS: 4
+
+      # Security
+      SECRET_KEY_FILE: /run/secrets/api_secret_key
+
+      # ML Model configuration
+      MODEL_PATH: /app/models
+      ENABLE_MODEL_CACHE: "true"
+      MODEL_CACHE_TTL: 3600
+
+      # Data configuration
+      DATA_PATH: /app/data
+      ENABLE_DATA_CACHE: "true"
+      DATA_CACHE_TTL: 1800
+
+      # External APIs
+      ERA5_API_KEY_FILE: /run/secrets/era5_api_key
+      MODIS_API_KEY_FILE: /run/secrets/modis_api_key
+
+      # Monitoring
+      ENABLE_METRICS: "true"
+      ENABLE_TRACING: "true"
+      SENTRY_DSN: ${SENTRY_DSN:-}
+
+      # Performance
+      ENABLE_COMPRESSION: "true"
+      MAX_REQUEST_SIZE: 10485760  # 10MB
+      REQUEST_TIMEOUT: 300
+    secrets:
+      - db_password
+      - redis_password
+      - api_secret_key
+      - era5_api_key
+      - modis_api_key
+    volumes:
+      - data_volume:/app/data:ro
+      - model_volume:/app/models:ro
+      - logs_volume:/app/logs
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - malaria-network
+      - malaria-internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/liveness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    labels:
+      - "malaria.component=api"
+      - "malaria.environment=production"
+      - "traefik.enable=true"
+      - "traefik.http.routers.malaria-api.rule=Host(`api.malaria-prediction.com`)"
+      - "traefik.http.routers.malaria-api.tls=true"
+      - "traefik.http.routers.malaria-api.tls.certresolver=letsencrypt"
+
+  # =============================================================================
+  # Celery Worker Service (Production)
+  # =============================================================================
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: malaria-prediction-api:latest
+    restart: always
+    command: celery -A malaria_predictor.workers.celery worker --loglevel=info --concurrency=4 --max-tasks-per-child=1000
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+asyncpg://malaria_user:$(cat /run/secrets/db_password)@database:5432/malaria_prediction
+      REDIS_URL: redis://:$(cat /run/secrets/redis_password)@redis:6379/0
+      CELERY_BROKER_URL: redis://:$(cat /run/secrets/redis_password)@redis:6379/1
+      CELERY_RESULT_BACKEND: redis://:$(cat /run/secrets/redis_password)@redis:6379/2
+
+      # External APIs
+      ERA5_API_KEY_FILE: /run/secrets/era5_api_key
+      MODIS_API_KEY_FILE: /run/secrets/modis_api_key
+
+      # Performance
+      CELERYD_PREFETCH_MULTIPLIER: 1
+      CELERY_TASK_ACKS_LATE: "true"
+      CELERY_WORKER_DISABLE_RATE_LIMITS: "false"
+    secrets:
+      - db_password
+      - redis_password
+      - era5_api_key
+      - modis_api_key
+    volumes:
+      - data_volume:/app/data
+      - model_volume:/app/models:ro
+      - logs_volume:/app/logs
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - malaria-internal
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          memory: 3G
+          cpus: '1.5'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    labels:
+      - "malaria.component=worker"
+      - "malaria.environment=production"
+
+  # =============================================================================
+  # Celery Beat Service (Production)
+  # =============================================================================
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: malaria-prediction-api:latest
+    restart: always
+    command: celery -A malaria_predictor.workers.celery beat --loglevel=info --schedule=/tmp/celerybeat-schedule
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+asyncpg://malaria_user:$(cat /run/secrets/db_password)@database:5432/malaria_prediction
+      REDIS_URL: redis://:$(cat /run/secrets/redis_password)@redis:6379/0
+      CELERY_BROKER_URL: redis://:$(cat /run/secrets/redis_password)@redis:6379/1
+      CELERY_RESULT_BACKEND: redis://:$(cat /run/secrets/redis_password)@redis:6379/2
+    secrets:
+      - db_password
+      - redis_password
+    volumes:
+      - logs_volume:/app/logs
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - malaria-internal
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
+    labels:
+      - "malaria.component=scheduler"
+      - "malaria.environment=production"
+
+  # =============================================================================
+  # Nginx Reverse Proxy and Load Balancer (Production)
+  # =============================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: malaria-nginx-prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_cache:/var/cache/nginx
+      - logs_volume:/var/log/nginx
+    depends_on:
+      - api
+    networks:
+      - malaria-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    labels:
+      - "malaria.component=proxy"
+      - "malaria.environment=production"
+
+  # =============================================================================
+  # Monitoring and Observability
+  # =============================================================================
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: malaria-prometheus
+    restart: always
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - malaria-network
+      - malaria-internal
+    profiles:
+      - "monitoring"
+    labels:
+      - "malaria.component=monitoring"
+      - "malaria.environment=production"
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: malaria-grafana
+    restart: always
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - malaria-network
+    profiles:
+      - "monitoring"
+    labels:
+      - "malaria.component=visualization"
+      - "malaria.environment=production"
+
+  # Log aggregation with Fluentd
+  fluentd:
+    image: fluent/fluentd:v1.16-debian-1
+    container_name: malaria-fluentd
+    restart: always
+    volumes:
+      - ./docker/fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro
+      - logs_volume:/var/log/app:ro
+    networks:
+      - malaria-internal
+    profiles:
+      - "logging"
+    labels:
+      - "malaria.component=logging"
+      - "malaria.environment=production"
+
+# Additional volumes for monitoring
+volumes:
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local

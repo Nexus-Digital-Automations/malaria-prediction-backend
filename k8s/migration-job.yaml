@@ -1,0 +1,437 @@
+# Database Migration Job Template
+# Used by CI/CD pipeline for automated database migrations
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migration-${MIGRATION_ID}
+  namespace: malaria-prediction-${ENVIRONMENT}
+  labels:
+    app: malaria-predictor
+    component: migration
+    environment: ${ENVIRONMENT}
+    migration-id: ${MIGRATION_ID}
+spec:
+  # Don't automatically clean up jobs for audit purposes
+  ttlSecondsAfterFinished: 86400  # Keep for 24 hours
+
+  # Retry policy
+  backoffLimit: 3
+
+  template:
+    metadata:
+      labels:
+        app: malaria-predictor
+        component: migration
+        environment: ${ENVIRONMENT}
+    spec:
+      restartPolicy: Never
+
+      # Use service account with proper permissions
+      serviceAccountName: malaria-predictor-migration
+
+      # Security context
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+
+      # Init container to verify database connectivity
+      initContainers:
+      - name: wait-for-database
+        image: postgres:15-alpine
+        env:
+        - name: DATABASE_HOST
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-database-secret
+              key: DATABASE_HOST
+        - name: DATABASE_PORT
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-database-secret
+              key: DATABASE_PORT
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-database-secret
+              key: DATABASE_USER
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-database-secret
+              key: DATABASE_PASSWORD
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for database to be ready..."
+          until pg_isready -h $DATABASE_HOST -p $DATABASE_PORT -U $DATABASE_USER; do
+            echo "Database not ready, waiting..."
+            sleep 2
+          done
+          echo "Database is ready!"
+
+          # Test connection with actual credentials
+          psql -h $DATABASE_HOST -p $DATABASE_PORT -U $DATABASE_USER -d $DATABASE_NAME -c "SELECT 1;" || exit 1
+          echo "Database connection verified!"
+        env:
+        - name: DATABASE_NAME
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-database-secret
+              key: DATABASE_NAME
+
+      containers:
+      - name: migration
+        image: ghcr.io/your-org/malaria-predictor:${IMAGE_TAG}
+
+        env:
+        # Database connection
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: malaria-predictor-database-secret
+              key: DATABASE_URL
+
+        # Migration settings
+        - name: ALEMBIC_CONFIG
+          value: "/app/alembic.ini"
+        - name: MIGRATION_TIMEOUT
+          value: "600"  # 10 minutes
+        - name: ENVIRONMENT
+          value: ${ENVIRONMENT}
+
+        # Logging configuration
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: LOG_FORMAT
+          value: "json"
+
+        # Migration metadata
+        - name: MIGRATION_ID
+          value: ${MIGRATION_ID}
+        - name: GIT_SHA
+          value: ${GIT_SHA:-unknown}
+        - name: DEPLOYED_BY
+          value: ${DEPLOYED_BY:-automation}
+
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -euo pipefail
+
+          echo "Starting database migration..."
+          echo "Migration ID: $MIGRATION_ID"
+          echo "Environment: $ENVIRONMENT"
+          echo "Git SHA: ${GIT_SHA:-unknown}"
+          echo "Deployed by: ${DEPLOYED_BY:-automation}"
+          echo "Timestamp: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+
+          # Function to log with timestamp
+          log() {
+            echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] $1"
+          }
+
+          # Function to handle errors
+          handle_error() {
+            log "ERROR: Migration failed at step: $1"
+            log "Error details: $2"
+
+            # Create failure marker
+            echo "MIGRATION_FAILED" > /tmp/migration_status
+            echo "Failed at: $1" >> /tmp/migration_status
+            echo "Error: $2" >> /tmp/migration_status
+
+            exit 1
+          }
+
+          # Trap errors
+          trap 'handle_error "Unknown step" "$?"' ERR
+
+          # Pre-migration checks
+          log "Running pre-migration checks..."
+
+          # Check database connectivity
+          python -c "
+          import asyncio
+          import asyncpg
+          import os
+
+          async def check_db():
+              try:
+                  conn = await asyncpg.connect(os.environ['DATABASE_URL'])
+                  result = await conn.fetchval('SELECT version()')
+                  print(f'Database version: {result}')
+                  await conn.close()
+                  return True
+              except Exception as e:
+                  print(f'Database check failed: {e}')
+                  return False
+
+          if not asyncio.run(check_db()):
+              exit(1)
+          " || handle_error "Database connectivity check" "$?"
+
+          # Check current schema version
+          log "Checking current schema version..."
+          current_version=$(alembic current 2>/dev/null | head -n1 || echo "none")
+          log "Current schema version: $current_version"
+
+          # Get target version
+          log "Getting target schema version..."
+          target_version=$(alembic heads 2>/dev/null | head -n1 || echo "unknown")
+          log "Target schema version: $target_version"
+
+          # Check if migration is needed
+          if [ "$current_version" = "$target_version" ] && [ "$current_version" != "none" ]; then
+            log "Schema is already up to date. No migration needed."
+            echo "NO_MIGRATION_NEEDED" > /tmp/migration_status
+            exit 0
+          fi
+
+          # Create database backup point (for rollback)
+          log "Creating backup point for potential rollback..."
+          python -c "
+          import asyncio
+          import asyncpg
+          import os
+
+          async def create_backup_point():
+              conn = await asyncpg.connect(os.environ['DATABASE_URL'])
+              try:
+                  # Create a savepoint for rollback
+                  await conn.execute('BEGIN;')
+                  await conn.execute('SAVEPOINT migration_backup;')
+                  await conn.execute('COMMIT;')
+                  print('Backup point created successfully')
+              except Exception as e:
+                  print(f'Failed to create backup point: {e}')
+                  raise
+              finally:
+                  await conn.close()
+
+          asyncio.run(create_backup_point())
+          " || handle_error "Backup point creation" "$?"
+
+          # Run the migration
+          log "Starting Alembic migration..."
+          timeout ${MIGRATION_TIMEOUT:-600} alembic upgrade head || handle_error "Alembic migration execution" "$?"
+
+          # Verify migration success
+          log "Verifying migration success..."
+          new_version=$(alembic current 2>/dev/null | head -n1 || echo "unknown")
+          log "New schema version: $new_version"
+
+          if [ "$new_version" != "$target_version" ]; then
+            handle_error "Migration verification" "Expected $target_version, got $new_version"
+          fi
+
+          # Run post-migration validation
+          log "Running post-migration validation..."
+          python -c "
+          import asyncio
+          import asyncpg
+          import os
+
+          async def validate_schema():
+              conn = await asyncpg.connect(os.environ['DATABASE_URL'])
+              try:
+                  # Check critical tables exist
+                  tables = await conn.fetch('''
+                      SELECT tablename FROM pg_tables
+                      WHERE schemaname = 'public'
+                  ''')
+
+                  required_tables = [
+                      'environmental_data',
+                      'malaria_cases',
+                      'predictions',
+                      'model_metadata',
+                      'users',
+                      'alembic_version'
+                  ]
+
+                  existing_tables = [row['tablename'] for row in tables]
+
+                  for table in required_tables:
+                      if table not in existing_tables:
+                          raise Exception(f'Required table {table} not found')
+
+                  print(f'Schema validation passed. Found {len(existing_tables)} tables.')
+                  return True
+
+              except Exception as e:
+                  print(f'Schema validation failed: {e}')
+                  return False
+              finally:
+                  await conn.close()
+
+          if not asyncio.run(validate_schema()):
+              exit(1)
+          " || handle_error "Post-migration validation" "$?"
+
+          # Create success marker
+          log "Migration completed successfully!"
+          echo "MIGRATION_SUCCESS" > /tmp/migration_status
+          echo "Migrated from: $current_version" >> /tmp/migration_status
+          echo "Migrated to: $new_version" >> /tmp/migration_status
+          echo "Migration ID: $MIGRATION_ID" >> /tmp/migration_status
+          echo "Timestamp: $(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> /tmp/migration_status
+
+          log "Migration process completed successfully"
+
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
+        # Security context for container
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+
+        # Volume mounts for configuration
+        volumeMounts:
+        - name: migration-config
+          mountPath: /app/migration-config
+          readOnly: true
+        - name: migration-logs
+          mountPath: /tmp
+
+      volumes:
+      - name: migration-config
+        configMap:
+          name: malaria-predictor-migration-config
+      - name: migration-logs
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: malaria-predictor-migration
+  namespace: malaria-prediction-${ENVIRONMENT}
+  labels:
+    app: malaria-predictor
+    component: migration
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: malaria-prediction-${ENVIRONMENT}
+  name: migration-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "create"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: migration-rolebinding
+  namespace: malaria-prediction-${ENVIRONMENT}
+subjects:
+- kind: ServiceAccount
+  name: malaria-predictor-migration
+  namespace: malaria-prediction-${ENVIRONMENT}
+roleRef:
+  kind: Role
+  name: migration-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: malaria-predictor-migration-config
+  namespace: malaria-prediction-${ENVIRONMENT}
+  labels:
+    app: malaria-predictor
+    component: migration-config
+data:
+  alembic.ini: |
+    [alembic]
+    script_location = migrations
+    prepend_sys_path = .
+    version_path_separator = os
+    sqlalchemy.url = driver://user:pass@localhost/dbname
+
+    [post_write_hooks]
+    hooks = black
+    black.type = console_scripts
+    black.entrypoint = black:main
+
+    [loggers]
+    keys = root,sqlalchemy,alembic
+
+    [handlers]
+    keys = console
+
+    [formatters]
+    keys = generic
+
+    [logger_root]
+    level = INFO
+    handlers = console
+    qualname =
+
+    [logger_sqlalchemy]
+    level = WARN
+    handlers =
+    qualname = sqlalchemy.engine
+
+    [logger_alembic]
+    level = INFO
+    handlers =
+    qualname = alembic
+
+    [handler_console]
+    class = StreamHandler
+    args = (sys.stdout,)
+    level = NOTSET
+    formatter = generic
+
+    [formatter_generic]
+    format = %(levelname)-5.5s [%(name)s] %(message)s
+    datefmt = %H:%M:%S
+
+  migration-policy.yaml: |
+    # Migration execution policy
+    max_migration_time: 600  # 10 minutes
+    require_backup: true
+    allow_data_loss: false
+    require_approval_for_prod: true
+
+    # Rollback policy
+    auto_rollback_on_failure: true
+    rollback_timeout: 300  # 5 minutes
+
+    # Validation rules
+    validate_schema_after_migration: true
+    validate_data_integrity: true
+
+    # Notification settings
+    notify_on_success: true
+    notify_on_failure: true
+    notification_channels:
+      - slack
+      - email

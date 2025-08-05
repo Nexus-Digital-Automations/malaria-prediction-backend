@@ -1,0 +1,353 @@
+# Alertmanager Configuration for Malaria Prediction Backend
+# Comprehensive alert routing, grouping, inhibition, and notification management
+
+global:
+  # SMTP server configuration for email notifications
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alerts@malaria-prediction.com'
+  smtp_auth_username: 'alerts@malaria-prediction.com'
+  smtp_auth_password: 'your-smtp-password'
+  smtp_require_tls: true
+
+  # Slack webhook URL template
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+
+  # Default notification timeout
+  resolve_timeout: 5m
+
+# Alert routing configuration
+route:
+  # Default group settings
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s          # Wait this long for additional alerts before sending notification
+  group_interval: 10s      # Wait this long between sending a notification about new alerts
+  repeat_interval: 12h     # Wait this long before re-sending a resolved notification
+  receiver: 'default'      # Default receiver
+
+  # Routing tree for different alert types
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 0s
+      group_interval: 5s
+      repeat_interval: 15m
+      routes:
+        # Platform team critical alerts
+        - match:
+            team: platform
+          receiver: 'platform-critical'
+        # ML-Ops team critical alerts
+        - match:
+            team: ml-ops
+          receiver: 'ml-ops-critical'
+
+    # Warning alerts - standard notification
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 2h
+      routes:
+        # Platform team warnings
+        - match:
+            team: platform
+          receiver: 'platform-warnings'
+        # ML-Ops team warnings
+        - match:
+            team: ml-ops
+          receiver: 'ml-ops-warnings'
+
+    # Info alerts - low priority notification
+    - match:
+        severity: info
+      receiver: 'info-alerts'
+      group_wait: 2m
+      group_interval: 30m
+      repeat_interval: 24h
+
+    # Service-specific routing
+    - match:
+        service: malaria-prediction-api
+      receiver: 'api-alerts'
+      routes:
+        - match:
+            severity: critical
+          receiver: 'api-critical'
+
+    - match:
+        service: malaria-prediction-models
+      receiver: 'ml-model-alerts'
+
+    - match:
+        service: malaria-prediction-database
+      receiver: 'database-alerts'
+
+    - match:
+        service: malaria-prediction-cache
+      receiver: 'cache-alerts'
+
+# Alert inhibition rules
+inhibit_rules:
+  # Inhibit warning alerts when critical alerts are firing for the same service
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+
+  # Inhibit individual service alerts when the entire system is down
+  - source_match:
+      alertname: 'APIServiceDown'
+    target_match_re:
+      alertname: '^(HighAPIErrorRate|HighAPIResponseTime|MLModel.*)'
+    equal: ['cluster']
+
+  # Inhibit ML model alerts when API is completely down
+  - source_match:
+      alertname: 'APIServiceDown'
+    target_match_re:
+      alertname: '^MLModel.*'
+    equal: ['cluster']
+
+# Notification receivers
+receivers:
+  # Default receiver
+  - name: 'default'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#malaria-alerts'
+        username: 'Alertmanager'
+        icon_emoji: ':warning:'
+        title: 'Malaria Prediction Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+
+  # Critical alerts - multiple notification channels
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'oncall@malaria-prediction.com'
+        subject: '[CRITICAL] Malaria Prediction Alert: {{ .GroupLabels.alertname }}'
+        headers:
+          Priority: 'high'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+
+          Labels:
+          {{ range .Labels.SortedPairs }}  {{ .Name }}: {{ .Value }}
+          {{ end }}
+          {{ end }}
+
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/CRITICAL/WEBHOOK'
+        channel: '#malaria-critical'
+        username: 'Critical Alert'
+        icon_emoji: ':rotating_light:'
+        title: ':rotating_light: CRITICAL ALERT :rotating_light:'
+        title_link: 'http://grafana:3000/d/malaria-operations'
+        color: 'danger'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Service:* {{ .Labels.service }}
+          *Team:* {{ .Labels.team }}
+          {{ if .Annotations.runbook_url }}*Runbook:* <{{ .Annotations.runbook_url }}|View Runbook>{{ end }}
+          {{ end }}
+        send_resolved: true
+
+  # Platform team critical alerts
+  - name: 'platform-critical'
+    email_configs:
+      - to: 'platform-oncall@malaria-prediction.com'
+        subject: '[PLATFORM-CRITICAL] {{ .GroupLabels.alertname }}'
+        body: |
+          Platform Critical Alert Triggered
+
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+
+          {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+          {{ end }}
+
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/PLATFORM/WEBHOOK'
+        channel: '#platform-alerts'
+        color: 'danger'
+        text: |
+          :rotating_light: *PLATFORM CRITICAL ALERT* :rotating_light:
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          Service: {{ .Labels.service }}
+          {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}<{{ .Annotations.runbook_url }}|:book: Runbook>{{ end }}
+          {{ end }}
+
+  # ML-Ops team critical alerts
+  - name: 'ml-ops-critical'
+    email_configs:
+      - to: 'ml-ops@malaria-prediction.com'
+        subject: '[ML-OPS-CRITICAL] {{ .GroupLabels.alertname }}'
+        body: |
+          ML-Ops Critical Alert
+
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Model/Service: {{ .Labels.service }}
+          {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+          {{ end }}
+
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/MLOPS/WEBHOOK'
+        channel: '#ml-ops-alerts'
+        color: 'danger'
+        text: |
+          :robot_face: *ML-OPS CRITICAL ALERT* :robot_face:
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}<{{ .Annotations.runbook_url }}|:books: ML Runbook>{{ end }}
+          {{ end }}
+
+  # Warning alerts
+  - name: 'warning-alerts'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#malaria-alerts'
+        color: 'warning'
+        text: |
+          :warning: *Warning Alert*
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          Service: {{ .Labels.service }}
+          {{ end }}
+
+  # Platform team warnings
+  - name: 'platform-warnings'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/PLATFORM/WEBHOOK'
+        channel: '#platform-alerts'
+        color: 'warning'
+        text: |
+          :warning: *Platform Warning*
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+          {{ end }}
+
+  # ML-Ops team warnings
+  - name: 'ml-ops-warnings'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/MLOPS/WEBHOOK'
+        channel: '#ml-ops-alerts'
+        color: 'warning'
+        text: |
+          :warning: *ML-Ops Warning*
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          Model: {{ .Labels.model_type | default "Unknown" }}
+          {{ end }}
+
+  # Info alerts
+  - name: 'info-alerts'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#malaria-info'
+        color: 'good'
+        text: |
+          :information_source: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+
+  # API-specific alerts
+  - name: 'api-alerts'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/API/WEBHOOK'
+        channel: '#api-monitoring'
+        text: |
+          :globe_with_meridians: *API Alert*
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+          {{ end }}
+
+  # API critical alerts
+  - name: 'api-critical'
+    email_configs:
+      - to: 'api-team@malaria-prediction.com'
+        subject: '[API-CRITICAL] Malaria Prediction API Issue'
+        body: |
+          Critical API Alert
+
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ end }}
+
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/API/WEBHOOK'
+        channel: '#api-critical'
+        color: 'danger'
+        text: |
+          :bangbang: *CRITICAL API ALERT* :bangbang:
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+          {{ end }}
+
+  # ML Model alerts
+  - name: 'ml-model-alerts'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/MLOPS/WEBHOOK'
+        channel: '#ml-model-monitoring'
+        text: |
+          :robot_face: *ML Model Alert*
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          Model: {{ .Labels.model_type | default "Unknown" }}
+          Version: {{ .Labels.model_version | default "Unknown" }}
+          {{ end }}
+
+  # Database alerts
+  - name: 'database-alerts'
+    email_configs:
+      - to: 'dba@malaria-prediction.com'
+        subject: '[DATABASE] {{ .GroupLabels.alertname }}'
+        body: |
+          Database Alert
+
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+          {{ end }}
+
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/DATABASE/WEBHOOK'
+        channel: '#database-alerts'
+        text: |
+          :floppy_disk: *Database Alert*
+          {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+
+  # Cache alerts
+  - name: 'cache-alerts'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/CACHE/WEBHOOK'
+        channel: '#cache-monitoring'
+        text: |
+          :memo: *Cache Alert*
+          {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+
+# Templates for custom message formatting
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
