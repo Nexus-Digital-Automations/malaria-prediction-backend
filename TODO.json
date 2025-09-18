@@ -7,7 +7,7 @@
       "description": "Continue with the current development tasks, fix any issues, and improve the codebase quality.",
       "mode": "DEVELOPMENT",
       "priority": "medium",
-      "status": "in_progress",
+      "status": "completed",
       "dependencies": [],
       "important_files": [],
       "requires_research": false,
@@ -25,17 +25,31 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T07:31:47.787Z",
+      "updated_at": "2025-09-18T07:31:47.787Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-18T06:58:19.556Z",
       "title": "Develop integration tests for malaria prediction system",
       "description": "Create integration tests for end-to-end workflows: data ingestion → processing → prediction → API response. Test database connections, external API integrations, and complete prediction pipelines. Target 90%+ overall system coverage.",
       "category": "test",
       "priority": "medium",
       "mode": "TESTING",
-      "id": "test_1758178699556_q8neqzd291q"
+      "id": "test_1758178699556_q8neqzd291q",
+      "assigned_agent": "dev_session_1758180146801_1_general_a98c4d17",
+      "started_at": "2025-09-18T07:32:23.936Z",
+      "claimed_by": "dev_session_1758180146801_1_general_a98c4d17",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758180146801_1_general_a98c4d17",
+          "role": "primary",
+          "assignedAt": "2025-09-18T07:32:23.936Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "completed",
