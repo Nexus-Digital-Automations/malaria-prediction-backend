@@ -6,13 +6,10 @@ patient case management, risk assessment processing, treatment protocol manageme
 resource allocation optimization, and surveillance data processing.
 """
 
-import asyncio
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
-
-from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -38,11 +35,11 @@ class HealthcareService:
         self,
         patient_id: str,
         healthcare_professional_id: str,
-        location: Dict[str, Any],
+        location: dict[str, Any],
         case_type: str,
-        symptoms: List[str],
-        initial_notes: Optional[str] = None
-    ) -> Dict[str, Any]:
+        symptoms: list[str],
+        initial_notes: str | None = None
+    ) -> dict[str, Any]:
         """
         Create a new patient case with comprehensive tracking.
 
@@ -90,10 +87,10 @@ class HealthcareService:
         self,
         case_id: str,
         template_id: str,
-        responses: Dict[str, Any],
+        responses: dict[str, Any],
         healthcare_professional_id: str,
         include_environmental_data: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Conduct comprehensive risk assessment for a patient case.
 
@@ -148,9 +145,9 @@ class HealthcareService:
     async def get_treatment_recommendations(
         self,
         case_id: str,
-        patient_weight: Optional[float] = None,
-        comorbidities: List[str] = None
-    ) -> Dict[str, Any]:
+        patient_weight: float | None = None,
+        comorbidities: list[str] = None
+    ) -> dict[str, Any]:
         """
         Get personalized treatment protocol recommendations.
 
@@ -185,14 +182,14 @@ class HealthcareService:
         self,
         healthcare_professional_id: str,
         organization: str,
-        location: Dict[str, Any],
-        resource_types: List[str],
+        location: dict[str, Any],
+        resource_types: list[str],
         population_at_risk: int,
-        current_capacity: Dict[str, int],
+        current_capacity: dict[str, int],
         prediction_horizon: int = 30,
         urgency_level: str = "normal",
         justification: str = ""
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Submit resource allocation planning request.
 
@@ -238,14 +235,14 @@ class HealthcareService:
         self,
         healthcare_professional_id: str,
         report_type: str,
-        reporting_period: Dict[str, Any],
-        location: Dict[str, Any],
+        reporting_period: dict[str, Any],
+        location: dict[str, Any],
         population_monitored: int,
-        case_data: Dict[str, Any],
-        vector_data: Optional[Dict[str, Any]] = None,
-        environmental_observations: Optional[Dict[str, Any]] = None,
-        intervention_activities: Optional[List[Dict[str, Any]]] = None
-    ) -> Dict[str, Any]:
+        case_data: dict[str, Any],
+        vector_data: dict[str, Any] | None = None,
+        environmental_observations: dict[str, Any] | None = None,
+        intervention_activities: list[dict[str, Any]] | None = None
+    ) -> dict[str, Any]:
         """
         Submit comprehensive surveillance data report.
 
@@ -297,8 +294,8 @@ class HealthcareService:
         self,
         risk_score: float,
         risk_level: str,
-        responses: Dict[str, Any]
-    ) -> List[str]:
+        responses: dict[str, Any]
+    ) -> list[str]:
         """Generate clinical recommendations based on risk assessment."""
         recommendations = []
 
@@ -340,10 +337,10 @@ class HealthcareService:
 
     def _calculate_data_quality_indicators(
         self,
-        case_data: Dict[str, Any],
-        vector_data: Dict[str, Any],
-        environmental_observations: Dict[str, Any]
-    ) -> Dict[str, float]:
+        case_data: dict[str, Any],
+        vector_data: dict[str, Any],
+        environmental_observations: dict[str, Any]
+    ) -> dict[str, float]:
         """Calculate data quality indicators for surveillance reports."""
         indicators = {}
 
@@ -384,17 +381,17 @@ class CaseRepository:
         self._cases = {}  # In production, use actual database
         logger.info("Case repository initialized")
 
-    async def store_case(self, case_data: Dict[str, Any]) -> None:
+    async def store_case(self, case_data: dict[str, Any]) -> None:
         """Store patient case data."""
         case_id = case_data["case_id"]
         self._cases[case_id] = case_data
         logger.debug(f"Stored case {case_id}")
 
-    async def get_case(self, case_id: str) -> Optional[Dict[str, Any]]:
+    async def get_case(self, case_id: str) -> dict[str, Any] | None:
         """Retrieve patient case data."""
         return self._cases.get(case_id)
 
-    async def update_case_assessment(self, case_id: str, assessment_data: Dict[str, Any]) -> None:
+    async def update_case_assessment(self, case_id: str, assessment_data: dict[str, Any]) -> None:
         """Update case with risk assessment data."""
         if case_id in self._cases:
             self._cases[case_id]["risk_assessment"] = assessment_data
@@ -408,9 +405,9 @@ class RiskAssessmentProcessor:
     async def process_assessment(
         self,
         template_id: str,
-        responses: Dict[str, Any],
+        responses: dict[str, Any],
         include_environmental: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Process risk assessment questionnaire responses."""
         logger.debug(f"Processing risk assessment with template {template_id}")
 
@@ -433,7 +430,7 @@ class RiskAssessmentProcessor:
             "environmental_risk": environmental_risk
         }
 
-    def _calculate_clinical_risk(self, responses: Dict[str, Any]) -> float:
+    def _calculate_clinical_risk(self, responses: dict[str, Any]) -> float:
         """Calculate clinical risk score from questionnaire responses."""
         risk_score = 0.0
 
@@ -453,7 +450,7 @@ class RiskAssessmentProcessor:
 
         return min(risk_score, 1.0)
 
-    async def _calculate_environmental_risk(self, responses: Dict[str, Any]) -> float:
+    async def _calculate_environmental_risk(self, responses: dict[str, Any]) -> float:
         """Calculate environmental risk score based on location and season."""
         # Mock environmental risk - in production, integrate with prediction API
         base_risk = 0.4  # Baseline environmental risk for the region
@@ -474,7 +471,7 @@ class RiskAssessmentProcessor:
 
         return min(base_risk, 1.0)
 
-    def _combine_risk_scores(self, clinical_risk: float, environmental_risk: Optional[float]) -> float:
+    def _combine_risk_scores(self, clinical_risk: float, environmental_risk: float | None) -> float:
         """Combine clinical and environmental risk scores."""
         if environmental_risk is None:
             return clinical_risk
@@ -499,10 +496,10 @@ class TreatmentProtocolAdvisor:
 
     async def recommend_treatment(
         self,
-        case_data: Dict[str, Any],
-        patient_weight: Optional[float] = None,
-        comorbidities: List[str] = None
-    ) -> Dict[str, Any]:
+        case_data: dict[str, Any],
+        patient_weight: float | None = None,
+        comorbidities: list[str] = None
+    ) -> dict[str, Any]:
         """Generate personalized treatment recommendations."""
         if comorbidities is None:
             comorbidities = []
@@ -512,7 +509,7 @@ class TreatmentProtocolAdvisor:
         # Analyze case data for treatment selection
         risk_assessment = case_data.get("risk_assessment", {})
         risk_level = risk_assessment.get("risk_level", "medium")
-        symptoms = case_data.get("symptoms", [])
+        case_data.get("symptoms", [])
 
         # Select primary recommendation based on risk level
         if risk_level in ["high", "very_high"] or "severe" in case_data.get("case_type", ""):
@@ -541,21 +538,21 @@ class TreatmentProtocolAdvisor:
             "valid_for_hours": 24
         }
 
-    def _calculate_severe_dosage(self, patient_weight: Optional[float]) -> str:
+    def _calculate_severe_dosage(self, patient_weight: float | None) -> str:
         """Calculate dosage for severe malaria treatment."""
         if patient_weight and patient_weight < 35:
             return "3mg/kg IV artesunate at 0, 12, 24 hours, then daily"
         else:
             return "2.4mg/kg IV artesunate at 0, 12, 24 hours, then daily"
 
-    def _calculate_standard_dosage(self, patient_weight: Optional[float]) -> str:
+    def _calculate_standard_dosage(self, patient_weight: float | None) -> str:
         """Calculate dosage for standard treatment."""
         if patient_weight and patient_weight < 35:
             return "Weight-based artemether-lumefantrine dosing per pediatric guidelines"
         else:
             return "4 tablets twice daily for 3 days (based on adult weight >35kg)"
 
-    def _get_alternative_protocols(self, comorbidities: List[str]) -> List[Dict[str, Any]]:
+    def _get_alternative_protocols(self, comorbidities: list[str]) -> list[dict[str, Any]]:
         """Get alternative treatment protocols based on comorbidities."""
         alternatives = []
 
@@ -569,7 +566,7 @@ class TreatmentProtocolAdvisor:
 
         return alternatives
 
-    def _check_contraindications(self, comorbidities: List[str]) -> List[str]:
+    def _check_contraindications(self, comorbidities: list[str]) -> list[str]:
         """Check for contraindications based on patient comorbidities."""
         checks = [
             "No known drug allergies",
@@ -582,7 +579,7 @@ class TreatmentProtocolAdvisor:
 
         return checks
 
-    def _generate_monitoring_plan(self, risk_level: str) -> List[str]:
+    def _generate_monitoring_plan(self, risk_level: str) -> list[str]:
         """Generate monitoring plan based on risk level."""
         if risk_level in ["high", "very_high"]:
             return [
@@ -602,7 +599,7 @@ class TreatmentProtocolAdvisor:
 class ResourceAllocationOptimizer:
     """Optimizer for healthcare resource allocation planning."""
 
-    async def optimize_allocation(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def optimize_allocation(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Generate optimized resource allocation plan."""
         logger.info(f"Optimizing resource allocation for request {request_data['request_id']}")
 
@@ -629,7 +626,7 @@ class ResourceAllocationOptimizer:
 
         return plan
 
-    def _generate_resource_recommendations(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_resource_recommendations(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Generate resource allocation recommendations."""
         current_capacity = request_data["current_capacity"]
 
@@ -650,7 +647,7 @@ class ResourceAllocationOptimizer:
             }
         }
 
-    def _calculate_cost_estimates(self) -> Dict[str, float]:
+    def _calculate_cost_estimates(self) -> dict[str, float]:
         """Calculate cost estimates for resource allocation."""
         return {
             "personnel_costs_usd": 8500,
@@ -659,7 +656,7 @@ class ResourceAllocationOptimizer:
             "total_estimated_cost_usd": 23700
         }
 
-    def _generate_implementation_timeline(self) -> List[Dict[str, Any]]:
+    def _generate_implementation_timeline(self) -> list[dict[str, Any]]:
         """Generate implementation timeline for resource allocation."""
         return [
             {
@@ -682,7 +679,7 @@ class ResourceAllocationOptimizer:
             }
         ]
 
-    def _generate_risk_mitigation_strategies(self) -> List[str]:
+    def _generate_risk_mitigation_strategies(self) -> list[str]:
         """Generate risk mitigation strategies."""
         return [
             "Establish referral protocols for severe cases",
@@ -695,7 +692,7 @@ class ResourceAllocationOptimizer:
 class SurveillanceDataProcessor:
     """Processor for surveillance data management and DHIS2 integration."""
 
-    async def process_report(self, report_data: Dict[str, Any]) -> None:
+    async def process_report(self, report_data: dict[str, Any]) -> None:
         """Process surveillance report and prepare for export."""
         logger.info(f"Processing surveillance report {report_data['report_id']}")
 
@@ -710,7 +707,7 @@ class SurveillanceDataProcessor:
 
         logger.info(f"Surveillance report {report_data['report_id']} processed successfully")
 
-    def _validate_surveillance_data(self, report_data: Dict[str, Any]) -> None:
+    def _validate_surveillance_data(self, report_data: dict[str, Any]) -> None:
         """Validate surveillance data completeness and quality."""
         # Check required fields
         required_fields = ["case_data", "location", "population_monitored"]
@@ -723,7 +720,7 @@ class SurveillanceDataProcessor:
         if not isinstance(case_data, dict):
             logger.warning("Case data should be a dictionary")
 
-    async def _prepare_dhis2_export(self, report_data: Dict[str, Any]) -> None:
+    async def _prepare_dhis2_export(self, report_data: dict[str, Any]) -> None:
         """Prepare surveillance data for DHIS2 export."""
         # Map data to DHIS2 format
         dhis2_data = {
@@ -737,7 +734,7 @@ class SurveillanceDataProcessor:
         report_data["dhis2_export_data"] = dhis2_data
         report_data["dhis2_export_status"] = "ready"
 
-    def _format_dhis2_period(self, reporting_period: Dict[str, Any]) -> str:
+    def _format_dhis2_period(self, reporting_period: dict[str, Any]) -> str:
         """Format reporting period for DHIS2."""
         # Convert to DHIS2 period format (e.g., 2023W52)
         start_date = reporting_period.get("start_date", datetime.now())
@@ -750,7 +747,7 @@ class SurveillanceDataProcessor:
 
         return f"{year}W{week_number:02d}"
 
-    def _map_to_dhis2_data_elements(self, case_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _map_to_dhis2_data_elements(self, case_data: dict[str, Any]) -> list[dict[str, Any]]:
         """Map case data to DHIS2 data elements."""
         data_values = []
 
@@ -771,7 +768,7 @@ class SurveillanceDataProcessor:
 
         return data_values
 
-    async def _store_surveillance_data(self, report_data: Dict[str, Any]) -> None:
+    async def _store_surveillance_data(self, report_data: dict[str, Any]) -> None:
         """Store surveillance data in local database."""
         # In production, store in surveillance database
         logger.debug(f"Storing surveillance data for report {report_data['report_id']}")

@@ -5,14 +5,12 @@ This module provides comprehensive integration with DHIS2 (District Health Infor
 for surveillance data reporting, organization unit management, and health system interoperability.
 """
 
-import asyncio
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 from urllib.parse import urljoin
 
 import aiohttp
-from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -112,10 +110,10 @@ class DHIS2Client:
 
     async def get_organization_units(
         self,
-        parent_id: Optional[str] = None,
-        level: Optional[int] = None,
+        parent_id: str | None = None,
+        level: int | None = None,
         fields: str = "id,name,level,parent"
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get organization units from DHIS2.
 
@@ -153,7 +151,7 @@ class DHIS2Client:
             logger.error(f"Error retrieving organization units: {e}")
             return []
 
-    async def get_data_sets(self, fields: str = "id,name,periodType") -> List[Dict[str, Any]]:
+    async def get_data_sets(self, fields: str = "id,name,periodType") -> list[dict[str, Any]]:
         """
         Get available data sets from DHIS2.
 
@@ -189,8 +187,8 @@ class DHIS2Client:
         data_set_id: str,
         org_unit_id: str,
         period: str,
-        data_values: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        data_values: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """
         Submit data values to DHIS2.
 
@@ -244,9 +242,9 @@ class DHIS2Client:
 
     async def get_data_elements(
         self,
-        data_set_id: Optional[str] = None,
+        data_set_id: str | None = None,
         fields: str = "id,name,valueType"
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get data elements from DHIS2.
 
@@ -286,7 +284,7 @@ class DHIS2Client:
         data_set_id: str,
         org_unit_id: str,
         period: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Validate data set completion for a specific period.
 
@@ -379,10 +377,10 @@ class DHIS2DataMapper:
 
     def map_surveillance_report(
         self,
-        report_data: Dict[str, Any],
+        report_data: dict[str, Any],
         org_unit_id: str,
         data_set_id: str = "MAL_WEEKLY_001"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Map surveillance report to DHIS2 data value set format.
 
@@ -435,7 +433,7 @@ class DHIS2DataMapper:
         logger.info(f"Mapped {len(data_values)} data values for DHIS2 submission")
         return dhis2_data
 
-    def _format_period(self, reporting_period: Dict[str, Any]) -> str:
+    def _format_period(self, reporting_period: dict[str, Any]) -> str:
         """
         Format reporting period for DHIS2.
 
@@ -457,7 +455,7 @@ class DHIS2DataMapper:
 
         return f"{year}W{week:02d}"
 
-    def _map_age_disaggregation(self, age_breakdown: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _map_age_disaggregation(self, age_breakdown: dict[str, Any]) -> list[dict[str, Any]]:
         """
         Map age-disaggregated data to DHIS2 format.
 
@@ -513,10 +511,10 @@ class DHIS2Service:
 
     async def export_surveillance_report(
         self,
-        report_data: Dict[str, Any],
+        report_data: dict[str, Any],
         org_unit_id: str,
         data_set_id: str = "MAL_WEEKLY_001"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Export surveillance report to DHIS2.
 
@@ -572,8 +570,8 @@ class DHIS2Service:
 
     async def get_organization_hierarchy(
         self,
-        root_id: Optional[str] = None
-    ) -> Dict[str, Any]:
+        root_id: str | None = None
+    ) -> dict[str, Any]:
         """
         Get organization unit hierarchy from DHIS2.
 
@@ -606,13 +604,13 @@ class DHIS2Service:
 
     def _build_org_hierarchy(
         self,
-        org_units: List[Dict[str, Any]],
-        root_id: Optional[str] = None
-    ) -> Dict[str, Any]:
+        org_units: list[dict[str, Any]],
+        root_id: str | None = None
+    ) -> dict[str, Any]:
         """Build hierarchical organization structure."""
         org_dict = {org["id"]: org for org in org_units}
 
-        def build_tree(unit_id: str) -> Dict[str, Any]:
+        def build_tree(unit_id: str) -> dict[str, Any]:
             unit = org_dict.get(unit_id, {})
             children = unit.get("children", [])
 
@@ -637,7 +635,7 @@ class DHIS2Service:
         org_unit_id: str,
         data_set_id: str,
         period: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Validate if organization unit is ready for data export.
 
@@ -697,7 +695,7 @@ class DHIS2Service:
                 "details": {}
             }
 
-    async def get_system_info(self) -> Dict[str, Any]:
+    async def get_system_info(self) -> dict[str, Any]:
         """
         Get DHIS2 system information.
 

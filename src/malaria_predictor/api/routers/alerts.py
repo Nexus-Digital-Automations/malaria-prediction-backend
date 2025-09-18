@@ -883,3 +883,272 @@ async def get_performance_metrics(
     except Exception as e:
         logger.error(f"Failed to get performance metrics: {e}")
         raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+# Advanced Analytics Endpoints
+@router.get("/analytics/kpis")
+async def get_alert_kpis(
+    current_user: User = Depends(get_current_user),
+    force_refresh: bool = Query(False, description="Force refresh of cached KPIs")
+):
+    """Get comprehensive alert system KPIs."""
+    try:
+        from ...alerts.alert_analytics import alert_analytics_engine
+
+        kpis = await alert_analytics_engine.get_alert_kpis(force_refresh=force_refresh)
+        return kpis.dict()
+
+    except Exception as e:
+        logger.error(f"Failed to get alert KPIs: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+@router.get("/analytics/channel-performance")
+async def get_channel_performance(
+    current_user: User = Depends(get_current_user)
+):
+    """Get performance metrics for all notification channels."""
+    try:
+        from ...alerts.alert_analytics import alert_analytics_engine
+
+        channel_metrics = await alert_analytics_engine.get_channel_performance()
+        return [metric.dict() for metric in channel_metrics]
+
+    except Exception as e:
+        logger.error(f"Failed to get channel performance: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+@router.get("/analytics/user-engagement")
+async def get_user_engagement_metrics(
+    current_user: User = Depends(get_current_user)
+):
+    """Get user engagement metrics for alerts."""
+    try:
+        from ...alerts.alert_analytics import alert_analytics_engine
+
+        engagement_metrics = await alert_analytics_engine.get_user_engagement_metrics()
+        return engagement_metrics.dict()
+
+    except Exception as e:
+        logger.error(f"Failed to get user engagement metrics: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+@router.get("/analytics/effectiveness")
+async def get_alert_effectiveness_metrics(
+    current_user: User = Depends(get_current_user)
+):
+    """Get alert effectiveness and accuracy metrics."""
+    try:
+        from ...alerts.alert_analytics import alert_analytics_engine
+
+        effectiveness_metrics = await alert_analytics_engine.get_alert_effectiveness_metrics()
+        return effectiveness_metrics.dict()
+
+    except Exception as e:
+        logger.error(f"Failed to get effectiveness metrics: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+@router.get("/analytics/system-health")
+async def get_system_health_metrics(
+    current_user: User = Depends(get_current_user)
+):
+    """Get overall system health and performance metrics."""
+    try:
+        from ...alerts.alert_analytics import alert_analytics_engine
+
+        health_metrics = await alert_analytics_engine.get_system_health_metrics()
+        return health_metrics.dict()
+
+    except Exception as e:
+        logger.error(f"Failed to get system health metrics: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+@router.get("/analytics/trends")
+async def get_alert_trends(
+    current_user: User = Depends(get_current_user),
+    days: int = Query(30, ge=7, le=90, description="Number of days to analyze")
+):
+    """Get trend analysis for alerts over time."""
+    try:
+        from ...alerts.alert_analytics import alert_analytics_engine
+
+        trend_analysis = await alert_analytics_engine.get_trend_analysis(days=days)
+        return trend_analysis.dict()
+
+    except Exception as e:
+        logger.error(f"Failed to get trend analysis: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+@router.get("/analytics/anomalies")
+async def get_alert_anomalies(
+    current_user: User = Depends(get_current_user)
+):
+    """Detect and return alert system anomalies."""
+    try:
+        from ...alerts.alert_analytics import alert_analytics_engine
+
+        anomalies = await alert_analytics_engine.detect_anomalies()
+        return {
+            "anomalies": anomalies,
+            "anomaly_count": len(anomalies),
+            "detection_timestamp": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to detect anomalies: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+# Alert History Management Endpoints
+@router.get("/history")
+async def get_alert_history_detailed(
+    current_user: User = Depends(get_current_user),
+    start_date: datetime | None = Query(None, description="Start date for history"),
+    end_date: datetime | None = Query(None, description="End date for history"),
+    alert_levels: str | None = Query(None, description="Comma-separated alert levels"),
+    alert_types: str | None = Query(None, description="Comma-separated alert types"),
+    status_filters: str | None = Query(None, description="Comma-separated status filters"),
+    location_filters: str | None = Query(None, description="Comma-separated location filters"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum results"),
+    offset: int = Query(0, ge=0, description="Results offset"),
+    sort_by: str = Query("created_at", description="Sort field"),
+    sort_order: str = Query("desc", description="Sort order")
+):
+    """Get detailed alert history with advanced filtering."""
+    try:
+        from ...alerts.alert_history_manager import alert_history_manager, AlertHistoryQuery
+
+        # Parse list parameters
+        alert_levels_list = alert_levels.split(",") if alert_levels else None
+        alert_types_list = alert_types.split(",") if alert_types else None
+        status_filters_list = status_filters.split(",") if status_filters else None
+        location_filters_list = location_filters.split(",") if location_filters else None
+
+        query = AlertHistoryQuery(
+            user_id=current_user.id,
+            start_date=start_date,
+            end_date=end_date,
+            alert_levels=alert_levels_list,
+            alert_types=alert_types_list,
+            status_filters=status_filters_list,
+            location_filters=location_filters_list,
+            limit=limit,
+            offset=offset,
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
+
+        history_data = await alert_history_manager.get_alert_history(query)
+        return history_data
+
+    except Exception as e:
+        logger.error(f"Failed to get alert history: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+@router.get("/history/summary")
+async def get_alert_history_summary(
+    current_user: User = Depends(get_current_user),
+    days: int = Query(30, ge=1, le=365, description="Number of days to analyze")
+):
+    """Get comprehensive alert history summary."""
+    try:
+        from ...alerts.alert_history_manager import alert_history_manager
+
+        summary = await alert_history_manager.get_alert_history_summary(
+            user_id=current_user.id,
+            days=days
+        )
+        return summary.dict()
+
+    except Exception as e:
+        logger.error(f"Failed to get alert history summary: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+@router.get("/history/trends")
+async def get_alert_history_trends(
+    current_user: User = Depends(get_current_user),
+    period: str = Query("daily", description="Aggregation period"),
+    days: int = Query(30, ge=7, le=90, description="Number of days to analyze")
+):
+    """Get alert trend data over time."""
+    try:
+        from ...alerts.alert_history_manager import alert_history_manager
+
+        trends = await alert_history_manager.get_alert_trends(
+            user_id=current_user.id,
+            period=period,
+            days=days
+        )
+        return [trend.dict() for trend in trends]
+
+    except Exception as e:
+        logger.error(f"Failed to get alert trends: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+@router.post("/history/export")
+async def export_alert_history(
+    current_user: User = Depends(get_current_user),
+    export_format: str = Query("json", description="Export format (json, csv)"),
+    start_date: datetime | None = Query(None, description="Start date for export"),
+    end_date: datetime | None = Query(None, description="End date for export")
+):
+    """Export alert history in various formats."""
+    try:
+        from ...alerts.alert_history_manager import alert_history_manager
+
+        export_data = await alert_history_manager.export_alert_history(
+            user_id=current_user.id,
+            export_format=export_format,
+            start_date=start_date,
+            end_date=end_date
+        )
+        return export_data
+
+    except Exception as e:
+        logger.error(f"Failed to export alert history: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+# System Administration Endpoints (require admin privileges)
+@router.post("/admin/archive")
+async def archive_old_alerts(
+    current_user: User = Depends(get_current_user),
+    dry_run: bool = Query(True, description="Simulate archiving without changes")
+):
+    """Archive old alerts based on retention policy."""
+    try:
+        # Note: In production, add admin role check here
+        from ...alerts.alert_history_manager import alert_history_manager
+
+        archive_result = await alert_history_manager.archive_old_alerts(dry_run=dry_run)
+        return archive_result
+
+    except Exception as e:
+        logger.error(f"Failed to archive alerts: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+@router.post("/admin/cleanup")
+async def cleanup_old_data(
+    current_user: User = Depends(get_current_user),
+    dry_run: bool = Query(True, description="Simulate cleanup without changes")
+):
+    """Clean up old alert data based on retention policy."""
+    try:
+        # Note: In production, add admin role check here
+        from ...alerts.alert_history_manager import alert_history_manager
+
+        cleanup_result = await alert_history_manager.cleanup_old_data(dry_run=dry_run)
+        return cleanup_result
+
+    except Exception as e:
+        logger.error(f"Failed to cleanup old data: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e

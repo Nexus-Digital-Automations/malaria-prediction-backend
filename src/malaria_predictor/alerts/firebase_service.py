@@ -34,27 +34,56 @@ logger = logging.getLogger(__name__)
 
 
 class PushNotificationPayload(BaseModel):
-    """Push notification payload structure."""
+    """Enhanced push notification payload structure."""
 
     title: str
     body: str
     data: dict[str, str] | None = None
     image_url: str | None = None
 
+    # Enhanced notification settings
+    alert_level: str | None = None  # low, medium, high, critical, emergency
+    category: str | None = None  # malaria_alert, system_update, etc.
+    deep_link: str | None = None  # Deep link for app navigation
+    action_buttons: list[dict] | None = None  # Interactive action buttons
+
+    # Rich content
+    attachment_url: str | None = None  # Media attachment
+    summary_text: str | None = None  # Summary for grouped notifications
+    thread_id: str | None = None  # For notification grouping
+
+    # Scheduling and timing
+    scheduled_time: datetime | None = None  # For scheduled notifications
+    expiry_time: datetime | None = None  # When notification expires
+    time_to_live_seconds: int = 3600  # How long FCM should attempt delivery
+
     # Platform-specific settings
     android_priority: str = "high"  # normal, high
     android_ttl: int = 3600  # Time to live in seconds
     android_collapse_key: str | None = None
+    android_channel_id: str = "malaria_alerts"  # Notification channel
+    android_color: str | None = None  # Notification color
+    android_sound: str | None = None  # Custom sound
+    android_vibrate_pattern: list[int] | None = None  # Vibration pattern
+    android_visibility: str = "public"  # public, private, secret
 
     ios_priority: str = "high"  # normal, high
     ios_sound: str = "default"
     ios_badge: int | None = None
     ios_content_available: bool = False
+    ios_mutable_content: bool = True  # Allow modification by app
+    ios_thread_id: str | None = None  # Thread identifier
+    ios_category: str | None = None  # Action category
+    ios_interruption_level: str = "active"  # passive, active, time-sensitive, critical
 
     # Web-specific settings
     web_icon: str | None = None
     web_badge: str | None = None
     web_actions: list[dict] | None = None
+    web_require_interaction: bool = False  # Keep notification visible until user acts
+    web_silent: bool = False  # Silent notification
+    web_vibrate: list[int] | None = None  # Vibration pattern for web
+    web_dir: str = "auto"  # Text direction: auto, ltr, rtl
 
 
 class FirebaseNotificationResult(BaseModel):
