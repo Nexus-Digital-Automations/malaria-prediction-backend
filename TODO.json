@@ -38,7 +38,7 @@
       "id": "test_1758178699556_q8neqzd291q"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T07:24:41.949Z",
       "title": "Fix 251 linting violations in test files",
       "description": "Fix import organization, remove unused imports, fix whitespace issues, and ensure proper file formatting in comprehensive test files. Target: zero linting violations.",
@@ -55,7 +55,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T07:26:46.807Z",
+      "updated_at": "2025-09-18T07:26:46.807Z"
     }
   ],
   "current_mode": "DEVELOPMENT",

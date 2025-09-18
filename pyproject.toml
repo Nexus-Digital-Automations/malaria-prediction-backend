@@ -24,33 +24,28 @@ dependencies = [
     # Web Framework
     "fastapi>=0.104.0",
     "uvicorn[standard]>=0.24.0",
-
     # AI/ML Core
     "torch>=2.1.0",
     "transformers>=4.35.0",
     "scikit-learn>=1.3.0",
-    "numpy>=1.24.0,<2.0.0",  # Pin to NumPy 1.x for compatibility with compiled extensions
+    "numpy>=1.24.0,<2.0.0", # Pin to NumPy 1.x for compatibility with compiled extensions
     "pandas>=2.1.0",
     "pytorch-lightning>=2.1.0",
     "optuna>=3.4.0",
-
     # Data Processing & Validation
     "pydantic>=2.5.0",
     "pydantic-settings>=2.0.0",
     "httpx>=0.25.0",
     "aiofiles>=23.2.0",
-
     # Security & Authentication
     "python-jose[cryptography]>=3.3.0",
     "passlib[bcrypt]>=1.7.4",
     "python-multipart>=0.0.6",
     "cryptography>=41.0.0",
-
     # Database & Time-Series
     "asyncpg>=0.29.0",
     "sqlalchemy[asyncio]>=2.0.0",
     "alembic>=1.12.0",
-
     # Geospatial & Environmental Data
     "geopandas>=0.14.0",
     "rasterio>=1.3.0",
@@ -60,20 +55,16 @@ dependencies = [
     "cfgrib>=0.9.10.4",
     "h5netcdf>=1.2.0",
     "shapely>=2.0.0",
-
     # Scheduling & Automation
     "schedule>=1.2.0",
-
     # Job Queue & Caching
     "celery>=5.3.0",
     "redis[hiredis]>=5.0.0",
-
     # Monitoring & Logging
     "mlflow>=2.8.0",
     "structlog>=23.2.0",
     "prometheus-client>=0.19.0",
     "prometheus-fastapi-instrumentator>=6.1.0",
-
     # Distributed Tracing
     "opentelemetry-api>=1.21.0",
     "opentelemetry-sdk>=1.21.0",
@@ -82,10 +73,10 @@ dependencies = [
     "opentelemetry-instrumentation-redis>=0.42b0",
     "opentelemetry-exporter-prometheus>=0.56b0",
     "opentelemetry-exporter-jaeger>=1.21.0",
-
     # Utilities
     "python-dotenv>=1.0.0",
     "typer>=0.9.0",
+    "deprecated>=1.2.18",
 ]
 
 [project.optional-dependencies]
