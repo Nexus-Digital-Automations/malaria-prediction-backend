@@ -18,6 +18,28 @@ from .models import ModelType
 
 logger = logging.getLogger(__name__)
 
+# Import auth functions
+try:
+    from .auth import get_current_user
+    
+    # Create optional user dependency 
+    async def get_current_user_optional(*args, **kwargs):
+        """Optional user authentication - returns None if not authenticated."""
+        try:
+            return await get_current_user(*args, **kwargs)
+        except Exception:
+            return None
+            
+except ImportError:
+    # Fallback if auth module not available
+    async def get_current_user(*args, **kwargs):
+        """Placeholder authentication function."""
+        return None
+        
+    async def get_current_user_optional(*args, **kwargs):
+        """Placeholder optional authentication function."""
+        return None
+
 
 class ModelManager:
     """

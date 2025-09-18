@@ -8,14 +8,26 @@ import json
 import logging
 from datetime import datetime
 
-import firebase_admin
-from firebase_admin import credentials, messaging
+try:
+    import firebase_admin
+    from firebase_admin import credentials, messaging
+    FIREBASE_AVAILABLE = True
+except ImportError:
+    firebase_admin = None
+    credentials = None
+    messaging = None
+    FIREBASE_AVAILABLE = False
+
+# Type aliases for optional Firebase types
+if FIREBASE_AVAILABLE:
+    from firebase_admin.messaging import Message
+else:
+    Message = object  # Placeholder for type annotations
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import settings
 from ..database.models import Alert, NotificationDelivery, UserDeviceToken
-from ..database.session import get_session
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +103,10 @@ class FirebaseNotificationService:
         try:
             if self.initialized:
                 return True
+
+            if not FIREBASE_AVAILABLE:
+                logger.warning("Firebase Admin SDK not available - Firebase notifications disabled")
+                return False
 
             # Load Firebase credentials
             firebase_credentials = self._load_firebase_credentials()
@@ -503,7 +519,7 @@ class FirebaseNotificationService:
         self,
         device_token: str,
         payload: PushNotificationPayload
-    ) -> messaging.Message:
+    ) -> Message:
         """Build FCM message from payload.
 
         Args:
@@ -607,7 +623,7 @@ class FirebaseNotificationService:
             ios_sound="alert.wav" if priority == "high" else "default"
         )
 
-    async def _get_target_device_tokens(self, db: Session, alert: Alert) -> list[str]:
+    async def _get_target_device_tokens(self, db: AsyncSession, alert: Alert) -> list[str]:
         """Get device tokens that should receive the alert.
 
         Args:

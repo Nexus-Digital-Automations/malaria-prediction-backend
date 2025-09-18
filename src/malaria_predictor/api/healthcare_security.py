@@ -8,13 +8,14 @@ prediction system's healthcare tools.
 
 import logging
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 
-from .routers.healthcare import HealthcareProfessional
+if TYPE_CHECKING:
+    from .routers.healthcare import HealthcareProfessional
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +107,7 @@ SUPPORTED_LANGUAGES = {
 
 async def get_current_healthcare_professional(
     credentials: HTTPAuthorizationCredentials = Depends(security)
-) -> HealthcareProfessional:
+) -> "HealthcareProfessional":
     """
     Get current authenticated healthcare professional.
 
@@ -115,6 +116,7 @@ async def get_current_healthcare_professional(
     """
     try:
         # Extract and validate JWT token
+        from .routers.healthcare import HealthcareProfessional
 
         # In production, validate JWT token and extract user info
         # For now, return mock healthcare professional
@@ -163,8 +165,8 @@ def require_healthcare_permission(permission: str):
         Dependency function that checks user permissions
     """
     async def permission_dependency(
-        current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-    ) -> HealthcareProfessional:
+        current_user: "HealthcareProfessional" = Depends(get_current_healthcare_professional)
+    ) -> "HealthcareProfessional":
         """Check if user has required permission."""
         if permission not in current_user.permissions:
             logger.warning(
@@ -190,8 +192,8 @@ def require_healthcare_role(allowed_roles: list[str]):
         Dependency function that checks user role
     """
     async def role_dependency(
-        current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-    ) -> HealthcareProfessional:
+        current_user: "HealthcareProfessional" = Depends(get_current_healthcare_professional)
+    ) -> "HealthcareProfessional":
         """Check if user has allowed role."""
         if current_user.role not in allowed_roles:
             logger.warning(

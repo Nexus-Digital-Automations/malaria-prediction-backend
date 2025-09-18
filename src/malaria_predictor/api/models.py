@@ -288,3 +288,39 @@ class AnalyticsHealthCheck(BaseModel):
     last_data_update: datetime = Field(..., description="Last data update timestamp")
     alerts_active: int = Field(..., description="Number of active alerts")
     performance_metrics: dict[str, float] = Field(..., description="Performance metrics")
+
+
+class HealthStatus(BaseModel):
+    """Health status enumeration."""
+    
+    status: str = Field(..., description="Health status (healthy, degraded, unhealthy)")
+    checks: dict[str, str] = Field(..., description="Individual health check results")
+    timestamp: datetime = Field(..., description="Health check timestamp")
+
+
+class HealthResponse(BaseModel):
+    """Health check response model."""
+    
+    status: str = Field(..., description="Overall health status")
+    version: str = Field(..., description="Application version")
+    uptime: float = Field(..., description="Uptime in seconds")
+    checks: dict[str, HealthStatus] = Field(..., description="Detailed health checks")
+    environment: str = Field(..., description="Environment name")
+    timestamp: datetime = Field(..., description="Response timestamp")
+
+
+class LocationPoint(BaseModel):
+    """Geographic location point."""
+    
+    latitude: float = Field(..., description="Latitude coordinate", ge=-90, le=90)
+    longitude: float = Field(..., description="Longitude coordinate", ge=-180, le=180)
+    name: str | None = Field(None, description="Location name")
+
+
+class RiskLevel(BaseModel):
+    """Risk level classification."""
+    
+    level: str = Field(..., description="Risk level (low, medium, high, critical)")
+    value: float = Field(..., description="Numeric risk value", ge=0, le=1)
+    confidence: float = Field(..., description="Confidence score", ge=0, le=1)
+    factors: dict[str, float] | None = Field(None, description="Contributing risk factors")

@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 from typing import Union
 
 from pydantic import BaseModel
-from sqlalchemy import or_
-from sqlalchemy.orm import Session
+from sqlalchemy import or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import settings
 from ..database.models import (
@@ -121,37 +121,37 @@ class AlertEngine:
                 # Get active alert configurations and rules
                 active_rules = await self._get_active_alert_rules(db, request)
 
-            if not active_rules:
-                logger.debug("No active alert rules found for evaluation")
-                return []
+                if not active_rules:
+                    logger.debug("No active alert rules found for evaluation")
+                    return []
 
-            # Evaluate each rule
-            evaluation_results = []
+                # Evaluate each rule
+                evaluation_results = []
 
-            for rule in active_rules:
-                result = await self._evaluate_alert_rule(db, rule, request)
-                evaluation_results.append(result)
+                for rule in active_rules:
+                    result = await self._evaluate_alert_rule(db, rule, request)
+                    evaluation_results.append(result)
 
-                # Generate alert if rule triggered and not suppressed
-                if result.triggered and not result.suppressed:
-                    await self._generate_alert(db, rule, request, result)
+                    # Generate alert if rule triggered and not suppressed
+                    if result.triggered and not result.suppressed:
+                        await self._generate_alert(db, rule, request, result)
 
-            # Update statistics
-            evaluation_time = (datetime.now() - start_time).total_seconds() * 1000
-            self.stats["evaluations_performed"] += 1
-            self.stats["avg_evaluation_time_ms"] = (
-                (self.stats["avg_evaluation_time_ms"] * (self.stats["evaluations_performed"] - 1) +
-                 evaluation_time) / self.stats["evaluations_performed"]
-            )
-            self.stats["last_evaluation"] = datetime.now()
+                # Update statistics
+                evaluation_time = (datetime.now() - start_time).total_seconds() * 1000
+                self.stats["evaluations_performed"] += 1
+                self.stats["avg_evaluation_time_ms"] = (
+                    (self.stats["avg_evaluation_time_ms"] * (self.stats["evaluations_performed"] - 1) +
+                     evaluation_time) / self.stats["evaluations_performed"]
+                )
+                self.stats["last_evaluation"] = datetime.now()
 
-            logger.info(
-                f"Alert evaluation completed: {len(evaluation_results)} rules evaluated, "
-                f"{sum(1 for r in evaluation_results if r.triggered)} triggered, "
-                f"evaluation_time={evaluation_time:.2f}ms"
-            )
+                logger.info(
+                    f"Alert evaluation completed: {len(evaluation_results)} rules evaluated, "
+                    f"{sum(1 for r in evaluation_results if r.triggered)} triggered, "
+                    f"evaluation_time={evaluation_time:.2f}ms"
+                )
 
-            return evaluation_results
+                return evaluation_results
 
         except Exception as e:
             logger.error(f"Alert evaluation failed: {e}")
@@ -188,20 +188,20 @@ class AlertEngine:
         evaluation_results = await self.evaluate_risk_for_alerts(request)
 
         # Return generated alerts
-        db = next(get_database())
-        try:
+        async with get_session() as db:
             alerts = []
             for result in evaluation_results:
                 if result.triggered and not result.suppressed:
-                    alert = db.query(Alert).filter(
-                        Alert.alert_rule_id == result.rule_id,
-                        Alert.created_at >= datetime.now() - timedelta(minutes=5)
-                    ).first()
+                    alert_query = await db.execute(
+                        select(Alert).filter(
+                            Alert.alert_rule_id == result.rule_id,
+                            Alert.created_at >= datetime.now() - timedelta(minutes=5)
+                        )
+                    )
+                    alert = alert_query.scalar_one_or_none()
                     if alert:
                         alerts.append(alert)
             return alerts
-        finally:
-            db.close()
 
     async def create_alert_configuration(
         self,
@@ -217,56 +217,51 @@ class AlertEngine:
         Returns:
             Created alert configuration or None if failed
         """
-        db = next(get_database())
+        async with get_session() as db:
+            try:
+                config = AlertConfiguration(
+                    user_id=user_id,
+                    configuration_name=config_data.get("name", "Default Configuration"),
+                    low_risk_threshold=config_data.get("low_risk_threshold", 0.3),
+                    medium_risk_threshold=config_data.get("medium_risk_threshold", 0.6),
+                    high_risk_threshold=config_data.get("high_risk_threshold", 0.8),
+                    critical_risk_threshold=config_data.get("critical_risk_threshold", 0.9),
+                    latitude_min=config_data.get("latitude_min"),
+                    latitude_max=config_data.get("latitude_max"),
+                    longitude_min=config_data.get("longitude_min"),
+                    longitude_max=config_data.get("longitude_max"),
+                    country_codes=config_data.get("country_codes"),
+                    admin_regions=config_data.get("admin_regions"),
+                    alert_frequency_hours=config_data.get("alert_frequency_hours", 24),
+                    time_horizon_days=config_data.get("time_horizon_days", 7),
+                    active_hours_start=config_data.get("active_hours_start"),
+                    active_hours_end=config_data.get("active_hours_end"),
+                    timezone=config_data.get("timezone", "UTC"),
+                    enable_push_notifications=config_data.get("enable_push_notifications", True),
+                    enable_email_notifications=config_data.get("enable_email_notifications", True),
+                    enable_sms_notifications=config_data.get("enable_sms_notifications", False),
+                    enable_webhook_notifications=config_data.get("enable_webhook_notifications", False),
+                    email_addresses=config_data.get("email_addresses"),
+                    phone_numbers=config_data.get("phone_numbers"),
+                    webhook_urls=config_data.get("webhook_urls"),
+                    enable_emergency_escalation=config_data.get("enable_emergency_escalation", False),
+                    emergency_contact_emails=config_data.get("emergency_contact_emails"),
+                    emergency_contact_phones=config_data.get("emergency_contact_phones"),
+                    emergency_escalation_threshold=config_data.get("emergency_escalation_threshold", 0.95),
+                    is_active=config_data.get("is_active", True),
+                    is_default=config_data.get("is_default", False)
+                )
 
-        try:
-            config = AlertConfiguration(
-                user_id=user_id,
-                configuration_name=config_data.get("name", "Default Configuration"),
-                low_risk_threshold=config_data.get("low_risk_threshold", 0.3),
-                medium_risk_threshold=config_data.get("medium_risk_threshold", 0.6),
-                high_risk_threshold=config_data.get("high_risk_threshold", 0.8),
-                critical_risk_threshold=config_data.get("critical_risk_threshold", 0.9),
-                latitude_min=config_data.get("latitude_min"),
-                latitude_max=config_data.get("latitude_max"),
-                longitude_min=config_data.get("longitude_min"),
-                longitude_max=config_data.get("longitude_max"),
-                country_codes=config_data.get("country_codes"),
-                admin_regions=config_data.get("admin_regions"),
-                alert_frequency_hours=config_data.get("alert_frequency_hours", 24),
-                time_horizon_days=config_data.get("time_horizon_days", 7),
-                active_hours_start=config_data.get("active_hours_start"),
-                active_hours_end=config_data.get("active_hours_end"),
-                timezone=config_data.get("timezone", "UTC"),
-                enable_push_notifications=config_data.get("enable_push_notifications", True),
-                enable_email_notifications=config_data.get("enable_email_notifications", True),
-                enable_sms_notifications=config_data.get("enable_sms_notifications", False),
-                enable_webhook_notifications=config_data.get("enable_webhook_notifications", False),
-                email_addresses=config_data.get("email_addresses"),
-                phone_numbers=config_data.get("phone_numbers"),
-                webhook_urls=config_data.get("webhook_urls"),
-                enable_emergency_escalation=config_data.get("enable_emergency_escalation", False),
-                emergency_contact_emails=config_data.get("emergency_contact_emails"),
-                emergency_contact_phones=config_data.get("emergency_contact_phones"),
-                emergency_escalation_threshold=config_data.get("emergency_escalation_threshold", 0.95),
-                is_active=config_data.get("is_active", True),
-                is_default=config_data.get("is_default", False)
-            )
+                db.add(config)
+                await db.flush()  # To get the ID
+                await db.refresh(config)
 
-            db.add(config)
-            db.commit()
-            db.refresh(config)
+                logger.info(f"Created alert configuration {config.id} for user {user_id}")
+                return config
 
-            logger.info(f"Created alert configuration {config.id} for user {user_id}")
-            return config
-
-        except Exception as e:
-            db.rollback()
-            logger.error(f"Failed to create alert configuration: {e}")
-            return None
-
-        finally:
-            db.close()
+            except Exception as e:
+                logger.error(f"Failed to create alert configuration: {e}")
+                raise
 
     async def create_alert_rule(
         self,
@@ -282,45 +277,40 @@ class AlertEngine:
         Returns:
             Created alert rule or None if failed
         """
-        db = next(get_database())
+        async with get_session() as db:
+            try:
+                rule = AlertRule(
+                    configuration_id=configuration_id,
+                    rule_name=rule_data.get("name", "Custom Rule"),
+                    rule_description=rule_data.get("description"),
+                    conditions=rule_data.get("conditions", {}),
+                    rule_type=rule_data.get("type", "threshold"),
+                    rule_version=rule_data.get("version", "1.0"),
+                    evaluation_frequency_minutes=rule_data.get("evaluation_frequency_minutes", 60),
+                    min_data_points_required=rule_data.get("min_data_points_required", 1),
+                    lookback_period_hours=rule_data.get("lookback_period_hours", 24),
+                    cooldown_period_hours=rule_data.get("cooldown_period_hours", 24),
+                    max_alerts_per_day=rule_data.get("max_alerts_per_day", 5),
+                    alert_priority=rule_data.get("priority", "medium"),
+                    alert_category=rule_data.get("category", "outbreak_risk"),
+                    is_active=rule_data.get("is_active", True),
+                    created_by=rule_data.get("created_by")
+                )
 
-        try:
-            rule = AlertRule(
-                configuration_id=configuration_id,
-                rule_name=rule_data.get("name", "Custom Rule"),
-                rule_description=rule_data.get("description"),
-                conditions=rule_data.get("conditions", {}),
-                rule_type=rule_data.get("type", "threshold"),
-                rule_version=rule_data.get("version", "1.0"),
-                evaluation_frequency_minutes=rule_data.get("evaluation_frequency_minutes", 60),
-                min_data_points_required=rule_data.get("min_data_points_required", 1),
-                lookback_period_hours=rule_data.get("lookback_period_hours", 24),
-                cooldown_period_hours=rule_data.get("cooldown_period_hours", 24),
-                max_alerts_per_day=rule_data.get("max_alerts_per_day", 5),
-                alert_priority=rule_data.get("priority", "medium"),
-                alert_category=rule_data.get("category", "outbreak_risk"),
-                is_active=rule_data.get("is_active", True),
-                created_by=rule_data.get("created_by")
-            )
+                db.add(rule)
+                await db.flush()  # To get the ID
+                await db.refresh(rule)
 
-            db.add(rule)
-            db.commit()
-            db.refresh(rule)
+                logger.info(f"Created alert rule {rule.id} for configuration {configuration_id}")
+                return rule
 
-            logger.info(f"Created alert rule {rule.id} for configuration {configuration_id}")
-            return rule
-
-        except Exception as e:
-            db.rollback()
-            logger.error(f"Failed to create alert rule: {e}")
-            return None
-
-        finally:
-            db.close()
+            except Exception as e:
+                logger.error(f"Failed to create alert rule: {e}")
+                raise
 
     async def _get_active_alert_rules(
         self,
-        db: Session,
+        db: AsyncSession,
         request: AlertGenerationRequest
     ) -> list[AlertRule]:
         """Get active alert rules that apply to the request.
@@ -372,7 +362,7 @@ class AlertEngine:
 
     async def _evaluate_alert_rule(
         self,
-        db: Session,
+        db: AsyncSession,
         rule: AlertRule,
         request: AlertGenerationRequest
     ) -> AlertEvaluationResult:
@@ -585,7 +575,7 @@ class AlertEngine:
 
     async def _check_suppression(
         self,
-        db: Session,
+        db: AsyncSession,
         rule: AlertRule,
         request: AlertGenerationRequest
     ) -> tuple[bool, str | None]:
@@ -637,7 +627,7 @@ class AlertEngine:
 
     async def _generate_alert(
         self,
-        db: Session,
+        db: AsyncSession,
         rule: AlertRule,
         request: AlertGenerationRequest,
         result: AlertEvaluationResult
@@ -707,7 +697,7 @@ class AlertEngine:
 
     async def _generate_alert_message(
         self,
-        db: Session,
+        db: AsyncSession,
         rule: AlertRule,
         request: AlertGenerationRequest,
         result: AlertEvaluationResult
