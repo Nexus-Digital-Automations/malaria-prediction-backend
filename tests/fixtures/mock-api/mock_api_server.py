@@ -116,11 +116,15 @@ def add_request_noise(
             and isinstance(value[0], int | float)
         ):
             result[key] = [
-                round(
-                    v + random.uniform(-abs(v * noise_factor), abs(v * noise_factor)), 4
+                (
+                    round(
+                        v
+                        + random.uniform(-abs(v * noise_factor), abs(v * noise_factor)),
+                        4,
+                    )
+                    if isinstance(v, float)
+                    else v
                 )
-                if isinstance(v, float)
-                else v
                 for v in value
             ]
 
@@ -409,9 +413,9 @@ def generate_synthetic_modis_data(
                 "evi": max(0, min(1, base_evi + random.gauss(0, 0.04))),
                 "lst_day": base_lst_day + random.gauss(0, 2),
                 "lst_night": base_lst_night + random.gauss(0, 1.5),
-                "qa_quality_flag": "Good quality"
-                if random.random() > 0.15
-                else "Acceptable quality",
+                "qa_quality_flag": (
+                    "Good quality" if random.random() > 0.15 else "Acceptable quality"
+                ),
             }
         )
 
@@ -597,11 +601,11 @@ def generate_synthetic_map_data(lat: float, lon: float, year: int) -> dict[str, 
                 ),
             },
             "environmental_suitability": round(environmental_suitability, 3),
-            "transmission_intensity": "high"
-            if base_incidence > 0.2
-            else "moderate"
-            if base_incidence > 0.1
-            else "low",
+            "transmission_intensity": (
+                "high"
+                if base_incidence > 0.2
+                else "moderate" if base_incidence > 0.1 else "low"
+            ),
         },
         "metadata": {
             "source": "MAP Mock Global Database",

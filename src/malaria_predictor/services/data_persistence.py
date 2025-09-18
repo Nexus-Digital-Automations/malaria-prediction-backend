@@ -305,21 +305,21 @@ class ERA5DataPersistence:
                             "composite_score": float(
                                 composite_risk.values[t_idx, lat_idx, lon_idx]
                             ),
-                            "temp_risk": float(
-                                temp_risk.values[t_idx, lat_idx, lon_idx]
-                            )
-                            if temp_risk is not None
-                            else 0,
-                            "precip_risk": float(
-                                precip_risk.values[t_idx, lat_idx, lon_idx]
-                            )
-                            if precip_risk is not None
-                            else 0,
-                            "humidity_risk": float(
-                                humidity_risk.values[t_idx, lat_idx, lon_idx]
-                            )
-                            if humidity_risk is not None
-                            else 0,
+                            "temp_risk": (
+                                float(temp_risk.values[t_idx, lat_idx, lon_idx])
+                                if temp_risk is not None
+                                else 0
+                            ),
+                            "precip_risk": (
+                                float(precip_risk.values[t_idx, lat_idx, lon_idx])
+                                if precip_risk is not None
+                                else 0
+                            ),
+                            "humidity_risk": (
+                                float(humidity_risk.values[t_idx, lat_idx, lon_idx])
+                                if humidity_risk is not None
+                                else 0
+                            ),
                             "confidence": 0.8,  # Default confidence for rule-based model
                             "prediction_date": timestamp,
                             "time_horizon_days": 30,

@@ -1045,9 +1045,11 @@ class TestSessionCoverage:
         with patch("malaria_predictor.database.session.get_engine") as mock_get_engine:
             mock_engine = Mock()
             # No sync_engine attribute
-            delattr(mock_engine, "sync_engine") if hasattr(
-                mock_engine, "sync_engine"
-            ) else None
+            (
+                delattr(mock_engine, "sync_engine")
+                if hasattr(mock_engine, "sync_engine")
+                else None
+            )
             mock_get_engine.return_value = mock_engine
 
             status = await get_connection_pool_status()

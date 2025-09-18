@@ -143,9 +143,7 @@ class CICDPerformanceIntegration:
                     ]
                 },
                 "push": {"branches": ["main", "develop"]},
-                "schedule": [
-                    {"cron": "0 6 * * *"}  # Daily at 6 AM
-                ],
+                "schedule": [{"cron": "0 6 * * *"}],  # Daily at 6 AM
             },
             "jobs": {
                 "performance-tests": {

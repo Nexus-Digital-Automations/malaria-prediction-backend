@@ -399,9 +399,9 @@ class MAPClient:
                 total_size_bytes=total_size,
                 data_type=data_type,
                 temporal_coverage={"year": year},
-                spatial_coverage=self._bounds_to_dict(area_bounds)
-                if area_bounds
-                else {},
+                spatial_coverage=(
+                    self._bounds_to_dict(area_bounds) if area_bounds else {}
+                ),
                 download_duration_seconds=download_duration,
                 success=len(downloaded_files) > 0,
                 error_message=None if downloaded_files else "No files downloaded",
@@ -499,9 +499,9 @@ class MAPClient:
                 total_size_bytes=total_size,
                 data_type=data_type,
                 temporal_coverage={"year": year},
-                spatial_coverage=self._bounds_to_dict(area_bounds)
-                if area_bounds
-                else {},
+                spatial_coverage=(
+                    self._bounds_to_dict(area_bounds) if area_bounds else {}
+                ),
                 download_duration_seconds=download_duration,
                 success=len(downloaded_files) > 0,
                 error_message=None if downloaded_files else "Download failed",
@@ -595,9 +595,9 @@ cat("DOWNLOADED:", output_file, "\\n")
                 total_size_bytes=total_size,
                 data_type="vector",
                 temporal_coverage={"start_year": start_year, "end_year": end_year},
-                spatial_coverage=self._bounds_to_dict(area_bounds)
-                if area_bounds
-                else {},
+                spatial_coverage=(
+                    self._bounds_to_dict(area_bounds) if area_bounds else {}
+                ),
                 download_duration_seconds=download_duration,
                 success=len(downloaded_files) > 0,
                 error_message=None,

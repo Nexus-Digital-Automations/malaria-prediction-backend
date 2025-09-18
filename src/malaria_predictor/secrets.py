@@ -279,13 +279,15 @@ class SecretsManager:
             "secrets_directory_readable": self.secrets_dir.exists()
             and os.access(self.secrets_dir, os.R_OK),
             "cached_secrets_count": len(self._secrets_cache),
-            "available_secret_files": [
-                f.name
-                for f in self.secrets_dir.iterdir()
-                if f.is_file() and not f.name.startswith(".")
-            ]
-            if self.secrets_dir.exists()
-            else [],
+            "available_secret_files": (
+                [
+                    f.name
+                    for f in self.secrets_dir.iterdir()
+                    if f.is_file() and not f.name.startswith(".")
+                ]
+                if self.secrets_dir.exists()
+                else []
+            ),
         }
 
 

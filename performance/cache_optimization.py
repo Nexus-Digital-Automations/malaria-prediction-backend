@@ -572,9 +572,9 @@ class CacheOptimizer:
                 "memory_usage": {
                     "used_memory_mb": used_memory_mb,
                     "max_memory_mb": max_memory_mb,
-                    "memory_utilization": used_memory_mb / max_memory_mb
-                    if max_memory_mb > 0
-                    else 0,
+                    "memory_utilization": (
+                        used_memory_mb / max_memory_mb if max_memory_mb > 0 else 0
+                    ),
                     "evicted_keys": redis_info.get("evicted_keys", 0),
                     "expired_keys": redis_info.get("expired_keys", 0),
                 },

@@ -521,15 +521,21 @@ class WorldPopClient:
                 valid_population = population_data[valid_mask]
 
                 stats = {
-                    "total_population": float(np.sum(valid_population))
-                    if len(valid_population) > 0
-                    else 0.0,
-                    "mean_density": float(np.mean(valid_population))
-                    if len(valid_population) > 0
-                    else 0.0,
-                    "max_density": float(np.max(valid_population))
-                    if len(valid_population) > 0
-                    else 0.0,
+                    "total_population": (
+                        float(np.sum(valid_population))
+                        if len(valid_population) > 0
+                        else 0.0
+                    ),
+                    "mean_density": (
+                        float(np.mean(valid_population))
+                        if len(valid_population) > 0
+                        else 0.0
+                    ),
+                    "max_density": (
+                        float(np.max(valid_population))
+                        if len(valid_population) > 0
+                        else 0.0
+                    ),
                     "valid_pixels": int(np.sum(valid_mask)),
                     "total_pixels": int(population_data.size),
                     "coverage_ratio": float(np.sum(valid_mask) / population_data.size),

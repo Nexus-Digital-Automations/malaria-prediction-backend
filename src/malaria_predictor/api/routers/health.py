@@ -176,9 +176,11 @@ async def model_health_check(model_manager: ModelManager = Depends(get_model_man
             "healthy_models": sum(
                 1 for h in model_health.values() if h.get("status") == "healthy"
             ),
-            "last_health_check": model_manager.last_health_check.isoformat()
-            if model_manager.last_health_check
-            else None,
+            "last_health_check": (
+                model_manager.last_health_check.isoformat()
+                if model_manager.last_health_check
+                else None
+            ),
         }
 
     except Exception as e:

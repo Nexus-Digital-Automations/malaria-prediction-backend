@@ -279,13 +279,13 @@ class TestDefaultSecuritySettings:
         # Ensure all sections have at least one setting
         for section_name, section_config in DEFAULT_SECURITY_SETTINGS.items():
             assert isinstance(section_config, dict)
-            assert len(section_config) > 0, (
-                f"Section {section_name} should not be empty"
-            )
+            assert (
+                len(section_config) > 0
+            ), f"Section {section_name} should not be empty"
 
             # Ensure all values are not None (except where None is valid)
             for key, value in section_config.items():
                 if key != "blocked_countries":  # blocked_countries can be empty list
-                    assert value is not None, (
-                        f"Setting {section_name}.{key} should not be None"
-                    )
+                    assert (
+                        value is not None
+                    ), f"Setting {section_name}.{key} should not be None"

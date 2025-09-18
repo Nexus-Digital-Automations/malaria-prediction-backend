@@ -131,9 +131,9 @@ async def load_sample_data():
                         "temperature_2m_max": 25.0,
                         "temperature_2m_min": 18.0,
                         "dewpoint_2m": 15.0,
-                        "total_precipitation": 5.0
-                        if hour == 18
-                        else 0.0,  # Evening rain
+                        "total_precipitation": (
+                            5.0 if hour == 18 else 0.0
+                        ),  # Evening rain
                         "file_reference": "sample_data",
                     }
                 )

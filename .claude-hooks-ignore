@@ -1,0 +1,13 @@
+# Patterns to ignore during linting
+*.tmp
+*.log
+node_modules/
+.git/
+build/
+dist/
+coverage/
+.next/
+.nuxt/
+vendor/
+target/
+*.generated.*

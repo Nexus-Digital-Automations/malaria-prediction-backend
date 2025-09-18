@@ -1044,9 +1044,11 @@ class MODISClient:
             "valid_files": valid_files,
             "validation_rate": valid_files / total_files if total_files > 0 else 0,
             "total_size_mb": round(total_size / 1024 / 1024, 2),
-            "average_file_size_mb": round(total_size / total_files / 1024 / 1024, 2)
-            if total_files > 0
-            else 0,
+            "average_file_size_mb": (
+                round(total_size / total_files / 1024 / 1024, 2)
+                if total_files > 0
+                else 0
+            ),
         }
 
     def _create_failed_result(self, error_message: str) -> MODISDownloadResult:

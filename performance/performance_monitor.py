@@ -572,9 +572,9 @@ class PerformanceMonitor:
             "total_requests": total_requests,
             "successful_requests": successful_requests,
             "failed_requests": failed_requests,
-            "success_rate": successful_requests / total_requests
-            if total_requests > 0
-            else 0,
+            "success_rate": (
+                successful_requests / total_requests if total_requests > 0 else 0
+            ),
             "requests_per_second": total_requests / duration if duration > 0 else 0,
         }
 

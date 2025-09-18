@@ -26,9 +26,9 @@ mock_audit_log_class = MagicMock()
 sys.modules["malaria_predictor.database.security_models"] = MagicMock()
 sys.modules["malaria_predictor.database.security_models"].User = mock_user_class
 sys.modules["malaria_predictor.database.security_models"].APIKey = mock_api_key_class
-sys.modules[
-    "malaria_predictor.database.security_models"
-].AuditLog = mock_audit_log_class
+sys.modules["malaria_predictor.database.security_models"].AuditLog = (
+    mock_audit_log_class
+)
 
 
 class TestAuthenticationIsolatedFixes:

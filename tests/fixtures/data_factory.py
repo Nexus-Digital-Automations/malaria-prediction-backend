@@ -230,16 +230,18 @@ class EnvironmentalDataFactory:
             modis_results.append(
                 {
                     "date": date.strftime("%Y-%m-%d"),
-                    "pixel_reliability": "Good"
-                    if random.random() > 0.1
-                    else "Marginal",
+                    "pixel_reliability": (
+                        "Good" if random.random() > 0.1 else "Marginal"
+                    ),
                     "ndvi": round(ndvi, 4),
                     "evi": round(evi, 4),
                     "lst_day": round(lst_day, 1),
                     "lst_night": round(lst_night, 1),
-                    "qa_quality_flag": "Good quality"
-                    if random.random() > 0.15
-                    else "Acceptable quality",
+                    "qa_quality_flag": (
+                        "Good quality"
+                        if random.random() > 0.15
+                        else "Acceptable quality"
+                    ),
                 }
             )
 
@@ -360,11 +362,11 @@ class EnvironmentalDataFactory:
                 "malaria_incidence": round(base_incidence, 4),
                 "parasite_rate": round(base_parasite_rate, 4),
                 "environmental_suitability": round(environmental_suitability, 3),
-                "transmission_intensity": "high"
-                if base_incidence > 0.2
-                else "moderate"
-                if base_incidence > 0.1
-                else "low",
+                "transmission_intensity": (
+                    "high"
+                    if base_incidence > 0.2
+                    else "moderate" if base_incidence > 0.1 else "low"
+                ),
             },
             "metadata": {
                 "source": "MAP Global Database",

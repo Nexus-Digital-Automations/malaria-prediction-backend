@@ -216,19 +216,21 @@ class KubernetesFailoverManager:
                 "inactive_slot": inactive_version,
                 "blue_deployment": {
                     "exists": blue_deployment is not None,
-                    "ready_replicas": blue_deployment.status.ready_replicas
-                    if blue_deployment
-                    else 0,
+                    "ready_replicas": (
+                        blue_deployment.status.ready_replicas if blue_deployment else 0
+                    ),
                     "replicas": blue_deployment.spec.replicas if blue_deployment else 0,
                 },
                 "green_deployment": {
                     "exists": green_deployment is not None,
-                    "ready_replicas": green_deployment.status.ready_replicas
-                    if green_deployment
-                    else 0,
-                    "replicas": green_deployment.spec.replicas
-                    if green_deployment
-                    else 0,
+                    "ready_replicas": (
+                        green_deployment.status.ready_replicas
+                        if green_deployment
+                        else 0
+                    ),
+                    "replicas": (
+                        green_deployment.spec.replicas if green_deployment else 0
+                    ),
                 },
             }
 

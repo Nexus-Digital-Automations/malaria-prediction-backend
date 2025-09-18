@@ -455,9 +455,9 @@ async def predict_time_series(
             "mean_risk": sum(risk_scores) / len(risk_scores) if risk_scores else 0,
             "min_risk": min(risk_scores) if risk_scores else 0,
             "max_risk": max(risk_scores) if risk_scores else 0,
-            "mean_uncertainty": sum(uncertainties) / len(uncertainties)
-            if uncertainties
-            else None,
+            "mean_uncertainty": (
+                sum(uncertainties) / len(uncertainties) if uncertainties else None
+            ),
             "high_risk_days": sum(
                 1
                 for point in time_series

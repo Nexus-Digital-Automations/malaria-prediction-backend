@@ -96,12 +96,16 @@ class DRTestMetrics:
         return {
             "test_info": {
                 "name": self.metrics.get("test_name"),
-                "start_time": self.metrics["test_start_time"].isoformat()
-                if self.metrics["test_start_time"]
-                else None,
-                "end_time": self.metrics["test_end_time"].isoformat()
-                if self.metrics["test_end_time"]
-                else None,
+                "start_time": (
+                    self.metrics["test_start_time"].isoformat()
+                    if self.metrics["test_start_time"]
+                    else None
+                ),
+                "end_time": (
+                    self.metrics["test_end_time"].isoformat()
+                    if self.metrics["test_end_time"]
+                    else None
+                ),
                 "total_duration_seconds": self.metrics.get(
                     "total_test_duration_seconds"
                 ),

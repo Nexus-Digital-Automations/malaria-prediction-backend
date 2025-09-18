@@ -1131,7 +1131,9 @@ class TestEnvironmentalDataRepository:
         mock_session.execute.return_value = mock_result
 
         with patch("malaria_predictor.database.repositories.select") as mock_select:
-            mock_select.return_value.where.return_value.order_by.return_value.limit.return_value = Mock()
+            mock_select.return_value.where.return_value.order_by.return_value.limit.return_value = (
+                Mock()
+            )
 
             result = await repository.get_by_location(
                 40.7128, -74.0060, data_type="modis"
@@ -1155,7 +1157,9 @@ class TestEnvironmentalDataRepository:
         mock_session.execute.return_value = mock_result
 
         with patch("malaria_predictor.database.repositories.select") as mock_select:
-            mock_select.return_value.where.return_value.order_by.return_value.limit.return_value = Mock()
+            mock_select.return_value.where.return_value.order_by.return_value.limit.return_value = (
+                Mock()
+            )
 
             result = await repository.get_by_location(
                 40.7128, -74.0060, data_type="worldpop"
@@ -1217,7 +1221,9 @@ class TestMalariaIncidenceRepository:
         mock_session.execute.return_value = mock_result
 
         with patch("malaria_predictor.database.repositories.select") as mock_select:
-            mock_select.return_value.where.return_value.order_by.return_value.limit.return_value = Mock()
+            mock_select.return_value.where.return_value.order_by.return_value.limit.return_value = (
+                Mock()
+            )
 
             result = await repository.get_by_location(40.7128, -74.0060)
 
@@ -1285,7 +1291,9 @@ class TestPredictionRepository:
         mock_session.execute.return_value = mock_result
 
         with patch("malaria_predictor.database.repositories.select") as mock_select:
-            mock_select.return_value.where.return_value.order_by.return_value.limit.return_value = Mock()
+            mock_select.return_value.where.return_value.order_by.return_value.limit.return_value = (
+                Mock()
+            )
 
             result = await repository.get_by_location(40.7128, -74.0060)
 

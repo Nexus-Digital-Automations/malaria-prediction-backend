@@ -398,15 +398,19 @@ class ConfigValidator:
         """Validate environment-specific settings."""
         results = {
             "environment_name": {
-                "status": "pass"
-                if self.settings.environment
-                in ["development", "staging", "production", "testing"]
-                else "fail",
+                "status": (
+                    "pass"
+                    if self.settings.environment
+                    in ["development", "staging", "production", "testing"]
+                    else "fail"
+                ),
                 "value": self.settings.environment,
-                "message": "Valid environment name"
-                if self.settings.environment
-                in ["development", "staging", "production", "testing"]
-                else "Invalid environment name",
+                "message": (
+                    "Valid environment name"
+                    if self.settings.environment
+                    in ["development", "staging", "production", "testing"]
+                    else "Invalid environment name"
+                ),
             }
         }
 
@@ -415,19 +419,23 @@ class ConfigValidator:
             results["debug_disabled"] = {
                 "status": "pass" if not self.settings.debug else "fail",
                 "value": self.settings.debug,
-                "message": "Debug disabled in production"
-                if not self.settings.debug
-                else "Debug must be disabled in production",
+                "message": (
+                    "Debug disabled in production"
+                    if not self.settings.debug
+                    else "Debug must be disabled in production"
+                ),
             }
 
             results["cors_restricted"] = {
-                "status": "pass"
-                if "*" not in self.settings.security.cors_origins
-                else "fail",
+                "status": (
+                    "pass" if "*" not in self.settings.security.cors_origins else "fail"
+                ),
                 "value": self.settings.security.cors_origins,
-                "message": "CORS properly restricted"
-                if "*" not in self.settings.security.cors_origins
-                else "Wildcard CORS not allowed in production",
+                "message": (
+                    "CORS properly restricted"
+                    if "*" not in self.settings.security.cors_origins
+                    else "Wildcard CORS not allowed in production"
+                ),
             }
 
         return results
@@ -490,9 +498,11 @@ class ConfigValidator:
             results["model_path"] = {
                 "status": "pass" if path_exists and path_is_dir else "warning",
                 "value": str(model_path),
-                "message": "Model path exists and is directory"
-                if (path_exists and path_is_dir)
-                else "Model path missing or not directory",
+                "message": (
+                    "Model path exists and is directory"
+                    if (path_exists and path_is_dir)
+                    else "Model path missing or not directory"
+                ),
             }
 
         # Data directory - check both nested and direct attribute access for test compatibility
@@ -546,9 +556,11 @@ class ConfigValidator:
             results["data_path"] = {
                 "status": "pass" if path_exists and path_is_dir else "warning",
                 "value": str(data_path),
-                "message": "Data path exists and is directory"
-                if (path_exists and path_is_dir)
-                else "Data path missing or not directory",
+                "message": (
+                    "Data path exists and is directory"
+                    if (path_exists and path_is_dir)
+                    else "Data path missing or not directory"
+                ),
             }
 
         # Keep the original names for backward compatibility
@@ -599,9 +611,11 @@ class ConfigValidator:
                     "scheme": db_url.scheme,
                     "hostname": db_url.hostname,
                     "database": db_url.path.lstrip("/") if db_url.path else None,
-                    "message": "Valid database URL"
-                    if db_url.hostname and db_url.path
-                    else "Invalid database URL",
+                    "message": (
+                        "Valid database URL"
+                        if db_url.hostname and db_url.path
+                        else "Invalid database URL"
+                    ),
                 }
         except Exception as e:
             results["database_url"] = {
@@ -627,9 +641,11 @@ class ConfigValidator:
                     "scheme": parsed_redis_url.scheme,
                     "hostname": parsed_redis_url.hostname,
                     "port": parsed_redis_url.port,
-                    "message": "Valid Redis URL"
-                    if parsed_redis_url.hostname
-                    else "Invalid Redis URL",
+                    "message": (
+                        "Valid Redis URL"
+                        if parsed_redis_url.hostname
+                        else "Invalid Redis URL"
+                    ),
                 }
         except Exception as e:
             results["redis_url"] = {
@@ -648,9 +664,11 @@ class ConfigValidator:
         results["database_pool_size"] = {
             "status": "pass" if 1 <= pool_size <= 100 else "warning",
             "value": pool_size,
-            "message": "Database pool size within recommended range"
-            if 1 <= pool_size <= 100
-            else "Database pool size outside recommended range (1-100)",
+            "message": (
+                "Database pool size within recommended range"
+                if 1 <= pool_size <= 100
+                else "Database pool size outside recommended range (1-100)"
+            ),
         }
 
         # Redis connection constraints
@@ -658,9 +676,11 @@ class ConfigValidator:
         results["redis_connections"] = {
             "status": "pass" if 1 <= redis_connections <= 1000 else "warning",
             "value": redis_connections,
-            "message": "Redis connections within recommended range"
-            if 1 <= redis_connections <= 1000
-            else "Redis connections outside recommended range (1-1000)",
+            "message": (
+                "Redis connections within recommended range"
+                if 1 <= redis_connections <= 1000
+                else "Redis connections outside recommended range (1-1000)"
+            ),
         }
 
         # ML model memory constraints
@@ -668,9 +688,11 @@ class ConfigValidator:
         results["model_memory"] = {
             "status": "pass" if 512 <= model_memory <= 32768 else "warning",
             "value": model_memory,
-            "message": "Model memory within recommended range"
-            if 512 <= model_memory <= 32768
-            else "Model memory outside recommended range (512MB-32GB)",
+            "message": (
+                "Model memory within recommended range"
+                if 512 <= model_memory <= 32768
+                else "Model memory outside recommended range (512MB-32GB)"
+            ),
         }
 
         # Additional constraints expected by tests
@@ -681,9 +703,11 @@ class ConfigValidator:
         results["max_request_size"] = {
             "status": "pass" if max_request_size > 0 else "fail",
             "value": max_request_size,
-            "message": "Max request size is valid"
-            if max_request_size > 0
-            else "Max request size must be positive",
+            "message": (
+                "Max request size is valid"
+                if max_request_size > 0
+                else "Max request size must be positive"
+            ),
         }
 
         # Timeout - check if attribute exists, use default if not
@@ -691,9 +715,9 @@ class ConfigValidator:
         results["timeout"] = {
             "status": "pass" if timeout > 0 else "fail",
             "value": timeout,
-            "message": "Timeout is valid"
-            if timeout > 0
-            else "Timeout must be positive",
+            "message": (
+                "Timeout is valid" if timeout > 0 else "Timeout must be positive"
+            ),
         }
 
         # Workers count
@@ -701,9 +725,11 @@ class ConfigValidator:
         results["workers"] = {
             "status": "pass" if workers > 0 else "fail",
             "value": workers,
-            "message": "Worker count is valid"
-            if workers > 0
-            else "Worker count must be positive",
+            "message": (
+                "Worker count is valid"
+                if workers > 0
+                else "Worker count must be positive"
+            ),
         }
 
         return results
@@ -731,9 +757,11 @@ class ConfigValidator:
             results["secret_key"] = {
                 "status": "pass" if len(secret_key) >= 32 else "fail",
                 "length": len(secret_key),
-                "message": "Secret key has sufficient length"
-                if len(secret_key) >= 32
-                else "Secret key too short (minimum 32 characters)",
+                "message": (
+                    "Secret key has sufficient length"
+                    if len(secret_key) >= 32
+                    else "Secret key too short (minimum 32 characters)"
+                ),
             }
 
         # Also include the original key name for backward compatibility
@@ -747,9 +775,11 @@ class ConfigValidator:
             results["jwt_expiration"] = {
                 "status": "pass" if 1 <= jwt_exp <= 168 else "warning",
                 "value": jwt_exp,
-                "message": "JWT expiration within recommended range"
-                if 1 <= jwt_exp <= 168
-                else "JWT expiration outside recommended range (1-168 hours)",
+                "message": (
+                    "JWT expiration within recommended range"
+                    if 1 <= jwt_exp <= 168
+                    else "JWT expiration outside recommended range (1-168 hours)"
+                ),
             }
 
         # Rate limiting - handle missing security section
@@ -760,9 +790,11 @@ class ConfigValidator:
             results["rate_limiting"] = {
                 "status": "pass" if rate_limit > 0 else "fail",
                 "value": rate_limit,
-                "message": "Rate limiting enabled"
-                if rate_limit > 0
-                else "Rate limiting disabled",
+                "message": (
+                    "Rate limiting enabled"
+                    if rate_limit > 0
+                    else "Rate limiting disabled"
+                ),
             }
 
         return results

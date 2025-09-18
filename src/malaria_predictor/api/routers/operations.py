@@ -247,9 +247,9 @@ async def get_system_resources(
             "cpu": {
                 "usage_percent": cpu_percent,
                 "count": cpu_count,
-                "load_average": psutil.getloadavg()
-                if hasattr(psutil, "getloadavg")
-                else None,
+                "load_average": (
+                    psutil.getloadavg() if hasattr(psutil, "getloadavg") else None
+                ),
             },
             "memory": {
                 "total_gb": round(memory.total / (1024**3), 2),
@@ -321,9 +321,11 @@ async def get_cache_status(
             "performance_metrics": cache_stats.get("performance_metrics", {}),
             "memory_usage": cache_stats.get("memory_usage", {}),
             "connection_status": cache_stats.get("connection_status", "unknown"),
-            "status": "healthy"
-            if cache_stats.get("connection_status") == "connected"
-            else "unhealthy",
+            "status": (
+                "healthy"
+                if cache_stats.get("connection_status") == "connected"
+                else "unhealthy"
+            ),
         }
 
     except Exception as e:

@@ -692,9 +692,9 @@ class DisasterRecoveryOrchestrator:
             return {
                 "redis_version": info.get("redis_version"),
                 "used_memory": info.get("used_memory_human"),
-                "keys_count": info.get("db0", {}).get("keys", 0)
-                if "db0" in info
-                else 0,
+                "keys_count": (
+                    info.get("db0", {}).get("keys", 0) if "db0" in info else 0
+                ),
                 "uptime_days": info.get("uptime_in_days"),
             }
         except Exception as e:

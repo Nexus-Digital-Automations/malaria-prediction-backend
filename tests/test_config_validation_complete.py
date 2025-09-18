@@ -274,9 +274,9 @@ class TestConfigValidator:
         with (
             patch(
                 "pathlib.Path.exists",
-                side_effect=lambda: False
-                if "data" in str(validator.settings.data_path)
-                else True,
+                side_effect=lambda: (
+                    False if "data" in str(validator.settings.data_path) else True
+                ),
             ),
             patch("pathlib.Path.is_dir", return_value=True),
         ):
