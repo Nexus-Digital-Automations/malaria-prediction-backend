@@ -10,10 +10,9 @@ Provides comprehensive alert history management including:
 
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
-from sqlalchemy import and_, desc, func, or_
+from sqlalchemy import desc, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import settings
@@ -21,7 +20,6 @@ from ..database.models import (
     Alert,
     AlertConfiguration,
     AlertPerformanceMetrics,
-    AlertRule,
     NotificationDelivery,
 )
 from ..database.session import get_session
@@ -33,12 +31,12 @@ class AlertHistoryQuery(BaseModel):
     """Query parameters for alert history retrieval."""
 
     user_id: str
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    alert_levels: Optional[List[str]] = None
-    alert_types: Optional[List[str]] = None
-    status_filters: Optional[List[str]] = None
-    location_filters: Optional[List[str]] = None
+    start_date: datetime | None = None
+    end_date: datetime | None = None
+    alert_levels: list[str] | None = None
+    alert_types: list[str] | None = None
+    status_filters: list[str] | None = None
+    location_filters: list[str] | None = None
     limit: int = Field(100, ge=1, le=10000)
     offset: int = Field(0, ge=0)
     sort_by: str = Field("created_at", description="Field to sort by")
@@ -49,15 +47,15 @@ class AlertHistorySummary(BaseModel):
     """Summary statistics for alert history."""
 
     total_alerts: int
-    alerts_by_level: Dict[str, int]
-    alerts_by_type: Dict[str, int]
-    alerts_by_status: Dict[str, int]
-    avg_response_time_hours: Optional[float]
+    alerts_by_level: dict[str, int]
+    alerts_by_type: dict[str, int]
+    alerts_by_status: dict[str, int]
+    avg_response_time_hours: float | None
     resolution_rate_percentage: float
     false_positive_rate_percentage: float
     delivery_success_rate_percentage: float
-    most_active_locations: List[Dict[str, any]]
-    trend_analysis: Dict[str, any]
+    most_active_locations: list[dict[str, any]]
+    trend_analysis: dict[str, any]
 
 
 class AlertArchivePolicy(BaseModel):
@@ -77,7 +75,7 @@ class AlertTrendData(BaseModel):
     period: str
     date: datetime
     alert_count: int
-    avg_risk_score: Optional[float]
+    avg_risk_score: float | None
     delivery_rate: float
     response_rate: float
     escalation_count: int
@@ -119,7 +117,7 @@ class AlertHistoryManager:
     async def get_alert_history(
         self,
         query: AlertHistoryQuery
-    ) -> Dict[str, any]:
+    ) -> dict[str, any]:
         """Get filtered alert history for a user.
 
         Args:
@@ -276,7 +274,7 @@ class AlertHistoryManager:
 
                 # Resolution and false positive rates
                 resolved_count = base_query.filter(Alert.resolved_at.isnot(None)).count()
-                false_positive_count = base_query.filter(Alert.false_positive == True).count()
+                false_positive_count = base_query.filter(Alert.false_positive).count()
 
                 resolution_rate = (resolved_count / max(total_alerts, 1)) * 100
                 false_positive_rate = (false_positive_count / max(total_alerts, 1)) * 100
@@ -284,10 +282,10 @@ class AlertHistoryManager:
                 # Delivery success rate
                 delivered_count = base_query.filter(
                     or_(
-                        Alert.push_notification_delivered == True,
-                        Alert.email_notification_delivered == True,
-                        Alert.sms_notification_delivered == True,
-                        Alert.webhook_notification_delivered == True
+                        Alert.push_notification_delivered,
+                        Alert.email_notification_delivered,
+                        Alert.sms_notification_delivered,
+                        Alert.webhook_notification_delivered
                     )
                 ).count()
 
@@ -342,7 +340,7 @@ class AlertHistoryManager:
         user_id: str,
         period: str = "daily",
         days: int = 30
-    ) -> List[AlertTrendData]:
+    ) -> list[AlertTrendData]:
         """Get alert trend data over time.
 
         Args:
@@ -372,10 +370,10 @@ class AlertHistoryManager:
                     func.avg(Alert.risk_score).label("avg_risk_score"),
                     func.sum(
                         func.case(
-                            (Alert.push_notification_delivered == True, 1),
-                            (Alert.email_notification_delivered == True, 1),
-                            (Alert.sms_notification_delivered == True, 1),
-                            (Alert.webhook_notification_delivered == True, 1),
+                            (Alert.push_notification_delivered, 1),
+                            (Alert.email_notification_delivered, 1),
+                            (Alert.sms_notification_delivered, 1),
+                            (Alert.webhook_notification_delivered, 1),
                             else_=0
                         )
                     ).label("delivered_count"),
@@ -421,7 +419,7 @@ class AlertHistoryManager:
     async def archive_old_alerts(
         self,
         dry_run: bool = False
-    ) -> Dict[str, any]:
+    ) -> dict[str, any]:
         """Archive old alerts based on retention policy.
 
         Args:
@@ -491,7 +489,7 @@ class AlertHistoryManager:
     async def cleanup_old_data(
         self,
         dry_run: bool = False
-    ) -> Dict[str, any]:
+    ) -> dict[str, any]:
         """Clean up old alert data based on retention policy.
 
         Args:
@@ -578,9 +576,9 @@ class AlertHistoryManager:
         self,
         user_id: str,
         export_format: str = "json",
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None
-    ) -> Dict[str, any]:
+        start_date: datetime | None = None,
+        end_date: datetime | None = None
+    ) -> dict[str, any]:
         """Export alert history in various formats.
 
         Args:
@@ -637,7 +635,7 @@ class AlertHistoryManager:
             logger.error(f"Alert history export failed: {e}")
             raise
 
-    def _serialize_alert(self, alert: Alert) -> Dict[str, any]:
+    def _serialize_alert(self, alert: Alert) -> dict[str, any]:
         """Serialize alert object to dictionary.
 
         Args:
@@ -687,7 +685,7 @@ class AlertHistoryManager:
         db: AsyncSession,
         user_id: str,
         days: int
-    ) -> Dict[str, any]:
+    ) -> dict[str, any]:
         """Calculate trend analysis for alerts.
 
         Args:
@@ -753,7 +751,7 @@ class AlertHistoryManager:
                 (current_avg * (query_count - 1) + processing_time) / query_count
             )
 
-    def get_stats(self) -> Dict[str, any]:
+    def get_stats(self) -> dict[str, any]:
         """Get alert history manager statistics.
 
         Returns:

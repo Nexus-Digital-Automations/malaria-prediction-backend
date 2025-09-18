@@ -268,7 +268,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T19:41:51.908Z",
       "title": "Implement Interactive Risk Maps with Flutter Map",
       "description": "Create interactive risk maps with malaria prediction overlays using flutter_map. Includes map integration, choropleth overlays, geographic controls, location services, risk data visualization, custom markers, and offline support.",
@@ -285,7 +285,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T20:39:48.288Z",
+      "updated_at": "2025-09-18T20:39:48.288Z"
     },
     {
       "status": "completed",
@@ -350,7 +352,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T19:41:52.710Z",
       "title": "Implement Healthcare Professional Tools System",
       "description": "Implement comprehensive healthcare professional tools including risk assessment, patient management, treatment protocols, resource planning, surveillance reporting, professional dashboard, and DHIS2 integration",
@@ -367,7 +369,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T19:50:04.528Z",
+      "updated_at": "2025-09-18T19:50:04.528Z"
     },
     {
       "status": "in_progress",

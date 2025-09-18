@@ -12,20 +12,15 @@ Provides comprehensive analytics for alert system performance including:
 import asyncio
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field
-from sqlalchemy import and_, desc, func, or_
-from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
+from sqlalchemy import func, or_
 
 from ..config import settings
 from ..database.models import (
     Alert,
     AlertConfiguration,
-    AlertPerformanceMetrics,
-    AlertRule,
     NotificationDelivery,
-    UserDeviceToken,
 )
 from ..database.session import get_session
 
@@ -44,7 +39,7 @@ class AlertKPIs(BaseModel):
     avg_response_rate_7d: float
     false_positive_rate_7d: float
     escalation_rate_24h: float
-    avg_resolution_time_hours: Optional[float]
+    avg_resolution_time_hours: float | None
     active_configurations: int
     active_users_24h: int
     critical_alerts_pending: int
@@ -57,9 +52,9 @@ class ChannelPerformanceMetrics(BaseModel):
     messages_sent_24h: int
     messages_delivered_24h: int
     delivery_rate_percentage: float
-    avg_delivery_time_seconds: Optional[float]
+    avg_delivery_time_seconds: float | None
     failure_rate_percentage: float
-    error_types: Dict[str, int]
+    error_types: dict[str, int]
 
 
 class UserEngagementMetrics(BaseModel):
@@ -69,11 +64,11 @@ class UserEngagementMetrics(BaseModel):
     active_users_24h: int
     active_users_7d: int
     avg_alerts_per_user_24h: float
-    avg_response_time_minutes: Optional[float]
+    avg_response_time_minutes: float | None
     acknowledgment_rate_percentage: float
     resolution_rate_percentage: float
     feedback_submission_rate: float
-    avg_user_rating: Optional[float]
+    avg_user_rating: float | None
 
 
 class AlertEffectivenessMetrics(BaseModel):
@@ -87,7 +82,7 @@ class AlertEffectivenessMetrics(BaseModel):
     false_negative_rate: float
     true_positive_alerts_7d: int
     false_positive_alerts_7d: int
-    user_satisfaction_score: Optional[float]
+    user_satisfaction_score: float | None
 
 
 class SystemHealthMetrics(BaseModel):
@@ -109,10 +104,10 @@ class AlertTrendAnalysis(BaseModel):
     period: str
     trend_direction: str  # "increasing", "decreasing", "stable"
     growth_rate_percentage: float
-    seasonal_patterns: Dict[str, float]
-    peak_hours: List[int]
-    peak_days: List[str]
-    forecast_next_7d: List[Dict[str, any]]
+    seasonal_patterns: dict[str, float]
+    peak_hours: list[int]
+    peak_days: list[str]
+    forecast_next_7d: list[dict[str, any]]
 
 
 class AlertAnalyticsEngine:
@@ -213,20 +208,20 @@ class AlertAnalyticsEngine:
                 delivered_24h = db.query(Alert).filter(
                     Alert.created_at >= day_ago,
                     or_(
-                        Alert.push_notification_delivered == True,
-                        Alert.email_notification_delivered == True,
-                        Alert.sms_notification_delivered == True,
-                        Alert.webhook_notification_delivered == True
+                        Alert.push_notification_delivered,
+                        Alert.email_notification_delivered,
+                        Alert.sms_notification_delivered,
+                        Alert.webhook_notification_delivered
                     )
                 ).count()
 
                 delivered_7d = db.query(Alert).filter(
                     Alert.created_at >= week_ago,
                     or_(
-                        Alert.push_notification_delivered == True,
-                        Alert.email_notification_delivered == True,
-                        Alert.sms_notification_delivered == True,
-                        Alert.webhook_notification_delivered == True
+                        Alert.push_notification_delivered,
+                        Alert.email_notification_delivered,
+                        Alert.sms_notification_delivered,
+                        Alert.webhook_notification_delivered
                     )
                 ).count()
 
@@ -250,7 +245,7 @@ class AlertAnalyticsEngine:
                 # False positive rate
                 false_positives_7d = db.query(Alert).filter(
                     Alert.created_at >= week_ago,
-                    Alert.false_positive == True
+                    Alert.false_positive
                 ).count()
 
                 false_positive_rate_7d = (false_positives_7d / max(total_7d, 1)) * 100
@@ -276,7 +271,7 @@ class AlertAnalyticsEngine:
 
                 # Active configurations and users
                 active_configurations = db.query(AlertConfiguration).filter(
-                    AlertConfiguration.is_active == True
+                    AlertConfiguration.is_active
                 ).count()
 
                 active_users_24h = db.query(Alert.configuration_id).join(AlertConfiguration).filter(
@@ -319,7 +314,7 @@ class AlertAnalyticsEngine:
             logger.error(f"Failed to calculate alert KPIs: {e}")
             raise
 
-    async def get_channel_performance(self) -> List[ChannelPerformanceMetrics]:
+    async def get_channel_performance(self) -> list[ChannelPerformanceMetrics]:
         """Get performance metrics for all notification channels.
 
         Returns:
@@ -493,8 +488,8 @@ class AlertAnalyticsEngine:
                     )
 
                 # Calculate confusion matrix components
-                true_positives = sum(1 for alert in alerts_with_feedback if alert.false_positive == False)
-                false_positives = sum(1 for alert in alerts_with_feedback if alert.false_positive == True)
+                true_positives = sum(1 for alert in alerts_with_feedback if not alert.false_positive)
+                false_positives = sum(1 for alert in alerts_with_feedback if alert.false_positive)
 
                 # Note: False negatives and true negatives require ground truth data
                 # For now, we'll estimate based on available feedback
@@ -547,9 +542,9 @@ class AlertAnalyticsEngine:
         try:
             # Get alert engine stats
             from .alert_engine import alert_engine
-            from .websocket_manager import websocket_manager
-            from .notification_service import notification_service
             from .firebase_service import firebase_service
+            from .notification_service import notification_service
+            from .websocket_manager import websocket_manager
 
             alert_stats = alert_engine.get_stats()
             websocket_stats = websocket_manager.get_stats()
@@ -681,7 +676,7 @@ class AlertAnalyticsEngine:
             logger.error(f"Failed to get trend analysis: {e}")
             raise
 
-    async def detect_anomalies(self) -> List[Dict[str, any]]:
+    async def detect_anomalies(self) -> list[dict[str, any]]:
         """Detect anomalies in alert system performance.
 
         Returns:
@@ -851,7 +846,7 @@ class AlertAnalyticsEngine:
                 (current_avg * (calculation_count - 1) + calculation_time) / calculation_count
             )
 
-    def get_stats(self) -> Dict[str, any]:
+    def get_stats(self) -> dict[str, any]:
         """Get analytics engine statistics.
 
         Returns:
