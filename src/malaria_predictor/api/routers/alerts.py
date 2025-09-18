@@ -1021,7 +1021,10 @@ async def get_alert_history_detailed(
 ):
     """Get detailed alert history with advanced filtering."""
     try:
-        from ...alerts.alert_history_manager import alert_history_manager, AlertHistoryQuery
+        from ...alerts.alert_history_manager import (
+            AlertHistoryQuery,
+            alert_history_manager,
+        )
 
         # Parse list parameters
         alert_levels_list = alert_levels.split(",") if alert_levels else None

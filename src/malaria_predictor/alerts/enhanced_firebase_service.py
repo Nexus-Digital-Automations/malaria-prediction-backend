@@ -13,6 +13,7 @@ import asyncio
 import json
 import logging
 from datetime import datetime, timedelta
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -57,9 +58,9 @@ class NotificationTemplate(BaseModel):
     localization: dict[str, dict[str, str]] = {}  # Language translations
 
     # Platform customizations
-    android_settings: dict[str, any] = {}
-    ios_settings: dict[str, any] = {}
-    web_settings: dict[str, any] = {}
+    android_settings: dict[str, Any] = {}
+    ios_settings: dict[str, Any] = {}
+    web_settings: dict[str, Any] = {}
 
     # Engagement optimization
     send_time_optimization: bool = False  # Optimize send times per user
@@ -95,7 +96,7 @@ class NotificationCampaign(BaseModel):
 
     # A/B Testing
     ab_test_enabled: bool = False
-    ab_test_variants: list[dict[str, any]] = []
+    ab_test_variants: list[dict[str, Any]] = []
     ab_test_traffic_split: dict[str, float] = {}  # variant -> percentage
 
     # Campaign settings
@@ -125,10 +126,10 @@ class UserSegment(BaseModel):
     description: str
 
     # Segmentation criteria
-    location_filters: dict[str, any] = {}  # Country, region, coordinates
+    location_filters: dict[str, Any] = {}  # Country, region, coordinates
     device_filters: list[str] = []  # Device types
-    activity_filters: dict[str, any] = {}  # Last active, engagement level
-    alert_history_filters: dict[str, any] = {}  # Alert interaction history
+    activity_filters: dict[str, Any] = {}  # Last active, engagement level
+    alert_history_filters: dict[str, Any] = {}  # Alert interaction history
 
     # Dynamic segments
     is_dynamic: bool = True  # Automatically update membership
@@ -304,7 +305,7 @@ class EnhancedFirebaseService:
         self,
         template_id: str,
         variables: dict[str, str],
-        user_preferences: dict[str, any] | None = None
+        user_preferences: dict[str, Any] | None = None
     ) -> PushNotificationPayload | None:
         """Render a notification from template with dynamic data.
 
@@ -493,7 +494,7 @@ class EnhancedFirebaseService:
             logger.error(f"Failed to create user segment: {e}")
             return False
 
-    async def get_campaign_analytics(self, campaign_id: str) -> dict[str, any]:
+    async def get_campaign_analytics(self, campaign_id: str) -> dict[str, Any]:
         """Get comprehensive analytics for a campaign.
 
         Args:
@@ -609,7 +610,7 @@ class EnhancedFirebaseService:
             logger.error(f"Failed to optimize send times: {e}")
             return None
 
-    def _load_firebase_credentials(self) -> dict[str, any] | None:
+    def _load_firebase_credentials(self) -> dict[str, Any] | None:
         """Load Firebase credentials from settings."""
         try:
             if hasattr(self.settings, "FIREBASE_CREDENTIALS_PATH"):
@@ -740,7 +741,7 @@ class EnhancedFirebaseService:
     def _apply_user_preferences(
         self,
         payload: PushNotificationPayload,
-        preferences: dict[str, any]
+        preferences: dict[str, Any]
     ) -> PushNotificationPayload:
         """Apply user-specific preferences to notification."""
         # Apply sound preferences
@@ -798,7 +799,7 @@ class EnhancedFirebaseService:
             logger.error(f"Failed to get user device tokens: {e}")
             return []
 
-    async def _get_user_preferences(self, user_id: str) -> dict[str, any]:
+    async def _get_user_preferences(self, user_id: str) -> dict[str, Any]:
         """Get user notification preferences."""
         # This would typically load from user preferences table
         # For now, return default preferences
@@ -1081,7 +1082,7 @@ class EnhancedFirebaseService:
                 (current_avg * (render_count - 1) + render_time) / render_count
             )
 
-    def get_stats(self) -> dict[str, any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get enhanced Firebase service statistics."""
         return {
             **self.stats,

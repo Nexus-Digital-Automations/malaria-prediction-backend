@@ -7,9 +7,7 @@ to ensure all components are working correctly.
 """
 
 import asyncio
-import json
 import logging
-from datetime import datetime
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -31,7 +29,6 @@ async def test_healthcare_tools():
 
     # Test 2: Import DHIS2 service
     try:
-        from src.malaria_predictor.services.dhis2_service import create_dhis2_service
         print("✅ DHIS2 service imported successfully")
     except Exception as e:
         print(f"❌ Failed to import DHIS2 service: {e}")
@@ -39,7 +36,9 @@ async def test_healthcare_tools():
 
     # Test 3: Import dashboard service
     try:
-        from src.malaria_predictor.services.professional_dashboard_service import professional_dashboard_service
+        from src.malaria_predictor.services.professional_dashboard_service import (
+            professional_dashboard_service,
+        )
         print("✅ Professional dashboard service imported successfully")
     except Exception as e:
         print(f"❌ Failed to import dashboard service: {e}")

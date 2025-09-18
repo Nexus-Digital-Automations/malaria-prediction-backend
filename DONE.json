@@ -950,6 +950,108 @@
       "updated_at": "2025-09-18T23:18:57.921Z",
       "archived_at": "2025-09-18T23:18:57.925Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T19:41:56.990Z",
+      "title": "Create comprehensive API client for Flutter backend integration",
+      "description": "Build complete API client with dio, retrofit, JWT auth, error handling, caching, and WebSocket support for malaria prediction app",
+      "category": "feature",
+      "id": "feature_1758224516990_mzwo8xefox",
+      "assigned_agent": "dev_session_1758224501870_1_general_90b4c7e9",
+      "started_at": "2025-09-18T19:42:45.693Z",
+      "claimed_by": "dev_session_1758224501870_1_general_90b4c7e9",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758224501870_1_general_90b4c7e9",
+          "role": "primary",
+          "assignedAt": "2025-09-18T19:42:45.693Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T23:19:59.952Z",
+      "updated_at": "2025-09-18T23:19:59.952Z",
+      "archived_at": "2025-09-18T23:19:59.957Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T19:41:52.434Z",
+      "title": "Implement comprehensive authentication system with JWT integration",
+      "description": "Create complete Flutter authentication system including: Authentication BLoC with state management, Login/Signup UI screens, JWT token management with secure storage, Biometric authentication support, Session management with auto-logout, Backend integration with FastAPI auth endpoints",
+      "category": "feature",
+      "id": "feature_1758224512434_q4hyirgdf9",
+      "assigned_agent": "dev_session_1758224497167_1_general_eb222d3d",
+      "started_at": "2025-09-18T19:42:40.996Z",
+      "claimed_by": "dev_session_1758224497167_1_general_eb222d3d",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758224497167_1_general_eb222d3d",
+          "role": "primary",
+          "assignedAt": "2025-09-18T19:42:40.996Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T23:20:42.884Z",
+      "updated_at": "2025-09-18T23:20:42.884Z",
+      "archived_at": "2025-09-18T23:20:42.887Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T23:39:42.592Z",
+      "title": "Fix Flutter Material3 deprecated API usage",
+      "description": "Fix deprecated Flutter APIs including MaterialStateProperty to WidgetStateProperty, MaterialState to WidgetState, withOpacity to withValues, surfaceVariant to surfaceContainerHighest, background to surface, onBackground to onSurface, and color.value to component accessors across the entire Flutter codebase",
+      "category": "error",
+      "id": "error_1758238782591_uq210x39eul",
+      "assigned_agent": "dev_session_1758238430118_1_general_03210539",
+      "started_at": "2025-09-18T23:39:58.322Z",
+      "claimed_by": "dev_session_1758238430118_1_general_03210539",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758238430118_1_general_03210539",
+          "role": "primary",
+          "assignedAt": "2025-09-18T23:39:58.322Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T23:47:58.949Z",
+      "updated_at": "2025-09-18T23:47:58.949Z",
+      "archived_at": "2025-09-18T23:47:58.955Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T19:41:56.990Z",
+      "title": "Create comprehensive API client for Flutter backend integration",
+      "description": "Build complete API client with dio, retrofit, JWT auth, error handling, caching, and WebSocket support for malaria prediction app",
+      "category": "feature",
+      "id": "error_1758239302167_8epe8iv71",
+      "assigned_agent": null,
+      "started_at": "2025-09-18T19:42:45.693Z",
+      "claimed_by": null,
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758224501870_1_general_90b4c7e9",
+          "role": "primary",
+          "assignedAt": "2025-09-18T19:42:45.693Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758224501870_1_general_90b4c7e9",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-18T23:48:22.164Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
+        }
+      ],
+      "completed_at": "2025-09-18T23:19:59.952Z",
+      "updated_at": "2025-09-18T23:19:59.952Z",
+      "archived_at": "2025-09-18T23:48:22.170Z",
+      "archive_version": "2.0.0"
     }
   ],
   "project_info": {
@@ -960,10 +1062,10 @@
     "total_completed": 0,
     "last_archived": null
   },
-  "last_archived": "2025-09-18T23:18:57.925Z",
-  "total_completed": 36,
+  "last_archived": "2025-09-18T23:48:22.170Z",
+  "total_completed": 40,
   "metadata": {
-    "last_bulk_archive": "2025-09-18T19:38:56.193Z",
-    "bulk_archive_count": 9
+    "last_bulk_archive": "2025-09-18T23:48:22.170Z",
+    "bulk_archive_count": 10
   }
 }

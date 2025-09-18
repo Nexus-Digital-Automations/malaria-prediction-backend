@@ -10,6 +10,7 @@ Provides comprehensive alert history management including:
 
 import logging
 from datetime import datetime, timedelta
+from typing import Any
 
 from pydantic import BaseModel, Field
 from sqlalchemy import desc, func, or_
@@ -54,8 +55,8 @@ class AlertHistorySummary(BaseModel):
     resolution_rate_percentage: float
     false_positive_rate_percentage: float
     delivery_success_rate_percentage: float
-    most_active_locations: list[dict[str, any]]
-    trend_analysis: dict[str, any]
+    most_active_locations: list[dict[str, Any]]
+    trend_analysis: dict[str, Any]
 
 
 class AlertArchivePolicy(BaseModel):
@@ -117,7 +118,7 @@ class AlertHistoryManager:
     async def get_alert_history(
         self,
         query: AlertHistoryQuery
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Get filtered alert history for a user.
 
         Args:
@@ -419,7 +420,7 @@ class AlertHistoryManager:
     async def archive_old_alerts(
         self,
         dry_run: bool = False
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Archive old alerts based on retention policy.
 
         Args:
@@ -489,7 +490,7 @@ class AlertHistoryManager:
     async def cleanup_old_data(
         self,
         dry_run: bool = False
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Clean up old alert data based on retention policy.
 
         Args:
@@ -578,7 +579,7 @@ class AlertHistoryManager:
         export_format: str = "json",
         start_date: datetime | None = None,
         end_date: datetime | None = None
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Export alert history in various formats.
 
         Args:
@@ -635,7 +636,7 @@ class AlertHistoryManager:
             logger.error(f"Alert history export failed: {e}")
             raise
 
-    def _serialize_alert(self, alert: Alert) -> dict[str, any]:
+    def _serialize_alert(self, alert: Alert) -> dict[str, Any]:
         """Serialize alert object to dictionary.
 
         Args:
@@ -685,7 +686,7 @@ class AlertHistoryManager:
         db: AsyncSession,
         user_id: str,
         days: int
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Calculate trend analysis for alerts.
 
         Args:
@@ -751,7 +752,7 @@ class AlertHistoryManager:
                 (current_avg * (query_count - 1) + processing_time) / query_count
             )
 
-    def get_stats(self) -> dict[str, any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get alert history manager statistics.
 
         Returns:

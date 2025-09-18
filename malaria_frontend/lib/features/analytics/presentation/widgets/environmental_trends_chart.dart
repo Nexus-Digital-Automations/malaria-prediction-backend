@@ -111,7 +111,7 @@ class _EnvironmentalTrendsChartState extends State<EnvironmentalTrendsChart> {
               }
             });
           },
-          selectedColor: _factorColors[factor]?.withOpacity(0.2),
+          selectedColor: _factorColors[factor]?.withValues(alpha:0.2),
           checkmarkColor: _factorColors[factor],
         );
       }).toList(),
@@ -369,13 +369,13 @@ class _EnvironmentalTrendsChartState extends State<EnvironmentalTrendsChart> {
           Icon(
             Icons.eco_outlined,
             size: 48,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.5),
           ),
           const SizedBox(height: 16),
           Text(
             'No environmental data available',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
             ),
             textAlign: TextAlign.center,
           ),

@@ -237,7 +237,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
               width: 200,
               child: LinearProgressIndicator(
                 value: state.progress,
-                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                 valueColor: AlwaysStoppedAnimation<Color>(
                   Theme.of(context).colorScheme.primary,
                 ),
@@ -307,7 +307,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
         // Show chart generation overlay
         Container(
           height: 80,
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+          color: Theme.of(context).colorScheme.surface.withValues(alpha:0.9),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -333,7 +333,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
         Expanded(child: _buildLoadedState(state.baseState)),
         Container(
           height: 80,
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+          color: Theme.of(context).colorScheme.surface.withValues(alpha:0.9),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

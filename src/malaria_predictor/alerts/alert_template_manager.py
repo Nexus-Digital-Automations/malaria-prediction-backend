@@ -14,6 +14,7 @@ import json
 import logging
 import re
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, Field, validator
 
@@ -33,7 +34,7 @@ class TemplateVariable(BaseModel):
     required: bool = True
     default_value: str | None = None
     validation_pattern: str | None = None  # Regex pattern for validation
-    format_options: dict[str, any] | None = None  # Formatting options (e.g., decimal places)
+    format_options: dict[str, Any] | None = None  # Formatting options (e.g., decimal places)
 
 
 class TemplateFormat(BaseModel):
@@ -133,7 +134,7 @@ class TemplateValidationResult(BaseModel):
     is_valid: bool
     errors: list[str] = []
     warnings: list[str] = []
-    variable_analysis: dict[str, any] = {}
+    variable_analysis: dict[str, Any] = {}
     estimated_length: dict[str, int] = {}  # Channel -> estimated message length
 
 
@@ -271,7 +272,7 @@ class AlertTemplateManager:
     async def update_template(
         self,
         template_id: str,
-        updates: dict[str, any],
+        updates: dict[str, Any],
         user_id: str | None = None
     ) -> bool:
         """Update an existing template.
@@ -426,7 +427,7 @@ class AlertTemplateManager:
     async def render_template(
         self,
         template_id: str,
-        variables: dict[str, any],
+        variables: dict[str, Any],
         language: str = "en",
         channel: str = "push",
         user_customization: UserTemplateCustomization | None = None
@@ -612,7 +613,7 @@ class AlertTemplateManager:
             logger.error(f"Failed to add translation: {e}")
             return False
 
-    async def get_template_analytics(self, template_id: str) -> dict[str, any]:
+    async def get_template_analytics(self, template_id: str) -> dict[str, Any]:
         """Get analytics data for a template.
 
         Args:
@@ -666,7 +667,7 @@ class AlertTemplateManager:
         category: str | None = None,
         user_id: str | None = None,
         language: str | None = None
-    ) -> list[dict[str, any]]:
+    ) -> list[dict[str, Any]]:
         """List available templates with filtering.
 
         Args:
@@ -742,7 +743,7 @@ class AlertTemplateManager:
     def _validate_variables(
         self,
         template: AlertTemplateDefinition,
-        variables: dict[str, any]
+        variables: dict[str, Any]
     ) -> list[str]:
         """Validate provided variables against template requirements."""
         errors = []
@@ -765,7 +766,7 @@ class AlertTemplateManager:
     def _apply_variable_defaults(
         self,
         template: AlertTemplateDefinition,
-        variables: dict[str, any]
+        variables: dict[str, Any]
     ) -> dict[str, str]:
         """Apply default values for missing variables."""
         complete_variables = variables.copy()
@@ -925,7 +926,7 @@ class AlertTemplateManager:
                 (current_avg * render_count + render_time) / (render_count + 1)
             )
 
-    def get_stats(self) -> dict[str, any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get template manager statistics."""
         return {
             **self.stats,

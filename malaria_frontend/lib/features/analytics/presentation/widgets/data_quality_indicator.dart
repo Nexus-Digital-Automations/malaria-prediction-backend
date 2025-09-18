@@ -71,9 +71,9 @@ class DataQualityIndicator extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: scoreColor.withOpacity(0.1),
+            color: scoreColor.withValues(alpha:0.1),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: scoreColor.withOpacity(0.3)),
+            border: Border.all(color: scoreColor.withValues(alpha:0.3)),
           ),
           child: Text(
             '${(overallScore * 100).toInt()}%',
@@ -141,7 +141,7 @@ class DataQualityIndicator extends StatelessWidget {
           flex: 2,
           child: LinearProgressIndicator(
             value: value,
-            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ),
@@ -186,7 +186,7 @@ class DataQualityIndicator extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: freshnessColor.withOpacity(0.1),
+            color: freshnessColor.withValues(alpha:0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -268,9 +268,9 @@ class DataQualityIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha:0.3)),
       ),
       child: Column(
         children: [
@@ -302,9 +302,9 @@ class DataQualityIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.1),
+        color: Colors.orange.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.orange.withOpacity(0.3)),
+        border: Border.all(color: Colors.orange.withValues(alpha:0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -12,6 +12,7 @@ Provides comprehensive analytics for alert system performance including:
 import asyncio
 import logging
 from datetime import datetime, timedelta
+from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy import func, or_
@@ -107,7 +108,7 @@ class AlertTrendAnalysis(BaseModel):
     seasonal_patterns: dict[str, float]
     peak_hours: list[int]
     peak_days: list[str]
-    forecast_next_7d: list[dict[str, any]]
+    forecast_next_7d: list[dict[str, Any]]
 
 
 class AlertAnalyticsEngine:
@@ -676,7 +677,7 @@ class AlertAnalyticsEngine:
             logger.error(f"Failed to get trend analysis: {e}")
             raise
 
-    async def detect_anomalies(self) -> list[dict[str, any]]:
+    async def detect_anomalies(self) -> list[dict[str, Any]]:
         """Detect anomalies in alert system performance.
 
         Returns:
@@ -846,7 +847,7 @@ class AlertAnalyticsEngine:
                 (current_avg * (calculation_count - 1) + calculation_time) / calculation_count
             )
 
-    def get_stats(self) -> dict[str, any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get analytics engine statistics.
 
         Returns:

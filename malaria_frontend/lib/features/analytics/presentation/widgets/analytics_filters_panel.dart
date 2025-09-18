@@ -155,7 +155,7 @@ class _AnalyticsFiltersPanelState extends State<AnalyticsFiltersPanel> {
         ),
         const SizedBox(height: 4),
         DropdownButtonFormField<String>(
-          value: widget.selectedRegion,
+          initialValue: widget.selectedRegion,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             border: OutlineInputBorder(
@@ -378,7 +378,7 @@ class _AnalyticsFiltersPanelState extends State<AnalyticsFiltersPanel> {
       ),
       selected: selected,
       onSelected: onChanged,
-      selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+      selectedColor: Theme.of(context).colorScheme.primary.withValues(alpha:0.2),
       checkmarkColor: Theme.of(context).colorScheme.primary,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.compact,

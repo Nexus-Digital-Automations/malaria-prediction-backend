@@ -231,7 +231,7 @@ class _PredictionAccuracyChartState extends State<PredictionAccuracyChart> {
             ),
             belowBarData: BarAreaData(
               show: true,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha:0.1),
             ),
           ),
         ],
@@ -413,9 +413,9 @@ class _PredictionAccuracyChartState extends State<PredictionAccuracyChart> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha:0.3)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -440,7 +440,7 @@ class _PredictionAccuracyChartState extends State<PredictionAccuracyChart> {
           const SizedBox(height: 8),
           LinearProgressIndicator(
             value: value,
-            backgroundColor: color.withOpacity(0.2),
+            backgroundColor: color.withValues(alpha:0.2),
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ],
@@ -461,7 +461,7 @@ class _PredictionAccuracyChartState extends State<PredictionAccuracyChart> {
             child: CircularProgressIndicator(
               value: widget.accuracyData.overall,
               strokeWidth: 8,
-              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(
                 Theme.of(context).colorScheme.primary,
               ),
@@ -493,7 +493,7 @@ class _PredictionAccuracyChartState extends State<PredictionAccuracyChart> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha:0.3),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -551,13 +551,13 @@ class _PredictionAccuracyChartState extends State<PredictionAccuracyChart> {
           Icon(
             Icons.info_outline,
             size: 48,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.5),
           ),
           const SizedBox(height: 16),
           Text(
             message,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
             ),
             textAlign: TextAlign.center,
           ),

@@ -71,8 +71,8 @@ class AnalyticsOverviewCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             gradient: LinearGradient(
               colors: [
-                color.withOpacity(0.1),
-                color.withOpacity(0.05),
+                color.withValues(alpha:0.1),
+                color.withValues(alpha:0.05),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -86,7 +86,7 @@ class AnalyticsOverviewCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.2),
+                      color: color.withValues(alpha:0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -111,7 +111,7 @@ class AnalyticsOverviewCard extends StatelessWidget {
               Text(
                 title,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                 ),
               ),
               if (subtitle != null) ...[
@@ -119,7 +119,7 @@ class AnalyticsOverviewCard extends StatelessWidget {
                 Text(
                   subtitle!,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.5),
                   ),
                 ),
               ],
@@ -136,7 +136,7 @@ class AnalyticsOverviewCard extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.2),
+          color: Colors.grey.withValues(alpha:0.2),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
@@ -157,7 +157,7 @@ class AnalyticsOverviewCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: trendColor.withOpacity(0.1),
+        color: trendColor.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

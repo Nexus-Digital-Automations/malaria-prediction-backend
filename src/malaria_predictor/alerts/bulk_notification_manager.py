@@ -13,6 +13,7 @@ Provides comprehensive bulk notification capabilities including:
 import asyncio
 import logging
 from datetime import datetime, timedelta
+from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, validator
@@ -111,7 +112,7 @@ class BulkNotificationCampaign(BaseModel):
 
     # A/B Testing
     ab_test_enabled: bool = False
-    ab_test_variants: list[dict[str, any]] = []
+    ab_test_variants: list[dict[str, Any]] = []
     ab_test_traffic_split: dict[str, float] = {}
 
     # Status and tracking
@@ -291,7 +292,7 @@ class BulkNotificationManager:
     async def update_campaign(
         self,
         campaign_id: str,
-        updates: dict[str, any],
+        updates: dict[str, Any],
         user_id: str
     ) -> bool:
         """Update an existing campaign.
@@ -417,7 +418,7 @@ class BulkNotificationManager:
             logger.error(f"Failed to cancel campaign: {e}")
             return False
 
-    async def get_campaign_status(self, campaign_id: str) -> dict[str, any] | None:
+    async def get_campaign_status(self, campaign_id: str) -> dict[str, Any] | None:
         """Get detailed status of a campaign.
 
         Args:
@@ -484,7 +485,7 @@ class BulkNotificationManager:
         self,
         user_id: str,
         status_filter: str | None = None
-    ) -> list[dict[str, any]]:
+    ) -> list[dict[str, Any]]:
         """Get campaigns created by a user.
 
         Args:
@@ -524,7 +525,7 @@ class BulkNotificationManager:
             logger.error(f"Failed to get user campaigns: {e}")
             return []
 
-    async def _validate_campaign(self, campaign: BulkNotificationCampaign) -> dict[str, any]:
+    async def _validate_campaign(self, campaign: BulkNotificationCampaign) -> dict[str, Any]:
         """Validate campaign configuration."""
         errors = []
         warnings = []
@@ -935,7 +936,7 @@ class BulkNotificationManager:
             except Exception as e:
                 logger.error(f"Error in retry processor: {e}")
 
-    def get_stats(self) -> dict[str, any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get bulk notification manager statistics."""
         self.stats["queued_jobs"] = self.job_queue.qsize()
         self.stats["active_campaigns"] = len([c for c in self.campaigns.values() if c.status == "running"])

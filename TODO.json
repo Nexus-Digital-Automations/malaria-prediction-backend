@@ -63,14 +63,54 @@
     },
     {
       "status": "in_progress",
+      "created_at": "2025-09-18T19:44:00.703Z",
+      "title": "Fix Flutter Analysis Errors - Missing Widget Imports and Undefined Classes",
+      "description": "Fix critical analysis errors including missing LayerControlPanel, RiskLegendWidget imports, undefined LatLngBounds class, and non-const constructor issues in risk maps feature.",
+      "category": "error",
+      "id": "error_1758224640702_anz7g1jkwh4",
+      "assigned_agent": "dev_session_1758238430118_1_general_03210539",
+      "started_at": "2025-09-18T23:34:27.422Z",
+      "claimed_by": "dev_session_1758238430118_1_general_03210539",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758238430118_1_general_03210539",
+          "role": "primary",
+          "assignedAt": "2025-09-18T23:34:27.422Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-18T19:44:17.291Z",
+      "title": "Fix Flutter Deprecated API Usage - Material3 Updates",
+      "description": "Update deprecated Flutter APIs including MaterialStateProperty to WidgetStateProperty, withOpacity to withValues, background/surfaceVariant properties, and logger printTime configuration.",
+      "category": "error",
+      "id": "error_1758224657290_tft0br3lc7r",
+      "assigned_agent": "dev_session_1758239465153_1_general_e6bad1b3",
+      "started_at": "2025-09-18T23:52:53.050Z",
+      "claimed_by": "dev_session_1758239465153_1_general_e6bad1b3",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758239465153_1_general_e6bad1b3",
+          "role": "primary",
+          "assignedAt": "2025-09-18T23:52:53.050Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "pending",
       "created_at": "2025-09-18T15:18:47.988Z",
       "title": "Create complete Flutter frontend for malaria prediction system",
       "description": "Implement comprehensive Flutter frontend following documented architecture - includes interactive risk maps, real-time alerts, analytics dashboard, healthcare tools, authentication, and backend integration across mobile/web/desktop platforms",
       "category": "feature",
       "id": "feature_1758208727988_efjnmz40emr",
-      "assigned_agent": "dev_session_1758223514738_1_general_c170e7b9",
-      "started_at": "2025-09-18T19:40:36.785Z",
-      "claimed_by": "dev_session_1758223514738_1_general_c170e7b9",
+      "assigned_agent": null,
+      "started_at": null,
+      "claimed_by": null,
       "agent_assignment_history": [
         {
           "agentId": "dev_session_1758223514738_1_general_c170e7b9",
@@ -78,6 +118,12 @@
           "assignedAt": "2025-09-18T19:40:36.785Z",
           "reassignReason": null,
           "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758223514738_1_general_c170e7b9",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-18T23:48:22.163Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
         }
       ]
     },
@@ -209,6 +255,32 @@
     },
     {
       "status": "pending",
+      "created_at": "2025-09-18T19:41:53.732Z",
+      "title": "Implement comprehensive alert and notification system with Firebase and real-time updates",
+      "description": "Develop comprehensive alert system including Firebase Cloud Messaging integration, alert management interface, push notifications, WebSocket real-time alerts, alert history tracking, emergency protocols, and customizable thresholds for malaria prediction alerts",
+      "category": "feature",
+      "id": "feature_1758224513732_7ng3zc25q8q",
+      "assigned_agent": null,
+      "started_at": null,
+      "claimed_by": null,
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758224497934_1_general_70e2171f",
+          "role": "primary",
+          "assignedAt": "2025-09-18T19:42:38.356Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758224497934_1_general_70e2171f",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-18T23:48:22.164Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
+        }
+      ]
+    },
+    {
+      "status": "pending",
       "created_at": "2025-09-18T15:21:17.903Z",
       "title": "Implement comprehensive testing and platform deployment",
       "description": "Create unit tests, widget tests, integration tests, platform-specific configurations, and deployment setup for iOS, Android, Web, and Desktop",
@@ -268,123 +340,15 @@
       ]
     },
     {
-      "status": "completed",
-      "created_at": "2025-09-18T19:41:51.908Z",
-      "title": "Implement Interactive Risk Maps with Flutter Map",
-      "description": "Create interactive risk maps with malaria prediction overlays using flutter_map. Includes map integration, choropleth overlays, geographic controls, location services, risk data visualization, custom markers, and offline support.",
-      "category": "feature",
-      "id": "feature_1758224511908_yynx2sokcrd",
-      "assigned_agent": "dev_session_1758224496964_1_general_b02b2f10",
-      "started_at": "2025-09-18T19:42:43.341Z",
-      "claimed_by": "dev_session_1758224496964_1_general_b02b2f10",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758224496964_1_general_b02b2f10",
-          "role": "primary",
-          "assignedAt": "2025-09-18T19:42:43.341Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-18T20:39:48.288Z",
-      "updated_at": "2025-09-18T20:39:48.288Z"
-    },
-    {
-      "status": "completed",
-      "created_at": "2025-09-18T19:41:51.929Z",
-      "title": "Create Flutter Foundation for Malaria Prediction System",
-      "description": "Initialize core Flutter project with navigation, theming, state management, UI components, and responsive layouts. Setup complete project structure with BLoC architecture and all required dependencies from architecture documentation.",
-      "category": "feature",
-      "id": "feature_1758224511929_pdng0fqu07",
-      "assigned_agent": "dev_session_1758224496878_1_general_5c669585",
-      "started_at": "2025-09-18T19:42:41.219Z",
-      "claimed_by": "dev_session_1758224496878_1_general_5c669585",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758224496878_1_general_5c669585",
-          "role": "primary",
-          "assignedAt": "2025-09-18T19:42:41.219Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-18T19:46:20.282Z",
-      "updated_at": "2025-09-18T19:46:20.282Z"
-    },
-    {
-      "status": "in_progress",
-      "created_at": "2025-09-18T19:41:52.434Z",
-      "title": "Implement comprehensive authentication system with JWT integration",
-      "description": "Create complete Flutter authentication system including: Authentication BLoC with state management, Login/Signup UI screens, JWT token management with secure storage, Biometric authentication support, Session management with auto-logout, Backend integration with FastAPI auth endpoints",
-      "category": "feature",
-      "id": "feature_1758224512434_q4hyirgdf9",
-      "assigned_agent": "dev_session_1758224497167_1_general_eb222d3d",
-      "started_at": "2025-09-18T19:42:40.996Z",
-      "claimed_by": "dev_session_1758224497167_1_general_eb222d3d",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758224497167_1_general_eb222d3d",
-          "role": "primary",
-          "assignedAt": "2025-09-18T19:42:40.996Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "status": "completed",
-      "created_at": "2025-09-18T19:41:52.679Z",
-      "title": "Build comprehensive analytics dashboard with data visualization",
-      "description": "Build comprehensive analytics dashboard with data visualization using fl_chart. Create dashboard layout, chart components, data visualization displays, environmental trends charts, interactive filters, export functionality, and real-time updates.",
-      "category": "feature",
-      "id": "feature_1758224512679_a4nlh9n54hc",
-      "assigned_agent": "dev_session_1758224497634_1_general_1a989879",
-      "started_at": "2025-09-18T19:43:16.137Z",
-      "claimed_by": "dev_session_1758224497634_1_general_1a989879",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758224497634_1_general_1a989879",
-          "role": "primary",
-          "assignedAt": "2025-09-18T19:43:16.137Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-18T23:18:57.921Z",
-      "updated_at": "2025-09-18T23:18:57.921Z"
-    },
-    {
-      "status": "completed",
-      "created_at": "2025-09-18T19:41:52.710Z",
-      "title": "Implement Healthcare Professional Tools System",
-      "description": "Implement comprehensive healthcare professional tools including risk assessment, patient management, treatment protocols, resource planning, surveillance reporting, professional dashboard, and DHIS2 integration",
-      "category": "feature",
-      "id": "feature_1758224512709_ddrq6g6wp74",
-      "assigned_agent": "dev_session_1758224497737_1_general_98f22e5d",
-      "started_at": "2025-09-18T19:42:36.532Z",
-      "claimed_by": "dev_session_1758224497737_1_general_98f22e5d",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758224497737_1_general_98f22e5d",
-          "role": "primary",
-          "assignedAt": "2025-09-18T19:42:36.532Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-18T19:50:04.528Z",
-      "updated_at": "2025-09-18T19:50:04.528Z"
-    },
-    {
-      "status": "in_progress",
+      "status": "pending",
       "created_at": "2025-09-18T19:41:52.763Z",
       "title": "Setup Flutter Testing Framework and Code Quality",
       "description": "Create comprehensive testing framework with unit tests, widget tests, integration tests, performance testing, code quality tools, CI/CD pipeline, and platform testing for Flutter application",
       "category": "feature",
-      "id": "feature_1758224512763_9j1yjyigaqj",
-      "assigned_agent": "dev_session_1758224497530_1_general_c04fd314",
-      "started_at": "2025-09-18T19:43:02.893Z",
-      "claimed_by": "dev_session_1758224497530_1_general_c04fd314",
+      "id": "test_1758239302167_b8jr667ee",
+      "assigned_agent": null,
+      "started_at": null,
+      "claimed_by": null,
       "agent_assignment_history": [
         {
           "agentId": "dev_session_1758224497530_1_general_c04fd314",
@@ -392,64 +356,14 @@
           "assignedAt": "2025-09-18T19:43:02.893Z",
           "reassignReason": null,
           "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "status": "in_progress",
-      "created_at": "2025-09-18T19:41:53.732Z",
-      "title": "Implement comprehensive alert and notification system with Firebase and real-time updates",
-      "description": "Develop comprehensive alert system including Firebase Cloud Messaging integration, alert management interface, push notifications, WebSocket real-time alerts, alert history tracking, emergency protocols, and customizable thresholds for malaria prediction alerts",
-      "category": "feature",
-      "id": "feature_1758224513732_7ng3zc25q8q",
-      "assigned_agent": "dev_session_1758224497934_1_general_70e2171f",
-      "started_at": "2025-09-18T19:42:38.356Z",
-      "claimed_by": "dev_session_1758224497934_1_general_70e2171f",
-      "agent_assignment_history": [
+        },
         {
-          "agentId": "dev_session_1758224497934_1_general_70e2171f",
-          "role": "primary",
-          "assignedAt": "2025-09-18T19:42:38.356Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
+          "agent": "dev_session_1758224497530_1_general_c04fd314",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-18T23:48:22.164Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
         }
       ]
-    },
-    {
-      "status": "in_progress",
-      "created_at": "2025-09-18T19:41:56.990Z",
-      "title": "Create comprehensive API client for Flutter backend integration",
-      "description": "Build complete API client with dio, retrofit, JWT auth, error handling, caching, and WebSocket support for malaria prediction app",
-      "category": "feature",
-      "id": "feature_1758224516990_mzwo8xefox",
-      "assigned_agent": "dev_session_1758224501870_1_general_90b4c7e9",
-      "started_at": "2025-09-18T19:42:45.693Z",
-      "claimed_by": "dev_session_1758224501870_1_general_90b4c7e9",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758224501870_1_general_90b4c7e9",
-          "role": "primary",
-          "assignedAt": "2025-09-18T19:42:45.693Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "status": "pending",
-      "created_at": "2025-09-18T19:44:00.703Z",
-      "title": "Fix Flutter Analysis Errors - Missing Widget Imports and Undefined Classes",
-      "description": "Fix critical analysis errors including missing LayerControlPanel, RiskLegendWidget imports, undefined LatLngBounds class, and non-const constructor issues in risk maps feature.",
-      "category": "error",
-      "id": "error_1758224640702_anz7g1jkwh4"
-    },
-    {
-      "status": "pending",
-      "created_at": "2025-09-18T19:44:17.291Z",
-      "title": "Fix Flutter Deprecated API Usage - Material3 Updates",
-      "description": "Update deprecated Flutter APIs including MaterialStateProperty to WidgetStateProperty, withOpacity to withValues, background/surfaceVariant properties, and logger printTime configuration.",
-      "category": "error",
-      "id": "error_1758224657290_tft0br3lc7r"
     }
   ],
   "current_mode": "DEVELOPMENT",
@@ -459,13 +373,13 @@
   "strikes_completed_last_run": false,
   "last_hook_activation": 1755045713680,
   "agents": {
-    "dev_session_1758223514738_1_general_c170e7b9": {
+    "dev_session_1758237593688_1_general_cd6981a1": {
       "name": "undefined Agent",
       "role": "development",
       "specialization": [],
       "status": "active",
       "assignedTasks": [],
-      "lastHeartbeat": "2025-09-18T19:39:32.697Z",
+      "lastHeartbeat": "2025-09-18T23:19:53.688Z",
       "parentAgentId": null,
       "capabilities": [
         "file-operations",
@@ -476,182 +390,35 @@
       ],
       "workload": 0,
       "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-18T19:25:14.739Z",
+      "createdAt": "2025-09-18T23:19:53.688Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758238430118_1_general_03210539": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-18T23:48:49.029Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-18T23:33:50.118Z",
       "sessionId": null,
       "metadata": {
-        "renewedAt": "2025-09-18T19:39:32.697Z",
+        "renewedAt": "2025-09-18T23:48:49.029Z",
         "renewalReason": "Agent reinitialization requested"
       },
-      "lastRenewal": "2025-09-18T19:39:32.697Z",
+      "lastRenewal": "2025-09-18T23:48:49.029Z",
       "renewalCount": 1
-    },
-    "dev_session_1758224496878_1_general_5c669585": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-18T19:41:36.878Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-18T19:41:36.878Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758224496964_1_general_b02b2f10": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-18T19:41:36.964Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-18T19:41:36.964Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758224497167_1_general_eb222d3d": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-18T19:41:37.167Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-18T19:41:37.167Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758224497530_1_general_c04fd314": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-18T19:41:37.531Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-18T19:41:37.531Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758224497634_1_general_1a989879": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-18T19:41:37.634Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-18T19:41:37.634Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758224497737_1_general_98f22e5d": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-18T19:41:37.738Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-18T19:41:37.738Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758224497934_1_general_70e2171f": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-18T19:41:37.934Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-18T19:41:37.934Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758224501870_1_general_90b4c7e9": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-18T19:41:41.871Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-18T19:41:41.871Z",
-      "sessionId": null,
-      "metadata": {}
     }
   },
   "completed_tasks": [],

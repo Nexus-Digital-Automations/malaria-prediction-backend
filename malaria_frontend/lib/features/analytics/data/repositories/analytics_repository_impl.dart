@@ -795,7 +795,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       if (configuration.title != null) 'title': configuration.title,
       if (configuration.subtitle != null) 'subtitle': configuration.subtitle,
       if (configuration.colors != null)
-        'colors': configuration.colors!.map((c) => c.value).toList(),
+        'colors': configuration.colors!.map((c) => c.toARGB32()).toList(),
       if (configuration.width != null) 'width': configuration.width,
       if (configuration.height != null) 'height': configuration.height,
       'show_legend': configuration.showLegend,
