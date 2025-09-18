@@ -517,6 +517,54 @@
       "updated_at": "2025-09-18T14:44:00.671Z",
       "archived_at": "2025-09-18T14:44:00.672Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T14:53:13.598Z",
+      "title": "Create detailed conversation summary",
+      "description": "Create comprehensive summary of previous conversation capturing technical details, code patterns, architectural decisions, user requests, and actions taken for continuing development work without losing context",
+      "category": "feature",
+      "id": "feature_1758207193598_49iv6w17txi",
+      "assigned_agent": "dev_session_1758207175504_1_general_0d3eb8a7",
+      "started_at": "2025-09-18T14:53:41.792Z",
+      "claimed_by": "dev_session_1758207175504_1_general_0d3eb8a7",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758207175504_1_general_0d3eb8a7",
+          "role": "primary",
+          "assignedAt": "2025-09-18T14:53:41.792Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T14:56:41.289Z",
+      "updated_at": "2025-09-18T14:56:41.289Z",
+      "archived_at": "2025-09-18T14:56:41.290Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T15:05:52.488Z",
+      "title": "Create detailed conversation summary",
+      "description": "Create a comprehensive summary of the previous session conversation, focusing on technical details, code patterns, architectural decisions, user requests, and actions taken. Essential for continuing development work without losing context.",
+      "category": "feature",
+      "id": "feature_1758207952488_eo9b948ahg",
+      "assigned_agent": "dev_session_1758207935915_1_general_c7b57c66",
+      "started_at": "2025-09-18T15:06:13.440Z",
+      "claimed_by": "dev_session_1758207935915_1_general_c7b57c66",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758207935915_1_general_c7b57c66",
+          "role": "primary",
+          "assignedAt": "2025-09-18T15:06:13.440Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T15:08:34.100Z",
+      "updated_at": "2025-09-18T15:08:34.100Z",
+      "archived_at": "2025-09-18T15:08:34.102Z",
+      "archive_version": "2.0.0"
     }
   ],
   "project_info": {
@@ -527,10 +575,10 @@
     "total_completed": 0,
     "last_archived": null
   },
-  "last_archived": "2025-09-18T14:44:29.302Z",
-  "total_completed": 19,
+  "last_archived": "2025-09-18T15:08:59.548Z",
+  "total_completed": 21,
   "metadata": {
-    "last_bulk_archive": "2025-09-18T14:44:29.302Z",
-    "bulk_archive_count": 5
+    "last_bulk_archive": "2025-09-18T15:08:59.548Z",
+    "bulk_archive_count": 7
   }
 }

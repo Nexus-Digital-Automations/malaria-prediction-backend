@@ -214,6 +214,7 @@ function processData(userId, data) {
 
 **REQUIREMENTS:**
 - **EMERGENCY PROTOCOL**: Instant halt → Create linter-error task → Fix all violations → Verify clean → Resume
+- **MAXIMUM CONCURRENT DEPLOYMENT**: MANDATORY for linter errors - deploy concurrent agents equal to number of error categories (max 10)
 - **OUTDATED MATERIAL EXCEPTION**: If errors in outdated/deprecated code → Remove code entirely, no error tasks
 - **WORKFLOWS**: After every file edit + before task completion
 - **NO SHORTCUTS**: Never hide, suppress, or bypass - fix actual problems, admit inability if needed
