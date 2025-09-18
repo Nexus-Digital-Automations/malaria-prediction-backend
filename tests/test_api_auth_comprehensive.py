@@ -5,9 +5,9 @@ Target: 100% coverage for src/malaria_predictor/api/auth.py
 from datetime import timedelta
 from unittest.mock import Mock, patch
 
-import jwt
 import pytest
 from fastapi import HTTPException, status
+from jose import jwt
 
 # Import the auth module to test
 from src.malaria_predictor.api.auth import (

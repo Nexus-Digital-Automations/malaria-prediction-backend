@@ -1,0 +1,111 @@
+name: malaria_frontend
+description: "AI-powered malaria outbreak prediction and monitoring system"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.2.0 <4.0.0"
+  flutter: ">=3.16.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI & Core
+  cupertino_icons: ^1.0.8
+
+  # State Management
+  flutter_bloc: ^8.1.3
+  hydrated_bloc: ^9.1.2
+  equatable: ^2.0.5
+
+  # Networking & API
+  dio: ^5.3.2
+  retrofit: ^4.0.3
+  retrofit_generator: ^7.0.8
+  web_socket_channel: ^2.4.0
+  connectivity_plus: ^5.0.1
+
+  # Maps & Geospatial
+  flutter_map: ^6.0.1
+  latlong2: ^0.9.1
+  geolocator: ^10.1.0
+  geocoding: ^2.1.1
+
+  # Data Persistence
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.2.2
+  sqflite: ^2.3.0
+  path_provider: ^2.1.1
+
+  # UI & Animation
+  fl_chart: ^0.64.0
+  lottie: ^2.7.0
+  shimmer: ^3.0.0
+  cached_network_image: ^3.3.0
+  flutter_svg: ^2.0.9
+
+  # Authentication & Security
+  flutter_secure_storage: ^9.0.0
+  local_auth: ^2.1.6
+  crypto: ^3.0.3
+
+  # Navigation
+  go_router: ^12.1.1
+
+  # Utilities
+  logger: ^2.0.2+1
+  intl: ^0.19.0
+  json_annotation: ^4.8.1
+  freezed_annotation: ^2.4.1
+  get_it: ^7.6.4
+  injectable: ^2.3.2
+
+  # Environment Configuration
+  flutter_dotenv: ^5.1.0
+
+  # HTTP Inspection (Debug only)
+  alice: ^0.4.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+  # Code Generation
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1
+  freezed: ^2.4.6
+  injectable_generator: ^2.4.1
+  hive_generator: ^2.0.1
+
+  # Testing
+  mockito: ^5.4.2
+  bloc_test: ^9.1.4
+  mocktail: ^1.0.0
+
+  # Assets
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+
+  # Assets
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/lottie/
+    - assets/maps/
+    - .env
+
+  # Fonts
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Roboto-Light.ttf
+          weight: 300

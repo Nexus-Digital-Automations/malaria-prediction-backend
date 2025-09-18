@@ -565,6 +565,54 @@
       "updated_at": "2025-09-18T15:08:34.100Z",
       "archived_at": "2025-09-18T15:08:34.102Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T15:15:25.088Z",
+      "title": "Provide frontend startup instructions",
+      "description": "User wants to start the frontend to see it - provide clear instructions for Flutter frontend startup and backend integration",
+      "category": "feature",
+      "id": "feature_1758208525087_ko02yzipzrp",
+      "assigned_agent": "dev_session_1758208373123_1_general_65a9f859",
+      "started_at": "2025-09-18T15:15:41.894Z",
+      "claimed_by": "dev_session_1758208373123_1_general_65a9f859",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758208373123_1_general_65a9f859",
+          "role": "primary",
+          "assignedAt": "2025-09-18T15:15:41.894Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T15:16:22.872Z",
+      "updated_at": "2025-09-18T15:16:22.872Z",
+      "archived_at": "2025-09-18T15:16:22.874Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T15:22:57.563Z",
+      "title": "Create main dashboard with navigation and comprehensive theme system",
+      "description": "Implement main dashboard with overview widgets, create bottom navigation and drawer navigation, setup comprehensive theme management (dark/light mode), build responsive layout system for all screen sizes, create reusable UI components library, implement navigation routing with go_router",
+      "category": "feature",
+      "id": "feature_1758208977563_ld2as2rngtq",
+      "assigned_agent": "dev_session_1758208959675_1_general_1583da1f",
+      "started_at": "2025-09-18T15:24:26.320Z",
+      "claimed_by": "dev_session_1758208959675_1_general_1583da1f",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758208959675_1_general_1583da1f",
+          "role": "primary",
+          "assignedAt": "2025-09-18T15:24:26.320Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T16:33:04.080Z",
+      "updated_at": "2025-09-18T16:33:04.080Z",
+      "archived_at": "2025-09-18T16:33:04.082Z",
+      "archive_version": "2.0.0"
     }
   ],
   "project_info": {
@@ -575,10 +623,10 @@
     "total_completed": 0,
     "last_archived": null
   },
-  "last_archived": "2025-09-18T15:08:59.548Z",
-  "total_completed": 21,
+  "last_archived": "2025-09-18T16:33:04.082Z",
+  "total_completed": 23,
   "metadata": {
-    "last_bulk_archive": "2025-09-18T15:08:59.548Z",
-    "bulk_archive_count": 7
+    "last_bulk_archive": "2025-09-18T15:16:39.287Z",
+    "bulk_archive_count": 8
   }
 }

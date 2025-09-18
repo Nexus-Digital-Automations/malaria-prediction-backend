@@ -7,16 +7,19 @@ PostgreSQL and TimescaleDB for efficient time-series storage.
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     Column,
     DateTime,
     Float,
+    ForeignKey,
     Index,
     Integer,
     String,
+    Text,
     UniqueConstraint,
     func,
 )
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
@@ -415,6 +418,456 @@ class MalariaRiskIndex(Base):
     )
 
 
+class AlertConfiguration(Base):
+    """Alert configuration and threshold settings.
+
+    Stores user-defined alert thresholds, notification preferences,
+    and configuration settings for the alert system.
+    """
+
+    __tablename__ = "alert_configurations"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(100), nullable=False, index=True)
+    configuration_name = Column(String(200), nullable=False)
+
+    # Alert thresholds (0-1 scale for risk scores)
+    low_risk_threshold = Column(Float, nullable=False, default=0.3)
+    medium_risk_threshold = Column(Float, nullable=False, default=0.6)
+    high_risk_threshold = Column(Float, nullable=False, default=0.8)
+    critical_risk_threshold = Column(Float, nullable=False, default=0.9)
+
+    # Geographic filters
+    latitude_min = Column(Float, nullable=True)
+    latitude_max = Column(Float, nullable=True)
+    longitude_min = Column(Float, nullable=True)
+    longitude_max = Column(Float, nullable=True)
+    country_codes = Column(JSON, nullable=True)  # List of ISO country codes
+    admin_regions = Column(JSON, nullable=True)  # List of administrative regions
+
+    # Time-based filters
+    alert_frequency_hours = Column(Integer, nullable=False, default=24)  # Minimum hours between alerts
+    time_horizon_days = Column(Integer, nullable=False, default=7)  # Prediction time horizon
+    active_hours_start = Column(Integer, nullable=True)  # 0-23, local time
+    active_hours_end = Column(Integer, nullable=True)  # 0-23, local time
+    timezone = Column(String(50), nullable=False, default="UTC")
+
+    # Notification channels
+    enable_push_notifications = Column(Boolean, nullable=False, default=True)
+    enable_email_notifications = Column(Boolean, nullable=False, default=True)
+    enable_sms_notifications = Column(Boolean, nullable=False, default=False)
+    enable_webhook_notifications = Column(Boolean, nullable=False, default=False)
+
+    # Contact information
+    email_addresses = Column(JSON, nullable=True)  # List of email addresses
+    phone_numbers = Column(JSON, nullable=True)  # List of phone numbers
+    webhook_urls = Column(JSON, nullable=True)  # List of webhook endpoints
+
+    # Emergency response settings
+    enable_emergency_escalation = Column(Boolean, nullable=False, default=False)
+    emergency_contact_emails = Column(JSON, nullable=True)
+    emergency_contact_phones = Column(JSON, nullable=True)
+    emergency_escalation_threshold = Column(Float, nullable=False, default=0.95)
+
+    # Configuration status
+    is_active = Column(Boolean, nullable=False, default=True)
+    is_default = Column(Boolean, nullable=False, default=False)
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    last_triggered = Column(DateTime(timezone=True), nullable=True)
+
+    __table_args__ = (
+        Index("idx_alert_config_user", "user_id"),
+        Index("idx_alert_config_active", "is_active"),
+    )
+
+
+class AlertRule(Base):
+    """Advanced alert rules with complex conditions.
+
+    Stores sophisticated alert logic beyond simple thresholds,
+    including multi-factor conditions and temporal patterns.
+    """
+
+    __tablename__ = "alert_rules"
+
+    id = Column(Integer, primary_key=True)
+    configuration_id = Column(Integer, ForeignKey("alert_configurations.id"), nullable=False)
+    rule_name = Column(String(200), nullable=False)
+    rule_description = Column(Text, nullable=True)
+
+    # Rule conditions (stored as JSON for flexibility)
+    # Example: {"and": [{"risk_score": {"gt": 0.8}}, {"trend": "increasing"}]}
+    conditions = Column(JSON, nullable=False)
+
+    # Rule type and metadata
+    rule_type = Column(String(50), nullable=False)  # threshold, trend, pattern, ml
+    rule_version = Column(String(20), nullable=False, default="1.0")
+
+    # Execution settings
+    evaluation_frequency_minutes = Column(Integer, nullable=False, default=60)
+    min_data_points_required = Column(Integer, nullable=False, default=1)
+    lookback_period_hours = Column(Integer, nullable=False, default=24)
+
+    # Alert suppression
+    cooldown_period_hours = Column(Integer, nullable=False, default=24)
+    max_alerts_per_day = Column(Integer, nullable=False, default=5)
+
+    # Priority and categorization
+    alert_priority = Column(String(20), nullable=False, default="medium")  # low, medium, high, critical
+    alert_category = Column(String(50), nullable=False, default="outbreak_risk")
+
+    # Status and performance tracking
+    is_active = Column(Boolean, nullable=False, default=True)
+    last_evaluation = Column(DateTime(timezone=True), nullable=True)
+    evaluation_count = Column(Integer, nullable=False, default=0)
+    triggered_count = Column(Integer, nullable=False, default=0)
+    false_positive_count = Column(Integer, nullable=False, default=0)
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100), nullable=True)
+
+    # Relationships
+    configuration = relationship("AlertConfiguration", backref="rules")
+
+    __table_args__ = (
+        Index("idx_alert_rule_config", "configuration_id"),
+        Index("idx_alert_rule_active", "is_active"),
+        Index("idx_alert_rule_priority", "alert_priority"),
+    )
+
+
+class Alert(Base):
+    """Generated alerts and notifications.
+
+    Stores all generated alerts with their status, delivery tracking,
+    and performance metrics for system monitoring.
+    """
+
+    __tablename__ = "alerts"
+
+    id = Column(Integer, primary_key=True)
+    alert_rule_id = Column(Integer, ForeignKey("alert_rules.id"), nullable=True)
+    configuration_id = Column(Integer, ForeignKey("alert_configurations.id"), nullable=False)
+
+    # Alert identification
+    alert_type = Column(String(50), nullable=False)  # outbreak_risk, system_health, data_quality
+    alert_level = Column(String(20), nullable=False)  # low, medium, high, critical, emergency
+    alert_title = Column(String(500), nullable=False)
+    alert_message = Column(Text, nullable=False)
+    alert_summary = Column(Text, nullable=True)
+
+    # Geographic and temporal context
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    location_name = Column(String(200), nullable=True)
+    country_code = Column(String(3), nullable=True)
+    admin_region = Column(String(200), nullable=True)
+
+    # Risk and prediction data
+    risk_score = Column(Float, nullable=True)
+    confidence_score = Column(Float, nullable=True)
+    prediction_date = Column(DateTime(timezone=True), nullable=True)
+    time_horizon_days = Column(Integer, nullable=True)
+
+    # Alert data and context (JSON for flexibility)
+    # Includes: trigger conditions, data sources, model outputs, etc.
+    alert_data = Column(JSON, nullable=True)
+    environmental_data = Column(JSON, nullable=True)
+
+    # Status tracking
+    status = Column(String(20), nullable=False, default="generated")  # generated, sent, delivered, read, acknowledged, resolved
+    priority = Column(String(20), nullable=False)  # low, medium, high, critical, emergency
+
+    # Delivery tracking
+    push_notification_sent = Column(Boolean, nullable=False, default=False)
+    push_notification_delivered = Column(Boolean, nullable=False, default=False)
+    email_notification_sent = Column(Boolean, nullable=False, default=False)
+    email_notification_delivered = Column(Boolean, nullable=False, default=False)
+    sms_notification_sent = Column(Boolean, nullable=False, default=False)
+    sms_notification_delivered = Column(Boolean, nullable=False, default=False)
+    webhook_notification_sent = Column(Boolean, nullable=False, default=False)
+    webhook_notification_delivered = Column(Boolean, nullable=False, default=False)
+
+    # User interaction tracking
+    viewed_at = Column(DateTime(timezone=True), nullable=True)
+    acknowledged_at = Column(DateTime(timezone=True), nullable=True)
+    resolved_at = Column(DateTime(timezone=True), nullable=True)
+    dismissed_at = Column(DateTime(timezone=True), nullable=True)
+    acknowledged_by = Column(String(100), nullable=True)
+    resolution_notes = Column(Text, nullable=True)
+
+    # Emergency escalation
+    is_emergency = Column(Boolean, nullable=False, default=False)
+    escalated_at = Column(DateTime(timezone=True), nullable=True)
+    escalation_level = Column(Integer, nullable=False, default=0)
+
+    # Performance and feedback
+    response_time_seconds = Column(Integer, nullable=True)  # Time from generation to acknowledgment
+    feedback_rating = Column(Integer, nullable=True)  # 1-5 scale user feedback
+    feedback_comments = Column(Text, nullable=True)
+    false_positive = Column(Boolean, nullable=True)
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    expires_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Relationships
+    rule = relationship("AlertRule", backref="alerts")
+    configuration = relationship("AlertConfiguration", backref="alerts")
+
+    __table_args__ = (
+        Index("idx_alert_status", "status"),
+        Index("idx_alert_level", "alert_level"),
+        Index("idx_alert_priority", "priority"),
+        Index("idx_alert_location", "latitude", "longitude"),
+        Index("idx_alert_created", "created_at"),
+        Index("idx_alert_type_level", "alert_type", "alert_level"),
+        Index("idx_alert_emergency", "is_emergency"),
+    )
+
+
+class NotificationDelivery(Base):
+    """Notification delivery tracking and retry management.
+
+    Tracks individual notification delivery attempts across
+    all channels with retry logic and failure analysis.
+    """
+
+    __tablename__ = "notification_deliveries"
+
+    id = Column(Integer, primary_key=True)
+    alert_id = Column(Integer, ForeignKey("alerts.id"), nullable=False)
+
+    # Delivery channel and targeting
+    channel = Column(String(20), nullable=False)  # push, email, sms, webhook
+    recipient = Column(String(500), nullable=False)  # email, phone, device_token, webhook_url
+    recipient_type = Column(String(50), nullable=False)  # user, admin, emergency_contact, system
+
+    # Message content
+    subject = Column(String(500), nullable=True)
+    message_body = Column(Text, nullable=False)
+    message_format = Column(String(20), nullable=False, default="text")  # text, html, json
+
+    # Delivery status and tracking
+    status = Column(String(20), nullable=False, default="pending")  # pending, sent, delivered, failed, bounced
+    delivery_provider = Column(String(50), nullable=True)  # firebase, sendgrid, twilio, etc.
+    provider_message_id = Column(String(200), nullable=True)
+    provider_response = Column(JSON, nullable=True)
+
+    # Timing and retry logic
+    scheduled_at = Column(DateTime(timezone=True), nullable=False)
+    sent_at = Column(DateTime(timezone=True), nullable=True)
+    delivered_at = Column(DateTime(timezone=True), nullable=True)
+    failed_at = Column(DateTime(timezone=True), nullable=True)
+    retry_count = Column(Integer, nullable=False, default=0)
+    max_retries = Column(Integer, nullable=False, default=3)
+    next_retry_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Error handling
+    error_code = Column(String(50), nullable=True)
+    error_message = Column(Text, nullable=True)
+    failure_reason = Column(String(100), nullable=True)  # invalid_recipient, service_unavailable, rate_limited
+
+    # Performance metrics
+    processing_time_ms = Column(Integer, nullable=True)
+    delivery_time_ms = Column(Integer, nullable=True)
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    alert = relationship("Alert", backref="deliveries")
+
+    __table_args__ = (
+        Index("idx_notification_alert", "alert_id"),
+        Index("idx_notification_status", "status"),
+        Index("idx_notification_channel", "channel"),
+        Index("idx_notification_scheduled", "scheduled_at"),
+        Index("idx_notification_retry", "next_retry_at"),
+    )
+
+
+class AlertTemplate(Base):
+    """Alert message templates for different notification channels.
+
+    Stores customizable templates for generating alert messages
+    across different channels and languages.
+    """
+
+    __tablename__ = "alert_templates"
+
+    id = Column(Integer, primary_key=True)
+    template_name = Column(String(200), nullable=False)
+    template_type = Column(String(50), nullable=False)  # outbreak_risk, system_alert, emergency
+
+    # Channel-specific templates
+    channel = Column(String(20), nullable=False)  # push, email, sms, webhook
+    language_code = Column(String(10), nullable=False, default="en")
+
+    # Template content
+    subject_template = Column(Text, nullable=True)
+    message_template = Column(Text, nullable=False)
+    html_template = Column(Text, nullable=True)
+
+    # Template variables and metadata
+    # Stores available variables: {risk_score}, {location}, {prediction_date}, etc.
+    template_variables = Column(JSON, nullable=True)
+    template_description = Column(Text, nullable=True)
+
+    # Formatting and styling
+    message_format = Column(String(20), nullable=False, default="text")  # text, html, markdown
+    include_attachments = Column(Boolean, nullable=False, default=False)
+    attachment_types = Column(JSON, nullable=True)  # ["map_image", "risk_chart", "data_export"]
+
+    # Template management
+    is_active = Column(Boolean, nullable=False, default=True)
+    is_default = Column(Boolean, nullable=False, default=False)
+    version = Column(String(20), nullable=False, default="1.0")
+
+    # Usage tracking
+    usage_count = Column(Integer, nullable=False, default=0)
+    last_used = Column(DateTime(timezone=True), nullable=True)
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100), nullable=True)
+
+    __table_args__ = (
+        Index("idx_template_type_channel", "template_type", "channel"),
+        Index("idx_template_language", "language_code"),
+        Index("idx_template_active", "is_active"),
+        UniqueConstraint("template_name", "channel", "language_code", name="uq_template_name_channel_lang"),
+    )
+
+
+class UserDeviceToken(Base):
+    """User device tokens for push notifications.
+
+    Stores FCM (Firebase Cloud Messaging) device tokens
+    for push notification delivery to mobile devices.
+    """
+
+    __tablename__ = "user_device_tokens"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(100), nullable=False, index=True)
+
+    # Device and token information
+    device_token = Column(String(500), nullable=False, unique=True)
+    device_type = Column(String(20), nullable=False)  # ios, android, web
+    device_id = Column(String(200), nullable=True)
+    device_name = Column(String(200), nullable=True)
+
+    # Platform-specific settings
+    platform_version = Column(String(50), nullable=True)
+    app_version = Column(String(50), nullable=True)
+
+    # Token status and management
+    is_active = Column(Boolean, nullable=False, default=True)
+    is_valid = Column(Boolean, nullable=False, default=True)
+    last_validated = Column(DateTime(timezone=True), nullable=True)
+    validation_failures = Column(Integer, nullable=False, default=0)
+
+    # Usage tracking
+    last_notification_sent = Column(DateTime(timezone=True), nullable=True)
+    notification_count = Column(Integer, nullable=False, default=0)
+    successful_deliveries = Column(Integer, nullable=False, default=0)
+    failed_deliveries = Column(Integer, nullable=False, default=0)
+
+    # Token lifecycle
+    registered_at = Column(DateTime(timezone=True), server_default=func.now())
+    refreshed_at = Column(DateTime(timezone=True), nullable=True)
+    expires_at = Column(DateTime(timezone=True), nullable=True)
+    deactivated_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Geographic context (for location-based notifications)
+    last_latitude = Column(Float, nullable=True)
+    last_longitude = Column(Float, nullable=True)
+    location_updated_at = Column(DateTime(timezone=True), nullable=True)
+
+    __table_args__ = (
+        Index("idx_device_token_user", "user_id"),
+        Index("idx_device_token_active", "is_active"),
+        Index("idx_device_token_type", "device_type"),
+        Index("idx_device_token_location", "last_latitude", "last_longitude"),
+    )
+
+
+class AlertPerformanceMetrics(Base):
+    """Alert system performance and analytics.
+
+    Stores aggregated metrics for monitoring alert system
+    performance, accuracy, and user engagement.
+    """
+
+    __tablename__ = "alert_performance_metrics"
+
+    id = Column(Integer, primary_key=True)
+
+    # Time aggregation
+    metric_date = Column(DateTime(timezone=True), nullable=False, index=True)
+    aggregation_period = Column(String(20), nullable=False)  # hourly, daily, weekly, monthly
+
+    # Alert generation metrics
+    alerts_generated = Column(Integer, nullable=False, default=0)
+    alerts_by_level = Column(JSON, nullable=True)  # {"low": 5, "medium": 3, "high": 1}
+    alerts_by_type = Column(JSON, nullable=True)
+    alerts_by_location = Column(JSON, nullable=True)
+
+    # Delivery metrics
+    notifications_sent = Column(Integer, nullable=False, default=0)
+    notifications_delivered = Column(Integer, nullable=False, default=0)
+    notifications_failed = Column(Integer, nullable=False, default=0)
+    delivery_rate_percentage = Column(Float, nullable=True)
+
+    # Channel performance
+    push_delivery_rate = Column(Float, nullable=True)
+    email_delivery_rate = Column(Float, nullable=True)
+    sms_delivery_rate = Column(Float, nullable=True)
+    webhook_delivery_rate = Column(Float, nullable=True)
+
+    # User engagement metrics
+    alerts_viewed = Column(Integer, nullable=False, default=0)
+    alerts_acknowledged = Column(Integer, nullable=False, default=0)
+    alerts_dismissed = Column(Integer, nullable=False, default=0)
+    avg_response_time_seconds = Column(Float, nullable=True)
+    engagement_rate_percentage = Column(Float, nullable=True)
+
+    # Accuracy and feedback
+    false_positive_count = Column(Integer, nullable=False, default=0)
+    false_positive_rate = Column(Float, nullable=True)
+    user_feedback_avg_rating = Column(Float, nullable=True)
+    user_feedback_count = Column(Integer, nullable=False, default=0)
+
+    # System performance
+    avg_generation_time_ms = Column(Float, nullable=True)
+    avg_delivery_time_ms = Column(Float, nullable=True)
+    system_errors = Column(Integer, nullable=False, default=0)
+
+    # Geographic and demographic breakdowns
+    metrics_by_country = Column(JSON, nullable=True)
+    metrics_by_risk_level = Column(JSON, nullable=True)
+    metrics_by_user_type = Column(JSON, nullable=True)
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    calculation_version = Column(String(20), nullable=False, default="1.0")
+
+    __table_args__ = (
+        Index("idx_perf_metrics_date", "metric_date"),
+        Index("idx_perf_metrics_period", "aggregation_period"),
+        UniqueConstraint("metric_date", "aggregation_period", name="uq_metrics_date_period"),
+    )
+
+
 # TimescaleDB-specific setup queries
 TIMESCALEDB_SETUP = """
 -- Enable TimescaleDB and PostGIS extensions
@@ -439,6 +892,19 @@ SELECT create_hypertable('processed_climate_data', 'date',
     if_not_exists => TRUE);
 
 SELECT create_hypertable('malaria_risk_indices', 'assessment_date',
+    chunk_time_interval => INTERVAL '1 month',
+    if_not_exists => TRUE);
+
+-- Convert alert tables to hypertables for time-series performance
+SELECT create_hypertable('alerts', 'created_at',
+    chunk_time_interval => INTERVAL '1 month',
+    if_not_exists => TRUE);
+
+SELECT create_hypertable('notification_deliveries', 'created_at',
+    chunk_time_interval => INTERVAL '1 month',
+    if_not_exists => TRUE);
+
+SELECT create_hypertable('alert_performance_metrics', 'metric_date',
     chunk_time_interval => INTERVAL '1 month',
     if_not_exists => TRUE);
 

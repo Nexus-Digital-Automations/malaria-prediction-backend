@@ -10,10 +10,10 @@ import time
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-import jwt
 import pytest
 from fastapi import Request
 from fastapi.security import HTTPAuthorizationCredentials
+from jose import jwt
 
 
 # Mock database models before importing auth modules to avoid SQLAlchemy issues

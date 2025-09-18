@@ -11,9 +11,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
-# Import the dependencies module to test
 from src.malaria_predictor.api.dependencies import (
-    CacheManager,
     DatabaseManager,
     SecurityManager,
     check_system_health,
@@ -34,6 +32,9 @@ from src.malaria_predictor.api.dependencies import (
     verify_api_key,
 )
 from src.malaria_predictor.models import Permission, User, UserRole
+
+# Import the dependencies module to test
+from src.malaria_predictor.services.unified_data_harmonizer import CacheManager
 
 
 class TestDatabaseDependencies:

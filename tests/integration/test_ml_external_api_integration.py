@@ -15,7 +15,6 @@ import numpy as np
 import pytest
 import torch
 
-from malaria_predictor.ml.feature_extractor import FeatureExtractor
 from malaria_predictor.ml.models.ensemble_model import EnsembleModel
 from malaria_predictor.ml.models.lstm_model import LSTMModel
 from malaria_predictor.models import GeographicLocation

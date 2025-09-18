@@ -1,367 +1,281 @@
 """
-Pydantic Models for API Request/Response Validation.
+API Models for Analytics Dashboard.
 
-This module defines the data models used for API request and response validation,
-ensuring type safety and proper data structure for the malaria prediction service.
+This module defines Pydantic models for analytics API requests and responses,
+providing comprehensive data structures for visualization and reporting.
 """
 
-from datetime import date, datetime
-from enum import Enum
+from datetime import datetime
+from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
-
-
-class ModelType(str, Enum):
-    """Available model types for prediction."""
-
-    LSTM = "lstm"
-    TRANSFORMER = "transformer"
-    ENSEMBLE = "ensemble"
+from pydantic import BaseModel, Field
 
 
-class PredictionHorizon(int, Enum):
-    """Supported prediction horizons in days."""
+class AnalyticsRequest(BaseModel):
+    """Base analytics request model."""
 
-    SHORT_TERM = 7
-    MEDIUM_TERM = 15
-    LONG_TERM = 30
-
-
-class GeographicBounds(BaseModel):
-    """Geographic bounding box for spatial queries."""
-
-    west: float = Field(..., ge=-180, le=180, description="Western longitude")
-    south: float = Field(..., ge=-90, le=90, description="Southern latitude")
-    east: float = Field(..., ge=-180, le=180, description="Eastern longitude")
-    north: float = Field(..., ge=-90, le=90, description="Northern latitude")
-
-    @field_validator("east")
-    def east_greater_than_west(cls, v, info):
-        """Validate that east is greater than west."""
-        if info.data and "west" in info.data and v <= info.data["west"]:
-            raise ValueError("East longitude must be greater than west longitude")
-        return v
-
-    @field_validator("north")
-    def north_greater_than_south(cls, v, info):
-        """Validate that north is greater than south."""
-        if info.data and "south" in info.data and v <= info.data["south"]:
-            raise ValueError("North latitude must be greater than south latitude")
-        return v
+    start_date: str | None = Field(None, description="Start date in YYYY-MM-DD format")
+    end_date: str | None = Field(None, description="End date in YYYY-MM-DD format")
+    location_lat: float | None = Field(None, ge=-90, le=90, description="Latitude")
+    location_lon: float | None = Field(None, ge=-180, le=180, description="Longitude")
+    radius_km: float | None = Field(50, gt=0, le=1000, description="Radius in kilometers")
 
 
-class LocationPoint(BaseModel):
-    """Single geographic point for prediction."""
+class PredictionAccuracyRequest(AnalyticsRequest):
+    """Request model for prediction accuracy analytics."""
 
-    latitude: float = Field(
-        ..., ge=-90, le=90, description="Latitude in decimal degrees"
-    )
-    longitude: float = Field(
-        ..., ge=-180, le=180, description="Longitude in decimal degrees"
-    )
-    name: str | None = Field(None, description="Optional location name")
+    model_type: str | None = Field(None, description="Model type filter")
+    region: str | None = Field(None, description="Geographic region filter")
+    confidence_threshold: float | None = Field(0.7, ge=0, le=1, description="Confidence threshold")
 
 
-class PredictionRequest(BaseModel):
-    """Base prediction request model."""
+class EnvironmentalTrendsRequest(AnalyticsRequest):
+    """Request model for environmental trends analysis."""
 
-    target_date: date = Field(..., description="Target date for prediction")
-    model_type: ModelType = Field(
-        ModelType.ENSEMBLE, description="Model to use for prediction"
-    )
-    prediction_horizon: PredictionHorizon = Field(
-        PredictionHorizon.LONG_TERM, description="Prediction horizon in days"
-    )
-    include_uncertainty: bool = Field(True, description="Include uncertainty estimates")
-    include_features: bool = Field(
-        False, description="Include input features in response"
-    )
-
-    model_config = {"protected_namespaces": ()}
+    days_back: int = Field(365, gt=0, le=3650, description="Number of days to analyze")
+    data_sources: str | None = Field("era5,chirps,modis", description="Comma-separated data sources")
+    aggregation: str = Field("daily", description="Aggregation level")
+    include_anomalies: bool = Field(True, description="Include anomaly detection")
 
 
-class SinglePredictionRequest(PredictionRequest):
-    """Request for single location prediction."""
+class OutbreakPatternsRequest(AnalyticsRequest):
+    """Request model for outbreak pattern analysis."""
 
-    location: LocationPoint = Field(
-        ..., description="Geographic location for prediction"
-    )
-
-
-class BatchPredictionRequest(PredictionRequest):
-    """Request for batch prediction across multiple locations."""
-
-    locations: list[LocationPoint] = Field(
-        ...,
-        min_items=1,
-        max_items=100,
-        description="List of locations for batch prediction",
-    )
+    region: str | None = Field(None, description="Geographic region")
+    time_scale: str = Field("monthly", description="Time scale for analysis")
+    risk_threshold: float = Field(0.7, ge=0, le=1, description="Risk threshold for outbreak classification")
+    years_back: int = Field(5, gt=0, le=20, description="Number of years to analyze")
+    include_seasonality: bool = Field(True, description="Include seasonal analysis")
 
 
-class SpatialPredictionRequest(PredictionRequest):
-    """Request for spatial grid prediction."""
+class DataExplorationRequest(AnalyticsRequest):
+    """Request model for interactive data exploration."""
 
-    bounds: GeographicBounds = Field(
-        ..., description="Geographic bounds for prediction"
-    )
-    resolution: float = Field(
-        0.1, ge=0.01, le=1.0, description="Spatial resolution in degrees"
-    )
-
-
-class TimeSeriesPredictionRequest(BaseModel):
-    """Request for time series prediction."""
-
-    location: LocationPoint = Field(..., description="Geographic location")
-    start_date: date = Field(..., description="Start date for time series")
-    end_date: date = Field(..., description="End date for time series")
-    model_type: ModelType = Field(ModelType.ENSEMBLE, description="Model to use")
-    include_uncertainty: bool = Field(True, description="Include uncertainty estimates")
-
-    model_config = {"protected_namespaces": ()}
-
-    @field_validator("end_date")
-    def end_after_start(cls, v, info):
-        """Validate that end_date is after start_date."""
-        if info.data and "start_date" in info.data and v <= info.data["start_date"]:
-            raise ValueError("End date must be after start date")
-        return v
+    data_type: str = Field(..., description="Data type to explore")
+    aggregation_method: str = Field("mean", description="Aggregation method")
+    group_by: str = Field("month", description="Grouping method")
+    limit: int = Field(1000, gt=0, le=10000, description="Maximum records to return")
+    include_metadata: bool = Field(True, description="Include data quality metadata")
 
 
-class RiskLevel(str, Enum):
-    """Risk level categories."""
+class CustomReportRequest(BaseModel):
+    """Request model for custom report generation."""
 
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    VERY_HIGH = "very_high"
-
-
-class PredictionResult(BaseModel):
-    """Single prediction result."""
-
-    location: LocationPoint
-    target_date: date
-    risk_score: float = Field(..., ge=0, le=1, description="Risk score between 0 and 1")
-    risk_level: RiskLevel = Field(..., description="Categorical risk level")
-    uncertainty: float | None = Field(None, ge=0, description="Prediction uncertainty")
-    confidence_interval: list[float] | None = Field(
-        None, description="95% confidence interval [lower, upper]"
-    )
-    model_used: ModelType = Field(..., description="Model used for prediction")
-    prediction_horizon: int = Field(..., description="Prediction horizon in days")
-
-    model_config = {"protected_namespaces": ()}
+    report_type: str = Field("summary", description="Type of report to generate")
+    data_sources: list[str] = Field(default_factory=list, description="Data sources to include")
+    time_range: dict[str, Any] = Field(default_factory=dict, description="Time range configuration")
+    geographic_scope: dict[str, Any] = Field(default_factory=dict, description="Geographic scope")
+    visualizations: list[dict[str, Any]] = Field(default_factory=list, description="Visualization configurations")
+    export_format: str = Field("json", description="Export format")
+    include_raw_data: bool = Field(False, description="Include raw data in report")
 
 
-class BatchPredictionResult(BaseModel):
-    """Batch prediction results."""
+# Response Models
 
-    predictions: list[PredictionResult]
-    total_locations: int = Field(..., description="Total number of locations processed")
-    successful_predictions: int = Field(
-        ..., description="Number of successful predictions"
-    )
-    failed_predictions: int = Field(..., description="Number of failed predictions")
-    processing_time_ms: float = Field(
-        ..., description="Total processing time in milliseconds"
-    )
+class ChartDataPoint(BaseModel):
+    """Single chart data point."""
+
+    x: str | float | int = Field(..., description="X-axis value")
+    y: str | float | int = Field(..., description="Y-axis value")
+    category: str | None = Field(None, description="Category for grouping")
+    metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
 
 
-class TimeSeriesPoint(BaseModel):
-    """Single point in time series prediction."""
+class ChartSeries(BaseModel):
+    """Chart data series."""
 
-    prediction_date: date
-    risk_score: float = Field(..., ge=0, le=1)
-    risk_level: RiskLevel
-    uncertainty: float | None = Field(None, ge=0)
-
-
-class TimeSeriesPredictionResult(BaseModel):
-    """Time series prediction result."""
-
-    location: LocationPoint
-    model_used: ModelType
-    time_series: list[TimeSeriesPoint]
-    summary_statistics: dict = Field(
-        ..., description="Summary statistics for the time series"
-    )
-
-    model_config = {"protected_namespaces": ()}
+    name: str = Field(..., description="Series name")
+    data: list[ChartDataPoint] = Field(..., description="Data points")
+    color: str | None = Field(None, description="Series color")
+    chart_type: str | None = Field(None, description="Chart type for this series")
 
 
-class ModelMetrics(BaseModel):
+class VisualizationConfig(BaseModel):
+    """Visualization configuration for frontend rendering."""
+
+    chart_type: str = Field(..., description="Type of chart")
+    title: str = Field(..., description="Chart title")
+    x_axis_label: str | None = Field(None, description="X-axis label")
+    y_axis_label: str | None = Field(None, description="Y-axis label")
+    color_scheme: str | None = Field("default", description="Color scheme")
+    interactive: bool = Field(True, description="Enable interactivity")
+    show_legend: bool = Field(True, description="Show legend")
+    animation_enabled: bool = Field(True, description="Enable animations")
+
+
+class StatisticalSummary(BaseModel):
+    """Statistical summary for a dataset."""
+
+    count: int = Field(..., description="Number of data points")
+    mean: float | None = Field(None, description="Mean value")
+    median: float | None = Field(None, description="Median value")
+    std_dev: float | None = Field(None, description="Standard deviation")
+    min_value: float | None = Field(None, description="Minimum value")
+    max_value: float | None = Field(None, description="Maximum value")
+    percentiles: dict[str, float] | None = Field(None, description="Percentile values")
+
+
+class ModelPerformanceMetrics(BaseModel):
     """Model performance metrics."""
 
-    model_type: ModelType
-    accuracy: float = Field(..., ge=0, le=1)
-    precision: float = Field(..., ge=0, le=1)
-    recall: float = Field(..., ge=0, le=1)
-    f1_score: float = Field(..., ge=0, le=1)
-    auc_roc: float = Field(..., ge=0, le=1)
-    rmse: float = Field(..., ge=0)
-    mae: float = Field(..., ge=0)
-    last_updated: datetime
-
-    model_config = {"protected_namespaces": ()}
+    model_name: str = Field(..., description="Model name")
+    accuracy: float = Field(..., ge=0, le=1, description="Model accuracy")
+    precision: float = Field(..., ge=0, le=1, description="Model precision")
+    recall: float = Field(..., ge=0, le=1, description="Model recall")
+    f1_score: float = Field(..., ge=0, le=1, description="F1 score")
+    confidence_score: float = Field(..., ge=0, le=1, description="Average confidence")
+    total_predictions: int = Field(..., ge=0, description="Total predictions made")
+    high_confidence_rate: float = Field(..., ge=0, le=1, description="Rate of high confidence predictions")
 
 
-class HealthStatus(str, Enum):
-    """Service health status."""
+class GeographicDistribution(BaseModel):
+    """Geographic distribution data."""
 
-    HEALTHY = "healthy"
-    DEGRADED = "degraded"
-    UNHEALTHY = "unhealthy"
-
-
-class HealthResponse(BaseModel):
-    """Health check response."""
-
-    status: HealthStatus
-    timestamp: datetime
-    version: str
-    uptime_seconds: float
-    models_loaded: list[ModelType]
-    data_sources: dict = Field(..., description="Status of data sources")
-    system_metrics: dict = Field(..., description="System resource metrics")
+    location: str = Field(..., description="Location name or coordinates")
+    latitude: float = Field(..., ge=-90, le=90, description="Latitude")
+    longitude: float = Field(..., ge=-180, le=180, description="Longitude")
+    value: float = Field(..., description="Metric value for this location")
+    category: str | None = Field(None, description="Category classification")
+    population: int | None = Field(None, description="Population in this area")
 
 
-class ErrorResponse(BaseModel):
-    """Error response model."""
+class TemporalTrend(BaseModel):
+    """Temporal trend data point."""
 
-    error: dict = Field(..., description="Error details")
-
-    model_config = {
-        "json_schema_extra": {
-            "example": {
-                "error": {
-                    "code": 400,
-                    "message": "Invalid request parameters",
-                    "timestamp": 1640995200.0,
-                    "path": "/predict/single",
-                }
-            }
-        }
-    }
+    timestamp: datetime = Field(..., description="Timestamp for this data point")
+    value: float = Field(..., description="Metric value")
+    trend_direction: str | None = Field(None, description="Trend direction (up/down/stable)")
+    anomaly_score: float | None = Field(None, description="Anomaly detection score")
+    confidence_interval: dict[str, float] | None = Field(None, description="Confidence interval")
 
 
-class FeatureImportance(BaseModel):
-    """Feature importance for model interpretability."""
+class SeasonalPattern(BaseModel):
+    """Seasonal pattern analysis."""
 
-    feature_name: str
-    importance_score: float = Field(..., ge=0, le=1)
-    category: str = Field(
-        ..., description="Feature category (climate, vegetation, etc.)"
-    )
-
-
-class ModelExplanation(BaseModel):
-    """Model prediction explanation."""
-
-    prediction_id: str
-    model_type: ModelType
-    feature_importance: list[FeatureImportance]
-    attention_weights: dict | None = Field(
-        None, description="Attention weights for Transformer"
-    )
-    temporal_importance: list[float] | None = Field(
-        None, description="Temporal importance weights"
-    )
-
-    model_config = {"protected_namespaces": ()}
+    season: str = Field(..., description="Season name")
+    average_value: float = Field(..., description="Average value for this season")
+    peak_month: int = Field(..., ge=1, le=12, description="Peak month")
+    peak_value: float = Field(..., description="Peak value")
+    seasonal_index: float = Field(..., description="Seasonal index (relative to annual average)")
 
 
-class DataQualityMetrics(BaseModel):
-    """Data quality metrics for input features."""
+class AnalyticsResponse(BaseModel):
+    """Base analytics response model."""
 
-    source: str = Field(..., description="Data source name")
-    completeness: float = Field(..., ge=0, le=1, description="Data completeness ratio")
-    freshness_hours: float = Field(..., ge=0, description="Hours since last update")
-    quality_score: float = Field(..., ge=0, le=1, description="Overall quality score")
-    issues: list[str] = Field(default_factory=list, description="Quality issues found")
-
-
-# Database creation models for testing
-class Location(BaseModel):
-    """Location model for database operations."""
-
-    latitude: float = Field(
-        ..., ge=-90, le=90, description="Latitude in decimal degrees"
-    )
-    longitude: float = Field(
-        ..., ge=-180, le=180, description="Longitude in decimal degrees"
-    )
+    success: bool = Field(True, description="Response success status")
+    data: dict[str, Any] = Field(..., description="Response data")
+    metadata: dict[str, Any] = Field(..., description="Response metadata")
+    generated_at: datetime = Field(default_factory=datetime.now, description="Response generation time")
 
 
-class EnvironmentalDataCreate(BaseModel):
-    """Model for creating environmental data records."""
+class PredictionAccuracyResponse(AnalyticsResponse):
+    """Response model for prediction accuracy analytics."""
 
-    location: Location = Field(..., description="Geographic location")
-    timestamp: datetime = Field(..., description="Data timestamp")
-    temperature: float | None = Field(None, description="Temperature in Celsius")
-    precipitation: float | None = Field(None, description="Precipitation in mm")
-    humidity: float | None = Field(None, description="Relative humidity percentage")
-    data_source: str = Field("unknown", description="Data source identifier")
+    model_performance: list[ModelPerformanceMetrics] = Field(..., description="Model performance metrics")
+    temporal_trends: list[TemporalTrend] = Field(..., description="Accuracy trends over time")
+    confidence_distribution: dict[str, int] = Field(..., description="Confidence score distribution")
+    visualization_config: VisualizationConfig = Field(..., description="Suggested visualization configuration")
 
 
-class MalariaIncidenceCreate(BaseModel):
-    """Model for creating malaria incidence records."""
+class EnvironmentalTrendsResponse(AnalyticsResponse):
+    """Response model for environmental trends analysis."""
 
-    location: Location = Field(..., description="Geographic location")
-    incidence_date: date = Field(..., description="Incidence date")
-    case_count: int = Field(..., ge=0, description="Number of confirmed cases")
-    population: int | None = Field(None, ge=0, description="Population at risk")
-    data_source: str = Field("unknown", description="Data source identifier")
-
-
-class PredictionCreate(BaseModel):
-    """Model for creating prediction records."""
-
-    location: Location = Field(..., description="Geographic location")
-    prediction_date: datetime = Field(..., description="When prediction was made")
-    target_date: date = Field(..., description="Target date for prediction")
-    risk_score: float = Field(..., ge=0, le=1, description="Predicted risk score")
-    model_type: ModelType = Field(..., description="Model used for prediction")
-    confidence: float | None = Field(
-        None, ge=0, le=1, description="Prediction confidence"
-    )
+    temperature_trends: list[TemporalTrend] = Field(..., description="Temperature trend data")
+    precipitation_trends: list[TemporalTrend] = Field(..., description="Precipitation trend data")
+    vegetation_trends: list[TemporalTrend] = Field(..., description="Vegetation index trends")
+    correlation_matrix: dict[str, dict[str, float]] = Field(..., description="Variable correlation matrix")
+    seasonal_patterns: list[SeasonalPattern] = Field(..., description="Seasonal pattern analysis")
+    anomaly_detection: dict[str, Any] = Field(..., description="Anomaly detection results")
 
 
-# Database model aliases for compatibility
-class EnvironmentalData(BaseModel):
-    """Environmental data model for database queries."""
+class OutbreakPatternsResponse(AnalyticsResponse):
+    """Response model for outbreak pattern analysis."""
 
-    id: int | None = None
-    timestamp: datetime
-    latitude: float
-    longitude: float
-    temperature: float | None = None
-    precipitation: float | None = None
-    humidity: float | None = None
-    data_source: str = "unknown"
+    outbreak_frequency: dict[str, int] = Field(..., description="Outbreak frequency by time period")
+    geographic_distribution: list[GeographicDistribution] = Field(..., description="Geographic outbreak distribution")
+    seasonal_patterns: list[SeasonalPattern] = Field(..., description="Seasonal outbreak patterns")
+    risk_escalation_events: list[dict[str, Any]] = Field(..., description="Risk escalation events")
+    clustering_analysis: dict[str, Any] = Field(..., description="Spatial-temporal clustering results")
 
 
-class MalariaIncidenceData(BaseModel):
-    """Malaria incidence data model for database queries."""
+class DataExplorationResponse(AnalyticsResponse):
+    """Response model for data exploration."""
 
-    id: int | None = None
-    incidence_date: date
-    latitude: float
-    longitude: float
-    case_count: int
-    population: int | None = None
-    data_source: str = "unknown"
+    dataset_summary: StatisticalSummary = Field(..., description="Dataset statistical summary")
+    data_points: list[dict[str, Any]] = Field(..., description="Raw or aggregated data points")
+    data_quality_metrics: dict[str, Any] = Field(..., description="Data quality assessment")
+    suggested_visualizations: list[VisualizationConfig] = Field(..., description="Suggested visualizations")
+    export_options: dict[str, str] = Field(..., description="Available export formats")
 
 
-class PredictionData(BaseModel):
-    """Prediction data model for database queries."""
+class CustomReportResponse(AnalyticsResponse):
+    """Response model for custom reports."""
 
-    id: int | None = None
-    prediction_date: datetime
-    target_date: date
-    latitude: float
-    longitude: float
-    risk_score: float
-    model_type: str
-    confidence: float | None = None
+    report_id: str = Field(..., description="Unique report identifier")
+    report_sections: list[dict[str, Any]] = Field(..., description="Report sections")
+    visualizations: list[dict[str, Any]] = Field(..., description="Generated visualizations")
+    summary_statistics: dict[str, Any] = Field(..., description="Summary statistics")
+    export_links: dict[str, str] = Field(..., description="Export download links")
+    report_metadata: dict[str, Any] = Field(..., description="Report generation metadata")
+
+
+class DashboardWidget(BaseModel):
+    """Dashboard widget configuration."""
+
+    widget_id: str = Field(..., description="Unique widget identifier")
+    widget_type: str = Field(..., description="Widget type")
+    title: str = Field(..., description="Widget title")
+    position: dict[str, int] = Field(..., description="Widget position and size")
+    data_endpoint: str = Field(..., description="API endpoint for widget data")
+    refresh_interval: int | None = Field(None, description="Refresh interval in seconds")
+    chart_config: dict[str, Any] | None = Field(None, description="Chart configuration")
+    alert_thresholds: dict[str, float] | None = Field(None, description="Alert thresholds")
+
+
+class DashboardLayout(BaseModel):
+    """Dashboard layout configuration."""
+
+    dashboard_id: str = Field(..., description="Dashboard identifier")
+    dashboard_type: str = Field(..., description="Dashboard type")
+    layout_config: dict[str, Any] = Field(..., description="Layout configuration")
+    widgets: list[DashboardWidget] = Field(..., description="Dashboard widgets")
+    theme_config: dict[str, Any] = Field(..., description="Theme configuration")
+    auto_refresh: bool = Field(True, description="Auto-refresh enabled")
+    refresh_interval: int = Field(300, description="Global refresh interval")
+
+
+class AlertConfiguration(BaseModel):
+    """Alert configuration for analytics monitoring."""
+
+    alert_id: str = Field(..., description="Alert identifier")
+    alert_name: str = Field(..., description="Human-readable alert name")
+    metric_name: str = Field(..., description="Metric being monitored")
+    threshold_value: float = Field(..., description="Alert threshold")
+    threshold_type: str = Field(..., description="Threshold type (above/below/equal)")
+    severity: str = Field(..., description="Alert severity level")
+    notification_channels: list[str] = Field(..., description="Notification channels")
+    cooldown_period: int = Field(300, description="Cooldown period in seconds")
+
+
+class ExportConfiguration(BaseModel):
+    """Data export configuration."""
+
+    export_format: str = Field(..., description="Export format")
+    include_metadata: bool = Field(True, description="Include metadata in export")
+    compression: str | None = Field(None, description="Compression format")
+    date_range: dict[str, str] | None = Field(None, description="Date range for export")
+    filters: dict[str, Any] | None = Field(None, description="Data filters")
+    aggregation_level: str | None = Field(None, description="Data aggregation level")
+
+
+class AnalyticsHealthCheck(BaseModel):
+    """Analytics system health check response."""
+
+    system_status: str = Field(..., description="Overall system status")
+    data_pipeline_status: dict[str, str] = Field(..., description="Data pipeline statuses")
+    model_status: dict[str, str] = Field(..., description="ML model statuses")
+    cache_status: str = Field(..., description="Cache system status")
+    database_status: str = Field(..., description="Database connectivity status")
+    last_data_update: datetime = Field(..., description="Last data update timestamp")
+    alerts_active: int = Field(..., description="Number of active alerts")
+    performance_metrics: dict[str, float] = Field(..., description="Performance metrics")

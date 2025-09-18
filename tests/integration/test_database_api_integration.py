@@ -22,8 +22,8 @@ from malaria_predictor.database.repositories import (
     PredictionRepository,
     UserRepository,
 )
+from malaria_predictor.database.security_models import APIKey
 from malaria_predictor.models import (
-    APIKey,
     EnvironmentalData,
     User,
     UserRole,

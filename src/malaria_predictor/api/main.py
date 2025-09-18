@@ -24,7 +24,7 @@ from .middleware import (
     RequestIdMiddleware,
     SecurityHeadersMiddleware,
 )
-from .routers import auth, health, operations, prediction
+from .routers import alerts, analytics, auth, health, healthcare, operations, prediction
 
 logger = logging.getLogger(__name__)
 
@@ -136,6 +136,9 @@ app.add_middleware(RateLimitMiddleware, calls=100, period=60)  # 100 calls per m
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(health.router, prefix="/health", tags=["Health"])
 app.include_router(prediction.router, prefix="/predict", tags=["Prediction"])
+app.include_router(healthcare.router, prefix="/healthcare", tags=["Healthcare Professional Tools"])
+app.include_router(alerts.router, prefix="/api/v1", tags=["Alerts"])
+app.include_router(analytics.router, tags=["Analytics"])
 app.include_router(operations.router, tags=["Operations"])
 
 
@@ -184,6 +187,7 @@ async def root():
             "docs": "/docs",
             "health": "/health",
             "prediction": "/predict",
+            "analytics": "/analytics",
             "operations": "/operations/dashboard",
             "metrics": "/health/metrics",
         },
@@ -241,6 +245,14 @@ async def api_info():
                 "batch": "POST /predict/batch - Multiple location predictions",
                 "time_series": "POST /predict/time-series - Historical predictions",
             },
+            "analytics": {
+                "accuracy": "GET /analytics/prediction-accuracy - Model performance metrics",
+                "trends": "GET /analytics/environmental-trends - Environmental trend analysis",
+                "patterns": "GET /analytics/outbreak-patterns - Outbreak pattern recognition",
+                "exploration": "GET /analytics/data-exploration - Interactive data exploration",
+                "reports": "POST /analytics/custom-report - Custom report generation",
+                "dashboard": "GET /analytics/dashboard-config - Dashboard configurations",
+            },
             "health": {
                 "status": "GET /health - API health status",
                 "models": "GET /health/models - Model health and metrics",
@@ -262,6 +274,10 @@ async def api_info():
             "monitoring": "Comprehensive health checks and metrics",
             "operations_dashboard": "Production-grade operations dashboard with real-time monitoring",
             "alerting": "Automated alerting with escalation and runbook integration",
+            "analytics_dashboard": "Comprehensive analytics dashboard with advanced data visualization",
+            "trend_analysis": "Environmental and epidemiological trend analysis",
+            "pattern_recognition": "Outbreak pattern recognition and seasonal analysis",
+            "custom_reporting": "Flexible custom report generation with multiple export formats",
         },
     }
 
