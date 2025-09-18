@@ -2,150 +2,26 @@
   "project": "root_files",
   "tasks": [
     {
-      "id": "task_1755045713680_6ffliyb1h",
+      "id": "error_1758180028406_lxzb5un63",
       "title": "Continue development and improvements",
       "description": "Continue with the current development tasks, fix any issues, and improve the codebase quality.",
       "mode": "DEVELOPMENT",
       "priority": "medium",
-      "status": "pending",
-      "dependencies": [],
-      "important_files": [],
-      "requires_research": false,
-      "created_at": "2025-08-13T00:41:53.680Z",
-      "subtasks": [],
-      "category": "feature"
-    },
-    {
-      "id": "task_1755045713681_review1",
-      "title": "Review Strike 1: Ensure the project builds completely without errors",
-      "description": "Perform a comprehensive code review with focus on: Ensure the project builds completely without errors\n\nCheck the entire codebase and ensure this criterion is met.\n\n## CRITICAL FAILURE RESPONSE PROTOCOL\n\nIF BUILD FAILS: Create specific TASK CREATION tasks in TODO.json to fix build issues:\n- Missing dependencies installation tasks\n- Build configuration setup tasks  \n- Compilation error resolution tasks\n- Environment setup tasks\n- Build script creation tasks\n\nCRITICAL: Use TaskManager API to add these tasks immediately when build failures are detected.\n\n## SUCCESS CRITERIA\n- Mark this review task as completed ONLY if the criterion is fully met\n- If criterion fails, you MUST create remediation tasks using TaskManager API before marking review as completed\n- All new tasks should be actionable, specific, and include proper dependencies/important_files parameters\n\n## TASK CREATION REQUIREMENT\nWhen creating remediation tasks, ensure each task includes:\n- Clear success criteria\n- Appropriate mode (DEVELOPMENT/TESTING/REFACTORING)\n- Specific file dependencies\n- Realistic time estimates\n- High priority for critical issues\n\nUse the task-creation.md guidelines for optimal task structure.",
-      "mode": "REVIEWER",
-      "priority": "high",
-      "status": "completed",
-      "dependencies": [],
-      "important_files": [],
-      "requires_research": false,
-      "created_at": "2025-08-13T00:41:53.680Z",
-      "subtasks": [],
-      "is_review_task": true,
-      "strike_number": 1,
-      "category": "error",
-      "assigned_agent": "dev_session_1758177771353_1_general_550ddd50",
-      "started_at": "2025-09-18T06:53:46.636Z",
-      "claimed_by": "dev_session_1758177771353_1_general_550ddd50",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758177771353_1_general_550ddd50",
-          "role": "primary",
-          "assignedAt": "2025-09-18T06:53:46.636Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-18T06:55:43.066Z",
-      "updated_at": "2025-09-18T06:55:43.066Z"
-    },
-    {
-      "id": "task_1755045713682_review2",
-      "title": "Review Strike 2: Verify no lint errors exist in the codebase",
-      "description": "Perform a comprehensive code review with focus on: Verify no lint errors exist in the codebase\n\nCheck the entire codebase and ensure this criterion is met.\n\n## CRITICAL FAILURE RESPONSE PROTOCOL\n\nIF LINT ERRORS FOUND: Create specific TASK CREATION tasks in TODO.json to achieve zero lint errors:\n- Linting tool setup and configuration tasks\n- Code style correction tasks\n- Import organization tasks\n- Naming convention fixes tasks\n- Dead code removal tasks\n\nCRITICAL: Use TaskManager API to add these tasks immediately when lint errors are detected.\n\n## SUCCESS CRITERIA\n- Mark this review task as completed ONLY if the criterion is fully met\n- If criterion fails, you MUST create remediation tasks using TaskManager API before marking review as completed\n- All new tasks should be actionable, specific, and include proper dependencies/important_files parameters\n\n## TASK CREATION REQUIREMENT\nWhen creating remediation tasks, ensure each task includes:\n- Clear success criteria\n- Appropriate mode (DEVELOPMENT/TESTING/REFACTORING)\n- Specific file dependencies\n- Realistic time estimates\n- High priority for critical issues\n\nUse the task-creation.md guidelines for optimal task structure.",
-      "mode": "REVIEWER",
-      "priority": "high",
-      "status": "completed",
-      "dependencies": [],
-      "important_files": [],
-      "requires_research": false,
-      "created_at": "2025-08-13T00:41:53.680Z",
-      "subtasks": [],
-      "is_review_task": true,
-      "strike_number": 2,
-      "category": "error",
-      "assigned_agent": "dev_session_1758177771353_1_general_550ddd50",
-      "started_at": "2025-09-18T06:56:03.705Z",
-      "claimed_by": "dev_session_1758177771353_1_general_550ddd50",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758177771353_1_general_550ddd50",
-          "role": "primary",
-          "assignedAt": "2025-09-18T06:56:03.705Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-18T06:56:48.134Z",
-      "updated_at": "2025-09-18T06:56:48.134Z"
-    },
-    {
-      "id": "task_1755045713683_review3",
-      "title": "Review Strike 3: Confirm test coverage is 100% on important modules and 90%+ on others, with all tests passing",
-      "description": "Perform a comprehensive code review with focus on: Confirm test coverage is 100% on important modules and 90%+ on others, with all tests passing\n\nCheck the entire codebase and ensure this criterion is met.\n\n## CRITICAL FAILURE RESPONSE PROTOCOL\n\nIF TEST COVERAGE INSUFFICIENT: Create specific TASK CREATION tasks in TODO.json to achieve required coverage:\n- Test framework setup tasks (Jest/Mocha/Vitest)\n- Unit test creation tasks for all modules\n- Integration test development tasks\n- Test coverage reporting setup tasks\n- CI/CD test integration tasks\n\nCRITICAL: Use TaskManager API to add these tasks immediately when coverage is below requirements.\n\n## SUCCESS CRITERIA\n- Mark this review task as completed ONLY if the criterion is fully met\n- If criterion fails, you MUST create remediation tasks using TaskManager API before marking review as completed\n- All new tasks should be actionable, specific, and include proper dependencies/important_files parameters\n\n## TASK CREATION REQUIREMENT\nWhen creating remediation tasks, ensure each task includes:\n- Clear success criteria\n- Appropriate mode (DEVELOPMENT/TESTING/REFACTORING)\n- Specific file dependencies\n- Realistic time estimates\n- High priority for critical issues\n\nUse the task-creation.md guidelines for optimal task structure.",
-      "mode": "REVIEWER",
-      "priority": "high",
-      "status": "completed",
-      "dependencies": [],
-      "important_files": [],
-      "requires_research": false,
-      "created_at": "2025-08-13T00:41:53.680Z",
-      "subtasks": [],
-      "is_review_task": true,
-      "strike_number": 3,
-      "category": "test",
-      "assigned_agent": "dev_session_1758177771353_1_general_550ddd50",
-      "started_at": "2025-09-18T06:57:11.471Z",
-      "claimed_by": "dev_session_1758177771353_1_general_550ddd50",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758177771353_1_general_550ddd50",
-          "role": "primary",
-          "assignedAt": "2025-09-18T06:57:11.471Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-18T06:58:42.531Z",
-      "updated_at": "2025-09-18T06:58:42.531Z"
-    },
-    {
-      "status": "completed",
-      "created_at": "2025-09-18T06:57:47.337Z",
-      "title": "Install project dependencies for test execution",
-      "description": "Install all required dependencies from pyproject.toml to enable test execution. Current tests failing with ModuleNotFoundError for sqlalchemy and other required packages. Must install dependencies before test coverage can be assessed.",
-      "category": "error",
-      "priority": "high",
-      "mode": "DEVELOPMENT",
-      "id": "error_1758178667336_r6hlrkxk0g9",
-      "assigned_agent": "dev_session_1758177771353_1_general_550ddd50",
-      "started_at": "2025-09-18T06:59:06.233Z",
-      "claimed_by": "dev_session_1758177771353_1_general_550ddd50",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758177771353_1_general_550ddd50",
-          "role": "primary",
-          "assignedAt": "2025-09-18T06:59:06.233Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-18T07:02:04.804Z",
-      "updated_at": "2025-09-18T07:02:04.805Z"
-    },
-    {
       "status": "in_progress",
-      "created_at": "2025-09-18T06:58:08.590Z",
-      "title": "Create comprehensive unit tests for core malaria prediction modules",
-      "description": "Develop unit tests to achieve 100% coverage on important modules: API routes, services, data processing, and ML models. Focus on src/malaria_predictor/api/, src/malaria_predictor/services/, and core prediction logic. Target 100% coverage on critical modules.",
-      "category": "test",
-      "priority": "high",
-      "mode": "TESTING",
-      "id": "test_1758178688589_qjkdgrdhu4",
-      "assigned_agent": "dev_session_1758177771353_1_general_550ddd50",
-      "started_at": "2025-09-18T07:02:30.386Z",
-      "claimed_by": "dev_session_1758177771353_1_general_550ddd50",
+      "dependencies": [],
+      "important_files": [],
+      "requires_research": false,
+      "created_at": "2025-08-13T00:41:53.680Z",
+      "subtasks": [],
+      "category": "feature",
+      "assigned_agent": "dev_session_1758180146801_1_general_a98c4d17",
+      "started_at": "2025-09-18T07:23:34.343Z",
+      "claimed_by": "dev_session_1758180146801_1_general_a98c4d17",
       "agent_assignment_history": [
         {
-          "agentId": "dev_session_1758177771353_1_general_550ddd50",
+          "agentId": "dev_session_1758180146801_1_general_a98c4d17",
           "role": "primary",
-          "assignedAt": "2025-09-18T07:02:30.386Z",
+          "assignedAt": "2025-09-18T07:23:34.343Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
@@ -162,26 +38,24 @@
       "id": "test_1758178699556_q8neqzd291q"
     },
     {
-      "status": "completed",
-      "created_at": "2025-09-18T07:13:06.236Z",
-      "title": "Add backend-only data policy to essentials directory",
-      "description": "Create a policy file in development/essentials/ specifying that all frontend data must come from the backend with absolutely no mock malaria data, and backend should be used comprehensively",
-      "category": "feature",
-      "id": "feature_1758179586236_k4v1kxmufq",
-      "assigned_agent": "dev_session_1758179569048_1_general_61593e28",
-      "started_at": "2025-09-18T07:13:22.365Z",
-      "claimed_by": "dev_session_1758179569048_1_general_61593e28",
+      "status": "in_progress",
+      "created_at": "2025-09-18T07:24:41.949Z",
+      "title": "Fix 251 linting violations in test files",
+      "description": "Fix import organization, remove unused imports, fix whitespace issues, and ensure proper file formatting in comprehensive test files. Target: zero linting violations.",
+      "category": "error",
+      "id": "error_1758180281948_r0zppwtl8h8",
+      "assigned_agent": "dev_session_1758180146801_1_general_a98c4d17",
+      "started_at": "2025-09-18T07:24:59.732Z",
+      "claimed_by": "dev_session_1758180146801_1_general_a98c4d17",
       "agent_assignment_history": [
         {
-          "agentId": "dev_session_1758179569048_1_general_61593e28",
+          "agentId": "dev_session_1758180146801_1_general_a98c4d17",
           "role": "primary",
-          "assignedAt": "2025-09-18T07:13:22.365Z",
+          "assignedAt": "2025-09-18T07:24:59.732Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ],
-      "completed_at": "2025-09-18T07:14:24.861Z",
-      "updated_at": "2025-09-18T07:14:24.861Z"
+      ]
     }
   ],
   "current_mode": "DEVELOPMENT",
@@ -258,8 +132,43 @@
       "createdAt": "2025-09-18T07:12:49.049Z",
       "sessionId": null,
       "metadata": {}
+    },
+    "dev_session_1758180146801_1_general_a98c4d17": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-18T07:22:26.802Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-18T07:22:26.802Z",
+      "sessionId": null,
+      "metadata": {}
     }
   },
   "completed_tasks": [],
-  "features": []
+  "features": [],
+  "settings": {
+    "id_based_classification": true,
+    "auto_sort_enabled": true,
+    "sort_criteria": {
+      "primary": "id_prefix",
+      "secondary": "created_at"
+    },
+    "id_priority_order": {
+      "error_": 1,
+      "feature_": 2,
+      "subtask_": 3,
+      "test_": 4
+    }
+  }
 }
