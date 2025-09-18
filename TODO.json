@@ -332,7 +332,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T19:41:52.679Z",
       "title": "Build comprehensive analytics dashboard with data visualization",
       "description": "Build comprehensive analytics dashboard with data visualization using fl_chart. Create dashboard layout, chart components, data visualization displays, environmental trends charts, interactive filters, export functionality, and real-time updates.",
@@ -349,7 +349,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T23:18:57.921Z",
+      "updated_at": "2025-09-18T23:18:57.921Z"
     },
     {
       "status": "completed",
