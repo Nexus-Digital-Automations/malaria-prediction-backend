@@ -30,7 +30,7 @@
       "id": "feature_1758208727988_efjnmz40emr"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T15:19:16.898Z",
       "title": "Setup Flutter project structure and core app configuration",
       "description": "Initialize Flutter project with proper directory structure, dependencies, platform configurations, and basic app shell following documented architecture",
@@ -47,7 +47,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T16:42:42.403Z",
+      "updated_at": "2025-09-18T16:42:42.403Z"
     },
     {
       "status": "pending",
@@ -186,7 +188,7 @@
       "updated_at": "2025-09-18T16:33:04.080Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T15:22:58.395Z",
       "title": "Implement comprehensive authentication system with JWT integration",
       "description": "Create complete authentication system including login/signup screens, JWT token management, biometric authentication, session handling, role-based access control, and backend integration with FastAPI /auth endpoints",
@@ -203,7 +205,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-18T16:42:11.781Z",
+      "updated_at": "2025-09-18T16:42:11.781Z"
     },
     {
       "status": "in_progress",
@@ -320,6 +324,26 @@
           "agentId": "dev_session_1758213262559_1_general_dd958b58",
           "role": "primary",
           "assignedAt": "2025-09-18T16:37:04.200Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-18T16:45:00.816Z",
+      "title": "Fix alert system database integration after import corrections",
+      "description": "Complete the alert system by fixing database session integration - update from synchronous get_database() to async get_session() pattern, ensure all alert components work with async database operations",
+      "category": "error",
+      "id": "error_1758213900816_y32bm5dtt9c",
+      "assigned_agent": "dev_session_1758213593368_1_general_d42663d2",
+      "started_at": "2025-09-18T16:45:16.915Z",
+      "claimed_by": "dev_session_1758213593368_1_general_d42663d2",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758213593368_1_general_d42663d2",
+          "role": "primary",
+          "assignedAt": "2025-09-18T16:45:16.915Z",
           "reassignReason": null,
           "claimPriority": "normal"
         }

@@ -6,9 +6,18 @@ providing comprehensive data structures for visualization and reporting.
 """
 
 from datetime import datetime
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
+
+
+class ModelType(str, Enum):
+    """Enumeration of available ML model types."""
+    
+    LSTM = "lstm"
+    TRANSFORMER = "transformer"
+    ENSEMBLE = "ensemble"
 
 
 class AnalyticsRequest(BaseModel):

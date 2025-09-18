@@ -637,6 +637,54 @@
       "updated_at": "2025-09-18T16:37:48.558Z",
       "archived_at": "2025-09-18T16:37:48.560Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T15:22:58.395Z",
+      "title": "Implement comprehensive authentication system with JWT integration",
+      "description": "Create complete authentication system including login/signup screens, JWT token management, biometric authentication, session handling, role-based access control, and backend integration with FastAPI /auth endpoints",
+      "category": "feature",
+      "id": "feature_1758208978394_1kmqnl7hab",
+      "assigned_agent": "dev_session_1758208959715_1_general_97643b9b",
+      "started_at": "2025-09-18T15:24:33.360Z",
+      "claimed_by": "dev_session_1758208959715_1_general_97643b9b",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758208959715_1_general_97643b9b",
+          "role": "primary",
+          "assignedAt": "2025-09-18T15:24:33.360Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T16:42:11.781Z",
+      "updated_at": "2025-09-18T16:42:11.781Z",
+      "archived_at": "2025-09-18T16:42:11.787Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T15:19:16.898Z",
+      "title": "Setup Flutter project structure and core app configuration",
+      "description": "Initialize Flutter project with proper directory structure, dependencies, platform configurations, and basic app shell following documented architecture",
+      "category": "subtask",
+      "id": "subtask_1758208756898_jxox9kh8vz",
+      "assigned_agent": "dev_session_1758208960046_1_general_59280cb2",
+      "started_at": "2025-09-18T15:24:13.370Z",
+      "claimed_by": "dev_session_1758208960046_1_general_59280cb2",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758208960046_1_general_59280cb2",
+          "role": "primary",
+          "assignedAt": "2025-09-18T15:24:13.370Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T16:42:42.403Z",
+      "updated_at": "2025-09-18T16:42:42.403Z",
+      "archived_at": "2025-09-18T16:42:42.406Z",
+      "archive_version": "2.0.0"
     }
   ],
   "project_info": {
@@ -647,8 +695,8 @@
     "total_completed": 0,
     "last_archived": null
   },
-  "last_archived": "2025-09-18T16:37:48.560Z",
-  "total_completed": 24,
+  "last_archived": "2025-09-18T16:42:42.406Z",
+  "total_completed": 26,
   "metadata": {
     "last_bulk_archive": "2025-09-18T15:16:39.287Z",
     "bulk_archive_count": 8

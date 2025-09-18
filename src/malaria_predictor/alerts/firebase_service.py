@@ -13,9 +13,9 @@ from firebase_admin import credentials, messaging
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ..config import get_settings
+from ..config import settings
 from ..database.models import Alert, NotificationDelivery, UserDeviceToken
-from ..database.session import get_database
+from ..database.session import get_session
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ class FirebaseNotificationService:
 
     def __init__(self):
         """Initialize Firebase Cloud Messaging service."""
-        self.settings = get_settings()
+        self.settings = settings
         self.app = None
         self.initialized = False
 

@@ -31,9 +31,9 @@ from ...database.models import (
     AlertRule,
     UserDeviceToken,
 )
-from ...database.session import get_database
+from ...database.session import get_session as get_database
 from ..auth import get_current_user
-from ..models import User
+from ...database.security_models import User
 
 logger = logging.getLogger(__name__)
 

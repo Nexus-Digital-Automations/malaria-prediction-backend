@@ -15,13 +15,13 @@ from email.mime.text import MIMEText
 import aiohttp
 from pydantic import BaseModel
 
-from ..config import get_settings
+from ..config import settings
 from ..database.models import (
     Alert,
     AlertConfiguration,
     NotificationDelivery,
 )
-from ..database.session import get_database
+from ..database.session import get_session
 from .firebase_service import PushNotificationPayload, firebase_service
 
 logger = logging.getLogger(__name__)
@@ -99,7 +99,7 @@ class NotificationService:
 
     def __init__(self):
         """Initialize the notification service."""
-        self.settings = get_settings()
+        self.settings = settings
 
         # Load configurations
         self.email_config = self._load_email_config()

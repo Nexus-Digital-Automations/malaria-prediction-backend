@@ -10,7 +10,7 @@ from datetime import datetime
 import aiohttp
 from pydantic import BaseModel
 
-from ..config import get_settings
+from ..config import settings
 from ..database.models import Alert
 from .notification_service import NotificationRequest, notification_service
 
@@ -73,7 +73,7 @@ class EmergencyResponseProtocolManager:
 
     def __init__(self):
         """Initialize the emergency response protocol manager."""
-        self.settings = get_settings()
+        self.settings = settings
 
         # Load emergency protocols from configuration
         self.protocols = self._load_emergency_protocols()

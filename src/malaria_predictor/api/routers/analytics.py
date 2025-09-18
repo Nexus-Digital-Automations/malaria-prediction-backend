@@ -22,7 +22,7 @@ from ...database.models import (
     ProcessedClimateData,
     WorldPopDataPoint,
 )
-from ...database.session import get_db
+from ...database.session import get_session as get_db
 from ...services.data_export import get_data_export_service
 from ..dependencies import get_current_user_optional
 

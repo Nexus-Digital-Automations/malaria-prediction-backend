@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from ..config import get_settings
+from ..config import settings
 from ..database.models import (
     Alert,
     AlertConfiguration,
@@ -20,7 +20,7 @@ from ..database.models import (
     AlertTemplate,
     MalariaRiskIndex,
 )
-from ..database.session import get_database
+from ..database.session import get_session
 from .firebase_service import firebase_service
 from .websocket_manager import websocket_manager
 
@@ -86,7 +86,7 @@ class AlertEngine:
 
     def __init__(self):
         """Initialize the alert engine."""
-        self.settings = get_settings()
+        self.settings = settings
         self.stats = {
             "evaluations_performed": 0,
             "alerts_generated": 0,
@@ -117,10 +117,9 @@ class AlertEngine:
         start_time = datetime.now()
 
         try:
-            db = next(get_database())
-
-            # Get active alert configurations and rules
-            active_rules = await self._get_active_alert_rules(db, request)
+            async with get_session() as db:
+                # Get active alert configurations and rules
+                active_rules = await self._get_active_alert_rules(db, request)
 
             if not active_rules:
                 logger.debug("No active alert rules found for evaluation")
