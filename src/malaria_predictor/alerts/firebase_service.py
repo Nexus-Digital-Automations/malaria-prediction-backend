@@ -318,7 +318,7 @@ class FirebaseNotificationService:
                 logger.error(f"Failed to send batch notifications: {e}")
 
                 # Mark all tokens in batch as failed
-                for token, payload in batch:
+                for token, _payload in batch:
                     self.stats["notifications_failed"] += 1
                     results[token] = FirebaseNotificationResult(
                         success=False,

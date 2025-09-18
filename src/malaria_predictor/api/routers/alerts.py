@@ -273,7 +273,7 @@ async def create_alert_configuration(
 
     except Exception as e:
         logger.error(f"Failed to create alert configuration: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/configurations", response_model=list[AlertConfigurationResponse])
@@ -297,7 +297,7 @@ async def get_alert_configurations(
 
     except Exception as e:
         logger.error(f"Failed to get alert configurations: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/configurations/{config_id}", response_model=AlertConfigurationResponse)
@@ -322,7 +322,7 @@ async def get_alert_configuration(
         raise
     except Exception as e:
         logger.error(f"Failed to get alert configuration: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.put("/configurations/{config_id}", response_model=AlertConfigurationResponse)
@@ -358,7 +358,7 @@ async def update_alert_configuration(
     except Exception as e:
         db.rollback()
         logger.error(f"Failed to update alert configuration: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.delete("/configurations/{config_id}")
@@ -390,7 +390,7 @@ async def delete_alert_configuration(
     except Exception as e:
         db.rollback()
         logger.error(f"Failed to delete alert configuration: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 # Alert Rule Endpoints

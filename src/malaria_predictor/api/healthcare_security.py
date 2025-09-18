@@ -142,14 +142,14 @@ async def get_current_healthcare_professional(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
     except Exception as e:
         logger.error(f"Authentication failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication failed",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
 
 def require_healthcare_permission(permission: str):
