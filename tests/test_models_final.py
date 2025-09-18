@@ -8,6 +8,7 @@ from datetime import UTC, date, datetime
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
 from src.malaria_predictor.models import (
     EnvironmentalFactors,
@@ -211,7 +212,7 @@ class TestGeographicLocation:
     def test_required_fields(self):
         """Test that required fields are enforced."""
         # Missing area_name should raise error
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             GeographicLocation(
                 latitude=0.0,
                 longitude=0.0,
@@ -220,7 +221,7 @@ class TestGeographicLocation:
             )
 
         # Missing country_code should raise error
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             GeographicLocation(
                 latitude=0.0,
                 longitude=0.0,
@@ -434,11 +435,11 @@ class TestMalariaPrediction:
         assert prediction.time_horizon_days == 365
 
         # Invalid time horizon should raise error
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             valid_prediction_data["time_horizon_days"] = 0  # Too low
             MalariaPrediction(**valid_prediction_data)
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             valid_prediction_data["time_horizon_days"] = 400  # Too high
             MalariaPrediction(**valid_prediction_data)
 

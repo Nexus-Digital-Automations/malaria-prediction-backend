@@ -110,7 +110,7 @@ async def get_prediction_accuracy_metrics(
             temporal_accuracy[month_key]["scores"].append(prediction.confidence_score)
 
         # Calculate averages
-        for model_type, data in model_accuracy.items():
+        for _model_type, data in model_accuracy.items():
             data["avg_confidence"] = sum(data["predictions"]) / len(data["predictions"])
             data["high_confidence_rate"] = data["high_confidence"] / data["total"]
             del data["predictions"]  # Remove raw data to reduce response size
@@ -149,7 +149,7 @@ async def get_prediction_accuracy_metrics(
 
     except Exception as e:
         logger.error(f"Error generating prediction accuracy metrics: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate accuracy metrics")
+        raise HTTPException(status_code=500, detail="Failed to generate accuracy metrics") from e
 
 
 @router.get("/environmental-trends")
@@ -346,7 +346,7 @@ async def get_environmental_trend_analysis(
 
     except Exception as e:
         logger.error(f"Error generating environmental trends: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate environmental trends")
+        raise HTTPException(status_code=500, detail="Failed to generate environmental trends") from e
 
 
 @router.get("/outbreak-patterns")
@@ -533,7 +533,7 @@ async def get_outbreak_pattern_recognition(
 
     except Exception as e:
         logger.error(f"Error generating outbreak pattern analysis: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate outbreak pattern analysis")
+        raise HTTPException(status_code=500, detail="Failed to generate outbreak pattern analysis") from e
 
 
 @router.get("/data-exploration")
@@ -793,7 +793,7 @@ async def get_interactive_data_exploration(
 
     except Exception as e:
         logger.error(f"Error in data exploration: {e}")
-        raise HTTPException(status_code=500, detail="Failed to execute data exploration")
+        raise HTTPException(status_code=500, detail="Failed to execute data exploration") from e
 
 
 @router.post("/custom-report")
@@ -951,7 +951,7 @@ async def generate_custom_report(
 
     except Exception as e:
         logger.error(f"Error generating custom report: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate custom report")
+        raise HTTPException(status_code=500, detail="Failed to generate custom report") from e
 
 
 @router.get("/dashboard-config")
@@ -1207,7 +1207,7 @@ async def get_dashboard_configuration(
 
     except Exception as e:
         logger.error(f"Error getting dashboard configuration: {e}")
-        raise HTTPException(status_code=500, detail="Failed to get dashboard configuration")
+        raise HTTPException(status_code=500, detail="Failed to get dashboard configuration") from e
 
 
 @router.get("/export/formats")
@@ -1302,7 +1302,7 @@ async def export_prediction_accuracy_data(
 
     except Exception as e:
         logger.error(f"Error exporting prediction accuracy data: {e}")
-        raise HTTPException(status_code=500, detail="Failed to export data")
+        raise HTTPException(status_code=500, detail="Failed to export data") from e
 
 
 @router.get("/export/statistics")
@@ -1343,4 +1343,4 @@ async def get_export_statistics(
 
     except Exception as e:
         logger.error(f"Error getting export statistics: {e}")
-        raise HTTPException(status_code=500, detail="Failed to get export statistics")
+        raise HTTPException(status_code=500, detail="Failed to get export statistics") from e

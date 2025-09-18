@@ -21,6 +21,7 @@ from ..database.models import (
     AlertConfiguration,
     NotificationDelivery,
 )
+from ..database.session import get_session as get_database
 from .firebase_service import PushNotificationPayload, firebase_service
 
 logger = logging.getLogger(__name__)

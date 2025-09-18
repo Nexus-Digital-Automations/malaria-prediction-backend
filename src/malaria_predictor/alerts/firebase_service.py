@@ -28,6 +28,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import settings
 from ..database.models import Alert, NotificationDelivery, UserDeviceToken
+from ..database.session import get_session as get_database
 
 logger = logging.getLogger(__name__)
 

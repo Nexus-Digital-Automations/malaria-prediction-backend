@@ -106,6 +106,29 @@ CORE OPERATION PRINCIPLES (Display at start of every response):
 
 **BALANCE**: Quick corrections for obvious typos, pause for major confusion, state assumptions when 95% certain, respect final user decisions
 
+### 🧠 SELF-LEARNING AGENT PROTOCOLS
+**CONTINUOUS LEARNING AND KNOWLEDGE RETENTION**
+
+**CORE LEARNING MANDATE:**
+- **PATTERN RECOGNITION**: Identify recurring problems, solutions, and optimization opportunities
+- **ERROR ANALYSIS**: Learn from every mistake to prevent future occurrences
+- **SUCCESS DOCUMENTATION**: Capture effective approaches for reuse
+- **DECISION RATIONALE**: Document why choices were made for future reference
+- **KNOWLEDGE RETENTION**: Maintain and apply lessons across sessions and projects
+
+**LEARNING SOURCES:**
+- **Error Resolution**: Document root causes and prevention strategies
+- **Feature Implementation**: Capture best practices and efficient approaches
+- **Performance Optimization**: Record bottlenecks discovered and solutions applied
+- **User Feedback**: Learn from stop hook feedback and user guidance
+- **Code Patterns**: Identify reusable solutions and architectural decisions
+
+**LESSON APPLICATION PROTOCOL:**
+- **PRE-TASK**: Review relevant lessons before starting new work
+- **DURING TASK**: Apply learned patterns and avoid documented pitfalls
+- **POST-TASK**: Document new discoveries and update existing lessons
+- **CROSS-PROJECT**: Transfer knowledge between similar tasks and projects
+
 ### ⚡ SCOPE CONTROL & AUTHORIZATION
 **NO UNAUTHORIZED SCOPE EXPANSION**
 
@@ -321,10 +344,11 @@ git status                                   # Verify clean/up-to-date
 2. **SCAN ALL DIRECTORIES** in `development/` - Check every folder and file for relevance
 3. **CHECK ERRORS** in `development/errors/` - Review all error tracking files
 4. **REVIEW LOGS** in `development/logs/` - Check recent system behavior and patterns
-5. **SCAN REPORTS** in `development/reports/`
-6. **ADD TO TASKS** relevant reports as important_files in TODO.json
-7. **LEVERAGE RESEARCH** before implementing
-8. **CODEBASE SCAN**: Identify task-relevant files throughout entire project codebase
+5. **REVIEW LESSONS** in `development/lessons/` - Check relevant lessons and patterns from previous work
+6. **SCAN REPORTS** in `development/reports/`
+7. **ADD TO TASKS** relevant reports as important_files in TODO.json
+8. **LEVERAGE RESEARCH** before implementing
+9. **CODEBASE SCAN**: Identify task-relevant files throughout entire project codebase
 
 **DEVELOPMENT SCANNING:**
 - `find development/ -type f -name "*.md" | head -50` - List all documentation
@@ -398,6 +422,54 @@ tail -n 50 development/logs/*.log
 - **MULTI-METHOD VALIDATION**: Validate through logs, commands, tests, and other comprehensive means
 - **CENTRALIZED LOGGING**: All system logs MUST go to development/logs/
 - **STOP HOOK INTEGRATION**: Configure stop hook to output all logs to development/logs/
+
+### LESSONS MANAGEMENT
+**LOCATION**: `development/lessons/` - All self-learning knowledge and insights
+**FORMAT**: `[category]_[timestamp]_[topic].md` (e.g., `error_20250914_linter_unused_imports.md`)
+
+**LESSON CATEGORIES:**
+- **ERRORS**: `development/lessons/errors/` - Error resolution patterns and prevention strategies
+- **FEATURES**: `development/lessons/features/` - Feature implementation best practices and approaches
+- **OPTIMIZATION**: `development/lessons/optimization/` - Performance improvements and efficiency discoveries  
+- **DECISIONS**: `development/lessons/decisions/` - Architectural and technical decision rationale
+- **PATTERNS**: `development/lessons/patterns/` - Recurring solutions and reusable approaches
+
+**LESSON STRUCTURE:**
+```markdown
+# Lesson: [Title]
+## Context: [When/why this lesson was learned]
+## Problem: [Original issue or challenge]
+## Solution: [What worked]
+## Rationale: [Why this approach was chosen]
+## Application: [When to apply this lesson]
+## Related: [Links to similar lessons or tasks]
+```
+
+**WORKFLOW:**
+```bash
+# Create directories if missing
+mkdir -p development/lessons/{errors,features,optimization,decisions,patterns}
+
+# Review lessons before every task
+find development/lessons/ -name "*.md" | grep -E "(error|feature|optimization)" | head -10
+cat development/lessons/[relevant-category]/*.md
+
+# Create new lesson
+echo "# Lesson: [Title]
+## Context: [timestamp and situation]
+## Problem: [challenge faced]
+## Solution: [approach taken]
+## Rationale: [reasoning]
+## Application: [when to use]" > development/lessons/[category]/[category]_$(date +%s)_[topic].md
+```
+
+**PROTOCOLS:**
+- **DIRECTORY CREATION**: Always create missing development/ subdirectories before documenting
+- **PRE-TASK LESSON REVIEW**: Check relevant lessons before starting similar work
+- **PATTERN MATCHING**: Identify connections between current task and documented lessons
+- **LESSON CREATION**: Document significant discoveries, solutions, and decision rationale
+- **LESSON UPDATES**: Enhance existing lessons with new insights and applications
+- **CROSS-REFERENCE**: Link related lessons and reference them in task documentation
 
 ## 📋 REPORTS MANAGEMENT PROTOCOL
 
@@ -542,6 +614,7 @@ development/reports/task_1234567890_abcdef123/
 
 ### 📋 PHASE 1: PREP
 - [ ] **ROOT CLEANUP**: Verify clean project root - move misplaced files to development/ subdirectories
+- [ ] **DIRECTORY SETUP**: Create missing development/ subdirectories - `mkdir -p development/{essentials,errors,logs,reports,lessons/{errors,features,optimization,decisions,patterns}}`
 - [ ] **AGENT PLANNING**: Communicate approach to user ("Handling solo" or "Using X concurrent agents")
 - [ ] **INITIALIZE**: `timeout 10s node /Users/jeremyparker/infinite-continue-stop-hook/taskmanager-api.js init` (or reinitialize with explicit agent ID)
 - [ ] **CREATE TASK**: `timeout 10s node /Users/jeremyparker/infinite-continue-stop-hook/taskmanager-api.js create '{"title":"[Request]", "description":"[Details]", "category":"type"}'`
@@ -604,6 +677,7 @@ development/reports/task_1234567890_abcdef123/
 
 - [ ] **COMPLETION & EVIDENCE**:
   - [ ] **COLLECT EVIDENCE**: Document validation results (lint passed, build succeeded, start passed, commit hash, git status)
+  - [ ] **DOCUMENT LESSONS**: Create lesson entries for significant discoveries, solutions, or patterns learned during task
   - [ ] **FORMAT COMPLETION**: Use proper JSON - `'"Task completed successfully"'` or `'{"message": "Status", "evidence": "Results"}'`
   - [ ] Avoid special characters (!, ✅, emojis) | Use single quotes | No unquoted strings
   - [ ] **MARK COMPLETE**: Update status via TaskManager API with evidence

@@ -9,6 +9,7 @@ Provides REST API endpoints for:
 - Notification preferences
 """
 
+import json
 import logging
 from datetime import datetime, timedelta
 
@@ -31,9 +32,9 @@ from ...database.models import (
     AlertRule,
     UserDeviceToken,
 )
+from ...database.security_models import User
 from ...database.session import get_session as get_database
 from ..auth import get_current_user
-from ...database.security_models import User
 
 logger = logging.getLogger(__name__)
 
@@ -430,7 +431,7 @@ async def create_alert_rule(
         raise
     except Exception as e:
         logger.error(f"Failed to create alert rule: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/rules", response_model=list[AlertRuleResponse])
@@ -458,7 +459,7 @@ async def get_alert_rules(
 
     except Exception as e:
         logger.error(f"Failed to get alert rules: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 # Alert History Endpoints
@@ -519,7 +520,7 @@ async def get_alerts(
 
     except Exception as e:
         logger.error(f"Failed to get alerts: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/{alert_id}", response_model=AlertResponse)
@@ -549,7 +550,7 @@ async def get_alert(
         raise
     except Exception as e:
         logger.error(f"Failed to get alert: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.post("/{alert_id}/acknowledge")
@@ -594,7 +595,7 @@ async def acknowledge_alert(
     except Exception as e:
         db.rollback()
         logger.error(f"Failed to acknowledge alert: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.post("/{alert_id}/resolve")
@@ -638,7 +639,7 @@ async def resolve_alert(
     except Exception as e:
         db.rollback()
         logger.error(f"Failed to resolve alert: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.post("/{alert_id}/feedback")
@@ -680,7 +681,7 @@ async def submit_alert_feedback(
     except Exception as e:
         db.rollback()
         logger.error(f"Failed to submit alert feedback: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 # Device Token Management
@@ -716,7 +717,7 @@ async def register_device_token(
         raise
     except Exception as e:
         logger.error(f"Failed to register device token: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/device-tokens")
@@ -745,7 +746,7 @@ async def get_device_tokens(
 
     except Exception as e:
         logger.error(f"Failed to get device tokens: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.delete("/device-tokens/{token_id}")
@@ -776,7 +777,7 @@ async def deactivate_device_token(
     except Exception as e:
         db.rollback()
         logger.error(f"Failed to deactivate device token: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 # WebSocket Connection
@@ -822,7 +823,7 @@ async def websocket_endpoint(
         logger.error(f"WebSocket error: {e}")
         try:
             await websocket.close()
-        except:
+        except Exception:
             pass
 
 
@@ -847,7 +848,7 @@ async def get_alert_stats(
 
     except Exception as e:
         logger.error(f"Failed to get alert stats: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/performance/metrics")
@@ -881,4 +882,4 @@ async def get_performance_metrics(
 
     except Exception as e:
         logger.error(f"Failed to get performance metrics: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e

@@ -1,0 +1,38 @@
+{
+  "project": "unknown",
+  "tasks": [
+    {
+      "status": "pending",
+      "created_at": "2025-09-18T17:17:43.632Z",
+      "title": "Complete analytics dashboard with data visualization",
+      "description": "Implement comprehensive analytics dashboard for malaria prediction data with charts, metrics, and visualization components using Clean Architecture principles",
+      "category": "subtask",
+      "id": "subtask_1758215863632_v8aqbix4wtt"
+    }
+  ],
+  "agents": {
+    "dev_session_1758215825734_1_general_fb75909e": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-18T17:17:05.734Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-18T17:17:05.734Z",
+      "sessionId": null,
+      "metadata": {}
+    }
+  },
+  "completed_tasks": [],
+  "features": []
+}

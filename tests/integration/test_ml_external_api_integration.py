@@ -25,6 +25,20 @@ from malaria_predictor.services.modis_client import MODISClient
 from malaria_predictor.services.worldpop_client import WorldPopClient
 
 
+# Mock FeatureExtractor for testing - TODO: Replace with actual implementation
+class FeatureExtractor:
+    """Mock feature extractor for testing purposes."""
+    async def extract_features(self, environmental_data):
+        return {
+            "temperature_statistics": {"mean": 24.7, "min": 20.0, "max": 30.0, "std": 2.5},
+            "precipitation_statistics": {"total": 4.3, "mean": 1.4, "days_with_rain": 3},
+            "humidity_statistics": {"mean": 65.2, "min": 45.0, "max": 85.0},
+            "vegetation_indices": {"ndvi": 0.72},
+            "demographic_factors": {"population_density": 250.0},
+            "baseline_risk_factors": {"baseline_risk": 0.15}
+        }
+
+
 @pytest.mark.asyncio
 class TestMLModelIntegration:
     """Test machine learning model integration workflows."""

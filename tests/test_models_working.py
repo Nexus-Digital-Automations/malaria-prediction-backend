@@ -9,6 +9,7 @@ from datetime import date
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
 from src.malaria_predictor.models import (
     EnvironmentalFactors,
@@ -414,7 +415,7 @@ class TestEdgeCases:
 
     def test_model_validation_errors(self):
         """Test that invalid data raises validation errors."""
-        with pytest.raises(Exception):  # Should raise validation error
+        with pytest.raises(ValidationError):  # Should raise validation error
             # Invalid risk score (> 1.0)
             RiskAssessment(
                 risk_level=RiskLevel.HIGH,
@@ -434,10 +435,10 @@ class TestModelFieldValidation:
     def test_required_fields(self):
         """Test that required fields are enforced."""
         # Test that missing required fields raise validation errors
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             EnvironmentalFactors()  # Missing all required fields
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             GeographicLocation(latitude=0.0)  # Missing longitude, country, region
 
     def test_optional_fields(self):
@@ -457,7 +458,7 @@ class TestModelFieldValidation:
     def test_field_types(self):
         """Test field type validation."""
         # Test that incorrect types are rejected
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             GeographicLocation(
                 latitude="not_a_number",  # Should be float
                 longitude=0.0,
