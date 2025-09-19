@@ -112,7 +112,6 @@ linter:
 
     # Flutter Specific
     avoid_unnecessary_containers: true
-    avoid_web_libraries_in_flutter: true
     sized_box_for_whitespace: true
     sort_child_properties_last: true
     use_build_context_synchronously: true

@@ -1052,6 +1052,30 @@
       "updated_at": "2025-09-18T23:19:59.952Z",
       "archived_at": "2025-09-18T23:48:22.170Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T19:44:17.291Z",
+      "title": "Fix Flutter Deprecated API Usage - Material3 Updates",
+      "description": "Update deprecated Flutter APIs including MaterialStateProperty to WidgetStateProperty, withOpacity to withValues, background/surfaceVariant properties, and logger printTime configuration.",
+      "category": "error",
+      "id": "error_1758224657290_tft0br3lc7r",
+      "assigned_agent": "dev_session_1758239465153_1_general_e6bad1b3",
+      "started_at": "2025-09-18T23:52:53.050Z",
+      "claimed_by": "dev_session_1758239465153_1_general_e6bad1b3",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758239465153_1_general_e6bad1b3",
+          "role": "primary",
+          "assignedAt": "2025-09-18T23:52:53.050Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-18T23:53:49.239Z",
+      "updated_at": "2025-09-18T23:53:49.239Z",
+      "archived_at": "2025-09-18T23:53:49.241Z",
+      "archive_version": "2.0.0"
     }
   ],
   "project_info": {
@@ -1062,10 +1086,10 @@
     "total_completed": 0,
     "last_archived": null
   },
-  "last_archived": "2025-09-18T23:48:22.170Z",
-  "total_completed": 40,
+  "last_archived": "2025-09-18T23:59:28.105Z",
+  "total_completed": 41,
   "metadata": {
-    "last_bulk_archive": "2025-09-18T23:48:22.170Z",
-    "bulk_archive_count": 10
+    "last_bulk_archive": "2025-09-18T23:59:28.105Z",
+    "bulk_archive_count": 11
   }
 }
