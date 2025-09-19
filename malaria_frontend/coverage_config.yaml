@@ -1,0 +1,126 @@
+# Test Coverage Configuration for Malaria Frontend
+# Defines coverage thresholds, exclusions, and reporting format
+
+# Coverage thresholds
+coverage:
+  thresholds:
+    global: 80    # Minimum 80% global coverage
+    class: 75     # Minimum 75% class coverage
+    function: 80  # Minimum 80% function coverage
+    line: 85      # Minimum 85% line coverage
+    branch: 70    # Minimum 70% branch coverage
+
+# Files to exclude from coverage
+exclude:
+  - "**/*.g.dart"           # Generated files
+  - "**/*.freezed.dart"     # Freezed generated files
+  - "**/*.config.dart"      # Configuration files
+  - "**/injection_container.dart"  # Dependency injection
+  - "**/main.dart"          # Main entry point
+  - "test/**"               # Test files themselves
+  - "lib/core/constants/**" # Constants
+  - "lib/app/routes/**"     # Route definitions
+  - "**/*.part.dart"        # Part files
+
+# Coverage reporting configuration
+reporting:
+  formats:
+    - lcov      # For CI/CD integration
+    - html      # For local development
+    - json      # For tooling integration
+    - cobertura # For GitLab/Azure DevOps
+
+  output_directory: "coverage"
+
+  # HTML report configuration
+  html:
+    title: "Malaria Frontend Test Coverage"
+    output_directory: "coverage/html"
+    show_missing_lines: true
+    skip_covered: false
+
+  # LCOV configuration
+  lcov:
+    output_file: "coverage/lcov.info"
+
+  # JSON configuration
+  json:
+    output_file: "coverage/coverage.json"
+
+  # Cobertura configuration
+  cobertura:
+    output_file: "coverage/cobertura.xml"
+
+# Test execution configuration
+test_execution:
+  # Test discovery patterns
+  test_patterns:
+    - "test/**/*_test.dart"
+    - "test/**/test_*.dart"
+
+  # Test timeout (in seconds)
+  timeout: 300
+
+  # Parallel test execution
+  parallel: true
+  max_workers: 4
+
+  # Test categories
+  categories:
+    unit:
+      pattern: "test/unit/**/*_test.dart"
+      timeout: 30
+    widget:
+      pattern: "test/widget/**/*_test.dart"
+      timeout: 60
+    integration:
+      pattern: "test/integration/**/*_test.dart"
+      timeout: 180
+    performance:
+      pattern: "test/performance/**/*_test.dart"
+      timeout: 300
+
+# CI/CD integration
+ci_integration:
+  # Coverage badge configuration
+  badge:
+    enabled: true
+    style: "flat-square"
+    colors:
+      excellent: "#4c1"    # >90%
+      good: "#97ca00"      # 80-90%
+      acceptable: "#a4a61d" # 70-80%
+      poor: "#dfb317"      # 60-70%
+      bad: "#e05d44"       # <60%
+
+  # Failure conditions
+  fail_on:
+    coverage_decrease: true   # Fail if coverage decreases
+    threshold_miss: true      # Fail if thresholds not met
+    test_failure: true        # Fail if any tests fail
+
+  # Notifications
+  notifications:
+    slack:
+      enabled: false
+      webhook_url: ""
+    email:
+      enabled: false
+      recipients: []
+
+# Advanced configuration
+advanced:
+  # Memory limits for test execution
+  memory_limit: "2GB"
+
+  # Test isolation
+  isolate_tests: true
+
+  # Coverage collection optimization
+  incremental_coverage: true
+
+  # Flaky test detection
+  flaky_test_detection:
+    enabled: true
+    retry_count: 3
+    threshold: 0.9  # Consider flaky if success rate < 90%
