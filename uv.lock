@@ -2513,6 +2513,9 @@ r-integration = [
 [package.dev-dependencies]
 dev = [
     { name = "bandit" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
 ]
 
 [package.metadata]
@@ -2587,7 +2590,12 @@ requires-dist = [
 provides-extras = ["dev", "performance", "r-integration"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "bandit", specifier = ">=1.8.6" }]
+dev = [
+    { name = "bandit", specifier = ">=1.8.6" },
+    { name = "pytest", specifier = ">=8.4.1" },
+    { name = "pytest-asyncio", specifier = ">=1.1.0" },
+    { name = "pytest-cov", specifier = ">=6.2.1" },
+]
 
 [[package]]
 name = "markdown-it-py"

@@ -3,9 +3,12 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i5;
 
+import 'package:connectivity_plus/connectivity_plus.dart' as _i3;
+import 'package:logger/logger.dart' as _i2;
 import 'package:malaria_frontend/core/cache/offline_cache_service.dart' as _i4;
+import 'package:malaria_frontend/core/models/models.dart' as _i6;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -21,26 +24,65 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
+class _FakeLogger_0 extends _i1.SmartFake implements _i2.Logger {
+  _FakeLogger_0(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeConnectivity_1 extends _i1.SmartFake implements _i3.Connectivity {
+  _FakeConnectivity_1(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
 /// A class which mocks [OfflineCacheService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockOfflineCacheService extends _i1.Mock implements _i4.OfflineCacheService {
+class MockOfflineCacheService extends _i1.Mock
+    implements _i4.OfflineCacheService {
   MockOfflineCacheService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<void> initialize() => (super.noSuchMethod(
+  _i2.Logger get logger => (super.noSuchMethod(
+        Invocation.getter(#logger),
+        returnValue: _FakeLogger_0(
+          this,
+          Invocation.getter(#logger),
+        ),
+      ) as _i2.Logger);
+
+  @override
+  _i3.Connectivity get connectivity => (super.noSuchMethod(
+        Invocation.getter(#connectivity),
+        returnValue: _FakeConnectivity_1(
+          this,
+          Invocation.getter(#connectivity),
+        ),
+      ) as _i3.Connectivity);
+
+  @override
+  _i5.Future<void> initialize() => (super.noSuchMethod(
         Invocation.method(
           #initialize,
           [],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 
   @override
-  _i3.Future<void> store({
+  _i5.Future<void> store({
     required String? key,
     required Map<String, dynamic>? data,
     Duration? ttl,
@@ -59,93 +101,178 @@ class MockOfflineCacheService extends _i1.Mock implements _i4.OfflineCacheServic
             #tags: tags,
           },
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 
   @override
-  _i3.Future<Map<String, dynamic>?> retrieve(String? key) => (super.noSuchMethod(
+  _i5.Future<Map<String, dynamic>?> retrieve(String? key) =>
+      (super.noSuchMethod(
         Invocation.method(
           #retrieve,
           [key],
         ),
-        returnValue: _i3.Future<Map<String, dynamic>?>.value(<String, dynamic>{}),
-      ) as _i3.Future<Map<String, dynamic>?>);
+        returnValue: _i5.Future<Map<String, dynamic>?>.value(),
+      ) as _i5.Future<Map<String, dynamic>?>);
 
   @override
-  _i3.Future<bool> has(String? key) => (super.noSuchMethod(
+  _i5.Future<bool> has(String? key) => (super.noSuchMethod(
         Invocation.method(
           #has,
           [key],
         ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
 
   @override
-  _i3.Future<void> remove(String? key) => (super.noSuchMethod(
+  _i5.Future<void> remove(String? key) => (super.noSuchMethod(
         Invocation.method(
           #remove,
           [key],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 
   @override
-  _i3.Future<void> clearAll() => (super.noSuchMethod(
+  _i5.Future<void> clearAll() => (super.noSuchMethod(
         Invocation.method(
           #clearAll,
           [],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 
   @override
-  _i3.Future<void> clearByTags(List<String>? tags) => (super.noSuchMethod(
+  _i5.Future<void> clearByTags(List<String>? tags) => (super.noSuchMethod(
         Invocation.method(
           #clearByTags,
           [tags],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 
   @override
-  _i3.Future<void> clearExpired() => (super.noSuchMethod(
+  _i5.Future<void> clearExpired() => (super.noSuchMethod(
         Invocation.method(
           #clearExpired,
           [],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 
   @override
-  _i3.Future<Map<String, dynamic>> getStats() => (super.noSuchMethod(
+  _i5.Future<Map<String, dynamic>> getStats() => (super.noSuchMethod(
         Invocation.method(
           #getStats,
           [],
         ),
-        returnValue: _i3.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
-      ) as _i3.Future<Map<String, dynamic>>);
+        returnValue:
+            _i5.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i5.Future<Map<String, dynamic>>);
 
   @override
-  _i3.Future<bool> isNetworkAvailable() => (super.noSuchMethod(
+  _i5.Future<bool> isNetworkAvailable() => (super.noSuchMethod(
         Invocation.method(
           #isNetworkAvailable,
           [],
         ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
 
   @override
-  _i3.Future<void> dispose() => (super.noSuchMethod(
+  _i5.Future<void> cachePrediction({
+    required String? locationKey,
+    required _i6.PredictionResult? prediction,
+    Duration? ttl,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cachePrediction,
+          [],
+          {
+            #locationKey: locationKey,
+            #prediction: prediction,
+            #ttl: ttl,
+          },
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<_i6.PredictionResult?> getCachedPrediction(String? locationKey) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getCachedPrediction,
+          [locationKey],
+        ),
+        returnValue: _i5.Future<_i6.PredictionResult?>.value(),
+      ) as _i5.Future<_i6.PredictionResult?>);
+
+  @override
+  _i5.Future<void> cacheMapData({
+    required String? regionKey,
+    required List<_i6.RiskData>? riskData,
+    Duration? ttl,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cacheMapData,
+          [],
+          {
+            #regionKey: regionKey,
+            #riskData: riskData,
+            #ttl: ttl,
+          },
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<List<_i6.RiskData>?> getCachedMapData(String? regionKey) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getCachedMapData,
+          [regionKey],
+        ),
+        returnValue: _i5.Future<List<_i6.RiskData>?>.value(),
+      ) as _i5.Future<List<_i6.RiskData>?>);
+
+  @override
+  _i5.Future<void> cacheUserSettings(
+          {required _i6.UserPreferences? preferences}) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cacheUserSettings,
+          [],
+          {#preferences: preferences},
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<_i6.UserPreferences?> getCachedUserSettings() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getCachedUserSettings,
+          [],
+        ),
+        returnValue: _i5.Future<_i6.UserPreferences?>.value(),
+      ) as _i5.Future<_i6.UserPreferences?>);
+
+  @override
+  _i5.Future<void> dispose() => (super.noSuchMethod(
         Invocation.method(
           #dispose,
           [],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 }

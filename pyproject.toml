@@ -323,4 +323,7 @@ skips = ["B101", "B601", "B105", "B107"]  # Skip assert_used, shell_injection, a
 [dependency-groups]
 dev = [
     "bandit>=1.8.6",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+    "pytest-cov>=6.2.1",
 ]
