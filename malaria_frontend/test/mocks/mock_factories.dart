@@ -29,6 +29,12 @@ import 'package:geolocator/geolocator.dart';
   Connectivity,
   GeolocatorPlatform,
 ])
+// Additional mocks for new BLoC infrastructure
+@GenerateMocks([
+  // Core network and cache services
+], customMocks: [
+  // Custom mock configurations if needed
+])
 class MockFactories {
   /// Create mock Dio client with predefined responses
   static Dio createMockDio({
