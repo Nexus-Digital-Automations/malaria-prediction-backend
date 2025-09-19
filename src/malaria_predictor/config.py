@@ -297,6 +297,91 @@ class MonitoringSettings(BaseModel):
         return v.lower()
 
 
+class FCMSettings(BaseModel):
+    """Firebase Cloud Messaging configuration."""
+
+    credentials_path: str = Field(
+        default="",
+        description="Path to Firebase service account JSON file"
+    )
+    project_id: str = Field(
+        default="",
+        description="Firebase project ID"
+    )
+    enable_fcm: bool = Field(
+        default=False,
+        description="Enable Firebase Cloud Messaging service"
+    )
+    batch_size: int = Field(
+        default=500,
+        ge=1,
+        le=500,
+        description="Maximum batch size for multicast messages"
+    )
+    rate_limit_per_minute: int = Field(
+        default=1000,
+        ge=1,
+        le=10000,
+        description="FCM rate limit per minute"
+    )
+    default_ttl_seconds: int = Field(
+        default=3600,
+        ge=0,
+        le=2419200,  # 28 days maximum
+        description="Default time-to-live for notifications in seconds"
+    )
+    retry_attempts: int = Field(
+        default=3,
+        ge=0,
+        le=10,
+        description="Maximum retry attempts for failed notifications"
+    )
+    retry_backoff_seconds: list[int] = Field(
+        default=[60, 300, 900],  # 1 min, 5 min, 15 min
+        description="Retry backoff intervals in seconds"
+    )
+    emergency_rate_limit: int = Field(
+        default=2000,
+        ge=1,
+        le=20000,
+        description="Higher rate limit for emergency notifications"
+    )
+    topic_prefix: str = Field(
+        default="malaria_",
+        description="Prefix for all topic names"
+    )
+    notification_retention_days: int = Field(
+        default=90,
+        ge=1,
+        le=365,
+        description="Days to retain notification logs"
+    )
+    inactive_device_cleanup_days: int = Field(
+        default=30,
+        ge=1,
+        le=365,
+        description="Days before cleaning up inactive devices"
+    )
+
+    @field_validator("credentials_path")
+    @classmethod
+    def validate_credentials_path(cls, v: str) -> str:
+        """Validate credentials file path."""
+        if v and not v.endswith('.json'):
+            raise ValueError("Credentials file must be a JSON file")
+        return v
+
+    @field_validator("retry_backoff_seconds")
+    @classmethod
+    def validate_retry_backoff(cls, v: list[int]) -> list[int]:
+        """Validate retry backoff intervals."""
+        if not v:
+            raise ValueError("At least one retry interval must be specified")
+        if any(interval <= 0 for interval in v):
+            raise ValueError("All retry intervals must be positive")
+        return v
+
+
 class Settings(BaseSettings):
     """
     Main application configuration settings.
@@ -348,6 +433,9 @@ class Settings(BaseSettings):
     )
     monitoring: MonitoringSettings = Field(
         default_factory=MonitoringSettings, description="Monitoring configuration"
+    )
+    fcm: FCMSettings = Field(
+        default_factory=FCMSettings, description="Firebase Cloud Messaging configuration"
     )
 
     model_config = SettingsConfigDict(

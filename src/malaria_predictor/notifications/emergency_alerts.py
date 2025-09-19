@@ -8,25 +8,31 @@ delivery, bypass mechanisms, and multi-channel communication.
 
 import asyncio
 import logging
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
+from sqlalchemy import and_, desc
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, func, desc
 
-from .fcm_service import FCMService, FCMMessageData, AndroidConfig, APNSConfig, WebConfig
+from ..database.session import get_database_session
+from .fcm_service import (
+    AndroidConfig,
+    APNSConfig,
+    FCMMessageData,
+    FCMService,
+    WebConfig,
+)
 from .models import (
+    DeviceToken,
     NotificationLog,
     NotificationPriority,
     NotificationStatus,
-    DeviceToken,
     TopicSubscription,
 )
-from .templates import NotificationTemplateEngine, TemplateContext
 from .scheduler import NotificationScheduler
-from ..database.session import get_database_session
+from .templates import NotificationTemplateEngine, TemplateContext
 
 logger = logging.getLogger(__name__)
 
@@ -61,31 +67,32 @@ class EmergencyAlert(BaseModel):
     message: str = Field(..., max_length=4000, description="Alert message")
 
     # Geographic targeting
-    affected_regions: List[str] = Field(default_factory=list, description="Affected regions")
-    coordinates: Optional[Dict[str, float]] = Field(None, description="Geographic coordinates")
-    radius_km: Optional[float] = Field(None, description="Alert radius in kilometers")
+    affected_regions: list[str] = Field(default_factory=list, description="Affected regions")
+    coordinates: dict[str, float] | None = Field(None, description="Geographic coordinates")
+    radius_km: float | None = Field(None, description="Alert radius in kilometers")
 
     # Timing
-    alert_start: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    alert_end: Optional[datetime] = Field(None, description="Alert expiration time")
+    alert_start: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    alert_end: datetime | None = Field(None, description="Alert expiration time")
 
     # Targeting
-    target_demographics: List[str] = Field(default_factory=list, description="Target demographics")
-    exclude_groups: List[str] = Field(default_factory=list, description="Groups to exclude")
+    target_demographics: list[str] = Field(default_factory=list, description="Target demographics")
+    exclude_groups: list[str] = Field(default_factory=list, description="Groups to exclude")
 
     # Actions and information
-    recommended_actions: List[str] = Field(default_factory=list, description="Recommended actions")
-    information_url: Optional[str] = Field(None, description="Additional information URL")
-    contact_info: Optional[str] = Field(None, description="Emergency contact information")
+    recommended_actions: list[str] = Field(default_factory=list, description="Recommended actions")
+    information_url: str | None = Field(None, description="Additional information URL")
+    contact_info: str | None = Field(None, description="Emergency contact information")
 
     # System metadata
     issued_by: str = Field(..., description="Authority issuing the alert")
-    source_data: Optional[Dict[str, Any]] = Field(None, description="Source data for alert")
+    source_data: dict[str, Any] | None = Field(None, description="Source data for alert")
 
-    @validator('alert_end')
-    def validate_end_time(cls, v, values):
+    @field_validator('alert_end')
+    @classmethod
+    def validate_end_time(cls, v, info):
         """Validate alert end time is after start time."""
-        if v and 'alert_start' in values and v <= values['alert_start']:
+        if v and 'alert_start' in info.data and v <= info.data['alert_start']:
             raise ValueError("Alert end time must be after start time")
         return v
 
@@ -103,7 +110,7 @@ class EmergencyAlertSystem:
         fcm_service: FCMService,
         template_engine: NotificationTemplateEngine,
         scheduler: NotificationScheduler,
-        db_session: Optional[Session] = None,
+        db_session: Session | None = None,
     ):
         """
         Initialize emergency alert system.
@@ -146,7 +153,7 @@ class EmergencyAlertSystem:
         self,
         alert: EmergencyAlert,
         immediate_delivery: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Issue an emergency alert with prioritized delivery.
 
@@ -257,7 +264,7 @@ class EmergencyAlertSystem:
                 "success": True,
                 "alert_id": alert.alert_id,
                 "delivery_results": delivery_results,
-                "issued_at": datetime.now(timezone.utc).isoformat(),
+                "issued_at": datetime.now(UTC).isoformat(),
             }
 
         except Exception as e:
@@ -277,8 +284,8 @@ class EmergencyAlertSystem:
         self,
         location_name: str,
         outbreak_probability: float,
-        affected_population: Optional[int] = None,
-        coordinates: Optional[Dict[str, float]] = None,
+        affected_population: int | None = None,
+        coordinates: dict[str, float] | None = None,
         radius_km: float = 50.0,
         severity: EmergencyLevel = EmergencyLevel.WARNING,
     ) -> EmergencyAlert:
@@ -337,7 +344,7 @@ class EmergencyAlertSystem:
             source_data={
                 "outbreak_probability": outbreak_probability,
                 "affected_population": affected_population,
-                "detection_timestamp": datetime.now(timezone.utc).isoformat(),
+                "detection_timestamp": datetime.now(UTC).isoformat(),
             },
         )
 
@@ -345,8 +352,8 @@ class EmergencyAlertSystem:
         self,
         location_name: str,
         mosquito_density_increase: float,
-        weather_conditions: Dict[str, Any],
-        coordinates: Optional[Dict[str, float]] = None,
+        weather_conditions: dict[str, Any],
+        coordinates: dict[str, float] | None = None,
         radius_km: float = 25.0,
     ) -> EmergencyAlert:
         """
@@ -403,7 +410,7 @@ class EmergencyAlertSystem:
             source_data={
                 "density_increase": mosquito_density_increase,
                 "weather_conditions": weather_conditions,
-                "surge_detection_timestamp": datetime.now(timezone.utc).isoformat(),
+                "surge_detection_timestamp": datetime.now(UTC).isoformat(),
             },
         )
 
@@ -412,7 +419,7 @@ class EmergencyAlertSystem:
         alert_id: str,
         reason: str,
         send_cancellation_notice: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Cancel an active emergency alert.
 
@@ -452,7 +459,7 @@ class EmergencyAlertSystem:
                 "alert_id": alert_id,
                 "cancelled_notifications": cancelled_count,
                 "reason": reason,
-                "cancelled_at": datetime.now(timezone.utc).isoformat(),
+                "cancelled_at": datetime.now(UTC).isoformat(),
             }
 
         except Exception as e:
@@ -470,13 +477,13 @@ class EmergencyAlertSystem:
             if self._should_close_session and session:
                 session.close()
 
-    async def _get_target_devices(self, alert: EmergencyAlert) -> List[DeviceToken]:
+    async def _get_target_devices(self, alert: EmergencyAlert) -> list[DeviceToken]:
         """Get target devices based on alert criteria."""
         try:
             session = self.db_session or await get_database_session()
 
             # Base query for active devices
-            query = session.query(DeviceToken).filter(DeviceToken.is_active == True)
+            query = session.query(DeviceToken).filter(DeviceToken.is_active)
 
             # Geographic targeting
             if alert.affected_regions:
@@ -492,7 +499,7 @@ class EmergencyAlertSystem:
                     query = query.join(TopicSubscription).filter(
                         and_(
                             TopicSubscription.topic.in_(topic_filters),
-                            TopicSubscription.is_active == True,
+                            TopicSubscription.is_active,
                         )
                     )
 
@@ -503,7 +510,7 @@ class EmergencyAlertSystem:
                 query = query.join(TopicSubscription).filter(
                     and_(
                         TopicSubscription.topic.in_(demo_topics),
-                        TopicSubscription.is_active == True,
+                        TopicSubscription.is_active,
                     )
                 )
 
@@ -513,7 +520,7 @@ class EmergencyAlertSystem:
                 excluded_devices = session.query(DeviceToken.id).join(TopicSubscription).filter(
                     and_(
                         TopicSubscription.topic.in_(exclude_topics),
-                        TopicSubscription.is_active == True,
+                        TopicSubscription.is_active,
                     )
                 )
                 query = query.filter(~DeviceToken.id.in_(excluded_devices))
@@ -530,14 +537,14 @@ class EmergencyAlertSystem:
 
     async def _deliver_emergency_immediate(
         self,
-        target_devices: List[DeviceToken],
+        target_devices: list[DeviceToken],
         message_data: FCMMessageData,
         android_config: AndroidConfig,
         apns_config: APNSConfig,
         web_config: WebConfig,
         alert: EmergencyAlert,
         priority: NotificationPriority,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Deliver emergency notifications immediately."""
         delivery_results = {
             "total_targeted": len(target_devices),
@@ -564,7 +571,7 @@ class EmergencyAlertSystem:
                 )
 
                 # Process results and log
-                for device, token in zip(batch_devices, batch_tokens):
+                for device, token in zip(batch_devices, batch_tokens, strict=False):
                     success, message_id, error = batch_results.get(token, (False, None, "Unknown error"))
 
                     # Create notification log entry
@@ -577,7 +584,7 @@ class EmergencyAlertSystem:
                         priority=priority,
                         fcm_message_id=message_id,
                         error_message=error,
-                        sent_at=datetime.now(timezone.utc),
+                        sent_at=datetime.now(UTC),
                         max_retries=self.emergency_retries,
                     )
 
@@ -636,19 +643,19 @@ class EmergencyAlertSystem:
             },
         )
 
-    async def _log_emergency_alert(self, alert: EmergencyAlert, delivery_results: Dict[str, Any]):
+    async def _log_emergency_alert(self, alert: EmergencyAlert, delivery_results: dict[str, Any]):
         """Log emergency alert issuance for audit and analysis."""
         try:
             # In a production system, you would log to a dedicated emergency alerts table
             logger.critical(
-                f"EMERGENCY ALERT ISSUED",
+                "EMERGENCY ALERT ISSUED",
                 extra={
                     "alert_id": alert.alert_id,
                     "alert_type": alert.alert_type,
                     "severity": alert.severity,
                     "affected_regions": alert.affected_regions,
                     "delivery_results": delivery_results,
-                    "issued_at": datetime.now(timezone.utc).isoformat(),
+                    "issued_at": datetime.now(UTC).isoformat(),
                 }
             )
         except Exception as e:
@@ -658,15 +665,15 @@ class EmergencyAlertSystem:
         self,
         alert_id: str,
         reason: str,
-        related_notifications: List[NotificationLog],
+        related_notifications: list[NotificationLog],
     ):
         """Send cancellation notice to users who received the original alert."""
         try:
             # Get unique devices that received the original alert
-            device_ids = set(
+            device_ids = {
                 notif.device_id for notif in related_notifications
                 if notif.device_id and notif.status == NotificationStatus.SENT
-            )
+            }
 
             if not device_ids:
                 return
@@ -700,14 +707,14 @@ class EmergencyAlertSystem:
             if self._should_close_session and session:
                 session.close()
 
-    async def get_active_emergency_alerts(self) -> List[Dict[str, Any]]:
+    async def get_active_emergency_alerts(self) -> list[dict[str, Any]]:
         """Get all currently active emergency alerts."""
         try:
             session = self.db_session or await get_database_session()
 
             # In a production system, you would have a dedicated emergency_alerts table
             # For now, we'll extract from recent notification logs
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             recent_cutoff = now - timedelta(hours=24)
 
             emergency_notifications = session.query(NotificationLog).filter(

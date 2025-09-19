@@ -5,13 +5,12 @@ This module provides a flexible template system for creating dynamic push notifi
 with context-based content generation, internationalization support, and rich media integration.
 """
 
-import json
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from jinja2 import Environment, Template, TemplateError
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from .models import NotificationPriority, NotificationTemplate
 
@@ -27,50 +26,51 @@ class TemplateContext(BaseModel):
     """
 
     # User information
-    user_id: Optional[str] = None
-    user_name: Optional[str] = None
-    user_location: Optional[Dict[str, Any]] = None
+    user_id: str | None = None
+    user_name: str | None = None
+    user_location: dict[str, Any] | None = None
 
     # Malaria-related data
-    risk_score: Optional[float] = Field(None, ge=0.0, le=1.0)
-    risk_level: Optional[str] = None  # "low", "medium", "high", "critical"
-    location_name: Optional[str] = None
-    coordinates: Optional[Dict[str, float]] = None
+    risk_score: float | None = Field(None, ge=0.0, le=1.0)
+    risk_level: str | None = None  # "low", "medium", "high", "critical"
+    location_name: str | None = None
+    coordinates: dict[str, float] | None = None
 
     # Environmental data
-    temperature: Optional[float] = None
-    humidity: Optional[float] = None
-    precipitation: Optional[float] = None
-    vegetation_index: Optional[float] = None
+    temperature: float | None = None
+    humidity: float | None = None
+    precipitation: float | None = None
+    vegetation_index: float | None = None
 
     # Time-related context
     timestamp: datetime = Field(default_factory=datetime.now)
-    forecast_date: Optional[datetime] = None
-    period: Optional[str] = None  # "daily", "weekly", "monthly"
+    forecast_date: datetime | None = None
+    period: str | None = None  # "daily", "weekly", "monthly"
 
     # Alert-specific data
-    alert_type: Optional[str] = None
-    severity: Optional[str] = None
-    outbreak_probability: Optional[float] = Field(None, ge=0.0, le=1.0)
+    alert_type: str | None = None
+    severity: str | None = None
+    outbreak_probability: float | None = Field(None, ge=0.0, le=1.0)
 
     # Custom data
-    custom_data: Dict[str, Any] = Field(default_factory=dict)
+    custom_data: dict[str, Any] = Field(default_factory=dict)
 
-    @validator('risk_level')
-    def validate_risk_level(cls, v: Optional[str]) -> Optional[str]:
+    @field_validator('risk_level')
+    @classmethod
+    def validate_risk_level(cls, v: str | None) -> str | None:
         """Validate risk level values."""
         if v is not None and v not in ['low', 'medium', 'high', 'critical']:
             raise ValueError("Risk level must be one of: low, medium, high, critical")
         return v
 
-    def to_template_vars(self) -> Dict[str, Any]:
+    def to_template_vars(self) -> dict[str, Any]:
         """
         Convert context to template variables.
 
         Returns:
             Dictionary of variables for template rendering
         """
-        data = self.dict()
+        data = self.model_dump()
 
         # Add formatted values for templates
         if self.risk_score is not None:
@@ -128,7 +128,7 @@ class NotificationTemplateEngine:
         template: NotificationTemplate,
         context: TemplateContext,
         language: str = "en",
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         """
         Render a notification template with provided context.
 
@@ -174,12 +174,12 @@ class NotificationTemplateEngine:
         except TemplateError as e:
             error_msg = f"Template rendering failed for '{template.name}': {str(e)}"
             logger.error(error_msg)
-            raise TemplateError(error_msg)
+            raise TemplateError(error_msg) from e
 
         except Exception as e:
             error_msg = f"Unexpected error rendering template '{template.name}': {str(e)}"
             logger.error(error_msg)
-            raise TemplateError(error_msg)
+            raise TemplateError(error_msg) from e
 
     def create_malaria_alert_template(self) -> NotificationTemplate:
         """
@@ -379,7 +379,7 @@ class NotificationTemplateEngine:
             },
         )
 
-    def get_built_in_templates(self) -> List[NotificationTemplate]:
+    def get_built_in_templates(self) -> list[NotificationTemplate]:
         """
         Get all built-in notification templates.
 
@@ -404,13 +404,13 @@ class NotificationTemplateEngine:
         }
         return emoji_map.get(risk_level.lower(), "⚪")
 
-    def _percentage_filter(self, value: Optional[float]) -> str:
+    def _percentage_filter(self, value: float | None) -> str:
         """Jinja2 filter to format as percentage."""
         if value is None:
             return "N/A"
         return f"{round(value * 100, 1)}%"
 
-    def _temperature_filter(self, value: Optional[float]) -> str:
+    def _temperature_filter(self, value: float | None) -> str:
         """Jinja2 filter to format temperature."""
         if value is None:
             return "N/A"
@@ -442,11 +442,11 @@ class MessageComposer:
     def compose_malaria_alert(
         self,
         risk_score: float,
-        location_name: Optional[str] = None,
-        coordinates: Optional[Dict[str, float]] = None,
-        environmental_data: Optional[Dict[str, float]] = None,
-        user_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        location_name: str | None = None,
+        coordinates: dict[str, float] | None = None,
+        environmental_data: dict[str, float] | None = None,
+        user_id: str | None = None,
+    ) -> dict[str, Any]:
         """
         Compose a malaria risk alert notification.
 
@@ -488,8 +488,8 @@ class MessageComposer:
         self,
         location_name: str,
         outbreak_probability: float,
-        additional_context: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        additional_context: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
         Compose an outbreak warning notification.
 
@@ -515,9 +515,9 @@ class MessageComposer:
     def compose_medication_reminder(
         self,
         user_id: str,
-        medication_name: Optional[str] = None,
-        dosage: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        medication_name: str | None = None,
+        dosage: str | None = None,
+    ) -> dict[str, Any]:
         """
         Compose a medication reminder notification.
 

@@ -340,6 +340,20 @@ async def close_database() -> None:
 
 
 # Utility function for running sync operations in async context
+async def get_database_session() -> AsyncSession:
+    """Get a new database session for notification system compatibility.
+
+    Note: This function creates a new session that must be manually closed.
+    Prefer using get_session() async context manager when possible.
+
+    Returns:
+        AsyncSession instance that must be manually closed
+    """
+    async_session_maker = get_session_maker()
+    return async_session_maker()
+
+
+# Utility function for running sync operations in async context
 async def run_async(func, *args, **kwargs):
     """Run a synchronous function in an async context.
 

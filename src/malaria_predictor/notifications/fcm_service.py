@@ -6,18 +6,14 @@ across different platforms (Android, iOS, Web) with comprehensive error handling
 retry logic, and delivery tracking.
 """
 
-import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
 
 import firebase_admin
 from firebase_admin import credentials, messaging
-from google.auth.exceptions import GoogleAuthError
-from google.cloud.firestore_v1.base_query import FieldFilter
 from google.cloud.firestore_v1.client import Client as FirestoreClient
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
-from ..config import get_settings
+from ..config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -31,22 +27,27 @@ class FCMMessageData(BaseModel):
 
     title: str = Field(..., max_length=255, description="Notification title")
     body: str = Field(..., max_length=4000, description="Notification body text")
-    data: Optional[Dict[str, str]] = Field(default=None, description="Additional data payload")
-    image_url: Optional[str] = Field(default=None, description="URL for notification image")
-    click_action: Optional[str] = Field(default=None, description="Action when notification is clicked")
+    data: dict[str, str] | None = Field(default=None, description="Additional data payload")
+    image_url: str | None = Field(default=None, description="URL for notification image")
+    click_action: str | None = Field(default=None, description="Action when notification is clicked")
     priority: str = Field(default="normal", description="Notification priority")
-    ttl: Optional[int] = Field(default=3600, description="Time to live in seconds")
+    ttl: int | None = Field(default=3600, description="Time to live in seconds")
 
-    @validator('priority')
+    @field_validator('priority')
+    @classmethod
     def validate_priority(cls, v: str) -> str:
         """Validate notification priority."""
-        valid_priorities = ['low', 'normal', 'high']
+        valid_priorities = ['low', 'normal', 'high', 'critical']
         if v not in valid_priorities:
             raise ValueError(f"Priority must be one of: {valid_priorities}")
+        # Map 'critical' to 'high' for FCM compatibility
+        if v == 'critical':
+            return 'high'
         return v
 
-    @validator('ttl')
-    def validate_ttl(cls, v: Optional[int]) -> Optional[int]:
+    @field_validator('ttl')
+    @classmethod
+    def validate_ttl(cls, v: int | None) -> int | None:
         """Validate time to live."""
         if v is not None and (v < 0 or v > 2419200):  # Max 28 days
             raise ValueError("TTL must be between 0 and 2419200 seconds (28 days)")
@@ -56,37 +57,37 @@ class FCMMessageData(BaseModel):
 class AndroidConfig(BaseModel):
     """Android-specific notification configuration."""
 
-    collapse_key: Optional[str] = None
+    collapse_key: str | None = None
     priority: str = "normal"  # "normal" or "high"
-    ttl: Optional[int] = None
-    restricted_package_name: Optional[str] = None
-    notification_sound: Optional[str] = None
-    notification_color: Optional[str] = None
-    notification_icon: Optional[str] = None
-    notification_channel_id: Optional[str] = None
+    ttl: int | None = None
+    restricted_package_name: str | None = None
+    notification_sound: str | None = None
+    notification_color: str | None = None
+    notification_icon: str | None = None
+    notification_channel_id: str | None = None
 
 
 class APNSConfig(BaseModel):
     """Apple Push Notification Service (APNS) configuration for iOS."""
 
-    badge: Optional[int] = None
-    sound: Optional[str] = None
+    badge: int | None = None
+    sound: str | None = None
     content_available: bool = False
     mutable_content: bool = False
-    category: Optional[str] = None
-    thread_id: Optional[str] = None
+    category: str | None = None
+    thread_id: str | None = None
 
 
 class WebConfig(BaseModel):
     """Web push notification configuration."""
 
-    icon: Optional[str] = None
-    badge: Optional[str] = None
-    image: Optional[str] = None
-    tag: Optional[str] = None
+    icon: str | None = None
+    badge: str | None = None
+    image: str | None = None
+    tag: str | None = None
     require_interaction: bool = False
     silent: bool = False
-    actions: Optional[List[Dict[str, str]]] = None
+    actions: list[dict[str, str]] | None = None
 
 
 class FCMService:
@@ -102,7 +103,7 @@ class FCMService:
     - Error handling and logging
     """
 
-    def __init__(self, credentials_path: Optional[str] = None, project_id: Optional[str] = None):
+    def __init__(self, credentials_path: str | None = None, project_id: str | None = None):
         """
         Initialize FCM service with Firebase credentials.
 
@@ -110,11 +111,11 @@ class FCMService:
             credentials_path: Path to Firebase service account JSON file
             project_id: Firebase project ID
         """
-        self.settings = get_settings()
-        self.credentials_path = credentials_path or self.settings.fcm_credentials_path
-        self.project_id = project_id or self.settings.fcm_project_id
+        self.settings = settings
+        self.credentials_path = credentials_path or self.settings.fcm.credentials_path
+        self.project_id = project_id or self.settings.fcm.project_id
         self.app = None
-        self.firestore_client: Optional[FirestoreClient] = None
+        self.firestore_client: FirestoreClient | None = None
 
         # Initialize Firebase Admin SDK
         self._initialize_firebase()
@@ -147,10 +148,10 @@ class FCMService:
         self,
         token: str,
         message_data: FCMMessageData,
-        android_config: Optional[AndroidConfig] = None,
-        apns_config: Optional[APNSConfig] = None,
-        web_config: Optional[WebConfig] = None,
-    ) -> Tuple[bool, Optional[str], Optional[str]]:
+        android_config: AndroidConfig | None = None,
+        apns_config: APNSConfig | None = None,
+        web_config: WebConfig | None = None,
+    ) -> tuple[bool, str | None, str | None]:
         """
         Send notification to a specific device token.
 
@@ -207,12 +208,12 @@ class FCMService:
 
     async def send_to_tokens(
         self,
-        tokens: List[str],
+        tokens: list[str],
         message_data: FCMMessageData,
-        android_config: Optional[AndroidConfig] = None,
-        apns_config: Optional[APNSConfig] = None,
-        web_config: Optional[WebConfig] = None,
-    ) -> Dict[str, Tuple[bool, Optional[str], Optional[str]]]:
+        android_config: AndroidConfig | None = None,
+        apns_config: APNSConfig | None = None,
+        web_config: WebConfig | None = None,
+    ) -> dict[str, tuple[bool, str | None, str | None]]:
         """
         Send notification to multiple device tokens using batch messaging.
 
@@ -246,8 +247,33 @@ class FCMService:
                     web_config=web_config,
                 )
 
-                # Send batch
-                response = messaging.send_multicast(message)
+                # Send batch - fallback to individual sends if send_multicast not available
+                try:
+                    response = messaging.send_multicast(message)
+                except AttributeError:
+                    # Fallback to individual sends
+                    logger.warning("send_multicast not available, falling back to individual sends")
+                    responses = []
+                    for token in batch_tokens:
+                        try:
+                            individual_message = self._build_message(
+                                token=token,
+                                message_data=message_data,
+                                android_config=android_config,
+                                apns_config=apns_config,
+                                web_config=web_config,
+                            )
+                            message_id = messaging.send(individual_message)
+                            responses.append(type('Response', (), {'success': True, 'message_id': message_id, 'exception': None})())
+                        except Exception as e:
+                            responses.append(type('Response', (), {'success': False, 'message_id': None, 'exception': e})())
+
+                    # Create a mock response object
+                    response = type('BatchResponse', (), {
+                        'responses': responses,
+                        'success_count': sum(1 for r in responses if r.success),
+                        'failure_count': sum(1 for r in responses if not r.success)
+                    })()
 
                 # Process results
                 for idx, result in enumerate(response.responses):
@@ -275,10 +301,10 @@ class FCMService:
         self,
         topic: str,
         message_data: FCMMessageData,
-        android_config: Optional[AndroidConfig] = None,
-        apns_config: Optional[APNSConfig] = None,
-        web_config: Optional[WebConfig] = None,
-    ) -> Tuple[bool, Optional[str], Optional[str]]:
+        android_config: AndroidConfig | None = None,
+        apns_config: APNSConfig | None = None,
+        web_config: WebConfig | None = None,
+    ) -> tuple[bool, str | None, str | None]:
         """
         Send notification to all devices subscribed to a topic.
 
@@ -313,7 +339,7 @@ class FCMService:
             logger.error(error_msg)
             return False, None, error_msg
 
-    async def subscribe_to_topic(self, tokens: List[str], topic: str) -> Dict[str, bool]:
+    async def subscribe_to_topic(self, tokens: list[str], topic: str) -> dict[str, bool]:
         """
         Subscribe device tokens to a topic for group messaging.
 
@@ -339,9 +365,9 @@ class FCMService:
 
         except Exception as e:
             logger.error(f"Failed to subscribe tokens to topic '{topic}': {e}")
-            return {token: False for token in tokens}
+            return dict.fromkeys(tokens, False)
 
-    async def unsubscribe_from_topic(self, tokens: List[str], topic: str) -> Dict[str, bool]:
+    async def unsubscribe_from_topic(self, tokens: list[str], topic: str) -> dict[str, bool]:
         """
         Unsubscribe device tokens from a topic.
 
@@ -367,16 +393,16 @@ class FCMService:
 
         except Exception as e:
             logger.error(f"Failed to unsubscribe tokens from topic '{topic}': {e}")
-            return {token: False for token in tokens}
+            return dict.fromkeys(tokens, False)
 
     def _build_message(
         self,
         message_data: FCMMessageData,
-        token: Optional[str] = None,
-        topic: Optional[str] = None,
-        android_config: Optional[AndroidConfig] = None,
-        apns_config: Optional[APNSConfig] = None,
-        web_config: Optional[WebConfig] = None,
+        token: str | None = None,
+        topic: str | None = None,
+        android_config: AndroidConfig | None = None,
+        apns_config: APNSConfig | None = None,
+        web_config: WebConfig | None = None,
     ) -> messaging.Message:
         """Build FCM message with platform-specific configurations."""
         # Build notification
@@ -455,11 +481,11 @@ class FCMService:
 
     def _build_multicast_message(
         self,
-        tokens: List[str],
+        tokens: list[str],
         message_data: FCMMessageData,
-        android_config: Optional[AndroidConfig] = None,
-        apns_config: Optional[APNSConfig] = None,
-        web_config: Optional[WebConfig] = None,
+        android_config: AndroidConfig | None = None,
+        apns_config: APNSConfig | None = None,
+        web_config: WebConfig | None = None,
     ) -> messaging.MulticastMessage:
         """Build FCM multicast message for batch sending."""
         # Build notification
@@ -573,4 +599,4 @@ class FCMService:
         Returns:
             URL for topic management
         """
-        return f"https://iid.googleapis.com/iid/v1:batchAdd"
+        return "https://iid.googleapis.com/iid/v1:batchAdd"

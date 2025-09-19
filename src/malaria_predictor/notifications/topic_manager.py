@@ -7,14 +7,14 @@ and targeted group notifications for malaria prevention campaigns.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
-from sqlalchemy.orm import Session
 from sqlalchemy import and_, func, or_
+from sqlalchemy.orm import Session
 
-from .fcm_service import FCMService
-from .models import DeviceToken, TopicSubscription, DevicePlatform
 from ..database.session import get_database_session
+from .fcm_service import FCMService
+from .models import DevicePlatform, DeviceToken, TopicSubscription
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class TopicManager:
     demographic targeting, and automatic subscription management.
     """
 
-    def __init__(self, fcm_service: FCMService, db_session: Optional[Session] = None):
+    def __init__(self, fcm_service: FCMService, db_session: Session | None = None):
         """
         Initialize topic manager.
 
@@ -86,7 +86,7 @@ class TopicManager:
         device_token: str,
         topic: str,
         auto_create_device: bool = True,
-    ) -> Tuple[bool, Optional[str]]:
+    ) -> tuple[bool, str | None]:
         """
         Subscribe a device to a topic.
 
@@ -124,7 +124,7 @@ class TopicManager:
                 and_(
                     TopicSubscription.device_id == device.id,
                     TopicSubscription.topic == topic,
-                    TopicSubscription.is_active == True,
+                    TopicSubscription.is_active,
                 )
             ).first()
 
@@ -164,7 +164,7 @@ class TopicManager:
         self,
         device_token: str,
         topic: str,
-    ) -> Tuple[bool, Optional[str]]:
+    ) -> tuple[bool, str | None]:
         """
         Unsubscribe a device from a topic.
 
@@ -191,7 +191,7 @@ class TopicManager:
                 and_(
                     TopicSubscription.device_id == device.id,
                     TopicSubscription.topic == topic,
-                    TopicSubscription.is_active == True,
+                    TopicSubscription.is_active,
                 )
             ).first()
 
@@ -222,7 +222,7 @@ class TopicManager:
             if self._should_close_session and session:
                 session.close()
 
-    async def get_device_subscriptions(self, device_token: str) -> List[str]:
+    async def get_device_subscriptions(self, device_token: str) -> list[str]:
         """
         Get all active topic subscriptions for a device.
 
@@ -239,7 +239,7 @@ class TopicManager:
             result = session.query(TopicSubscription.topic).join(DeviceToken).filter(
                 and_(
                     DeviceToken.token == device_token,
-                    TopicSubscription.is_active == True,
+                    TopicSubscription.is_active,
                 )
             ).all()
 
@@ -253,7 +253,7 @@ class TopicManager:
             if self._should_close_session and session:
                 session.close()
 
-    async def get_topic_subscribers(self, topic: str) -> List[Dict[str, Any]]:
+    async def get_topic_subscribers(self, topic: str) -> list[dict[str, Any]]:
         """
         Get all active subscribers for a topic.
 
@@ -275,8 +275,8 @@ class TopicManager:
             ).join(TopicSubscription).filter(
                 and_(
                     TopicSubscription.topic == topic,
-                    TopicSubscription.is_active == True,
-                    DeviceToken.is_active == True,
+                    TopicSubscription.is_active,
+                    DeviceToken.is_active,
                 )
             ).all()
 
@@ -301,8 +301,8 @@ class TopicManager:
     async def create_geographic_topic(
         self,
         location_name: str,
-        coordinates: Optional[Dict[str, float]] = None,
-        radius_km: Optional[float] = None,
+        coordinates: dict[str, float] | None = None,
+        radius_km: float | None = None,
     ) -> str:
         """
         Create a geographic topic for location-based messaging.
@@ -343,10 +343,10 @@ class TopicManager:
     async def auto_subscribe_device(
         self,
         device_token: str,
-        user_location: Optional[Dict[str, Any]] = None,
-        user_preferences: Optional[Dict[str, Any]] = None,
+        user_location: dict[str, Any] | None = None,
+        user_preferences: dict[str, Any] | None = None,
         language: str = "en",
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Automatically subscribe device to relevant topics based on context.
 
@@ -412,7 +412,7 @@ class TopicManager:
             logger.error(f"Failed to auto-subscribe device: {str(e)}")
             return subscribed_topics
 
-    async def get_topic_statistics(self) -> Dict[str, Any]:
+    async def get_topic_statistics(self) -> dict[str, Any]:
         """
         Get comprehensive statistics about topic subscriptions.
 
@@ -424,7 +424,7 @@ class TopicManager:
 
             # Get total active subscriptions
             total_subscriptions = session.query(TopicSubscription).filter(
-                TopicSubscription.is_active == True
+                TopicSubscription.is_active
             ).count()
 
             # Get subscriptions by topic
@@ -432,7 +432,7 @@ class TopicManager:
                 TopicSubscription.topic,
                 func.count(TopicSubscription.id).label('subscriber_count')
             ).filter(
-                TopicSubscription.is_active == True
+                TopicSubscription.is_active
             ).group_by(TopicSubscription.topic).all()
 
             # Get subscriptions by platform
@@ -441,19 +441,15 @@ class TopicManager:
                 func.count(TopicSubscription.id).label('subscription_count')
             ).join(TopicSubscription).filter(
                 and_(
-                    TopicSubscription.is_active == True,
-                    DeviceToken.is_active == True,
+                    TopicSubscription.is_active,
+                    DeviceToken.is_active,
                 )
             ).group_by(DeviceToken.platform).all()
 
             return {
                 "total_subscriptions": total_subscriptions,
-                "topics": {
-                    topic: count for topic, count in topic_stats
-                },
-                "platforms": {
-                    platform: count for platform, count in platform_stats
-                },
+                "topics": dict(topic_stats),
+                "platforms": dict(platform_stats),
                 "topic_categories": self.topic_categories,
             }
 
@@ -484,9 +480,9 @@ class TopicManager:
 
             inactive_subscriptions = session.query(TopicSubscription).join(DeviceToken).filter(
                 and_(
-                    TopicSubscription.is_active == True,
+                    TopicSubscription.is_active,
                     or_(
-                        DeviceToken.is_active == False,
+                        not DeviceToken.is_active,
                         DeviceToken.last_seen < cutoff_date,
                     )
                 )
@@ -541,10 +537,10 @@ class TopicManager:
 
     async def get_recommended_topics(
         self,
-        user_location: Optional[Dict[str, Any]] = None,
-        user_preferences: Optional[Dict[str, Any]] = None,
+        user_location: dict[str, Any] | None = None,
+        user_preferences: dict[str, Any] | None = None,
         language: str = "en",
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get recommended topics for a user based on their profile.
 

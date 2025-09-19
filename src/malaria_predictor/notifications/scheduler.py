@@ -8,25 +8,29 @@ optimal user engagement and system performance.
 
 import asyncio
 import logging
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional, Tuple, Union
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
-import schedule
 from celery import Celery
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, func
 
-from .fcm_service import FCMService, FCMMessageData, AndroidConfig, APNSConfig, WebConfig
-from .models import (
-    NotificationLog,
-    NotificationSchedule,
-    NotificationStatus,
-    NotificationPriority,
-    DeviceToken,
-)
-from .templates import NotificationTemplateEngine, TemplateContext, MessageComposer
+from ..config import settings
 from ..database.session import get_database_session
-from ..config import get_settings
+from .fcm_service import (
+    AndroidConfig,
+    APNSConfig,
+    FCMMessageData,
+    FCMService,
+    WebConfig,
+)
+from .models import (
+    DeviceToken,
+    NotificationLog,
+    NotificationPriority,
+    NotificationStatus,
+)
+from .templates import MessageComposer, NotificationTemplateEngine, TemplateContext
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +47,8 @@ class NotificationScheduler:
         self,
         fcm_service: FCMService,
         template_engine: NotificationTemplateEngine,
-        celery_app: Optional[Celery] = None,
-        db_session: Optional[Session] = None,
+        celery_app: Celery | None = None,
+        db_session: Session | None = None,
     ):
         """
         Initialize notification scheduler.
@@ -62,7 +66,7 @@ class NotificationScheduler:
         self.db_session = db_session
         self._should_close_session = db_session is None
 
-        self.settings = get_settings()
+        self.settings = settings
 
         # Delivery optimization settings
         self.batch_size = 500  # FCM maximum batch size
@@ -97,10 +101,10 @@ class NotificationScheduler:
         context: TemplateContext,
         target_type: str,  # "device", "topic", "user"
         target_value: str,
-        scheduled_time: Optional[datetime] = None,
+        scheduled_time: datetime | None = None,
         priority: NotificationPriority = NotificationPriority.NORMAL,
-        max_retries: Optional[int] = None,
-    ) -> Optional[int]:
+        max_retries: int | None = None,
+    ) -> int | None:
         """
         Schedule a notification for future delivery.
 
@@ -185,9 +189,9 @@ class NotificationScheduler:
 
     async def schedule_bulk_notifications(
         self,
-        notifications: List[Dict[str, Any]],
-        batch_size: Optional[int] = None,
-    ) -> List[Optional[int]]:
+        notifications: list[dict[str, Any]],
+        batch_size: int | None = None,
+    ) -> list[int | None]:
         """
         Schedule multiple notifications efficiently.
 
@@ -229,7 +233,7 @@ class NotificationScheduler:
         target_type: str,
         target_value: str,
         priority: NotificationPriority = NotificationPriority.HIGH,
-    ) -> Tuple[bool, Optional[int], Optional[str]]:
+    ) -> tuple[bool, int | None, str | None]:
         """
         Send a notification immediately without scheduling.
 
@@ -250,7 +254,7 @@ class NotificationScheduler:
                 context=context,
                 target_type=target_type,
                 target_value=target_value,
-                scheduled_time=datetime.now(timezone.utc),
+                scheduled_time=datetime.now(UTC),
                 priority=priority,
             )
 
@@ -277,7 +281,7 @@ class NotificationScheduler:
             session = self.db_session or await get_database_session()
 
             # Get pending notifications that are due
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             pending_notifications = session.query(NotificationLog).filter(
                 and_(
                     NotificationLog.status == NotificationStatus.PENDING,
@@ -365,7 +369,7 @@ class NotificationScheduler:
                     # Check if enough time has passed for retry
                     if notification.sent_at:
                         next_retry = notification.sent_at + timedelta(seconds=retry_delay)
-                        if datetime.now(timezone.utc) < next_retry:
+                        if datetime.now(UTC) < next_retry:
                             continue
 
                     # Increment retry count
@@ -395,7 +399,7 @@ class NotificationScheduler:
             if self._should_close_session and session:
                 session.close()
 
-    async def _deliver_notification(self, notification_id: int) -> Tuple[bool, Optional[str]]:
+    async def _deliver_notification(self, notification_id: int) -> tuple[bool, str | None]:
         """
         Deliver a specific notification.
 
@@ -432,7 +436,7 @@ class NotificationScheduler:
                 android_config = AndroidConfig(**notification.template.android_config)
             if notification.template and notification.template.ios_config:
                 apns_config = APNSConfig(**notification.template.ios_config)
-            if notification.template && notification.template.web_config:
+            if notification.template and notification.template.web_config:
                 web_config = WebConfig(**notification.template.web_config)
 
             # Send notification
@@ -440,7 +444,7 @@ class NotificationScheduler:
             fcm_message_id = None
             error_message = None
 
-            notification.sent_at = datetime.now(timezone.utc)
+            notification.sent_at = datetime.now(UTC)
 
             if notification.device_id:
                 # Send to specific device
@@ -497,7 +501,7 @@ class NotificationScheduler:
         self,
         priority: NotificationPriority,
         target_value: str,
-        timezone_offset: Optional[int] = None,
+        timezone_offset: int | None = None,
     ) -> datetime:
         """
         Optimize delivery time based on priority and user timezone.
@@ -510,7 +514,7 @@ class NotificationScheduler:
         Returns:
             Optimized delivery time
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # Critical notifications send immediately
         if priority == NotificationPriority.CRITICAL:
@@ -588,7 +592,7 @@ class NotificationScheduler:
             return
 
         # Calculate delay in seconds
-        delay = (scheduled_time - datetime.now(timezone.utc)).total_seconds()
+        delay = (scheduled_time - datetime.now(UTC)).total_seconds()
         delay = max(0, delay)  # Don't schedule in the past
 
         # Schedule Celery task
@@ -600,9 +604,9 @@ class NotificationScheduler:
 
     async def get_delivery_statistics(
         self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-    ) -> Dict[str, Any]:
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> dict[str, Any]:
         """
         Get comprehensive delivery statistics.
 
@@ -618,9 +622,9 @@ class NotificationScheduler:
 
             # Default to last 7 days if no dates provided
             if not start_date:
-                start_date = datetime.now(timezone.utc) - timedelta(days=7)
+                start_date = datetime.now(UTC) - timedelta(days=7)
             if not end_date:
-                end_date = datetime.now(timezone.utc)
+                end_date = datetime.now(UTC)
 
             # Base query
             base_query = session.query(NotificationLog).filter(

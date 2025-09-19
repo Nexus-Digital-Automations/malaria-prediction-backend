@@ -629,7 +629,7 @@
       "updated_at": "2025-09-19T06:11:22.582Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-19T06:14:27.705Z",
       "title": "Implement Real-time Alert System with WebSocket Infrastructure",
       "description": "Build comprehensive WebSocket server with FastAPI integration, alert broadcasting, connection management, authentication, rate limiting, health monitoring, and integration with existing AlertBloc architecture",
@@ -646,7 +646,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-19T06:24:20.830Z",
+      "updated_at": "2025-09-19T06:24:20.830Z"
     },
     {
       "status": "in_progress",

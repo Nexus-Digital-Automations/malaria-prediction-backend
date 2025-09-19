@@ -5,22 +5,19 @@ This module defines SQLAlchemy models for tracking device tokens, notification l
 templates, and topic subscriptions.
 """
 
-from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     Column,
     DateTime,
     ForeignKey,
     Index,
     Integer,
-    JSON,
     String,
     Text,
 )
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
