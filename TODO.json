@@ -574,6 +574,46 @@
       ],
       "completed_at": "2025-09-19T05:49:39.114Z",
       "updated_at": "2025-09-19T05:49:39.114Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-19T05:52:39.767Z",
+      "title": "Implement Treatment Protocols and Resource Allocation Tools",
+      "description": "Comprehensive implementation of WHO-based treatment protocol recommendation engine and resource allocation planning tools for malaria healthcare system",
+      "category": "feature",
+      "id": "feature_1758261159767_mhv2v7lxywo",
+      "assigned_agent": "dev_session_1758261145075_1_general_096113b2",
+      "started_at": "2025-09-19T05:53:29.559Z",
+      "claimed_by": "dev_session_1758261145075_1_general_096113b2",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758261145075_1_general_096113b2",
+          "role": "primary",
+          "assignedAt": "2025-09-19T05:53:29.559Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-19T05:52:41.157Z",
+      "title": "Implement Risk Assessment Workflows and Patient Case Management",
+      "description": "Implement comprehensive risk assessment workflows with guided questionnaires, risk scoring algorithms, and patient case management system with case tracking, treatment history, and DHIS2 integration. Include multi-language support, HIPAA compliance, and extensive testing.",
+      "category": "feature",
+      "id": "feature_1758261161157_7nvyzb953ma",
+      "assigned_agent": "dev_session_1758261145820_1_general_446663ec",
+      "started_at": "2025-09-19T05:53:45.757Z",
+      "claimed_by": "dev_session_1758261145820_1_general_446663ec",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758261145820_1_general_446663ec",
+          "role": "primary",
+          "assignedAt": "2025-09-19T05:53:45.757Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "current_mode": "DEVELOPMENT",
@@ -753,6 +793,48 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-19T05:27:26.129Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758261145075_1_general_096113b2": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T05:52:25.075Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T05:52:25.075Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758261145820_1_general_446663ec": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T05:52:25.820Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T05:52:25.820Z",
       "sessionId": null,
       "metadata": {}
     }
