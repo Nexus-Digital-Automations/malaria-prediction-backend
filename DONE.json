@@ -2370,6 +2370,30 @@
       "updated_at": "2025-09-19T16:58:58.521Z",
       "archived_at": "2025-09-19T16:58:58.524Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-19T16:45:43.305Z",
+      "title": "Create comprehensive custom markers system for health facilities and points of interest",
+      "description": "Design custom marker widgets for different facility types, implement marker clustering for performance, create interactive marker popups and info windows, build facility type categorization and filtering, add marker search and filtering capabilities, implement custom marker icons and styling, create facility data integration and display",
+      "category": "feature",
+      "id": "feature_1758300343305_k1be2ajnwah",
+      "assigned_agent": "dev_session_1758300328541_1_general_d4c55109",
+      "started_at": "2025-09-19T16:58:50.336Z",
+      "claimed_by": "dev_session_1758300328541_1_general_d4c55109",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758300328541_1_general_d4c55109",
+          "role": "primary",
+          "assignedAt": "2025-09-19T16:58:50.336Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T16:59:32.302Z",
+      "updated_at": "2025-09-19T16:59:32.303Z",
+      "archived_at": "2025-09-19T16:59:32.305Z",
+      "archive_version": "2.0.0"
     }
   ],
   "project_info": {
@@ -2380,8 +2404,8 @@
     "total_completed": 0,
     "last_archived": null
   },
-  "last_archived": "2025-09-19T16:58:58.524Z",
-  "total_completed": 94,
+  "last_archived": "2025-09-19T16:59:32.305Z",
+  "total_completed": 95,
   "metadata": {
     "last_bulk_archive": "2025-09-19T16:39:39.801Z",
     "bulk_archive_count": 16

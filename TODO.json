@@ -351,7 +351,7 @@
       "updated_at": "2025-09-19T16:58:58.521Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-19T16:45:43.305Z",
       "title": "Create comprehensive custom markers system for health facilities and points of interest",
       "description": "Design custom marker widgets for different facility types, implement marker clustering for performance, create interactive marker popups and info windows, build facility type categorization and filtering, add marker search and filtering capabilities, implement custom marker icons and styling, create facility data integration and display",
@@ -368,7 +368,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-19T16:59:32.302Z",
+      "updated_at": "2025-09-19T16:59:32.303Z"
     },
     {
       "status": "completed",
