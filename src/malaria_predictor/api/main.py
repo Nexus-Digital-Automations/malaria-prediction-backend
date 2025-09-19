@@ -39,33 +39,55 @@ async def lifespan(app: FastAPI):
     global model_manager, prediction_service
 
     # Startup
-    logger.info("🚀 Starting Malaria Prediction API...")
+    logger.info("🚀 Starting Enhanced Malaria Prediction API...")
 
     try:
         # Initialize model manager and prediction service
         model_manager = await get_model_manager()
         prediction_service = await get_prediction_service()
 
+        # Initialize enhanced WebSocket alert system
+        from .alerts.websocket_manager import websocket_manager
+
+        logger.info("🔌 Initializing enhanced WebSocket alert system...")
+        await websocket_manager.initialize()
+        logger.info("✅ Enhanced WebSocket alert system initialized")
+
         # Store in app state
         app.state.model_manager = model_manager
         app.state.prediction_service = prediction_service
+        app.state.websocket_manager = websocket_manager
 
-        logger.info("✅ Malaria Prediction API started successfully")
+        logger.info("✅ Enhanced Malaria Prediction API started successfully")
+        logger.info("🎯 Real-time alert system ready with features:")
+        logger.info("   • Low-latency broadcasting (<100ms)")
+        logger.info("   • Rate limiting and abuse protection")
+        logger.info("   • Offline message queuing")
+        logger.info("   • Health monitoring and diagnostics")
+        logger.info("   • Multi-client subscription management")
 
         yield
 
     except Exception as e:
-        logger.error(f"❌ Failed to start API: {e}")
+        logger.error(f"❌ Failed to start Enhanced API: {e}")
         raise
 
     finally:
         # Shutdown
-        logger.info("🛑 Shutting down Malaria Prediction API...")
+        logger.info("🛑 Shutting down Enhanced Malaria Prediction API...")
+
+        # Cleanup WebSocket manager
+        try:
+            from .alerts.websocket_manager import websocket_manager
+            await websocket_manager.stop_background_tasks()
+            logger.info("✅ WebSocket alert system shutdown complete")
+        except Exception as e:
+            logger.warning(f"⚠️ Error during WebSocket cleanup: {e}")
 
         if model_manager:
             await model_manager.cleanup()
 
-        logger.info("✅ Malaria Prediction API shutdown complete")
+        logger.info("✅ Enhanced Malaria Prediction API shutdown complete")
 
 
 # Create FastAPI application

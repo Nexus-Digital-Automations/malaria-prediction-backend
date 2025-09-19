@@ -4,11 +4,13 @@ Provides REST API endpoints for:
 - Alert configuration management
 - Alert rule creation and management
 - Alert history and querying
-- WebSocket connection management
+- Enhanced WebSocket connection management with real-time features
 - Device token registration
 - Notification preferences
+- Performance monitoring and diagnostics
 """
 
+import asyncio
 import json
 import logging
 from datetime import datetime, timedelta
@@ -780,13 +782,207 @@ async def deactivate_device_token(
         raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
-# WebSocket Connection
+# Enhanced WebSocket Connection
 @router.websocket("/ws")
-async def websocket_endpoint(
+async def enhanced_websocket_endpoint(
+    websocket: WebSocket,
+    auth_token: str = None,
+    location_filter: str = None,
+    risk_threshold: float = 0.0,
+    alert_types: str = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Enhanced WebSocket endpoint for real-time alerts with advanced features."""
+    try:
+        from ...alerts.websocket_manager import websocket_manager
+
+        # Parse parameters
+        location_filter_dict = None
+        if location_filter:
+            try:
+                location_filter_dict = json.loads(location_filter)
+            except json.JSONDecodeError:
+                logger.warning(f"Invalid location_filter format: {location_filter}")
+
+        alert_types_set = None
+        if alert_types:
+            alert_types_set = set(alert_types.split(","))
+
+        # Get user permissions and roles (implement according to your auth system)
+        permissions = getattr(current_user, 'permissions', set())
+        user_roles = getattr(current_user, 'roles', [])
+
+        # Initialize WebSocket manager if not already done
+        if not hasattr(websocket_manager, '_initialized'):
+            await websocket_manager.initialize()
+            websocket_manager._initialized = True
+
+        connection_id = await websocket_manager.connect(
+            websocket=websocket,
+            user_id=current_user.id,
+            auth_token=auth_token,
+            location_filter=location_filter_dict,
+            risk_threshold=risk_threshold,
+            alert_types_filter=alert_types_set,
+            permissions=permissions,
+            user_roles=user_roles
+        )
+
+        logger.info(f"Enhanced WebSocket connection established: {connection_id}")
+
+        try:
+            while True:
+                # Wait for client messages with timeout
+                try:
+                    data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
+                    message = json.loads(data)
+
+                    # Rate limit check
+                    if not await websocket_manager._check_rate_limit(current_user.id, connection_id):
+                        await websocket.send_text(json.dumps({
+                            "type": "rate_limit_warning",
+                            "message": "Rate limit exceeded. Please slow down.",
+                            "timestamp": datetime.now().isoformat()
+                        }))
+                        continue
+
+                    # Handle enhanced client messages
+                    await handle_websocket_message(websocket_manager, connection_id, message)
+
+                except TimeoutError:
+                    # Send periodic ping to keep connection alive
+                    await websocket.send_text(json.dumps({
+                        "type": "ping",
+                        "timestamp": datetime.now().isoformat()
+                    }))
+
+        except WebSocketDisconnect:
+            logger.info(f"WebSocket client disconnected: {connection_id}")
+            await websocket_manager.disconnect(connection_id)
+
+    except HTTPException as e:
+        logger.warning(f"WebSocket connection rejected: {e.detail}")
+        await websocket.close(code=1008, reason=e.detail)
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+        try:
+            await websocket.close(code=1011, reason="Internal server error")
+        except Exception:
+            pass
+
+
+async def handle_websocket_message(websocket_manager, connection_id: str, message: dict):
+    """Handle incoming WebSocket messages with enhanced functionality."""
+    try:
+        message_type = message.get("type")
+
+        if message_type == "subscribe":
+            group_name = message.get("group")
+
+            if group_name:
+                success = await websocket_manager.subscribe(connection_id, group_name)
+                response = {
+                    "type": "subscription_response",
+                    "action": "subscribe",
+                    "group_name": group_name,
+                    "success": success,
+                    "message": f"Successfully subscribed to {group_name}" if success else f"Failed to subscribe to {group_name}",
+                    "timestamp": datetime.now().isoformat()
+                }
+                await websocket_manager._send_to_connection(connection_id, response)
+
+        elif message_type == "unsubscribe":
+            group_name = message.get("group")
+
+            if group_name:
+                success = await websocket_manager.unsubscribe(connection_id, group_name)
+                response = {
+                    "type": "subscription_response",
+                    "action": "unsubscribe",
+                    "group_name": group_name,
+                    "success": success,
+                    "message": f"Successfully unsubscribed from {group_name}" if success else f"Failed to unsubscribe from {group_name}",
+                    "timestamp": datetime.now().isoformat()
+                }
+                await websocket_manager._send_to_connection(connection_id, response)
+
+        elif message_type == "pong":
+            # Update connection health
+            if connection_id in websocket_manager.connections:
+                connection = websocket_manager.connections[connection_id]
+                connection.last_pong = datetime.now()
+                connection.is_healthy = True
+
+        elif message_type == "get_stats":
+            # Send connection-specific statistics
+            if connection_id in websocket_manager.connections:
+                connection = websocket_manager.connections[connection_id]
+                stats = {
+                    "type": "connection_stats",
+                    "connection_id": connection_id,
+                    "connected_at": connection.connected_at.isoformat(),
+                    "subscriptions": list(connection.subscriptions),
+                    "messages_sent": connection.metrics.messages_sent,
+                    "messages_received": connection.metrics.messages_received,
+                    "is_healthy": connection.is_healthy,
+                    "timestamp": datetime.now().isoformat()
+                }
+                await websocket_manager._send_to_connection(connection_id, stats)
+
+        elif message_type == "update_filters":
+            # Update connection filters
+            if connection_id in websocket_manager.connections:
+                connection = websocket_manager.connections[connection_id]
+
+                # Update location filter
+                location_filter = message.get("location_filter")
+                if location_filter:
+                    connection.location_filter = location_filter
+
+                # Update risk threshold
+                risk_threshold = message.get("risk_threshold")
+                if risk_threshold is not None:
+                    connection.risk_threshold = risk_threshold
+
+                # Update alert types filter
+                alert_types = message.get("alert_types")
+                if alert_types:
+                    connection.alert_types_filter = set(alert_types)
+
+                response = {
+                    "type": "filters_updated",
+                    "success": True,
+                    "message": "Filters updated successfully",
+                    "timestamp": datetime.now().isoformat()
+                }
+                await websocket_manager._send_to_connection(connection_id, response)
+
+        else:
+            # Unknown message type
+            response = {
+                "type": "error",
+                "message": f"Unknown message type: {message_type}",
+                "timestamp": datetime.now().isoformat()
+            }
+            await websocket_manager._send_to_connection(connection_id, response)
+
+    except Exception as e:
+        logger.error(f"Error handling WebSocket message: {e}")
+        error_response = {
+            "type": "error",
+            "message": "Failed to process message",
+            "timestamp": datetime.now().isoformat()
+        }
+        await websocket_manager._send_to_connection(connection_id, error_response)
+
+
+# Legacy WebSocket endpoint for backward compatibility
+@router.websocket("/ws/legacy")
+async def legacy_websocket_endpoint(
     websocket: WebSocket,
     current_user: User = Depends(get_current_user)
 ):
-    """WebSocket endpoint for real-time alerts."""
+    """Legacy WebSocket endpoint for backward compatibility."""
     try:
         from ...alerts.websocket_manager import websocket_manager
 

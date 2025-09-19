@@ -627,6 +627,46 @@
       ],
       "completed_at": "2025-09-19T06:11:22.582Z",
       "updated_at": "2025-09-19T06:11:22.582Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-19T06:14:27.705Z",
+      "title": "Implement Real-time Alert System with WebSocket Infrastructure",
+      "description": "Build comprehensive WebSocket server with FastAPI integration, alert broadcasting, connection management, authentication, rate limiting, health monitoring, and integration with existing AlertBloc architecture",
+      "category": "feature",
+      "id": "feature_1758262467705_uhkm5hkzc2",
+      "assigned_agent": "dev_session_1758262452416_1_general_a2c21948",
+      "started_at": "2025-09-19T06:15:08.794Z",
+      "claimed_by": "dev_session_1758262452416_1_general_a2c21948",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758262452416_1_general_a2c21948",
+          "role": "primary",
+          "assignedAt": "2025-09-19T06:15:08.794Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-19T06:14:28.572Z",
+      "title": "Implement Firebase Cloud Messaging (FCM) and Push Notification System",
+      "description": "Implement comprehensive FCM integration with Python FastAPI backend including device token management, topic-based messaging, notification scheduling, emergency alerts, and cross-platform delivery with analytics",
+      "category": "feature",
+      "id": "feature_1758262468572_z4lx0325hvc",
+      "assigned_agent": "dev_session_1758262453051_1_general_60d86c1f",
+      "started_at": "2025-09-19T06:15:25.235Z",
+      "claimed_by": "dev_session_1758262453051_1_general_60d86c1f",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758262453051_1_general_60d86c1f",
+          "role": "primary",
+          "assignedAt": "2025-09-19T06:15:25.235Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     }
   ],
   "current_mode": "DEVELOPMENT",
@@ -848,6 +888,48 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-19T05:52:25.820Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758262452416_1_general_a2c21948": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T06:14:12.416Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T06:14:12.416Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758262453051_1_general_60d86c1f": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-19T06:14:13.052Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-19T06:14:13.052Z",
       "sessionId": null,
       "metadata": {}
     }
