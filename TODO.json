@@ -301,7 +301,7 @@
       ]
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-19T16:45:42.475Z",
       "title": "Create comprehensive choropleth risk overlay system for malaria prediction visualization",
       "description": "Design and implement risk data visualization with color-coded overlays, polygon-based risk area mapping, dynamic risk level calculation, interactive risk zone selection, risk gradient visualization, risk threshold configuration, and risk legend indicators. Create required files in lib/features/risk_maps/ and integrate with existing analytics data.",
@@ -318,7 +318,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-19T17:00:00.737Z",
+      "updated_at": "2025-09-19T17:00:00.737Z"
     },
     {
       "status": "pending",
