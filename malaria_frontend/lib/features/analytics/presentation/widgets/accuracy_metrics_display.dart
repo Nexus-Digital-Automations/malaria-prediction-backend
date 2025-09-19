@@ -371,7 +371,7 @@ class _AccuracyMetricsDisplayState extends State<AccuracyMetricsDisplay>
                     Text(
                       label,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.bold,
                         color: isSelected ? colorScheme.primary : null,
                       ),
                     ),
@@ -461,7 +461,7 @@ class _AccuracyMetricsDisplayState extends State<AccuracyMetricsDisplay>
           '${(trend * 100).toStringAsFixed(1)}%',
           style: theme.textTheme.bodySmall?.copyWith(
             color: isPositive ? Colors.green : Colors.red,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
             fontSize: 10,
           ),
         ),
@@ -649,7 +649,7 @@ class _AccuracyMetricsDisplayState extends State<AccuracyMetricsDisplay>
                 Text(
                   label,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
@@ -767,7 +767,7 @@ class _AccuracyMetricsDisplayState extends State<AccuracyMetricsDisplay>
             Text(
               label,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
                 color: color,
               ),
               textAlign: TextAlign.center,

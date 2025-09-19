@@ -271,7 +271,7 @@ class _ConfidenceIndicatorState extends State<ConfidenceIndicator>
             child: Text(
               'CI: ${(widget.confidenceInterval!.confidenceLevel * 100).toStringAsFixed(0)}%',
               style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -432,7 +432,7 @@ class _ConfidenceIndicatorState extends State<ConfidenceIndicator>
                           Text(
                             'Interval Width: ${(range * 100).toStringAsFixed(1)}%',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
@@ -462,7 +462,7 @@ class _ConfidenceIndicatorState extends State<ConfidenceIndicator>
           label,
           style: theme.textTheme.bodySmall?.copyWith(
             color: color,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
         Text(
@@ -744,7 +744,7 @@ class _ConfidenceIndicatorState extends State<ConfidenceIndicator>
                 Text(
                   label,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
@@ -831,7 +831,7 @@ class _ConfidenceIndicatorState extends State<ConfidenceIndicator>
                 '${(widget.confidenceThreshold * 100).toStringAsFixed(0)}%',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.primary,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),

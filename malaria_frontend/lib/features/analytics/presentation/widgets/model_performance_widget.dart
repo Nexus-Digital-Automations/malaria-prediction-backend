@@ -200,7 +200,7 @@ class _ModelPerformanceWidgetState extends State<ModelPerformanceWidget>
             'Best: ${bestModel.modelName}',
             style: theme.textTheme.bodySmall?.copyWith(
               color: Colors.green,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
@@ -338,7 +338,7 @@ class _ModelPerformanceWidgetState extends State<ModelPerformanceWidget>
                 color: isSelected
                     ? colorScheme.onPrimary
                     : colorScheme.onSurface.withValues(alpha: 0.7),
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
           ],
@@ -541,7 +541,7 @@ class _ModelPerformanceWidgetState extends State<ModelPerformanceWidget>
                       Text(
                         model.modelName,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
                           color: isSelected ? colorScheme.primary : null,
                         ),
                       ),
@@ -606,7 +606,7 @@ class _ModelPerformanceWidgetState extends State<ModelPerformanceWidget>
                     Text(
                       model.modelName,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
@@ -622,7 +622,7 @@ class _ModelPerformanceWidgetState extends State<ModelPerformanceWidget>
                 Text(
                   '${(model.accuracy * 100).toStringAsFixed(1)}%',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                     color: _getAccuracyColor(model.accuracy),
                   ),
                 ),
@@ -691,7 +691,7 @@ class _ModelPerformanceWidgetState extends State<ModelPerformanceWidget>
         _getStatusDisplayName(status),
         style: theme.textTheme.bodySmall?.copyWith(
           color: color,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

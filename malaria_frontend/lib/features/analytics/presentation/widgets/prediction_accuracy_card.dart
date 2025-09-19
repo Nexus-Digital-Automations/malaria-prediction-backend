@@ -367,7 +367,7 @@ class _PredictionAccuracyCardState extends State<PredictionAccuracyCard>
             Text(
               'Accuracy',
               style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onSurface,
               ),
             ),
@@ -505,7 +505,7 @@ class _PredictionAccuracyCardState extends State<PredictionAccuracyCard>
         Text(
           'Accuracy by Risk Level',
           style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),
@@ -547,7 +547,7 @@ class _PredictionAccuracyCardState extends State<PredictionAccuracyCard>
                     Text(
                       '${(accuracy * 100).toStringAsFixed(0)}%',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],

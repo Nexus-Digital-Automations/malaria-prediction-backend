@@ -108,7 +108,7 @@ class _AnalyticsFiltersPanelState extends State<AnalyticsFiltersPanel> {
               Text(
                 'Analytics Filters',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),

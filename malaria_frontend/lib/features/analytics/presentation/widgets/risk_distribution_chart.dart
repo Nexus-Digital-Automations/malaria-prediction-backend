@@ -177,7 +177,7 @@ class _RiskDistributionChartState extends State<RiskDistributionChart> {
         Text(
           'Statistics',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 12),

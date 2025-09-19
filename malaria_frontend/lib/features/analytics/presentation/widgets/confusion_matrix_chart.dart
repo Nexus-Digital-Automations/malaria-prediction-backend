@@ -263,7 +263,7 @@ class _ConfusionMatrixChartState extends State<ConfusionMatrixChart> {
         text,
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -277,7 +277,7 @@ class _ConfusionMatrixChartState extends State<ConfusionMatrixChart> {
         text,
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -379,7 +379,7 @@ class _ConfusionMatrixChartState extends State<ConfusionMatrixChart> {
           Text(
             'Performance Metrics',
             style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
@@ -392,7 +392,7 @@ class _ConfusionMatrixChartState extends State<ConfusionMatrixChart> {
             Text(
               'Selected Cell',
               style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),

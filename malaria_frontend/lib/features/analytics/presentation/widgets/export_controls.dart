@@ -127,7 +127,7 @@ class _ExportControlsState extends State<ExportControls> {
         Text(
           'Export Format',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),
@@ -179,7 +179,7 @@ class _ExportControlsState extends State<ExportControls> {
         Text(
           'Export Options',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),
@@ -207,7 +207,7 @@ class _ExportControlsState extends State<ExportControls> {
         Text(
           'Report Sections',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),

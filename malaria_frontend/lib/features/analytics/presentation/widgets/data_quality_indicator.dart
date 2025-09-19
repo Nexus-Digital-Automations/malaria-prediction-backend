@@ -211,7 +211,7 @@ class DataQualityIndicator extends StatelessWidget {
         Text(
           'Data Sources',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),

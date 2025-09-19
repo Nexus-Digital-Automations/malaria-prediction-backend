@@ -76,6 +76,11 @@ dependencies:
   firebase_messaging: ^14.7.9
   permission_handler: ^11.3.1
 
+  # Report Generation
+  pdf: ^3.10.7
+  printing: ^5.12.0
+  csv: ^5.1.1
+
   uuid: any
 dev_dependencies:
   flutter_test:

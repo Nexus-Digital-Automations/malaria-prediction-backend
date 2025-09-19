@@ -330,7 +330,7 @@ class _PredictionMetricsTabState extends State<PredictionMetricsTab>
           Text(
             'Performance by Risk Level',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
@@ -439,7 +439,7 @@ class _PredictionMetricsTabState extends State<PredictionMetricsTab>
                 Text(
                   _getRiskLevelDisplayName(entry.key),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -466,7 +466,7 @@ class _PredictionMetricsTabState extends State<PredictionMetricsTab>
             Text(
               'Model Information',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
@@ -492,7 +492,7 @@ class _PredictionMetricsTabState extends State<PredictionMetricsTab>
             Text(
               'Model Comparison Details',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
@@ -541,7 +541,7 @@ class _PredictionMetricsTabState extends State<PredictionMetricsTab>
             Text(
               'Trend Analysis',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),

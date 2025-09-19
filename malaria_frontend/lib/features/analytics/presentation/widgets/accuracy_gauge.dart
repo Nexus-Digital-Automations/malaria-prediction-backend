@@ -292,7 +292,7 @@ class _AccuracyGaugeState extends State<AccuracyGauge>
             performanceLevel,
             style: theme.textTheme.bodySmall?.copyWith(
               color: performanceColor,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
@@ -443,7 +443,7 @@ class MultiAccuracyGauge extends StatelessWidget {
             Text(
               metric.label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
             ),

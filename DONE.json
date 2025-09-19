@@ -2214,6 +2214,18 @@
       "updated_at": "2025-09-19T15:26:41.415Z",
       "archived_at": "2025-09-19T16:03:52.227Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-19T16:10:43.682Z",
+      "title": "Create prediction accuracy metrics display widgets for malaria analytics dashboard",
+      "description": "Build interactive widgets for prediction accuracy visualization including: 1) accuracy trend charts 2) precision/recall/F1 score displays 3) model performance comparison 4) accuracy by risk level breakdown 5) confidence interval displays 6) accuracy threshold indicators. Create in analytics presentation/widgets directory with proper error handling and loading states.",
+      "category": "feature",
+      "id": "feature_1758298243682_sug96cr2ryr",
+      "completed_at": "2025-09-19T16:19:21.633Z",
+      "updated_at": "2025-09-19T16:19:21.633Z",
+      "archived_at": "2025-09-19T16:19:21.635Z",
+      "archive_version": "2.0.0"
     }
   ],
   "project_info": {
@@ -2224,8 +2236,8 @@
     "total_completed": 0,
     "last_archived": null
   },
-  "last_archived": "2025-09-19T16:03:52.227Z",
-  "total_completed": 84,
+  "last_archived": "2025-09-19T16:19:21.635Z",
+  "total_completed": 85,
   "metadata": {
     "last_bulk_archive": "2025-09-19T16:03:52.227Z",
     "bulk_archive_count": 15
