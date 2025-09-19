@@ -17,6 +17,7 @@
 ///   (analyticsData) => displayDashboard(analyticsData),
 /// );
 /// ```
+library;
 
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
@@ -73,7 +74,7 @@ class GetAnalyticsData implements UseCase<AnalyticsData, GetAnalyticsDataParams>
       return Left(ServerFailure(
         message: 'Unexpected error during analytics data retrieval: ${e.toString()}',
         statusCode: 500,
-      ));
+      ),);
     }
   }
 
@@ -111,7 +112,7 @@ class GetAnalyticsData implements UseCase<AnalyticsData, GetAnalyticsDataParams>
     }
 
     // Validate date range duration (maximum 5 years for performance)
-    final maxDuration = const Duration(days: 365 * 5);
+    const maxDuration = Duration(days: 365 * 5);
     if (params.dateRange.duration > maxDuration) {
       return const ValidationFailure(
         message: 'Date range cannot exceed 5 years for performance reasons',
@@ -193,28 +194,28 @@ class GetAnalyticsData implements UseCase<AnalyticsData, GetAnalyticsDataParams>
     try {
       // Validate basic data completeness
       if (data.region.isEmpty) {
-        return Left(const DataValidationFailure(
+        return const Left(DataValidationFailure(
           message: 'Analytics data missing region information',
           field: 'region',
-        ));
+        ),);
       }
 
       // Validate data generation timestamp
       final now = DateTime.now();
-      final maxAge = const Duration(hours: 24);
+      const maxAge = Duration(hours: 24);
       if (now.difference(data.generatedAt) > maxAge) {
-        return Left(const DataValidationFailure(
+        return const Left(DataValidationFailure(
           message: 'Analytics data is too old (over 24 hours)',
           field: 'generatedAt',
-        ));
+        ),);
       }
 
       // Validate prediction accuracy if included
       if (data.predictionAccuracy.overall < 0.0 || data.predictionAccuracy.overall > 1.0) {
-        return Left(const DataValidationFailure(
+        return const Left(DataValidationFailure(
           message: 'Invalid prediction accuracy value',
           field: 'predictionAccuracy',
-        ));
+        ),);
       }
 
       // Validate environmental trends data consistency
@@ -223,10 +224,10 @@ class GetAnalyticsData implements UseCase<AnalyticsData, GetAnalyticsDataParams>
           (trend) => trend.value.isNaN || trend.value.isInfinite,
         );
         if (invalidTrends.isNotEmpty) {
-          return Left(const DataValidationFailure(
+          return const Left(DataValidationFailure(
             message: 'Invalid environmental trend values detected',
             field: 'environmentalTrends',
-          ));
+          ),);
         }
       }
 
@@ -236,26 +237,26 @@ class GetAnalyticsData implements UseCase<AnalyticsData, GetAnalyticsDataParams>
           (trend) => trend.riskScore < 0.0 || trend.riskScore > 1.0,
         );
         if (invalidRiskTrends.isNotEmpty) {
-          return Left(const DataValidationFailure(
+          return const Left(DataValidationFailure(
             message: 'Invalid risk score values detected',
             field: 'riskTrends',
-          ));
+          ),);
         }
       }
 
       // Validate data quality metrics
       if (data.dataQuality.completeness < 0.0 || data.dataQuality.completeness > 1.0) {
-        return Left(const DataValidationFailure(
+        return const Left(DataValidationFailure(
           message: 'Invalid data completeness value',
           field: 'dataQuality.completeness',
-        ));
+        ),);
       }
 
       if (data.dataQuality.accuracy < 0.0 || data.dataQuality.accuracy > 1.0) {
-        return Left(const DataValidationFailure(
+        return const Left(DataValidationFailure(
           message: 'Invalid data accuracy value',
           field: 'dataQuality.accuracy',
-        ));
+        ),);
       }
 
       // Data validation passed - return valid analytics data
@@ -264,7 +265,7 @@ class GetAnalyticsData implements UseCase<AnalyticsData, GetAnalyticsDataParams>
       return Left(DataValidationFailure(
         message: 'Error during analytics data validation: ${e.toString()}',
         field: 'validation',
-      ));
+      ),);
     }
   }
 }

@@ -4,6 +4,7 @@
 /// Author: Testing Agent 8
 /// Created: 2025-09-18
 /// Purpose: Centralized mock factory for consistent test mocking
+library;
 
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
@@ -42,28 +43,28 @@ class MockFactories {
               data: defaultResponse ?? {'success': true, 'data': []},
               statusCode: statusCode,
               requestOptions: RequestOptions(path: ''),
-            ));
+            ),);
 
     when(mockDio.post(any, data: anyNamed('data'), options: anyNamed('options')))
         .thenAnswer((_) async => Response(
               data: defaultResponse ?? {'success': true, 'message': 'Created'},
               statusCode: statusCode,
               requestOptions: RequestOptions(path: ''),
-            ));
+            ),);
 
     when(mockDio.put(any, data: anyNamed('data'), options: anyNamed('options')))
         .thenAnswer((_) async => Response(
               data: defaultResponse ?? {'success': true, 'message': 'Updated'},
               statusCode: statusCode,
               requestOptions: RequestOptions(path: ''),
-            ));
+            ),);
 
     when(mockDio.delete(any, options: anyNamed('options')))
         .thenAnswer((_) async => Response(
               data: defaultResponse ?? {'success': true, 'message': 'Deleted'},
               statusCode: statusCode,
               requestOptions: RequestOptions(path: ''),
-            ));
+            ),);
 
     return mockDio;
   }
@@ -171,15 +172,18 @@ class MockFactories {
       final key = invocation.namedArguments[#key] as String;
       final value = invocation.namedArguments[#value] as String;
       values[key] = value;
+      return null;
     });
 
     when(mockStorage.delete(key: anyNamed('key'))).thenAnswer((invocation) async {
       final key = invocation.namedArguments[#key] as String;
       values.remove(key);
+      return null;
     });
 
     when(mockStorage.deleteAll()).thenAnswer((_) async {
       values.clear();
+      return null;
     });
 
     when(mockStorage.readAll()).thenAnswer((_) async => values);
@@ -224,13 +228,13 @@ class MockFactories {
       latitude: -1.2921, // Nairobi coordinates
       longitude: 36.8219,
       timestamp: DateTime.now(),
-      accuracy: 5.0,
-      altitude: 1700.0,
-      heading: 0.0,
-      speed: 0.0,
-      speedAccuracy: 0.0,
-      altitudeAccuracy: 0.0,
-      headingAccuracy: 0.0,
+      accuracy: 5,
+      altitude: 1700,
+      heading: 0,
+      speed: 0,
+      speedAccuracy: 0,
+      altitudeAccuracy: 0,
+      headingAccuracy: 0,
     );
 
     when(mockGeolocator.isLocationServiceEnabled())
@@ -244,11 +248,11 @@ class MockFactories {
 
     when(mockGeolocator.getCurrentPosition(
       locationSettings: anyNamed('locationSettings'),
-    )).thenAnswer((_) async => defaultPosition);
+    ),).thenAnswer((_) async => defaultPosition);
 
     when(mockGeolocator.getLastKnownPosition(
       forceLocationManager: anyNamed('forceLocationManager'),
-    )).thenAnswer((_) async => defaultPosition);
+    ),).thenAnswer((_) async => defaultPosition);
 
     // Set up position stream
     final positionStream = Stream<Position>.periodic(
@@ -258,7 +262,7 @@ class MockFactories {
 
     when(mockGeolocator.getPositionStream(
       locationSettings: anyNamed('locationSettings'),
-    )).thenAnswer((_) => positionStream);
+    ),).thenAnswer((_) => positionStream);
 
     return mockGeolocator;
   }
@@ -479,7 +483,7 @@ class HttpResponseMockBuilder {
           'code': statusCode,
           'message': message,
           'timestamp': DateTime.now().toIso8601String(),
-        }
+        },
       },
       statusCode: statusCode,
       requestOptions: RequestOptions(path: path, headers: headers),

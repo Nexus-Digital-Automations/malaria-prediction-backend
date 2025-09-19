@@ -4,15 +4,11 @@
 /// Author: Testing Agent 8
 /// Created: 2025-09-18
 /// Purpose: Ensure core widgets function correctly across different scenarios
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:bloc_test/bloc_test.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mocktail/mocktail.dart';
-
 import '../helpers/test_helper.dart';
-import '../mocks/mock_factories.dart';
 
 /// Test core application widgets and components
 void main() {
@@ -84,7 +80,7 @@ void main() {
 
         // Assert
         expect(buildTime.inMilliseconds, lessThan(100),
-            reason: 'Loading widget should build quickly');
+            reason: 'Loading widget should build quickly',);
       });
     });
 
@@ -202,7 +198,7 @@ void main() {
 
       testWidgets('should display loading state correctly', (tester) async {
         // Arrange
-        const button = CustomButton(
+        final button = CustomButton(
           text: 'Loading Button',
           isLoading: true,
           onPressed: () {},
@@ -221,7 +217,7 @@ void main() {
 
       testWidgets('should apply custom styling correctly', (tester) async {
         // Arrange
-        const button = CustomButton(
+        final button = CustomButton(
           text: 'Styled Button',
           backgroundColor: Colors.red,
           textColor: Colors.white,
@@ -535,7 +531,7 @@ class CustomErrorWidget extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -581,7 +577,6 @@ class CustomErrorWidget extends StatelessWidget {
           'icon': Icons.lock_outline,
         };
       case ErrorType.unknown:
-      default:
         return {
           'message': 'An error occurred',
           'icon': Icons.error,
@@ -640,7 +635,7 @@ class DataCard extends StatelessWidget {
     if (data.isEmpty) {
       return const Card(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(16),
           child: Text('No data available'),
         ),
       );
@@ -650,7 +645,7 @@ class DataCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -709,7 +704,7 @@ class _SearchFieldState extends State<SearchField> {
       setState(() {
         _filteredSuggestions = widget.suggestions!
             .where((suggestion) =>
-                suggestion.toLowerCase().contains(query.toLowerCase()))
+                suggestion.toLowerCase().contains(query.toLowerCase()),)
             .toList();
       });
     }

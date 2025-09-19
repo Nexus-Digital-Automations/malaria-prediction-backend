@@ -14,6 +14,7 @@
 ///   onFiltersChanged: (filters) => handleFiltersChange(filters),
 /// );
 /// ```
+library;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -374,7 +375,7 @@ class _AnalyticsFiltersPanelState extends State<AnalyticsFiltersPanel> {
     return FilterChip(
       label: Text(
         label,
-        style: TextStyle(fontSize: 12),
+        style: const TextStyle(fontSize: 12),
       ),
       selected: selected,
       onSelected: onChanged,
@@ -398,7 +399,7 @@ class _AnalyticsFiltersPanelState extends State<AnalyticsFiltersPanel> {
       widget.onDateRangeChanged(DateRange(
         start: selectedDate,
         end: widget.selectedDateRange.end,
-      ));
+      ),);
     }
   }
 
@@ -415,7 +416,7 @@ class _AnalyticsFiltersPanelState extends State<AnalyticsFiltersPanel> {
       widget.onDateRangeChanged(DateRange(
         start: widget.selectedDateRange.start,
         end: selectedDate,
-      ));
+      ),);
     }
   }
 

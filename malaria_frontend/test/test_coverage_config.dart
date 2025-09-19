@@ -4,6 +4,7 @@
 /// Author: Testing Agent 8
 /// Created: 2025-09-18
 /// Purpose: Ensure comprehensive test coverage and quality metrics
+library;
 
 import 'dart:io';
 import 'dart:convert';
@@ -223,7 +224,7 @@ class TestCoverageConfig {
 <div class="file-item">
     <h4>${file.filePath}</h4>
     <div class="coverage-bar">
-        <div class="coverage-fill" style="width: ${linePercentage}%"></div>
+        <div class="coverage-fill" style="width: $linePercentage%"></div>
     </div>
     <p>Lines: ${linePercentage.toStringAsFixed(1)}% (${file.linesHit}/${file.linesFound})</p>
 </div>

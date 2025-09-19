@@ -13,10 +13,10 @@
 ///   filters: {'include_predictions': true},
 /// );
 /// ```
+library;
 
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
-import '../../../../core/constants/api_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../models/analytics_data_model.dart';
 
@@ -38,7 +38,7 @@ abstract class AnalyticsRemoteDataSource {
   /// Throws:
   /// - [ServerException]: If API request fails or returns error
   /// - [NetworkException]: If network connectivity issues occur
-  /// - [ParsingException]: If response data cannot be parsed
+  /// - [ParseException]: If response data cannot be parsed
   Future<AnalyticsDataModel> getAnalyticsData({
     required String region,
     required DateTime startDate,
@@ -333,8 +333,8 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     } on DioException catch (e) {
       throw _handleDioException(e);
     } catch (e) {
-      throw ParsingException(
-        message: 'Failed to parse analytics data response: ${e.toString()}',
+      throw ParseException(
+        'Failed to parse analytics data response: ${e.toString()}',
       );
     }
   }
@@ -358,8 +358,8 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     } on DioException catch (e) {
       throw _handleDioException(e);
     } catch (e) {
-      throw ParsingException(
-        message: 'Failed to parse prediction accuracy response: ${e.toString()}',
+      throw ParseException(
+        'Failed to parse prediction accuracy response: ${e.toString()}',
       );
     }
   }
@@ -387,8 +387,8 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     } on DioException catch (e) {
       throw _handleDioException(e);
     } catch (e) {
-      throw ParsingException(
-        message: 'Failed to parse environmental trends response: ${e.toString()}',
+      throw ParseException(
+        'Failed to parse environmental trends response: ${e.toString()}',
       );
     }
   }
@@ -416,8 +416,8 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     } on DioException catch (e) {
       throw _handleDioException(e);
     } catch (e) {
-      throw ParsingException(
-        message: 'Failed to parse risk trends response: ${e.toString()}',
+      throw ParseException(
+        'Failed to parse risk trends response: ${e.toString()}',
       );
     }
   }
@@ -441,8 +441,8 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     } on DioException catch (e) {
       throw _handleDioException(e);
     } catch (e) {
-      throw ParsingException(
-        message: 'Failed to parse alert statistics response: ${e.toString()}',
+      throw ParseException(
+        'Failed to parse alert statistics response: ${e.toString()}',
       );
     }
   }
@@ -466,8 +466,8 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     } on DioException catch (e) {
       throw _handleDioException(e);
     } catch (e) {
-      throw ParsingException(
-        message: 'Failed to parse data quality response: ${e.toString()}',
+      throw ParseException(
+        'Failed to parse data quality response: ${e.toString()}',
       );
     }
   }
@@ -496,8 +496,8 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     } on DioException catch (e) {
       throw _handleDioException(e);
     } catch (e) {
-      throw ParsingException(
-        message: 'Failed to parse chart data response: ${e.toString()}',
+      throw ParseException(
+        'Failed to parse chart data response: ${e.toString()}',
       );
     }
   }
@@ -526,8 +526,8 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     } on DioException catch (e) {
       throw _handleDioException(e);
     } catch (e) {
-      throw ParsingException(
-        message: 'Failed to parse export response: ${e.toString()}',
+      throw ParseException(
+        'Failed to parse export response: ${e.toString()}',
       );
     }
   }
@@ -539,8 +539,8 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     } on DioException catch (e) {
       throw _handleDioException(e);
     } catch (e) {
-      throw ParsingException(
-        message: 'Failed to parse regions response: ${e.toString()}',
+      throw ParseException(
+        'Failed to parse regions response: ${e.toString()}',
       );
     }
   }
@@ -555,8 +555,8 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     } on DioException catch (e) {
       throw _handleDioException(e);
     } catch (e) {
-      throw ParsingException(
-        message: 'Failed to parse date range response: ${e.toString()}',
+      throw ParseException(
+        'Failed to parse date range response: ${e.toString()}',
       );
     }
   }
@@ -571,12 +571,12 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
         return const NetworkException(
-          message: 'Request timeout. Please check your internet connection.',
+          'Request timeout. Please check your internet connection.',
         );
 
       case DioExceptionType.connectionError:
         return const NetworkException(
-          message: 'Unable to connect to server. Please check your internet connection.',
+          'Unable to connect to server. Please check your internet connection.',
         );
 
       case DioExceptionType.badResponse:
@@ -584,41 +584,36 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
         final errorMessage = _getErrorMessageFromResponse(e.response);
 
         if (statusCode >= 500) {
-          return ServerException(
-            message: 'Server error occurred. Please try again later.',
-            statusCode: statusCode,
+          return const ServerException(
+            'Server error occurred. Please try again later.',
           );
         } else if (statusCode == 404) {
           return const ServerException(
-            message: 'Analytics data not found for the specified region and date range.',
-            statusCode: 404,
+            'Analytics data not found for the specified region and date range.',
           );
         } else if (statusCode == 401) {
           return const ServerException(
-            message: 'Authentication required. Please log in again.',
-            statusCode: 401,
+            'Authentication required. Please log in again.',
           );
         } else if (statusCode == 403) {
           return const ServerException(
-            message: 'Access denied. You do not have permission to access this data.',
-            statusCode: 403,
+            'Access denied. You do not have permission to access this data.',
           );
         } else {
           return ServerException(
-            message: errorMessage ?? 'An error occurred while fetching analytics data.',
-            statusCode: statusCode,
+            errorMessage ?? 'An error occurred while fetching analytics data.',
           );
         }
 
       case DioExceptionType.cancel:
         return const NetworkException(
-          message: 'Request was cancelled.',
+          'Request was cancelled.',
         );
 
       case DioExceptionType.unknown:
       default:
         return NetworkException(
-          message: 'An unexpected error occurred: ${e.message}',
+          'An unexpected error occurred: ${e.message}',
         );
     }
   }

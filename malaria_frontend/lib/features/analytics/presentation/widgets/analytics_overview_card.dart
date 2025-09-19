@@ -13,6 +13,7 @@
 ///   trend: 0.05, // 5% increase
 /// );
 /// ```
+library;
 
 import 'package:flutter/material.dart';
 

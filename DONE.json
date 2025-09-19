@@ -1076,6 +1076,43 @@
       "updated_at": "2025-09-18T23:53:49.239Z",
       "archived_at": "2025-09-18T23:53:49.241Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T19:44:00.703Z",
+      "title": "Fix Flutter Analysis Errors - Missing Widget Imports and Undefined Classes",
+      "description": "Fix critical analysis errors including missing LayerControlPanel, RiskLegendWidget imports, undefined LatLngBounds class, and non-const constructor issues in risk maps feature.",
+      "category": "error",
+      "id": "error_1758224640702_anz7g1jkwh4",
+      "assigned_agent": "dev_session_1758242107067_1_general_1f481298",
+      "started_at": "2025-09-19T00:36:04.514Z",
+      "claimed_by": "dev_session_1758242107067_1_general_1f481298",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758238430118_1_general_03210539",
+          "role": "primary",
+          "assignedAt": "2025-09-18T23:34:27.422Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758238430118_1_general_03210539",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-19T00:23:03.265Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
+        },
+        {
+          "agentId": "dev_session_1758242107067_1_general_1f481298",
+          "role": "primary",
+          "assignedAt": "2025-09-19T00:36:04.514Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T00:47:43.663Z",
+      "updated_at": "2025-09-19T00:47:43.663Z",
+      "archived_at": "2025-09-19T00:47:43.666Z",
+      "archive_version": "2.0.0"
     }
   ],
   "project_info": {
@@ -1086,10 +1123,10 @@
     "total_completed": 0,
     "last_archived": null
   },
-  "last_archived": "2025-09-18T23:59:28.105Z",
-  "total_completed": 41,
+  "last_archived": "2025-09-19T00:48:10.607Z",
+  "total_completed": 42,
   "metadata": {
-    "last_bulk_archive": "2025-09-18T23:59:28.105Z",
-    "bulk_archive_count": 11
+    "last_bulk_archive": "2025-09-19T00:48:10.607Z",
+    "bulk_archive_count": 12
   }
 }

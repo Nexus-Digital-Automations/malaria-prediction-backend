@@ -20,6 +20,7 @@
 ///   ),
 /// );
 /// ```
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,6 +31,7 @@ import '../../../../core/widgets/loading_widget.dart';
 import '../../domain/entities/analytics_data.dart';
 import '../../domain/entities/chart_data.dart';
 import '../../domain/repositories/analytics_repository.dart';
+import '../../domain/usecases/generate_chart_data.dart';
 import '../bloc/analytics_bloc.dart';
 import '../widgets/analytics_overview_card.dart';
 import '../widgets/analytics_filters_panel.dart';
@@ -132,7 +134,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: const Text('Analytics Dashboard'),
-      subtitle: Text('${_selectedRegion} • ${_formatDateRange(_selectedDateRange)}'),
+      subtitle: Text('$_selectedRegion • ${_formatDateRange(_selectedDateRange)}'),
       elevation: 2,
       actions: [
         IconButton(
@@ -433,7 +435,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
           child: AnalyticsOverviewCard(
             title: 'Prediction Accuracy',
             value: '${(analyticsData.predictionAccuracy.overall * 100).toInt()}%',
-            icon: Icons.accuracy,
+            icon: Icons.analytics,
             color: Theme.of(context).colorScheme.primary,
             trend: _calculateAccuracyTrend(analyticsData.predictionAccuracy),
           ),
@@ -445,7 +447,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
             value: '${(analyticsData.alertStatistics.deliveryRate * 100).toInt()}%',
             icon: Icons.notifications_active,
             color: Theme.of(context).colorScheme.secondary,
-            trend: 0.0, // Would calculate from historical data
+            trend: 0, // Would calculate from historical data
           ),
         ),
         const SizedBox(width: 16),
@@ -465,7 +467,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
             value: '${analyticsData.riskTrends.length}',
             icon: Icons.map,
             color: Theme.of(context).colorScheme.error,
-            trend: 0.0, // Would calculate from historical data
+            trend: 0, // Would calculate from historical data
           ),
         ),
       ],
@@ -658,7 +660,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
           region: _selectedRegion,
           dateRange: _selectedDateRange,
           filters: _appliedFilters,
-        ));
+        ),);
   }
 
   /// Refreshes current analytics data
@@ -717,7 +719,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
     context.read<AnalyticsBloc>().add(ExportAnalyticsReport(
           format: format,
           includeCharts: true,
-        ));
+        ),);
   }
 
   /// Shows quick actions dialog
@@ -759,7 +761,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
           dataType: ChartDataType.riskDistribution,
           region: _selectedRegion,
           dateRange: _selectedDateRange,
-        ));
+        ),);
   }
 
   /// Shows settings dialog
@@ -781,7 +783,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
 
   /// Calculates accuracy trend from prediction data
   double _calculateAccuracyTrend(PredictionAccuracy accuracy) {
-    if (accuracy.trend.length < 2) return 0.0;
+    if (accuracy.trend.length < 2) return 0;
 
     final recent = accuracy.trend.last.accuracy;
     final previous = accuracy.trend[accuracy.trend.length - 2].accuracy;

@@ -10,6 +10,7 @@
 ///   height: 400,
 /// );
 /// ```
+library;
 
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -41,7 +42,7 @@ class EnvironmentalTrendsChart extends StatefulWidget {
 
 class _EnvironmentalTrendsChartState extends State<EnvironmentalTrendsChart> {
   /// Selected environmental factors to display
-  Set<EnvironmentalFactor> _selectedFactors = {
+  final Set<EnvironmentalFactor> _selectedFactors = {
     EnvironmentalFactor.temperature,
     EnvironmentalFactor.rainfall,
     EnvironmentalFactor.vegetation,
@@ -280,7 +281,7 @@ class _EnvironmentalTrendsChartState extends State<EnvironmentalTrendsChart> {
         final trend = trends.where((t) =>
           t.date.year == date.year &&
           t.date.month == date.month &&
-          t.date.day == date.day
+          t.date.day == date.day,
         ).firstOrNull;
 
         if (trend != null) {

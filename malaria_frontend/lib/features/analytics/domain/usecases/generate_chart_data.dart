@@ -18,9 +18,11 @@
 ///   (chartData) => renderChart(chartData),
 /// );
 /// ```
+library;
 
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/chart_data.dart';
@@ -71,9 +73,8 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during chart generation: ${e.toString()}',
-        statusCode: 500,
-      ));
+        'Unexpected error during chart generation: ${e.toString()}',
+      ),);
     }
   }
 
@@ -87,24 +88,24 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
     // Validate region identifier
     if (params.region.isEmpty) {
       return const ValidationFailure(
-        message: 'Region identifier cannot be empty',
-        field: 'region',
+        'Region identifier cannot be empty',
+        'region',
       );
     }
 
     // Validate date range
     if (params.dateRange.start.isAfter(params.dateRange.end)) {
       return const ValidationFailure(
-        message: 'Start date must be before end date',
-        field: 'dateRange',
+        'Start date must be before end date',
+        'dateRange',
       );
     }
 
     // Validate chart type and data type compatibility
     if (!_isChartTypeCompatible(params.chartType, params.dataType)) {
       return ValidationFailure(
-        message: 'Chart type ${params.chartType} is not compatible with data type ${params.dataType}',
-        field: 'chartType',
+        'Chart type ${params.chartType} is not compatible with data type ${params.dataType}',
+        'chartType',
       );
     }
 
@@ -112,8 +113,8 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
     if (params.chartType == ChartType.scatterPlot) {
       if (params.xFactor == null || params.yFactor == null) {
         return const ValidationFailure(
-          message: 'Scatter plot requires both X and Y environmental factors',
-          field: 'scatterPlotFactors',
+          'Scatter plot requires both X and Y environmental factors',
+          'scatterPlotFactors',
         );
       }
     }
@@ -181,7 +182,7 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
       return Left(ChartGenerationFailure(
         message: 'Failed to generate line chart: ${e.toString()}',
         chartType: 'lineChart',
-      ));
+      ),);
     }
   }
 
@@ -208,7 +209,7 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
       return Left(ChartGenerationFailure(
         message: 'Failed to generate bar chart: ${e.toString()}',
         chartType: 'barChart',
-      ));
+      ),);
     }
   }
 
@@ -235,7 +236,7 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
       return Left(ChartGenerationFailure(
         message: 'Failed to generate pie chart: ${e.toString()}',
         chartType: 'pieChart',
-      ));
+      ),);
     }
   }
 
@@ -248,10 +249,10 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
   ) async {
     try {
       if (params.xFactor == null || params.yFactor == null) {
-        return Left(const ValidationFailure(
-          message: 'Scatter plot requires both X and Y factors',
-          field: 'scatterPlotFactors',
-        ));
+        return const Left(ValidationFailure(
+          'Scatter plot requires both X and Y factors',
+          'scatterPlotFactors',
+        ),);
       }
 
       final result = await repository.generateScatterPlotData(
@@ -270,7 +271,7 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
       return Left(ChartGenerationFailure(
         message: 'Failed to generate scatter plot: ${e.toString()}',
         chartType: 'scatterPlot',
-      ));
+      ),);
     }
   }
 
@@ -514,5 +515,3 @@ class ChartGenerationFailure extends Failure {
   List<Object?> get props => [message, chartType];
 }
 
-/// Import statements for dependencies
-import 'package:flutter/material.dart';

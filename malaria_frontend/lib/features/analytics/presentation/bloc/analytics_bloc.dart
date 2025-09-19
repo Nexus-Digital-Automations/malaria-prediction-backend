@@ -18,12 +18,12 @@
 ///   dataType: ChartDataType.predictionAccuracy,
 /// ));
 /// ```
+library;
 
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/analytics_data.dart';
-import '../../domain/entities/chart_data.dart';
 import '../../domain/usecases/get_analytics_data.dart';
 import '../../domain/usecases/generate_chart_data.dart';
 import '../../domain/repositories/analytics_repository.dart';
@@ -505,21 +505,21 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           message: failure.message,
           errorType: 'data_loading',
           isRecoverable: true,
-        )),
+        ),),
         (analyticsData) => emit(AnalyticsLoaded(
           analyticsData: analyticsData,
           selectedRegion: event.region,
           selectedDateRange: event.dateRange,
           appliedFilters: event.filters,
           lastRefresh: DateTime.now(),
-        )),
+        ),),
       );
     } catch (e) {
       emit(AnalyticsError(
         message: 'Unexpected error loading analytics data: ${e.toString()}',
         errorType: 'unexpected',
         isRecoverable: true,
-      ));
+      ),);
     }
   }
 
@@ -536,7 +536,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           message: 'Cannot generate chart without loaded analytics data',
           errorType: 'invalid_state',
           isRecoverable: true,
-        ));
+        ),);
         return;
       }
 
@@ -545,8 +545,8 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
         baseState: currentState,
         chartType: event.chartType,
         dataType: event.dataType,
-        progress: 0.0,
-      ));
+        progress: 0,
+      ),);
 
       // Create chart generation parameters
       final params = GenerateChartDataParams(
@@ -569,7 +569,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           errorType: 'chart_generation',
           previousState: currentState,
           isRecoverable: true,
-        )),
+        ),),
         (chartData) {
           // Generate unique chart ID
           final chartId = _generateChartId(event.chartType, event.dataType);
@@ -583,7 +583,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
             baseState: currentState.copyWith(charts: updatedCharts),
             chartData: chartData,
             chartId: chartId,
-          ));
+          ),);
         },
       );
     } catch (e) {
@@ -591,7 +591,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
         message: 'Unexpected error generating chart: ${e.toString()}',
         errorType: 'unexpected',
         isRecoverable: true,
-      ));
+      ),);
     }
   }
 
@@ -607,7 +607,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           message: 'Cannot apply filters without loaded analytics data',
           errorType: 'invalid_state',
           isRecoverable: true,
-        ));
+        ),);
         return;
       }
 
@@ -617,7 +617,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           region: currentState.selectedRegion,
           dateRange: currentState.selectedDateRange,
           filters: event.filters,
-        ));
+        ),);
       } else {
         // Just update filters without reloading
         emit(currentState.copyWith(appliedFilters: event.filters));
@@ -627,7 +627,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
         message: 'Error applying filters: ${e.toString()}',
         errorType: 'filter_application',
         isRecoverable: true,
-      ));
+      ),);
     }
   }
 
@@ -643,7 +643,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           message: 'Cannot change region without loaded analytics data',
           errorType: 'invalid_state',
           isRecoverable: true,
-        ));
+        ),);
         return;
       }
 
@@ -653,7 +653,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           region: event.region,
           dateRange: currentState.selectedDateRange,
           filters: currentState.appliedFilters,
-        ));
+        ),);
       } else {
         // Just update region selection
         emit(currentState.copyWith(selectedRegion: event.region));
@@ -663,7 +663,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
         message: 'Error changing region: ${e.toString()}',
         errorType: 'region_change',
         isRecoverable: true,
-      ));
+      ),);
     }
   }
 
@@ -679,7 +679,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           message: 'Cannot change date range without loaded analytics data',
           errorType: 'invalid_state',
           isRecoverable: true,
-        ));
+        ),);
         return;
       }
 
@@ -689,7 +689,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           region: currentState.selectedRegion,
           dateRange: event.dateRange,
           filters: currentState.appliedFilters,
-        ));
+        ),);
       } else {
         // Just update date range selection
         emit(currentState.copyWith(selectedDateRange: event.dateRange));
@@ -699,7 +699,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
         message: 'Error changing date range: ${e.toString()}',
         errorType: 'date_range_change',
         isRecoverable: true,
-      ));
+      ),);
     }
   }
 
@@ -716,20 +716,20 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           region: currentState.selectedRegion,
           dateRange: currentState.selectedDateRange,
           filters: currentState.appliedFilters,
-        ));
+        ),);
       } else {
         emit(const AnalyticsError(
           message: 'Cannot refresh without existing analytics data',
           errorType: 'refresh_error',
           isRecoverable: true,
-        ));
+        ),);
       }
     } catch (e) {
       emit(AnalyticsError(
         message: 'Error refreshing data: ${e.toString()}',
         errorType: 'refresh_error',
         isRecoverable: true,
-      ));
+      ),);
     }
   }
 
@@ -745,7 +745,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           message: 'Cannot export report without loaded analytics data',
           errorType: 'invalid_state',
           isRecoverable: true,
-        ));
+        ),);
         return;
       }
 
@@ -753,8 +753,8 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
       emit(AnalyticsExporting(
         baseState: currentState,
         format: event.format,
-        progress: 0.0,
-      ));
+        progress: 0,
+      ),);
 
       // Export report through repository
       final result = await _analyticsRepository.exportAnalyticsReport(
@@ -772,19 +772,19 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           errorType: 'export_error',
           previousState: currentState,
           isRecoverable: true,
-        )),
+        ),),
         (reportUrl) => emit(AnalyticsExported(
           baseState: currentState,
           reportUrl: reportUrl,
           format: event.format,
-        )),
+        ),),
       );
     } catch (e) {
       emit(AnalyticsError(
         message: 'Unexpected error exporting report: ${e.toString()}',
         errorType: 'unexpected',
         isRecoverable: true,
-      ));
+      ),);
     }
   }
 
@@ -826,7 +826,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
         message: 'Error clearing analytics data: ${e.toString()}',
         errorType: 'clear_error',
         isRecoverable: true,
-      ));
+      ),);
     }
   }
 

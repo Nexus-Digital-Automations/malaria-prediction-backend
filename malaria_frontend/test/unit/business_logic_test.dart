@@ -4,14 +4,13 @@
 /// Author: Testing Agent 8
 /// Created: 2025-09-18
 /// Purpose: Validate business logic correctness and edge cases
+library;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:bloc_test/bloc_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
 
 import '../helpers/test_helper.dart';
-import '../mocks/mock_factories.dart';
 
 /// Business logic unit tests covering use cases, repositories, and domain entities
 void main() {
@@ -48,7 +47,7 @@ void main() {
         final result = await useCase(const RiskAssessmentParams(
           region: 'Nairobi',
           coordinates: Coordinates(latitude: -1.2921, longitude: 36.8219),
-        ));
+        ),);
 
         // Assert
         expect(result.isRight(), isTrue);
@@ -74,8 +73,8 @@ void main() {
         // Act
         final result = await useCase(const RiskAssessmentParams(
           region: 'Invalid Region',
-          coordinates: Coordinates(latitude: 0.0, longitude: 0.0),
-        ));
+          coordinates: Coordinates(latitude: 0, longitude: 0),
+        ),);
 
         // Assert
         expect(result.isLeft(), isTrue);
@@ -92,8 +91,8 @@ void main() {
         // Arrange & Act
         final result = await useCase(const RiskAssessmentParams(
           region: 'Test Region',
-          coordinates: Coordinates(latitude: 91.0, longitude: 181.0), // Invalid coordinates
-        ));
+          coordinates: Coordinates(latitude: 91, longitude: 181), // Invalid coordinates
+        ),);
 
         // Assert
         expect(result.isLeft(), isTrue);
@@ -108,13 +107,13 @@ void main() {
       test('should handle network timeout gracefully', () async {
         // Arrange
         when(() => mockRepository.getRiskAssessment(any()))
-            .thenThrow(TimeoutException('Request timeout', const Duration(seconds: 30)));
+            .thenThrow(const TimeoutException('Request timeout', Duration(seconds: 30)));
 
         // Act
         final result = await useCase(const RiskAssessmentParams(
           region: 'Nairobi',
           coordinates: Coordinates(latitude: -1.2921, longitude: 36.8219),
-        ));
+        ),);
 
         // Assert
         expect(result.isLeft(), isTrue);
@@ -143,7 +142,7 @@ void main() {
             date: DateTime.now().add(Duration(days: index + 1)),
             riskScore: 0.5 + (index * 0.01),
             confidence: 0.85,
-          )),
+          ),),
           modelVersion: '2.1.0',
           generatedAt: DateTime.now(),
         );
@@ -156,7 +155,7 @@ void main() {
           region: 'Nairobi',
           daysAhead: 14,
           coordinates: Coordinates(latitude: -1.2921, longitude: 36.8219),
-        ));
+        ),);
 
         // Assert
         expect(result.isRight(), isTrue);
@@ -178,7 +177,7 @@ void main() {
           region: 'Nairobi',
           daysAhead: 91, // Exceeds 90-day limit
           coordinates: Coordinates(latitude: -1.2921, longitude: 36.8219),
-        ));
+        ),);
 
         // Assert - Maximum limit
         expect(resultMax.isLeft(), isTrue);
@@ -192,7 +191,7 @@ void main() {
           region: 'Nairobi',
           daysAhead: 0, // Below minimum
           coordinates: Coordinates(latitude: -1.2921, longitude: 36.8219),
-        ));
+        ),);
 
         // Assert - Minimum limit
         expect(resultMin.isLeft(), isTrue);
@@ -221,7 +220,7 @@ void main() {
           daysAhead: 7,
           coordinates: Coordinates(latitude: -1.2921, longitude: 36.8219),
           preferCache: true,
-        ));
+        ),);
 
         // Assert
         expect(result.isRight(), isTrue);
@@ -262,7 +261,7 @@ void main() {
         final result = await loginUseCase(const LoginParams(
           email: 'test@malaria-prediction.org',
           password: 'SecurePassword123!',
-        ));
+        ),);
 
         // Assert
         expect(result.isRight(), isTrue);
@@ -280,7 +279,7 @@ void main() {
         final result = await loginUseCase(const LoginParams(
           email: 'invalid-email',
           password: 'password',
-        ));
+        ),);
 
         // Assert
         expect(result.isLeft(), isTrue);
@@ -297,7 +296,7 @@ void main() {
         final result = await loginUseCase(const LoginParams(
           email: 'test@example.com',
           password: '123', // Too weak
-        ));
+        ),);
 
         // Assert
         expect(result.isLeft(), isTrue);
@@ -316,7 +315,7 @@ void main() {
         final result = await loginUseCase(const LoginParams(
           email: 'test@example.com',
           password: 'WrongPassword',
-        ));
+        ),);
 
         // Assert
         expect(result.isLeft(), isTrue);
@@ -343,9 +342,9 @@ void main() {
     group('Data Validation Tests', () {
       test('should validate risk score ranges', () {
         // Test valid range
-        expect(RiskScore.isValid(0.0), isTrue);
+        expect(RiskScore.isValid(0), isTrue);
         expect(RiskScore.isValid(0.5), isTrue);
-        expect(RiskScore.isValid(1.0), isTrue);
+        expect(RiskScore.isValid(1), isTrue);
 
         // Test invalid range
         expect(RiskScore.isValid(-0.1), isFalse);
@@ -356,12 +355,12 @@ void main() {
 
       test('should validate coordinate ranges', () {
         // Test valid coordinates
-        expect(Coordinates.isValidLatitude(-90.0), isTrue);
-        expect(Coordinates.isValidLatitude(0.0), isTrue);
-        expect(Coordinates.isValidLatitude(90.0), isTrue);
-        expect(Coordinates.isValidLongitude(-180.0), isTrue);
-        expect(Coordinates.isValidLongitude(0.0), isTrue);
-        expect(Coordinates.isValidLongitude(180.0), isTrue);
+        expect(Coordinates.isValidLatitude(-90), isTrue);
+        expect(Coordinates.isValidLatitude(0), isTrue);
+        expect(Coordinates.isValidLatitude(90), isTrue);
+        expect(Coordinates.isValidLongitude(-180), isTrue);
+        expect(Coordinates.isValidLongitude(0), isTrue);
+        expect(Coordinates.isValidLongitude(180), isTrue);
 
         // Test invalid coordinates
         expect(Coordinates.isValidLatitude(-90.1), isFalse);
@@ -386,7 +385,7 @@ void main() {
       test('should validate password strength', () {
         // Test strong passwords
         expect(PasswordValidator.isStrong('StrongPass123!'), isTrue);
-        expect(PasswordValidator.isStrong('Another$ecureP@ssw0rd'), isTrue);
+        expect(PasswordValidator.isStrong('AnotherSecureP@ssw0rd'), isTrue);
 
         // Test weak passwords
         expect(PasswordValidator.isStrong('weak'), isFalse);

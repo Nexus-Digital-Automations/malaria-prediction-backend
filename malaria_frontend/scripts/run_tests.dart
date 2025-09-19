@@ -6,9 +6,9 @@
 /// Author: Testing Agent 8
 /// Created: 2025-09-18
 /// Purpose: Orchestrate all testing phases with detailed reporting
+library run_tests;
 
 import 'dart:io';
-import 'dart:convert';
 
 import '../test/test_coverage_config.dart';
 
@@ -353,7 +353,7 @@ EXAMPLES:
 
   /// Display test summary
   void _displaySummary(Map<String, TestResult> results, Duration totalDuration) {
-    print('\n' + '═' * 60);
+    print('\n${'═' * 60}');
     print('📋 Test Summary');
     print('═' * 60);
 

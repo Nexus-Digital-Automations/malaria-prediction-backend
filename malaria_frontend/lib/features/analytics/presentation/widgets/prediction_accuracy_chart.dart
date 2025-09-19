@@ -12,6 +12,7 @@
 ///   showDetails: true,
 /// );
 /// ```
+library;
 
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -258,7 +259,7 @@ class _PredictionAccuracyChartState extends State<PredictionAccuracyChart> {
                   },
                 ),
               )
-            : LineTouchData(enabled: false),
+            : const LineTouchData(enabled: false),
       ),
     );
   }
@@ -450,7 +451,7 @@ class _PredictionAccuracyChartState extends State<PredictionAccuracyChart> {
 
   /// Builds overall accuracy circular indicator
   Widget _buildOverallAccuracyIndicator() {
-    return Container(
+    return SizedBox(
       height: 120,
       child: Stack(
         alignment: Alignment.center,

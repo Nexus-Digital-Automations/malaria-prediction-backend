@@ -13,6 +13,7 @@
 /// // To JSON for API requests
 /// final json = analyticsDataModel.toJson();
 /// ```
+library;
 
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';

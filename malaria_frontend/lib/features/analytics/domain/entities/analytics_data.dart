@@ -14,6 +14,7 @@
 ///   riskTrends: [...],
 /// );
 /// ```
+library;
 
 import 'package:equatable/equatable.dart';
 

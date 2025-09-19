@@ -16,10 +16,10 @@
 ///   ],
 /// );
 /// ```
+library;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 /// Line chart data entity for trend visualization
 class LineChartDataEntity extends Equatable {

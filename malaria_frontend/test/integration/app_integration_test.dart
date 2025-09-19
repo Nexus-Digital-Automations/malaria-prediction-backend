@@ -4,6 +4,7 @@
 /// Author: Testing Agent 8
 /// Created: 2025-09-18
 /// Purpose: Validate complete user journeys and system integration
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -219,7 +220,7 @@ void main() {
 
         // Verify reasonable loading time
         expect(stopwatch.elapsed.inSeconds, lessThan(8),
-            reason: 'Map should load within 8 seconds');
+            reason: 'Map should load within 8 seconds',);
       });
     });
 
@@ -626,7 +627,7 @@ Future<void> _testMapInteraction(WidgetTester tester) async {
   await tester.pump();
 
   // Test zoom gesture (pinch)
-  await tester.timerDuration = const Duration(milliseconds: 200);
+  await tester.pump(const Duration(milliseconds: 200));
   final center = tester.getCenter(map);
   await tester.startGesture(center);
   await tester.pump();
@@ -798,7 +799,7 @@ Future<void> _testScrollPerformance(WidgetTester tester) async {
 
   // Verify reasonable scroll performance
   expect(scrollMetrics.fps, greaterThan(30),
-      reason: 'Scroll should maintain at least 30 FPS');
+      reason: 'Scroll should maintain at least 30 FPS',);
 }
 
 /// Mock app implementation for integration testing
@@ -832,8 +833,8 @@ class LoginScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Login to Malaria Prediction System')),
       body: Column(
         children: [
-          TextField(key: const Key('email_field')),
-          TextField(key: const Key('password_field')),
+          const TextField(key: Key('email_field')),
+          const TextField(key: Key('password_field')),
           ElevatedButton(
             key: const Key('login_button'),
             onPressed: () => Navigator.pushReplacementNamed(context, '/dashboard'),
@@ -898,7 +899,7 @@ class RiskAssessmentScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Malaria Risk Assessment')),
       body: Column(
         children: [
-          TextField(key: const Key('location_search')),
+          const TextField(key: Key('location_search')),
           ElevatedButton(
             key: const Key('get_risk_button'),
             onPressed: () {/* Get risk data */},

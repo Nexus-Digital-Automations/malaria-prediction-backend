@@ -12,8 +12,10 @@
 ///   filters: AnalyticsFilters(includePredictions: true),
 /// );
 /// ```
+library;
 
 import 'package:dartz/dartz.dart';
+import 'package:flutter/material.dart';
 import '../../../../core/errors/failures.dart';
 import '../entities/analytics_data.dart';
 import '../entities/chart_data.dart';
@@ -416,5 +418,3 @@ enum ReportSection {
   recommendations,
 }
 
-/// Import statements for Color type
-import 'package:flutter/material.dart';

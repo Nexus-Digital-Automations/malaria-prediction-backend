@@ -12,6 +12,7 @@
 ///   filters: AnalyticsFilters(includePredictions: true),
 /// );
 /// ```
+library;
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,6 @@ import '../../domain/entities/chart_data.dart';
 import '../../domain/repositories/analytics_repository.dart';
 import '../datasources/analytics_local_datasource.dart';
 import '../datasources/analytics_remote_datasource.dart';
-import '../models/analytics_data_model.dart';
 
 /// Implementation of analytics repository using local and remote data sources
 class AnalyticsRepositoryImpl implements AnalyticsRepository {
@@ -59,8 +59,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during analytics data retrieval: ${e.toString()}',
-      ));
+        'Unexpected error during analytics data retrieval: ${e.toString()}',
+      ),);
     }
   }
 
@@ -78,8 +78,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during prediction accuracy retrieval: ${e.toString()}',
-      ));
+        'Unexpected error during prediction accuracy retrieval: ${e.toString()}',
+      ),);
     }
   }
 
@@ -103,8 +103,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during environmental trends retrieval: ${e.toString()}',
-      ));
+        'Unexpected error during environmental trends retrieval: ${e.toString()}',
+      ),);
     }
   }
 
@@ -123,8 +123,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during risk trends retrieval: ${e.toString()}',
-      ));
+        'Unexpected error during risk trends retrieval: ${e.toString()}',
+      ),);
     }
   }
 
@@ -138,14 +138,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       if (await _networkInfo.isConnected) {
         return await _getAlertStatisticsFromRemote(region, dateRange, severityLevels);
       } else {
-        return Left(const NetworkFailure(
-          message: 'Alert statistics require internet connection',
-        ));
+        return const Left(NetworkFailure(
+          'Alert statistics require internet connection',
+        ),);
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during alert statistics retrieval: ${e.toString()}',
-      ));
+        'Unexpected error during alert statistics retrieval: ${e.toString()}',
+      ),);
     }
   }
 
@@ -159,14 +159,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       if (await _networkInfo.isConnected) {
         return await _getDataQualityFromRemote(region, dateRange, dataSources);
       } else {
-        return Left(const NetworkFailure(
-          message: 'Data quality metrics require internet connection',
-        ));
+        return const Left(NetworkFailure(
+          'Data quality metrics require internet connection',
+        ),);
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during data quality retrieval: ${e.toString()}',
-      ));
+        'Unexpected error during data quality retrieval: ${e.toString()}',
+      ),);
     }
   }
 
@@ -190,14 +190,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       if (await _networkInfo.isConnected) {
         return await _generateLineChartFromRemote(type, region, dateRange, configuration);
       } else {
-        return Left(const NetworkFailure(
-          message: 'Chart generation requires internet connection',
-        ));
+        return const Left(NetworkFailure(
+          'Chart generation requires internet connection',
+        ),);
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during line chart generation: ${e.toString()}',
-      ));
+        'Unexpected error during line chart generation: ${e.toString()}',
+      ),);
     }
   }
 
@@ -221,14 +221,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       if (await _networkInfo.isConnected) {
         return await _generateBarChartFromRemote(type, region, dateRange, configuration);
       } else {
-        return Left(const NetworkFailure(
-          message: 'Chart generation requires internet connection',
-        ));
+        return const Left(NetworkFailure(
+          'Chart generation requires internet connection',
+        ),);
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during bar chart generation: ${e.toString()}',
-      ));
+        'Unexpected error during bar chart generation: ${e.toString()}',
+      ),);
     }
   }
 
@@ -252,14 +252,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       if (await _networkInfo.isConnected) {
         return await _generatePieChartFromRemote(type, region, dateRange, configuration);
       } else {
-        return Left(const NetworkFailure(
-          message: 'Chart generation requires internet connection',
-        ));
+        return const Left(NetworkFailure(
+          'Chart generation requires internet connection',
+        ),);
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during pie chart generation: ${e.toString()}',
-      ));
+        'Unexpected error during pie chart generation: ${e.toString()}',
+      ),);
     }
   }
 
@@ -295,14 +295,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
           configuration,
         );
       } else {
-        return Left(const NetworkFailure(
-          message: 'Chart generation requires internet connection',
-        ));
+        return const Left(NetworkFailure(
+          'Chart generation requires internet connection',
+        ),);
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during scatter plot generation: ${e.toString()}',
-      ));
+        'Unexpected error during scatter plot generation: ${e.toString()}',
+      ),);
     }
   }
 
@@ -327,14 +327,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
 
         return Right(reportUrl);
       } else {
-        return Left(const NetworkFailure(
-          message: 'Report export requires internet connection',
-        ));
+        return const Left(NetworkFailure(
+          'Report export requires internet connection',
+        ),);
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during report export: ${e.toString()}',
-      ));
+        'Unexpected error during report export: ${e.toString()}',
+      ),);
     }
   }
 
@@ -363,14 +363,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         await _localDataSource.cacheAvailableRegions(regions, ttl: 168); // 1 week
         return Right(regions);
       } else {
-        return Left(const NetworkFailure(
-          message: 'Available regions require internet connection',
-        ));
+        return const Left(NetworkFailure(
+          'Available regions require internet connection',
+        ),);
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during regions retrieval: ${e.toString()}',
-      ));
+        'Unexpected error during regions retrieval: ${e.toString()}',
+      ),);
     }
   }
 
@@ -383,14 +383,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         final dateRangeModel = await _remoteDataSource.getDataDateRange(region: region);
         return Right(dateRangeModel.toEntity());
       } else {
-        return Left(const NetworkFailure(
-          message: 'Data date range requires internet connection',
-        ));
+        return const Left(NetworkFailure(
+          'Data date range requires internet connection',
+        ),);
       }
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Unexpected error during date range retrieval: ${e.toString()}',
-      ));
+        'Unexpected error during date range retrieval: ${e.toString()}',
+      ),);
     }
   }
 
@@ -434,14 +434,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       if (cachedData != null) {
         return Right(cachedData.toEntity());
       } else {
-        return Left(const CacheFailure(
-          message: 'No cached analytics data available for offline access',
-        ));
+        return const Left(CacheFailure(
+          'No cached analytics data available for offline access',
+        ),);
       }
     } catch (e) {
       return Left(CacheFailure(
-        message: 'Failed to retrieve cached analytics data: ${e.toString()}',
-      ));
+        'Failed to retrieve cached analytics data: ${e.toString()}',
+      ),);
     }
   }
 
@@ -484,14 +484,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       if (cachedData != null) {
         return Right(cachedData.toEntity());
       } else {
-        return Left(const CacheFailure(
-          message: 'No cached prediction accuracy data available',
-        ));
+        return const Left(CacheFailure(
+          'No cached prediction accuracy data available',
+        ),);
       }
     } catch (e) {
       return Left(CacheFailure(
-        message: 'Failed to retrieve cached prediction accuracy: ${e.toString()}',
-      ));
+        'Failed to retrieve cached prediction accuracy: ${e.toString()}',
+      ),);
     }
   }
 
@@ -537,14 +537,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       if (cachedData != null) {
         return Right(cachedData.map((model) => model.toEntity()).toList());
       } else {
-        return Left(const CacheFailure(
-          message: 'No cached environmental trends available',
-        ));
+        return const Left(CacheFailure(
+          'No cached environmental trends available',
+        ),);
       }
     } catch (e) {
       return Left(CacheFailure(
-        message: 'Failed to retrieve cached environmental trends: ${e.toString()}',
-      ));
+        'Failed to retrieve cached environmental trends: ${e.toString()}',
+      ),);
     }
   }
 
@@ -587,14 +587,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       if (cachedData != null) {
         return Right(cachedData.map((model) => model.toEntity()).toList());
       } else {
-        return Left(const CacheFailure(
-          message: 'No cached risk trends available',
-        ));
+        return const Left(CacheFailure(
+          'No cached risk trends available',
+        ),);
       }
     } catch (e) {
       return Left(CacheFailure(
-        message: 'Failed to retrieve cached risk trends: ${e.toString()}',
-      ));
+        'Failed to retrieve cached risk trends: ${e.toString()}',
+      ),);
     }
   }
 
@@ -616,8 +616,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       return Right(statisticsModel.toEntity());
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Failed to fetch alert statistics: ${e.toString()}',
-      ));
+        'Failed to fetch alert statistics: ${e.toString()}',
+      ),);
     }
   }
 
@@ -638,8 +638,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       return Right(qualityModel.toEntity());
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Failed to fetch data quality metrics: ${e.toString()}',
-      ));
+        'Failed to fetch data quality metrics: ${e.toString()}',
+      ),);
     }
   }
 
@@ -668,8 +668,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       return Right(_parseLineChartData(chartData));
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Failed to generate line chart: ${e.toString()}',
-      ));
+        'Failed to generate line chart: ${e.toString()}',
+      ),);
     }
   }
 
@@ -698,8 +698,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       return Right(_parseBarChartData(chartData));
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Failed to generate bar chart: ${e.toString()}',
-      ));
+        'Failed to generate bar chart: ${e.toString()}',
+      ),);
     }
   }
 
@@ -728,8 +728,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       return Right(_parsePieChartData(chartData));
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Failed to generate pie chart: ${e.toString()}',
-      ));
+        'Failed to generate pie chart: ${e.toString()}',
+      ),);
     }
   }
 
@@ -767,8 +767,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       return Right(_parseScatterPlotData(chartData));
     } catch (e) {
       return Left(ServerFailure(
-        message: 'Failed to generate scatter plot: ${e.toString()}',
-      ));
+        'Failed to generate scatter plot: ${e.toString()}',
+      ),);
     }
   }
 
@@ -843,7 +843,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     return LineChartDataEntity(
       title: chartData['title'] as String? ?? 'Chart',
       subtitle: chartData['subtitle'] as String?,
-      series: [], // Parse series data from chartData
+      series: const [], // Parse series data from chartData
       xAxis: _parseChartAxis(chartData['x_axis']),
       yAxis: _parseChartAxis(chartData['y_axis']),
       style: _parseChartStyle(chartData['style']),
@@ -855,7 +855,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     return BarChartDataEntity(
       title: chartData['title'] as String? ?? 'Chart',
       subtitle: chartData['subtitle'] as String?,
-      dataGroups: [], // Parse data groups from chartData
+      dataGroups: const [], // Parse data groups from chartData
       xAxis: _parseChartAxis(chartData['x_axis']),
       yAxis: _parseChartAxis(chartData['y_axis']),
       style: _parseChartStyle(chartData['style']),
@@ -867,7 +867,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     return PieChartDataEntity(
       title: chartData['title'] as String? ?? 'Chart',
       subtitle: chartData['subtitle'] as String?,
-      sections: [], // Parse sections from chartData
+      sections: const [], // Parse sections from chartData
       style: _parseChartStyle(chartData['style']),
     );
   }
@@ -877,7 +877,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     return ScatterPlotDataEntity(
       title: chartData['title'] as String? ?? 'Chart',
       subtitle: chartData['subtitle'] as String?,
-      series: [], // Parse series from chartData
+      series: const [], // Parse series from chartData
       xAxis: _parseChartAxis(chartData['x_axis']),
       yAxis: _parseChartAxis(chartData['y_axis']),
       style: _parseChartStyle(chartData['style']),

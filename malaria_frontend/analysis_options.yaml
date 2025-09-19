@@ -58,7 +58,6 @@ linter:
 
     # Documentation
     public_member_api_docs: false # Enable for production
-    package_api_docs: false # Enable for production
 
     # Style Guidelines
     curly_braces_in_flow_control_structures: true
@@ -120,4 +119,3 @@ linter:
 
     # Testing
     avoid_final_parameters: false
-    prefer_const_parameters: false

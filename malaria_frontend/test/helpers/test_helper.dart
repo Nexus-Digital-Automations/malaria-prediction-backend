@@ -4,10 +4,10 @@
 /// Author: Testing Agent 8
 /// Created: 2025-09-18
 /// Purpose: Centralized testing utilities for consistent test setup
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:bloc_test/bloc_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -112,221 +112,246 @@ class TestHelper {
     await tester.pumpAndSettle(duration, EnginePhase.sendSemanticsUpdate);
   }
 
-  /// Common widget finder utilities
-  static class WidgetFinders {
-    /// Find widget by test key
-    static Finder byTestKey(String key) => find.byKey(Key(key));
+  /// Access to widget finder utilities
+  static const WidgetFinders = _WidgetFinders();
 
-    /// Find button by text with specific button type
-    static Finder buttonByText(String text) => find.widgetWithText(ElevatedButton, text);
+  /// Access to test actions
+  static const TestActions = _TestActions();
 
-    /// Find text field by hint text
-    static Finder textFieldByHint(String hint) => find.widgetWithText(TextField, hint);
+  /// Access to performance helper
+  static const PerformanceHelper = _PerformanceHelper();
 
-    /// Find app bar with title
-    static Finder appBarWithTitle(String title) => find.widgetWithText(AppBar, title);
+  /// Access to data verification utilities
+  static const DataVerification = _DataVerification();
 
-    /// Find icon button by icon
-    static Finder iconButtonByIcon(IconData icon) => find.widgetWithIcon(IconButton, icon);
+  /// Access to mock data generators
+  static const MockDataGenerator = _MockDataGenerator();
+}
 
-    /// Find loading indicators
-    static Finder loadingIndicator() => find.byType(CircularProgressIndicator);
+/// Common widget finder utilities
+class _WidgetFinders {
+  const _WidgetFinders();
 
-    /// Find error widgets
-    static Finder errorWidget() => find.byType(ErrorWidget);
+  /// Find widget by test key
+  Finder byTestKey(String key) => find.byKey(Key(key));
+
+  /// Find button by text with specific button type
+  Finder buttonByText(String text) => find.widgetWithText(ElevatedButton, text);
+
+  /// Find text field by hint text
+  Finder textFieldByHint(String hint) => find.widgetWithText(TextField, hint);
+
+  /// Find app bar with title
+  Finder appBarWithTitle(String title) => find.widgetWithText(AppBar, title);
+
+  /// Find icon button by icon
+  Finder iconButtonByIcon(IconData icon) => find.widgetWithIcon(IconButton, icon);
+
+  /// Find loading indicators
+  Finder loadingIndicator() => find.byType(CircularProgressIndicator);
+
+  /// Find error widgets
+  Finder errorWidget() => find.byType(ErrorWidget);
+}
+
+/// Common test actions
+class _TestActions {
+  const _TestActions();
+
+  /// Tap and wait for animations to complete
+  Future<void> tapAndSettle(WidgetTester tester, Finder finder) async {
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
   }
 
-  /// Common test actions
-  static class TestActions {
-    /// Tap and wait for animations to complete
-    static Future<void> tapAndSettle(WidgetTester tester, Finder finder) async {
-      await tester.tap(finder);
-      await tester.pumpAndSettle();
-    }
-
-    /// Enter text and wait for updates
-    static Future<void> enterTextAndSettle(
-      WidgetTester tester,
-      Finder finder,
-      String text,
-    ) async {
-      await tester.enterText(finder, text);
-      await tester.pumpAndSettle();
-    }
-
-    /// Scroll until widget is visible
-    static Future<void> scrollUntilVisible(
-      WidgetTester tester,
-      Finder finder,
-      Finder scrollableFinder, {
-      double delta = 100.0,
-    }) async {
-      await tester.scrollUntilVisible(finder, delta, scrollable: scrollableFinder);
-      await tester.pumpAndSettle();
-    }
-
-    /// Drag to refresh
-    static Future<void> dragToRefresh(WidgetTester tester, Finder finder) async {
-      await tester.drag(finder, const Offset(0, 300));
-      await tester.pumpAndSettle();
-    }
-
-    /// Wait for specific condition with timeout
-    static Future<void> waitFor(
-      WidgetTester tester,
-      bool Function() condition, {
-      Duration timeout = const Duration(seconds: 5),
-    }) async {
-      final stopwatch = Stopwatch()..start();
-
-      while (!condition() && stopwatch.elapsed < timeout) {
-        await tester.pump(const Duration(milliseconds: 100));
-      }
-
-      if (!condition()) {
-        throw TimeoutException('Condition not met within timeout', timeout);
-      }
-    }
+  /// Enter text and wait for updates
+  Future<void> enterTextAndSettle(
+    WidgetTester tester,
+    Finder finder,
+    String text,
+  ) async {
+    await tester.enterText(finder, text);
+    await tester.pumpAndSettle();
   }
 
-  /// Performance testing utilities
-  static class PerformanceHelper {
-    /// Measure widget build time
-    static Future<Duration> measureBuildTime(
-      WidgetTester tester,
-      Widget widget,
-    ) async {
-      final stopwatch = Stopwatch()..start();
-      await tester.pumpWidget(widget);
-      stopwatch.stop();
-      return stopwatch.elapsed;
-    }
-
-    /// Measure scroll performance
-    static Future<ScrollMetrics> measureScrollPerformance(
-      WidgetTester tester,
-      Finder scrollableFinder,
-      double scrollDistance,
-    ) async {
-      final scrollableWidget = tester.widget<Scrollable>(scrollableFinder);
-      final controller = scrollableWidget.controller;
-
-      if (controller == null) {
-        throw StateError('Scrollable widget must have a controller for performance measurement');
-      }
-
-      final initialPosition = controller.position.pixels;
-      final stopwatch = Stopwatch()..start();
-
-      await tester.drag(scrollableFinder, Offset(0, -scrollDistance));
-      await tester.pumpAndSettle();
-
-      stopwatch.stop();
-
-      return ScrollMetrics(
-        scrollDistance: (controller.position.pixels - initialPosition).abs(),
-        duration: stopwatch.elapsed,
-        frameCount: tester.binding.frameCount,
-      );
-    }
+  /// Scroll until widget is visible
+  Future<void> scrollUntilVisible(
+    WidgetTester tester,
+    Finder finder,
+    Finder scrollableFinder, {
+    double delta = 100.0,
+  }) async {
+    await tester.scrollUntilVisible(finder, delta, scrollable: scrollableFinder);
+    await tester.pumpAndSettle();
   }
 
-  /// Data verification utilities
-  static class DataVerification {
-    /// Verify BLoC state transitions
-    static void verifyBlocStateTransition<B extends BlocBase<S>, S>(
-      B bloc,
-      List<S> expectedStates,
-    ) {
-      expect(bloc.stream, emitsInOrder(expectedStates));
-    }
-
-    /// Verify API call with specific parameters
-    static void verifyApiCall(
-      Mock mockObject,
-      String methodName,
-      dynamic expectedParams,
-    ) {
-      verify(() => mockObject.noSuchMethod(
-        Invocation.method(Symbol(methodName), [expectedParams]),
-      )).called(1);
-    }
-
-    /// Verify widget properties
-    static void verifyWidgetProperties<T extends Widget>(
-      WidgetTester tester,
-      Finder finder,
-      Map<String, dynamic> expectedProperties,
-    ) {
-      final widget = tester.widget<T>(finder);
-
-      for (final entry in expectedProperties.entries) {
-        final property = entry.key;
-        final expectedValue = entry.value;
-
-        // Use reflection or specific property accessors
-        // This is a simplified version - implement based on specific widget types
-        expect(widget.toString().contains(expectedValue.toString()), isTrue,
-            reason: 'Property $property should have value $expectedValue');
-      }
-    }
+  /// Drag to refresh
+  Future<void> dragToRefresh(WidgetTester tester, Finder finder) async {
+    await tester.drag(finder, const Offset(0, 300));
+    await tester.pumpAndSettle();
   }
 
-  /// Mock data generators
-  static class MockDataGenerator {
-    /// Generate mock user data
-    static Map<String, dynamic> generateMockUser({
-      String? id,
-      String? email,
-      String? name,
-    }) {
-      return {
-        'id': id ?? 'test_user_${DateTime.now().millisecondsSinceEpoch}',
-        'email': email ?? 'test@example.com',
-        'name': name ?? 'Test User',
-        'created_at': DateTime.now().toIso8601String(),
-        'preferences': {
-          'notifications': true,
-          'theme': 'light',
-          'language': 'en',
-        },
-      };
+  /// Wait for specific condition with timeout
+  Future<void> waitFor(
+    WidgetTester tester,
+    bool Function() condition, {
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
+    final stopwatch = Stopwatch()..start();
+
+    while (!condition() && stopwatch.elapsed < timeout) {
+      await tester.pump(const Duration(milliseconds: 100));
     }
 
-    /// Generate mock risk data
-    static List<Map<String, dynamic>> generateMockRiskData({
-      int count = 10,
-      String? region,
-    }) {
-      return List.generate(count, (index) => {
-        'id': 'risk_${index}_${DateTime.now().millisecondsSinceEpoch}',
-        'region': region ?? 'test_region_$index',
-        'risk_level': ['low', 'medium', 'high'][index % 3],
-        'risk_score': (index % 100) / 100.0,
-        'timestamp': DateTime.now().subtract(Duration(days: index)).toIso8601String(),
-        'environmental_factors': {
-          'temperature': 20.0 + (index % 15),
-          'rainfall': 100.0 + (index % 200),
-          'humidity': 60.0 + (index % 30),
-        },
-      });
+    if (!condition()) {
+      throw TimeoutException('Condition not met within timeout', timeout);
+    }
+  }
+}
+
+/// Performance testing utilities
+class _PerformanceHelper {
+  const _PerformanceHelper();
+
+  /// Measure widget build time
+  Future<Duration> measureBuildTime(
+    WidgetTester tester,
+    Widget widget,
+  ) async {
+    final stopwatch = Stopwatch()..start();
+    await tester.pumpWidget(widget);
+    stopwatch.stop();
+    return stopwatch.elapsed;
+  }
+
+  /// Measure scroll performance
+  Future<TestScrollMetrics> measureScrollPerformance(
+    WidgetTester tester,
+    Finder scrollableFinder,
+    double scrollDistance,
+  ) async {
+    final scrollableWidget = tester.widget<Scrollable>(scrollableFinder);
+    final controller = scrollableWidget.controller;
+
+    if (controller == null) {
+      throw StateError('Scrollable widget must have a controller for performance measurement');
     }
 
-    /// Generate mock API responses
-    static Map<String, dynamic> generateMockApiResponse({
-      required dynamic data,
-      bool success = true,
-      String? message,
-      int statusCode = 200,
-    }) {
-      return {
-        'success': success,
-        'status_code': statusCode,
-        'message': message ?? (success ? 'Operation successful' : 'Operation failed'),
-        'data': data,
-        'timestamp': DateTime.now().toIso8601String(),
-      };
+    final initialPosition = controller.position.pixels;
+    final stopwatch = Stopwatch()..start();
+
+    await tester.drag(scrollableFinder, Offset(0, -scrollDistance));
+    await tester.pumpAndSettle();
+
+    stopwatch.stop();
+
+    return TestScrollMetrics(
+      scrollDistance: (controller.position.pixels - initialPosition).abs(),
+      duration: stopwatch.elapsed,
+      frameCount: 0, // frameCount not available in TestWidgetsFlutterBinding
+    );
+  }
+}
+
+/// Data verification utilities
+class _DataVerification {
+  const _DataVerification();
+
+  /// Verify BLoC state transitions
+  void verifyBlocStateTransition<B extends BlocBase<S>, S>(
+    B bloc,
+    List<S> expectedStates,
+  ) {
+    expect(bloc.stream, emitsInOrder(expectedStates));
+  }
+
+  /// Verify API call with specific parameters
+  void verifyApiCall(
+    Mock mockObject,
+    String methodName,
+    dynamic expectedParams,
+  ) {
+    verify(() => mockObject.noSuchMethod(
+      Invocation.method(Symbol(methodName), [expectedParams]),
+    )).called(1);
+  }
+
+  /// Verify widget properties
+  void verifyWidgetProperties<T extends Widget>(
+    WidgetTester tester,
+    Finder finder,
+    Map<String, dynamic> expectedProperties,
+  ) {
+    final widget = tester.widget<T>(finder);
+
+    for (final entry in expectedProperties.entries) {
+      final property = entry.key;
+      final expectedValue = entry.value;
+
+      // Use reflection or specific property accessors
+      // This is a simplified version - implement based on specific widget types
+      expect(widget.toString().contains(expectedValue.toString()), isTrue,
+          reason: 'Property $property should have value $expectedValue');
     }
+  }
+}
+
+/// Mock data generators
+class _MockDataGenerator {
+  const _MockDataGenerator();
+
+  /// Generate mock user data
+  Map<String, dynamic> generateMockUser({
+    String? id,
+    String? email,
+    String? name,
+  }) {
+    return {
+      'id': id ?? 'test_user_${DateTime.now().millisecondsSinceEpoch}',
+      'email': email ?? 'test@example.com',
+      'name': name ?? 'Test User',
+      'created_at': DateTime.now().toIso8601String(),
+      'preferences': {
+        'notifications': true,
+        'theme': 'light',
+        'language': 'en',
+      },
+    };
+  }
+
+  /// Generate mock risk data
+  List<Map<String, dynamic>> generateMockRiskData({
+    int count = 10,
+    String? region,
+  }) {
+    return List.generate(count, (index) => {
+      'id': 'risk_${index}_${DateTime.now().millisecondsSinceEpoch}',
+      'region': region ?? 'test_region_$index',
+      'risk_level': ['low', 'medium', 'high'][index % 3],
+      'risk_score': (index % 100) / 100.0,
+      'timestamp': DateTime.now().subtract(Duration(days: index)).toIso8601String(),
+      'environmental_factors': {
+        'temperature': 20.0 + (index % 15),
+        'rainfall': 100.0 + (index % 200),
+        'humidity': 60.0 + (index % 30),
+      },
+    });
+  }
+
+  /// Generate mock API responses
+  Map<String, dynamic> generateMockApiResponse({
+    required dynamic data,
+    bool success = true,
+    String? message,
+    int statusCode = 200,
+  }) {
+    return {
+      'success': success,
+      'status_code': statusCode,
+      'message': message ?? (success ? 'Operation successful' : 'Operation failed'),
+      'data': data,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
   }
 }
 
@@ -341,13 +366,13 @@ class TimeoutException implements Exception {
   String toString() => 'TimeoutException: $message (timeout: $timeout)';
 }
 
-/// Scroll performance metrics
-class ScrollMetrics {
+/// Test scroll performance metrics
+class TestScrollMetrics {
   final double scrollDistance;
   final Duration duration;
   final int frameCount;
 
-  const ScrollMetrics({
+  const TestScrollMetrics({
     required this.scrollDistance,
     required this.duration,
     required this.frameCount,
@@ -361,7 +386,7 @@ class ScrollMetrics {
 
   @override
   String toString() {
-    return 'ScrollMetrics(distance: $scrollDistance, duration: $duration, velocity: $velocity px/ms, fps: $fps)';
+    return 'TestScrollMetrics(distance: $scrollDistance, duration: $duration, velocity: $velocity px/ms, fps: $fps)';
   }
 }
 

@@ -10,6 +10,7 @@
 ///   availableFormats: [ExportFormat.pdf, ExportFormat.csv],
 /// );
 /// ```
+library;
 
 import 'package:flutter/material.dart';
 import '../../domain/repositories/analytics_repository.dart';

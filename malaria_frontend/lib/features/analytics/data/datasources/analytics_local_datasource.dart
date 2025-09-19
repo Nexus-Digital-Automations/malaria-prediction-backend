@@ -16,11 +16,11 @@
 ///   endDate: endDate,
 /// );
 /// ```
+library;
 
 import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../models/analytics_data_model.dart';
 
@@ -288,7 +288,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       await _updateCacheMetadata('analytics_data', cacheKey, cacheEntry);
     } catch (e) {
       throw CacheException(
-        message: 'Failed to cache analytics data: ${e.toString()}',
+        'Failed to cache analytics data: ${e.toString()}',
       );
     }
   }
@@ -322,7 +322,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       return analyticsData;
     } catch (e) {
       throw CacheException(
-        message: 'Failed to retrieve cached analytics data: ${e.toString()}',
+        'Failed to retrieve cached analytics data: ${e.toString()}',
       );
     }
   }
@@ -348,7 +348,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       await _updateCacheMetadata('prediction_accuracy', cacheKey, cacheEntry);
     } catch (e) {
       throw CacheException(
-        message: 'Failed to cache prediction accuracy: ${e.toString()}',
+        'Failed to cache prediction accuracy: ${e.toString()}',
       );
     }
   }
@@ -376,7 +376,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       return PredictionAccuracyModel.fromJson(jsonDecode(cacheEntry.data));
     } catch (e) {
       throw CacheException(
-        message: 'Failed to retrieve cached prediction accuracy: ${e.toString()}',
+        'Failed to retrieve cached prediction accuracy: ${e.toString()}',
       );
     }
   }
@@ -403,7 +403,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       await _updateCacheMetadata('environmental_trends', cacheKey, cacheEntry);
     } catch (e) {
       throw CacheException(
-        message: 'Failed to cache environmental trends: ${e.toString()}',
+        'Failed to cache environmental trends: ${e.toString()}',
       );
     }
   }
@@ -434,7 +434,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
           .toList();
     } catch (e) {
       throw CacheException(
-        message: 'Failed to retrieve cached environmental trends: ${e.toString()}',
+        'Failed to retrieve cached environmental trends: ${e.toString()}',
       );
     }
   }
@@ -461,7 +461,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       await _updateCacheMetadata('risk_trends', cacheKey, cacheEntry);
     } catch (e) {
       throw CacheException(
-        message: 'Failed to cache risk trends: ${e.toString()}',
+        'Failed to cache risk trends: ${e.toString()}',
       );
     }
   }
@@ -492,7 +492,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
           .toList();
     } catch (e) {
       throw CacheException(
-        message: 'Failed to retrieve cached risk trends: ${e.toString()}',
+        'Failed to retrieve cached risk trends: ${e.toString()}',
       );
     }
   }
@@ -515,7 +515,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       await _updateCacheMetadata('chart_data', chartKey, cacheEntry);
     } catch (e) {
       throw CacheException(
-        message: 'Failed to cache chart data: ${e.toString()}',
+        'Failed to cache chart data: ${e.toString()}',
       );
     }
   }
@@ -539,7 +539,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       return jsonDecode(cacheEntry.data) as Map<String, dynamic>;
     } catch (e) {
       throw CacheException(
-        message: 'Failed to retrieve cached chart data: ${e.toString()}',
+        'Failed to retrieve cached chart data: ${e.toString()}',
       );
     }
   }
@@ -562,7 +562,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       await _metadataBox.put(cacheKey, jsonEncode(cacheEntry.toJson()));
     } catch (e) {
       throw CacheException(
-        message: 'Failed to cache available regions: ${e.toString()}',
+        'Failed to cache available regions: ${e.toString()}',
       );
     }
   }
@@ -588,7 +588,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       return regionsJson.cast<String>();
     } catch (e) {
       throw CacheException(
-        message: 'Failed to retrieve cached regions: ${e.toString()}',
+        'Failed to retrieve cached regions: ${e.toString()}',
       );
     }
   }
@@ -639,7 +639,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       await _updateCacheStatistics();
     } catch (e) {
       throw CacheException(
-        message: 'Failed to clear expired cache: ${e.toString()}',
+        'Failed to clear expired cache: ${e.toString()}',
       );
     }
   }
@@ -653,7 +653,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       await _updateCacheStatistics();
     } catch (e) {
       throw CacheException(
-        message: 'Failed to clear all cache: ${e.toString()}',
+        'Failed to clear all cache: ${e.toString()}',
       );
     }
   }
@@ -679,7 +679,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       };
     } catch (e) {
       throw CacheException(
-        message: 'Failed to get cache statistics: ${e.toString()}',
+        'Failed to get cache statistics: ${e.toString()}',
       );
     }
   }

@@ -9,6 +9,7 @@
 ///   dataQuality: dataQualityMetrics,
 /// );
 /// ```
+library;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -103,7 +104,7 @@ class DataQualityIndicator extends StatelessWidget {
           context,
           'Accuracy',
           dataQuality.accuracy,
-          Icons.target,
+          Icons.gps_fixed,
         ),
         const SizedBox(height: 12),
         _buildFreshnessIndicator(context),
@@ -311,7 +312,7 @@ class DataQualityIndicator extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.warning,
                 color: Colors.orange,
                 size: 16,

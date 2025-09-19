@@ -4,6 +4,7 @@
 /// Author: Testing Agent 8
 /// Created: 2025-09-18
 /// Purpose: Centralized test data management for consistent testing
+library;
 
 import 'dart:convert';
 
@@ -462,7 +463,7 @@ class TestFixtures {
         'index': index,
         'batch': index ~/ 100,
       },
-    });
+    },);
   }
 
   /// Mock API responses for different HTTP status codes

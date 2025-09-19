@@ -10,6 +10,7 @@
 ///   height: 300,
 /// );
 /// ```
+library;
 
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -151,7 +152,7 @@ class _RiskDistributionChartState extends State<RiskDistributionChart> {
             fontSize: isTouched ? 18 : 14,
             fontWeight: FontWeight.bold,
             color: Colors.white,
-            shadows: [
+            shadows: const [
               Shadow(
                 color: Colors.black26,
                 offset: Offset(1, 1),
@@ -214,7 +215,7 @@ class _RiskDistributionChartState extends State<RiskDistributionChart> {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
