@@ -10,7 +10,7 @@
       "id": "error_1758221818104_jyvigr7jw"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T15:22:55.934Z",
       "title": "Develop Comprehensive BLoC State Management Architecture",
       "description": "Implement complete BLoC pattern state management with event-driven architecture, persistent state with hydrated_bloc, dependency injection, and comprehensive error handling for all app features including Authentication, Prediction, Map, Alert, Analytics, Theme, and Connectivity modules",
@@ -53,7 +53,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-19T05:25:51.548Z",
+      "updated_at": "2025-09-19T05:25:51.548Z"
     },
     {
       "status": "pending",
@@ -438,7 +440,7 @@
       "updated_at": "2025-09-19T05:07:11.738Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-19T05:08:29.033Z",
       "title": "Enhance BLoC Infrastructure Components",
       "description": "Comprehensive enhancement of BLoC infrastructure including BlocManager with global event bus, BlocRegistry with scoped instances, dependency injection optimization, and standardized error handling",
@@ -455,10 +457,12 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-19T05:24:10.202Z",
+      "updated_at": "2025-09-19T05:24:10.202Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-19T05:08:30.182Z",
       "title": "Implement PredictionBloc and AlertBloc for malaria prediction app",
       "description": "Create missing core BLoCs - PredictionBloc with LoadPrediction/RefreshPrediction/UpdatePredictionParameters/ClearPrediction events and PredictionInitial/PredictionLoading/PredictionLoaded/PredictionError states. AlertBloc with LoadAlerts/MarkAlertRead/CreateAlert/DismissAlert/UpdateAlertSettings events and AlertInitial/AlertLoading/AlertLoaded/AlertError/AlertsUpdated states. Include API integration, error handling, logging, tests.",
@@ -475,15 +479,19 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-19T05:24:48.020Z",
+      "updated_at": "2025-09-19T05:24:48.020Z"
     },
     {
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-09-19T05:08:34.757Z",
       "title": "Implement OfflineBloc and CacheBloc for malaria prediction app",
       "description": "Create missing OfflineBloc with connectivity monitoring, sync capabilities, and CacheBloc with intelligent caching strategies following existing patterns",
       "category": "feature",
-      "id": "feature_1758258514756_oqyy6tesose"
+      "id": "feature_1758258514756_oqyy6tesose",
+      "completed_at": "2025-09-19T05:24:03.504Z",
+      "updated_at": "2025-09-19T05:24:03.504Z"
     }
   ],
   "current_mode": "DEVELOPMENT",
