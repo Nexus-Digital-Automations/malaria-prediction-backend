@@ -21,6 +21,7 @@
 library;
 
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/analytics_data.dart';
@@ -799,7 +800,8 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
       result.fold(
         (failure) {
           // Don't emit error for regions loading failure - it's not critical
-          print('Warning: Failed to load available regions: ${failure.message}');
+          // Using debugPrint instead of print for proper logging
+          debugPrint('Warning: Failed to load available regions: ${failure.message}');
         },
         (regions) {
           final currentState = state;
@@ -810,7 +812,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
         },
       );
     } catch (e) {
-      print('Warning: Unexpected error loading regions: ${e.toString()}');
+      debugPrint('Warning: Unexpected error loading regions: ${e.toString()}');
     }
   }
 

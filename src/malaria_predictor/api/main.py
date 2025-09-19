@@ -24,7 +24,17 @@ from .middleware import (
     RequestIdMiddleware,
     SecurityHeadersMiddleware,
 )
-from .routers import alerts, analytics, auth, health, healthcare, notifications, operations, prediction
+from .routers import (
+    alerts,
+    analytics,
+    auth,
+    health,
+    healthcare,
+    notifications,
+    operations,
+    prediction,
+    reports,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -163,6 +173,7 @@ app.include_router(alerts.router, prefix="/api/v1", tags=["Alerts"])
 app.include_router(analytics.router, tags=["Analytics"])
 app.include_router(operations.router, tags=["Operations"])
 app.include_router(notifications.router, prefix="/notifications", tags=["Push Notifications"])
+app.include_router(reports.router, prefix="/api/v1", tags=["Custom Reports"])
 
 
 @app.exception_handler(HTTPException)

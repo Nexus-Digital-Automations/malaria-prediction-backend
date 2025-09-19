@@ -19,6 +19,7 @@
 library;
 
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/errors/exceptions.dart';
@@ -727,7 +728,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       await _metadataBox.put(metadataKey, jsonEncode(metadata));
     } catch (e) {
       // Non-critical error - log but don't throw
-      print('Warning: Failed to update cache metadata: ${e.toString()}');
+      debugPrint('Warning: Failed to update cache metadata: ${e.toString()}');
     }
   }
 
@@ -740,7 +741,7 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
       );
     } catch (e) {
       // Non-critical error - log but don't throw
-      print('Warning: Failed to update cache statistics: ${e.toString()}');
+      debugPrint('Warning: Failed to update cache statistics: ${e.toString()}');
     }
   }
 }

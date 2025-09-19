@@ -868,6 +868,263 @@ class AlertPerformanceMetrics(Base):
     )
 
 
+class Report(Base):
+    """Report entity for storing generated reports and metadata.
+
+    Stores comprehensive report information including generation metadata,
+    content references, and export status for all supported formats.
+    """
+
+    __tablename__ = "reports"
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(255), nullable=False, index=True)
+    description = Column(Text, nullable=True)
+
+    # Report configuration
+    report_type = Column(String(50), nullable=False)  # analytics, prediction, outbreak, custom
+    template_id = Column(Integer, ForeignKey("report_templates.id"), nullable=True)
+
+    # Generation metadata
+    generated_by = Column(String(100), nullable=False, index=True)  # user_id
+    generated_at = Column(DateTime(timezone=True), server_default=func.now())
+    data_period_start = Column(DateTime(timezone=True), nullable=True)
+    data_period_end = Column(DateTime(timezone=True), nullable=True)
+
+    # Content and data
+    report_data = Column(JSON, nullable=False)  # Structured report data
+    chart_configurations = Column(JSON, nullable=True)  # Chart configs and data
+    custom_parameters = Column(JSON, nullable=True)  # Custom filters/parameters
+
+    # Export status and metadata
+    export_formats = Column(JSON, nullable=True)  # ["pdf", "excel", "csv", "pptx"]
+    export_status = Column(JSON, nullable=True)  # {format: {status, path, generated_at}}
+    file_paths = Column(JSON, nullable=True)  # {format: relative_path}
+
+    # Scheduling and automation
+    is_scheduled = Column(Boolean, default=False)
+    schedule_id = Column(Integer, ForeignKey("report_schedules.id"), nullable=True)
+
+    # Performance and size metadata
+    generation_time_seconds = Column(Float, nullable=True)
+    file_sizes = Column(JSON, nullable=True)  # {format: size_bytes}
+    data_points_count = Column(Integer, nullable=True)
+
+    # Status and lifecycle
+    status = Column(String(20), nullable=False, default="draft")  # draft, generating, completed, failed
+    error_message = Column(Text, nullable=True)
+    last_updated = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    template = relationship("ReportTemplate", back_populates="reports")
+    schedule = relationship("ReportSchedule", back_populates="reports")
+
+    __table_args__ = (
+        Index("idx_report_user_date", "generated_by", "generated_at"),
+        Index("idx_report_type_status", "report_type", "status"),
+        Index("idx_report_schedule", "schedule_id", "generated_at"),
+    )
+
+
+class ReportTemplate(Base):
+    """Report template entity for customizable report layouts.
+
+    Stores template configurations, widget layouts, and styling
+    for reusable report generation.
+    """
+
+    __tablename__ = "report_templates"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False, index=True)
+    description = Column(Text, nullable=True)
+
+    # Template metadata
+    created_by = Column(String(100), nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_modified_by = Column(String(100), nullable=True)
+    last_modified_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Template configuration
+    template_type = Column(String(50), nullable=False)  # standard, custom, system
+    category = Column(String(50), nullable=False)  # analytics, prediction, outbreak, operational
+
+    # Layout and design
+    layout_configuration = Column(JSON, nullable=False)  # Widget layout, positions, sizes
+    style_configuration = Column(JSON, nullable=True)  # Colors, fonts, branding
+    page_configuration = Column(JSON, nullable=True)  # Page settings, margins, orientation
+
+    # Widget and component definitions
+    widgets = Column(JSON, nullable=False)  # Widget definitions and configurations
+    data_sources = Column(JSON, nullable=False)  # Data source configurations
+    chart_configurations = Column(JSON, nullable=True)  # Default chart settings
+
+    # Template behavior
+    default_parameters = Column(JSON, nullable=True)  # Default filter/parameter values
+    required_parameters = Column(JSON, nullable=True)  # Required parameters for generation
+    export_formats = Column(JSON, nullable=True)  # Supported export formats
+
+    # Usage and performance
+    usage_count = Column(Integer, default=0)
+    last_used_at = Column(DateTime(timezone=True), nullable=True)
+    average_generation_time = Column(Float, nullable=True)
+
+    # Template status
+    is_active = Column(Boolean, default=True)
+    is_public = Column(Boolean, default=False)  # Available to all users
+    version = Column(String(20), nullable=False, default="1.0")
+
+    # Relationships
+    reports = relationship("Report", back_populates="template")
+    schedules = relationship("ReportSchedule", back_populates="template")
+
+    __table_args__ = (
+        Index("idx_template_user_category", "created_by", "category"),
+        Index("idx_template_type_active", "template_type", "is_active"),
+        UniqueConstraint("name", "created_by", name="uq_template_name_user"),
+    )
+
+
+class ReportSchedule(Base):
+    """Report schedule entity for automated report generation.
+
+    Manages automated report generation schedules with flexible
+    timing, delivery options, and configuration management.
+    """
+
+    __tablename__ = "report_schedules"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False, index=True)
+    description = Column(Text, nullable=True)
+
+    # Schedule ownership
+    created_by = Column(String(100), nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_modified_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Template and configuration
+    template_id = Column(Integer, ForeignKey("report_templates.id"), nullable=False)
+    report_configuration = Column(JSON, nullable=False)  # Report generation parameters
+
+    # Schedule timing
+    schedule_type = Column(String(20), nullable=False)  # cron, interval, one_time
+    cron_expression = Column(String(100), nullable=True)  # For cron-based schedules
+    interval_minutes = Column(Integer, nullable=True)  # For interval-based schedules
+    timezone = Column(String(50), nullable=False, default="UTC")
+
+    # Execution window
+    start_date = Column(DateTime(timezone=True), nullable=True)
+    end_date = Column(DateTime(timezone=True), nullable=True)
+    next_execution = Column(DateTime(timezone=True), nullable=True, index=True)
+    last_execution = Column(DateTime(timezone=True), nullable=True)
+
+    # Delivery configuration
+    delivery_methods = Column(JSON, nullable=False)  # ["email", "webhook", "storage"]
+    email_recipients = Column(JSON, nullable=True)  # List of email addresses
+    webhook_urls = Column(JSON, nullable=True)  # List of webhook endpoints
+    storage_locations = Column(JSON, nullable=True)  # Storage paths and configurations
+
+    # Export and format settings
+    export_formats = Column(JSON, nullable=False, default=["pdf"])  # Formats to generate
+    compression_enabled = Column(Boolean, default=False)
+    retention_days = Column(Integer, nullable=True)  # Auto-cleanup after N days
+
+    # Schedule status and health
+    is_active = Column(Boolean, default=True)
+    status = Column(String(20), nullable=False, default="active")  # active, paused, failed, completed
+    last_status = Column(String(20), nullable=True)  # Previous execution status
+    error_count = Column(Integer, default=0)
+    last_error_message = Column(Text, nullable=True)
+
+    # Performance tracking
+    execution_count = Column(Integer, default=0)
+    success_count = Column(Integer, default=0)
+    average_execution_time = Column(Float, nullable=True)
+    last_execution_time = Column(Float, nullable=True)
+
+    # Relationships
+    template = relationship("ReportTemplate", back_populates="schedules")
+    reports = relationship("Report", back_populates="schedule")
+
+    __table_args__ = (
+        Index("idx_schedule_user_active", "created_by", "is_active"),
+        Index("idx_schedule_next_execution", "next_execution", "is_active"),
+        Index("idx_schedule_template", "template_id", "is_active"),
+    )
+
+
+class ReportMetrics(Base):
+    """Report metrics entity for performance and usage analytics.
+
+    Tracks comprehensive metrics for report generation performance,
+    usage patterns, and system health monitoring.
+    """
+
+    __tablename__ = "report_metrics"
+
+    id = Column(Integer, primary_key=True)
+    metric_date = Column(DateTime(timezone=True), nullable=False, index=True)
+    aggregation_period = Column(String(20), nullable=False)  # hourly, daily, weekly, monthly
+
+    # Report generation metrics
+    total_reports_generated = Column(Integer, default=0)
+    successful_reports = Column(Integer, default=0)
+    failed_reports = Column(Integer, default=0)
+    average_generation_time = Column(Float, nullable=True)
+    max_generation_time = Column(Float, nullable=True)
+    min_generation_time = Column(Float, nullable=True)
+
+    # Export format metrics
+    pdf_exports = Column(Integer, default=0)
+    excel_exports = Column(Integer, default=0)
+    csv_exports = Column(Integer, default=0)
+    powerpoint_exports = Column(Integer, default=0)
+
+    # Template usage metrics
+    template_usage = Column(JSON, nullable=True)  # {template_id: usage_count}
+    most_used_template_id = Column(Integer, nullable=True)
+    custom_reports_count = Column(Integer, default=0)
+
+    # Scheduling metrics
+    scheduled_reports = Column(Integer, default=0)
+    manual_reports = Column(Integer, default=0)
+    schedule_failures = Column(Integer, default=0)
+    average_schedule_execution_time = Column(Float, nullable=True)
+
+    # Performance metrics
+    total_data_points_processed = Column(Integer, default=0)
+    average_data_points_per_report = Column(Float, nullable=True)
+    total_storage_used_bytes = Column(Integer, default=0)
+    average_file_size_bytes = Column(Float, nullable=True)
+
+    # User engagement metrics
+    unique_users = Column(Integer, default=0)
+    reports_per_user = Column(Float, nullable=True)
+    user_retention_rate = Column(Float, nullable=True)
+
+    # Error and failure analysis
+    error_categories = Column(JSON, nullable=True)  # {error_type: count}
+    most_common_error = Column(String(255), nullable=True)
+    error_rate_percentage = Column(Float, nullable=True)
+
+    # System resource metrics
+    peak_memory_usage_mb = Column(Float, nullable=True)
+    average_cpu_usage_percent = Column(Float, nullable=True)
+    peak_concurrent_generations = Column(Integer, nullable=True)
+    queue_wait_time_seconds = Column(Float, nullable=True)
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    calculation_version = Column(String(20), nullable=False, default="1.0")
+
+    __table_args__ = (
+        Index("idx_report_metrics_date", "metric_date"),
+        Index("idx_report_metrics_period", "aggregation_period"),
+        UniqueConstraint("metric_date", "aggregation_period", name="uq_report_metrics_date_period"),
+    )
+
+
 # TimescaleDB-specific setup queries
 TIMESCALEDB_SETUP = """
 -- Enable TimescaleDB and PostGIS extensions
@@ -905,6 +1162,15 @@ SELECT create_hypertable('notification_deliveries', 'created_at',
     if_not_exists => TRUE);
 
 SELECT create_hypertable('alert_performance_metrics', 'metric_date',
+    chunk_time_interval => INTERVAL '1 month',
+    if_not_exists => TRUE);
+
+-- Convert report tables to hypertables for time-series performance
+SELECT create_hypertable('reports', 'generated_at',
+    chunk_time_interval => INTERVAL '1 month',
+    if_not_exists => TRUE);
+
+SELECT create_hypertable('report_metrics', 'metric_date',
     chunk_time_interval => INTERVAL '1 month',
     if_not_exists => TRUE);
 

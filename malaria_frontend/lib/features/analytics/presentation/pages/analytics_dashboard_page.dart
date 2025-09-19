@@ -25,11 +25,9 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/error_widget.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../domain/entities/analytics_data.dart';
-import '../../domain/entities/chart_data.dart';
 import '../../domain/repositories/analytics_repository.dart';
 import '../../domain/usecases/generate_chart_data.dart';
 import '../bloc/analytics_bloc.dart';
@@ -133,8 +131,18 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
   /// Builds the app bar with dashboard title and actions
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: const Text('Analytics Dashboard'),
-      subtitle: Text('$_selectedRegion • ${_formatDateRange(_selectedDateRange)}'),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Analytics Dashboard'),
+          Text(
+            '$_selectedRegion • ${_formatDateRange(_selectedDateRange)}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+        ],
+      ),
       elevation: 2,
       actions: [
         IconButton(
@@ -226,7 +234,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const LoadingWidget(),
+          const AppLoadingWidget(),
           const SizedBox(height: 16),
           Text(
             state.message,
@@ -259,10 +267,9 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
   /// Builds the error state UI
   Widget _buildErrorState(AnalyticsError state) {
     return Center(
-      child: CustomErrorWidget(
+      child: AppErrorWidget(
         message: state.message,
         onRetry: state.isRecoverable ? _retryLastAction : null,
-        errorType: state.errorType,
       ),
     );
   }
