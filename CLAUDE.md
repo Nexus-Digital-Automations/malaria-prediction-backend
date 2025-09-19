@@ -156,86 +156,46 @@ CORE OPERATION PRINCIPLES (Display at start of every response):
 
 ## 🚨 QUALITY CONTROL & STANDARDS
 
-### CODE QUALITY STANDARDS
-**COMPREHENSIVE QUALITY REQUIREMENTS:**
-- **DOCUMENTATION**: Document every function, class, module, decision
-- **COMPREHENSIVE COMMENTS**: Inline comments explaining logic, decisions, edge cases, and complex operations
-- **LOGGING**: Function entry/exit, parameters, returns, errors, timing, state changes, decisions - CRITICAL for maintainability
-- **PERFORMANCE METRICS**: Execution timing and bottleneck identification
-- **API DOCUMENTATION**: Complete interfaces with usage examples
-- **ARCHITECTURE DOCUMENTATION**: System design decisions, data flow, integration patterns
+### CODE STANDARDS
+**QUALITY REQUIREMENTS:**
+- **DOCUMENTATION**: Document every function, class, module, decision with comprehensive comments
+- **LOGGING**: Function entry/exit, parameters, returns, errors, timing - CRITICAL for maintainability
+- **PERFORMANCE**: Execution timing and bottleneck identification
 - **MAINTENANCE**: Keep comments/logs current with code changes
+
+**ENTERPRISE STANDARDS:**
+- **CODE REVIEW**: Mandatory peer review via pull requests with automated checks
+- **TESTING**: Unit tests (>80% coverage), integration tests, E2E for critical paths
+- **SECURITY**: SAST scanning, dependency checks, no hardcoded secrets
+- **CI/CD**: Automated pipelines with quality gates - all checks pass before merge
+
+**NAMING CONVENTIONS:**
+- **CONSISTENCY**: Never change variable/function names unless functionally necessary
+- **JS/TS**: `camelCase` variables, `UPPER_SNAKE_CASE` constants, `PascalCase` classes, `kebab-case.js` files
+- **Python**: `snake_case` variables, `UPPER_SNAKE_CASE` constants, `PascalCase` classes, `snake_case.py` files
+- **Principles**: Descriptive names, boolean prefixes (`is`, `has`), action verbs, avoid abbreviations
 
 **EXAMPLE PATTERN:**
 ```javascript
-/**
- * Module: Data Processing - transformation/validation
- * Usage: processData(userId, rawData) -> Promise<ProcessedData>
- */
 function processData(userId, data) {
     const logger = getLogger('DataProcessor');
-    const opId = generateOperationId();
-    
-    logger.info(`[${opId}] Starting`, {userId, dataSize: data.length});
+    logger.info(`Starting`, {userId, dataSize: data.length});
     try {
-        const start = Date.now();
         const result = transformData(data);
-        logger.info(`[${opId}] Completed in ${Date.now() - start}ms`);
+        logger.info(`Completed in ${Date.now() - start}ms`);
         return result;
     } catch (error) {
-        logger.error(`[${opId}] Failed`, {error: error.message});
+        logger.error(`Failed`, {error: error.message});
         throw error;
     }
 }
 ```
 
-### STANDARDIZED NAMING CONVENTIONS
-**MANDATORY CONSISTENCY - NO VARIABLE NAME SWITCHING**
-
-**ABSOLUTE REQUIREMENTS:**
-- **CONSISTENCY FIRST**: Once established, NEVER change variable/function names unless functionally necessary
-- **LANGUAGE ADHERENCE**: Follow strict language-specific conventions
-- **READABILITY**: Names must clearly describe purpose and data type
-- **NO ARBITRARY CHANGES**: Prevent agents from switching names for style preferences
-
-**JAVASCRIPT/TYPESCRIPT CONVENTIONS:**
-- **Variables/Functions**: `camelCase` (e.g., `getUserData`, `isValidEmail`, `processRequest`)
-- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_RETRY_COUNT`, `API_BASE_URL`)
-- **Classes/Interfaces**: `PascalCase` (e.g., `UserService`, `ApiResponse`, `DataProcessor`)
-- **Files/Modules**: `kebab-case.js/.ts` (e.g., `user-service.ts`, `api-client.js`)
-- **Private Methods**: `_camelCase` (e.g., `_validateInput`, `_processData`)
-- **Enums**: `PascalCase` names, `UPPER_SNAKE_CASE` values (e.g., `UserRole.ADMIN_USER`, `TaskStatus.PENDING`)
-
-**PYTHON CONVENTIONS:**
-- **Variables/Functions**: `snake_case` (e.g., `get_user_data`, `is_valid_email`)
-- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_RETRY_COUNT`, `DEFAULT_TIMEOUT`)
-- **Classes**: `PascalCase` (e.g., `UserService`, `DatabaseManager`)
-- **Files/Modules**: `snake_case.py` (e.g., `user_service.py`, `api_client.py`)
-- **Private Methods**: `_snake_case` (e.g., `_validate_input`, `_process_data`)
-- **Enums**: `PascalCase` names, `UPPER_SNAKE_CASE` values (e.g., `UserRole.ADMIN_USER`, `TaskStatus.PENDING`)
-
-**UNIVERSAL PRINCIPLES:**
-- **Descriptive Names**: `userData` not `data`, `isAuthenticated` not `auth`
-- **Boolean Prefixes**: `is`, `has`, `can`, `should` (e.g., `isValid`, `hasPermission`)
-- **Action Verbs**: `get`, `set`, `create`, `update`, `delete`, `process`, `validate`
-- **Avoid Abbreviations**: `authentication` not `auth`, `configuration` not `config`
-- **Context Clarity**: `userEmail` not `email` when multiple email types exist
-
-**FORBIDDEN PRACTICES:**
-- **❌ STYLE SWITCHING**: Changing `userData` to `user_data` or `UserData` arbitrarily
-- **❌ INCONSISTENT PREFIXES**: Using both `get` and `fetch` for similar operations
-- **❌ GENERIC NAMES**: `data`, `info`, `item`, `value` without context
-- **❌ HUNGARIAN NOTATION**: `strName`, `intCount`, `boolIsValid`
-
-**ENFORCEMENT PROTOCOL:**
-- **PRESERVATION**: Keep existing variable names unless changing functionality
-- **VALIDATION**: Check existing codebase patterns before introducing new names
-- **DOCUMENTATION**: Comment rationale for any naming changes in commit messages
-
 ### LINTER ERROR PROTOCOL
 **ALL LINTER WARNINGS ARE CRITICAL ERRORS**
 
 **REQUIREMENTS:**
+- **MAXIMUM STRICTNESS**: Use strictest linter configurations with zero tolerance for any violations
 - **EMERGENCY PROTOCOL**: Instant halt → Create linter-error task → Fix all violations → Verify clean → Resume
 - **MAXIMUM CONCURRENT DEPLOYMENT**: MANDATORY for linter errors - deploy concurrent agents equal to number of error categories (max 10)
 - **OUTDATED MATERIAL EXCEPTION**: If errors in outdated/deprecated code → Remove code entirely, no error tasks
@@ -253,48 +213,20 @@ function processData(userId, data) {
 
 ## 🎯 TASK MANAGEMENT & GIT WORKFLOW
 
-### TASK COMPLETION DISCIPLINE
-**FINISH WHAT YOU START - TEAMS DEPEND ON YOU**
+### TASK WORKFLOW
+**COMPLETE TASKS ONE AT A TIME**
 
-**REQUIREMENTS:**
-- **✅ ONE AT A TIME**: Complete current task before starting new ones  
-- **✅ CONTINUATION FIRST**: Check for incomplete work before new tasks
-- **✅ PERSISTENCE**: Work through difficulties, don't abandon tasks
-- **❌ NO ABANDONMENT**: Never leave tasks partially complete
+**PRIORITIES:**
+1. **USER REQUESTS** - HIGHEST (execute immediately, override all other work)
+2. **ERROR TASKS** - Linter > build > start > runtime bugs
+3. **FEATURE TASKS** - Only after errors resolved, linear order
+4. **TEST TASKS** - Prohibited until all errors and approved features complete
 
-**INTERRUPTION HIERARCHY:**
-1. **USER REQUESTS** - HIGHEST PRIORITY (above all tasks including errors)
-2. **LINTER ERRORS** - High priority when no user requests  
-3. **BUILD FAILURES** - System-blocking errors
-4. **SECURITY VULNERABILITIES** - Critical issues
-
-**USER REQUEST PROTOCOL:**
-- **IMMEDIATE EXECUTION**: When user gives new request, execute immediately - never list existing tasks first
-- **OVERRIDE ALL**: User requests override error tasks, feature tasks, and all existing work
-- **NO DELAY**: Skip task discovery, skip status checks, go directly to Initialize → Create → Execute
-
-### PRIORITY SYSTEM
-- **ERROR TASKS** (HIGHEST PRIORITY): Linter > build > start > runtime bugs (bypass all ordering)
-- **FEATURE TASKS**: Only after errors resolved, linear order
-- **SUBTASK TASKS**: Within features, sequential order
-- **TEST TASKS** (BLOCKED): Prohibited until all error and approved feature tasks complete
-
-### TASKMANAGER COMPLETION FORMATTING
-**PREVENT JSON PARSING FAILURES**
-
-**SAFE FORMATS:**
-```bash
-# ✅ RECOMMENDED - Simple quoted string
-timeout 10s taskmanager complete task_123 '"Task completed successfully"'
-
-# ✅ ALTERNATIVE - Basic JSON without special characters
-timeout 10s taskmanager complete task_456 '{"message": "Build successful", "status": "All tests passed"}'
-```
-
-**RULES:**
-- **✅ USE**: Simple quoted strings, proper shell quoting (wrap in single quotes)
-- **❌ AVOID**: Special characters (!, ✅, emojis), unquoted strings, complex nested JSON
-- **TROUBLESHOOT**: JSON errors → use simple strings; escaping issues → wrap in single quotes; complex data → break into multiple calls
+**COMPLETION REQUIREMENTS:**
+- **ONE AT A TIME**: Complete current task before starting new ones
+- **NO ABANDONMENT**: Work through difficulties, finish what you start
+- **SAFE FORMATTING**: Use simple quoted strings: `'"Task completed successfully"'`
+- **NO SPECIAL CHARACTERS**: Avoid emojis, !, ✅ in completion messages
 
 ### GIT WORKFLOW - MANDATORY COMMIT/PUSH
 **ALL WORK MUST BE COMMITTED AND PUSHED BEFORE COMPLETION**
@@ -302,6 +234,8 @@ timeout 10s taskmanager complete task_456 '{"message": "Build successful", "stat
 **REQUIREMENTS:**
 - **✅ ALWAYS**: Commit all changes, push to remote, use descriptive messages, atomic commits
 - **❌ NEVER**: Leave uncommitted changes or unpushed commits when marking complete
+- **CI/CD PIPELINE**: All commits must pass automated pipeline (lint, test, build, security scans)
+- **BRANCH PROTECTION**: Main branch requires PR approval + status checks passing
 
 **SEQUENCE:**
 ```bash
@@ -338,191 +272,49 @@ git status                                   # Verify clean/up-to-date
 **COMPREHENSIVE development/ DIRECTORY SCANNING EVERY TASK START/CONTINUE**
 
 **PREPARATION STEPS:**
-1. **READ ALL FILES** in `development/essentials/` (critical project constraints) - EVERY FILE REQUIRED
-   - **USER-APPROVED FILES**: Read-only - never edit, delete, or modify (marked as user-approved)
-   - **AGENT-MADE FILES**: Freely edit, add, remove as needed for project requirements
-2. **SCAN ALL DIRECTORIES** in `development/` - Check every folder and file for relevance
-3. **CHECK ERRORS** in `development/errors/` - Review all error tracking files
-4. **REVIEW LOGS** in `development/logs/` - Check recent system behavior and patterns
-5. **REVIEW LESSONS** in `development/lessons/` - Check relevant lessons and patterns from previous work
-6. **SCAN REPORTS** in `development/reports/`
-7. **ADD TO TASKS** relevant reports as important_files in TODO.json
-8. **LEVERAGE RESEARCH** before implementing
-9. **CODEBASE SCAN**: Identify task-relevant files throughout entire project codebase
+1. **READ ESSENTIALS**: All files in `development/essentials/` (user-approved = read-only, agent-made = editable)
+2. **SCAN DEVELOPMENT**: Check `development/{errors,logs,lessons,reports}/` for relevant context
+3. **CODEBASE SCAN**: Find task-relevant files: `find . -name "*.js" -o -name "*.ts" -o -name "*.py" | grep -v node_modules`
+4. **LEVERAGE RESEARCH**: Apply lessons and reports before implementing
 
-**DEVELOPMENT SCANNING:**
-- `find development/ -type f -name "*.md" | head -50` - List all documentation
-- `ls -la development/*/` - Check all subdirectories
-- **REQUIRED FOLDERS**: essentials/, errors/, logs/, reports/
-- **READ EVERYTHING** in essentials/ - zero exceptions
-- **CHECK LOGS** in logs/ for system behavior patterns and issues
-
-**CODEBASE SCANNING:**
-- `find . -name "*.js" -o -name "*.ts" -o -name "*.py" -o -name "*.md" | grep -v node_modules | head -50` - Find relevant files
-- `find . -type f -name "*[task-keyword]*" | grep -v node_modules` - Search for task-specific files
-- **TASK-RELEVANT PATTERNS**: Components, services, utilities, configs, tests related to current task
-
-**RESEARCH TASK CREATION:** Required for external API integrations, database schema changes, auth/security systems, complex architectural decisions
+**RESEARCH REQUIRED FOR**: External APIs, database schemas, auth/security systems, complex architecture
 
 ## 🚨 DIRECTORY MANAGEMENT PROTOCOL
 
-### ERRORS TRACKING
-**LOCATION**: `development/errors/` - All error tracking files
-**FORMAT**: `error_[timestamp]_[type]_[identifier].md`
+### DEVELOPMENT DIRECTORY STRUCTURE
+**CENTRALIZED DOCUMENTATION & TRACKING**
 
-**ERROR CATEGORIES:**
-- **LINTER**: Code quality violations and fixes
-- **BUILD**: Compilation and build process failures
-- **RUNTIME**: Application execution errors
-- **INTEGRATION**: API and service connection issues
-- **SECURITY**: Vulnerability discoveries and patches
+**DIRECTORIES:**
+- **`development/errors/`** - Error tracking: `error_[timestamp]_[type]_[id].md`
+- **`development/logs/`** - System logs: `[component]_[date]_[type].log`
+- **`development/lessons/`** - Self-learning insights: `[category]_[timestamp]_[topic].md`
+- **`development/reports/`** - Task reports: `[taskId]/main-report.md`
 
-**WORKFLOW:**
-```bash
-# Check errors before every task
-ls -la development/errors/
-cat development/errors/*.md
-
-# Create new error file when issues found
-echo "# Error: [Description]
-## Discovered: [timestamp]
-## Investigation: [details]
-## Resolution: [steps taken]
-## Prevention: [measures implemented]" > development/errors/error_$(date +%s)_[type]_[id].md
-```
-
-**PROTOCOLS:**
-- **CHECK ERRORS FIRST**: Always review development/errors/ before starting work
-- **UPDATE EXISTING**: Add progress updates to relevant error files  
-- **CREATE NEW**: Document any newly discovered errors immediately
-- **RESOLUTION TRACKING**: Mark resolved errors with timestamps and evidence
-
-### LOGS MANAGEMENT
-**LOCATION**: `development/logs/` - All system and application logs
-**FORMAT**: `[component]_[date]_[type].log` (e.g., `taskmanager_20250914_debug.log`)
-
-**LOG CATEGORIES:**
-- **TASKMANAGER**: All TaskManager API operations and responses
-- **BUILD**: Build process outputs and errors
-- **LINTER**: Linting results and violations
-- **SYSTEM**: General system operations and diagnostics
-- **DEBUG**: Debug information and troubleshooting data
-- **PERFORMANCE**: Timing and performance metrics
+**CATEGORIES:**
+- **Errors**: Linter, build, runtime, integration, security
+- **Logs**: TaskManager, build, linter, system, debug, performance
+- **Lessons**: Errors, features, optimization, decisions, patterns
+- **Reports**: Task reports, research, error investigations, audits, system analysis
 
 **WORKFLOW:**
 ```bash
-# Check logs before every task
-ls -la development/logs/
+# Setup directories
+mkdir -p development/{errors,logs,lessons/{errors,features,optimization,decisions,patterns},reports}
+
+# Pre-task review
+ls -la development/{errors,logs,lessons,reports}/
+find development/ -name "*.md" | head -20
 tail -n 50 development/logs/*.log
+
+# Create documentation
+echo "# [Type]: [Title]" > development/[category]/[type]_$(date +%s)_[topic].md
 ```
 
 **PROTOCOLS:**
-- **PRE-TASK LOG REVIEW**: Check development/logs/ for recent system behavior patterns
-- **COMPREHENSIVE CODEBASE VALIDATION**: Logs are PRIMARY method for reviewing codebase health
-- **MULTI-METHOD VALIDATION**: Validate through logs, commands, tests, and other comprehensive means
-- **CENTRALIZED LOGGING**: All system logs MUST go to development/logs/
-- **STOP HOOK INTEGRATION**: Configure stop hook to output all logs to development/logs/
-
-### LESSONS MANAGEMENT
-**LOCATION**: `development/lessons/` - All self-learning knowledge and insights
-**FORMAT**: `[category]_[timestamp]_[topic].md` (e.g., `error_20250914_linter_unused_imports.md`)
-
-**LESSON CATEGORIES:**
-- **ERRORS**: `development/lessons/errors/` - Error resolution patterns and prevention strategies
-- **FEATURES**: `development/lessons/features/` - Feature implementation best practices and approaches
-- **OPTIMIZATION**: `development/lessons/optimization/` - Performance improvements and efficiency discoveries  
-- **DECISIONS**: `development/lessons/decisions/` - Architectural and technical decision rationale
-- **PATTERNS**: `development/lessons/patterns/` - Recurring solutions and reusable approaches
-
-**LESSON STRUCTURE:**
-```markdown
-# Lesson: [Title]
-## Context: [When/why this lesson was learned]
-## Problem: [Original issue or challenge]
-## Solution: [What worked]
-## Rationale: [Why this approach was chosen]
-## Application: [When to apply this lesson]
-## Related: [Links to similar lessons or tasks]
-```
-
-**WORKFLOW:**
-```bash
-# Create directories if missing
-mkdir -p development/lessons/{errors,features,optimization,decisions,patterns}
-
-# Review lessons before every task
-find development/lessons/ -name "*.md" | grep -E "(error|feature|optimization)" | head -10
-cat development/lessons/[relevant-category]/*.md
-
-# Create new lesson
-echo "# Lesson: [Title]
-## Context: [timestamp and situation]
-## Problem: [challenge faced]
-## Solution: [approach taken]
-## Rationale: [reasoning]
-## Application: [when to use]" > development/lessons/[category]/[category]_$(date +%s)_[topic].md
-```
-
-**PROTOCOLS:**
-- **DIRECTORY CREATION**: Always create missing development/ subdirectories before documenting
-- **PRE-TASK LESSON REVIEW**: Check relevant lessons before starting similar work
-- **PATTERN MATCHING**: Identify connections between current task and documented lessons
-- **LESSON CREATION**: Document significant discoveries, solutions, and decision rationale
-- **LESSON UPDATES**: Enhance existing lessons with new insights and applications
-- **CROSS-REFERENCE**: Link related lessons and reference them in task documentation
-
-## 📋 REPORTS MANAGEMENT PROTOCOL
-
-**TASK FOLDER NAMING:**
-- **USE ACTUAL TASK IDs**: Task folders must be named with actual task IDs, not placeholders
-- **CORRECT FORMAT**: `feature_1757702700510_aiwn0i8s8/` (actual task ID)
-- **EXAMPLES**:
-  - ✅ `development/reports/feature_1757709439408_i4z5amov7/`
-  - ❌ `development/reports/feature_[taskId]/`
-
-**REPORT TYPES:**
-- **TASK REPORTS**: Implementation and feature development reports
-- **RESEARCH REPORTS**: Analysis, architectural decisions, API integrations
-- **ERROR INVESTIGATIONS**: Detailed error analysis and resolution documentation
-- **AUDIT RESULTS**: Post-completion audits and quality reviews
-- **SYSTEM ANALYSIS**: Performance, security, or architectural assessment reports
-
-**REPORT STRUCTURE WITHIN TASK FOLDERS:**
-```
-development/reports/task_1234567890_abcdef123/
-├── main-report.md          # Primary task report
-├── analysis/               # Detailed analysis files
-├── screenshots/            # Visual documentation
-├── logs/                   # Relevant log files
-├── code-samples/           # Code examples or snippets
-└── references/             # External references and links
-```
-
-### REPORTS WORKFLOW
-
-**PRE-TASK REPORT SCANNING:**
-- **CHECK EXISTING REPORTS**: Always scan `development/reports/` for related task reports before starting work
-- **READ RELEVANT REPORTS**: Review reports from similar tasks, related features, or referenced components
-- **INTEGRATE FINDINGS**: Incorporate existing research and findings into current task approach
-- **AVOID DUPLICATION**: Don't recreate research or analysis that already exists
-
-**REPORT READING WORKFLOW:**
-- Always scan `development/reports/` for related task reports before starting work
-
-**CONTENT REQUIREMENTS:**
-- **TASK CONTEXT**: Link to original task ID and description
-- **METHODOLOGY**: Approach taken and reasoning
-- **FINDINGS**: Key discoveries, insights, or results
-- **RECOMMENDATIONS**: Actionable next steps or suggestions
-- **EVIDENCE**: Screenshots, logs, code samples as supporting documentation
-- **TIMELINE**: When work was performed and by which agent
-
-**MAINTENANCE PROCEDURES:**
-- **REGULAR ORGANIZATION**: Keep reports properly organized in task-specific folders
-- **NAMING CONSISTENCY**: Follow actual task ID naming conventions consistently
-- **CONTENT UPDATES**: Update reports when task details or findings change
-- **ARCHIVAL PROCESS**: Move completed task reports to appropriate archive structure
-- **CLEAN UNUSED FILES**: Remove outdated or duplicate reports during maintenance
+- **PRE-TASK REVIEW**: Check all development/ subdirectories before starting work
+- **CENTRALIZED LOGGING**: All system output goes to development/logs/
+- **PATTERN RECOGNITION**: Reference lessons and reports for similar work
+- **EVIDENCE COLLECTION**: Document discoveries, solutions, and decision rationale
 
 ### ROOT FOLDER CLEANLINESS
 **MANDATORY: MAINTAIN CLEAN AND ORGANIZED PROJECT ROOT**
@@ -609,86 +401,27 @@ development/reports/task_1234567890_abcdef123/
 - Restart Claude session if persistence fails
 - Use `/status --verbose` for detailed token consumption
 
-## 🚨 COMPREHENSIVE WORKFLOW CHECKLIST
-**FOLLOW EVERY STEP - NO SHORTCUTS**
+## 🚨 WORKFLOW CHECKLIST
 
-### 📋 PHASE 1: PREP
-- [ ] **ROOT CLEANUP**: Verify clean project root - move misplaced files to development/ subdirectories
-- [ ] **DIRECTORY SETUP**: Create missing development/ subdirectories - `mkdir -p development/{essentials,errors,logs,reports,lessons/{errors,features,optimization,decisions,patterns}}`
-- [ ] **AGENT PLANNING**: Communicate approach to user ("Handling solo" or "Using X concurrent agents")
-- [ ] **INITIALIZE**: `timeout 10s node /Users/jeremyparker/infinite-continue-stop-hook/taskmanager-api.js init` (or reinitialize with explicit agent ID)
+### 📋 SETUP
+- [ ] **ROOT CLEANUP**: Move misplaced files to development/ subdirectories
+- [ ] **DIRECTORIES**: `mkdir -p development/{essentials,errors,logs,reports,lessons/{errors,features,optimization,decisions,patterns}}`
+- [ ] **INITIALIZE**: `timeout 10s node /Users/jeremyparker/infinite-continue-stop-hook/taskmanager-api.js init`
 - [ ] **CREATE TASK**: `timeout 10s node /Users/jeremyparker/infinite-continue-stop-hook/taskmanager-api.js create '{"title":"[Request]", "description":"[Details]", "category":"type"}'`
-- [ ] **DEVELOPMENT SCAN**: Check ALL development/ folders and files
-  - [ ] **ESSENTIALS REVIEW**: Read EVERY file in `development/essentials/`
-  - [ ] **ERRORS CHECK**: Review all files in `development/errors/` for relevant issues
-  - [ ] **LOGS REVIEW**: Check `development/logs/` for recent system behavior and patterns
-  - [ ] **REPORTS SCAN**: Review `development/reports/`
-  - [ ] **COMPLETE INVENTORY**: `find development/ -type f -name "*.md"` - ensure nothing missed
-- [ ] **CODEBASE SCAN**: Search entire project for task-relevant files
-  - [ ] **FILE DISCOVERY**: `find . -name "*.js" -o -name "*.ts" -o -name "*.py" -o -name "*.md" | grep -v node_modules`
-  - [ ] **TASK-SPECIFIC SEARCH**: Find files matching task keywords and patterns
-- [ ] **CLAIM TASK**: Take ownership via API
+- [ ] **SCAN**: Read `development/essentials/`, check other development/ folders, find relevant codebase files
 
-### 📋 PHASE 2: EXECUTE
-- [ ] **COMPLETE IMPLEMENTATION** with:
-  - [ ] Comprehensive documentation (functions, classes, modules)
-  - [ ] Comprehensive comments (inline logic, decisions, edge cases, complex operations)
-  - [ ] Comprehensive logging (calls, parameters, returns, errors, timing) - CRITICAL for maintainability
-  - [ ] Performance metrics and bottleneck identification
-  - [ ] API documentation with usage examples
-  - [ ] Architecture documentation for system design decisions
+### 📋 EXECUTE
+- [ ] **IMPLEMENT**: Comprehensive documentation, comments, logging, performance metrics
+- [ ] **LINTER CHECK**: After EVERY file edit - create error task if violations found
+- [ ] **FEEDBACK SCAN**: Process system reminders immediately after file edits
 
-- [ ] **POST-EDIT LINTER CHECK** after EVERY file edit:
-  - [ ] **JS/TS**: `eslint [file]` | **Python**: `ruff check [file]` | **Go**: `golint [file]` | **Rust**: `clippy [file]`
-  - [ ] **IF errors in outdated code** → Remove code entirely, no error tasks
-  - [ ] **IF errors in current code** → Create linter-error task INSTANTLY and fix
-  - [ ] **IF clean** → Continue
-
-- [ ] **POST-EDIT FEEDBACK SCAN** after file editing operations:
-  - [ ] Scan for system reminders and feedback after file edits
-  - [ ] Read `<system-reminder>` content thoroughly
-  - [ ] Process feedback immediately, adapt behavior, acknowledge, implement changes
-  - [ ] **SCOPE**: Only applies to file editing tools (Edit, Write, MultiEdit)
-
-### 📋 PHASE 3: VALIDATE
-- [ ] **CHECK TASK REQUIREMENTS** - Consult `development/essentials/task-requirements.md`:
-  - [ ] Read project-specific requirements | Create file if missing | Update if needed
-
-- [ ] **FULL PROJECT VALIDATION** per requirements file:
-  - [ ] **LINT**: `npm run lint` (zero tolerance - all violations fixed)
-  - [ ] **BUILD**: `npm run build` (complete without errors/warnings)
-  - [ ] **START**: `npm start` (application starts, all services functional)
-  - [ ] **COMPREHENSIVE LOG REVIEW**: Analyze ALL logs for errors, warnings, and system health
-  - [ ] **STARTUP LOGS**: Review startup logs for errors/warnings
-  - [ ] **MULTI-METHOD VALIDATION**: Use logs, commands, tests, and other means for complete verification
-  - [ ] **TEST**: `npm test` (all existing tests pass; if outdated, create test-update task)
-
-- [ ] **COMPREHENSIVE FEATURE VALIDATION**:
-  - [ ] **Feature Testing**: Test all implemented features via Puppeteer (web) or API calls (backend)
-  - [ ] **Integration Testing**: Verify feature interactions work correctly
-  - [ ] **Error Handling**: Test edge cases and error scenarios
-  - [ ] **Performance Check**: Ensure features perform within acceptable limits
-
-- [ ] **GIT WORKFLOW**:
-  - [ ] **STAGE**: `git add .`
-  - [ ] **COMMIT**: `git commit -m "[type]: [description]"` (use: feat, fix, refactor, docs, test, style)
-  - [ ] **PUSH**: `git push`
-  - [ ] **VERIFY**: `git status` (clean working directory + "up to date with origin/main")
-
-- [ ] **COMPLETION & EVIDENCE**:
-  - [ ] **COLLECT EVIDENCE**: Document validation results (lint passed, build succeeded, start passed, commit hash, git status)
-  - [ ] **DOCUMENT LESSONS**: Create lesson entries for significant discoveries, solutions, or patterns learned during task
-  - [ ] **FORMAT COMPLETION**: Use proper JSON - `'"Task completed successfully"'` or `'{"message": "Status", "evidence": "Results"}'`
-  - [ ] Avoid special characters (!, ✅, emojis) | Use single quotes | No unquoted strings
-  - [ ] **MARK COMPLETE**: Update status via TaskManager API with evidence
-
-- [ ] **STOP AUTHORIZATION** (only when ALL user-approved features complete):
-  - [ ] All feature tasks completed | All error tasks resolved | All validation passed
-  - [ ] **AUTHORIZE STOP**: `timeout 10s node -e 'const TaskManager = require("/Users/jeremyparker/infinite-continue-stop-hook/lib/taskManager"); const tm = new TaskManager("./TODO.json"); tm.authorizeStopHook("AGENT_ID", "All user-approved features completed and validated").then(result => console.log(JSON.stringify(result, null, 2)));'`
-
-### 📋 CRITICAL ENFORCEMENT RULES
-- [ ] **EVIDENCE-BASED COMPLETION**: Include validation evidence
-- [ ] **FAILURE RECOVERY**: Linter → create error task + fix; Build → fix + verify; Git → resolve conflicts + push
+### 📋 VALIDATE
+- [ ] **PROJECT VALIDATION**: `npm run lint && npm run build && npm start && npm test`
+- [ ] **CI/CD PIPELINE**: Verify automated pipeline passes (lint, test, build, security scans)
+- [ ] **FEATURE TESTING**: Test implementation via Puppeteer/API calls
+- [ ] **GIT**: `git add . && git commit -m "[type]: [description]" && git push`
+- [ ] **COMPLETE**: Document evidence, lessons learned, mark complete with proper formatting
+- [ ] **STOP AUTHORIZATION**: Only when all user-approved features complete
 
 ## 🚨 ESSENTIAL COMMANDS
 
