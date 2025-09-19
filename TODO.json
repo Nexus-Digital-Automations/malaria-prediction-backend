@@ -327,7 +327,7 @@
       "id": "test_1758221818104_i313147jl"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-18T15:22:58.546Z",
       "title": "Create specialized healthcare professional tools and patient management features",
       "description": "Implement comprehensive healthcare tools including: 1) Risk assessment workflow tools with guided questionnaires, 2) Patient case management system with tracking, 3) Treatment protocol recommendation engine with decision support, 4) Resource allocation planning tools with optimization, 5) Surveillance reporting features with form builders, 6) Professional dashboard for healthcare workers. Features must include multi-language support, integration capabilities with health record systems (DHIS2), and professional documentation tools.",
@@ -357,7 +357,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-19T06:12:27.569Z",
+      "updated_at": "2025-09-19T06:12:27.569Z"
     },
     {
       "status": "pending",
@@ -598,7 +600,7 @@
       "updated_at": "2025-09-19T06:07:19.113Z"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-19T05:52:41.157Z",
       "title": "Implement Risk Assessment Workflows and Patient Case Management",
       "description": "Implement comprehensive risk assessment workflows with guided questionnaires, risk scoring algorithms, and patient case management system with case tracking, treatment history, and DHIS2 integration. Include multi-language support, HIPAA compliance, and extensive testing.",
@@ -615,7 +617,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-19T06:11:22.582Z",
+      "updated_at": "2025-09-19T06:11:22.582Z"
     }
   ],
   "current_mode": "DEVELOPMENT",

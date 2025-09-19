@@ -1454,6 +1454,67 @@
       "updated_at": "2025-09-19T06:07:19.113Z",
       "archived_at": "2025-09-19T06:07:19.116Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-19T05:52:41.157Z",
+      "title": "Implement Risk Assessment Workflows and Patient Case Management",
+      "description": "Implement comprehensive risk assessment workflows with guided questionnaires, risk scoring algorithms, and patient case management system with case tracking, treatment history, and DHIS2 integration. Include multi-language support, HIPAA compliance, and extensive testing.",
+      "category": "feature",
+      "id": "feature_1758261161157_7nvyzb953ma",
+      "assigned_agent": "dev_session_1758261145820_1_general_446663ec",
+      "started_at": "2025-09-19T05:53:45.757Z",
+      "claimed_by": "dev_session_1758261145820_1_general_446663ec",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758261145820_1_general_446663ec",
+          "role": "primary",
+          "assignedAt": "2025-09-19T05:53:45.757Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T06:11:22.582Z",
+      "updated_at": "2025-09-19T06:11:22.582Z",
+      "archived_at": "2025-09-19T06:11:22.584Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-18T15:22:58.546Z",
+      "title": "Create specialized healthcare professional tools and patient management features",
+      "description": "Implement comprehensive healthcare tools including: 1) Risk assessment workflow tools with guided questionnaires, 2) Patient case management system with tracking, 3) Treatment protocol recommendation engine with decision support, 4) Resource allocation planning tools with optimization, 5) Surveillance reporting features with form builders, 6) Professional dashboard for healthcare workers. Features must include multi-language support, integration capabilities with health record systems (DHIS2), and professional documentation tools.",
+      "category": "feature",
+      "id": "test_1758221818104_3ju3ywv61",
+      "assigned_agent": "dev_session_1758256820938_1_general_9d70da20",
+      "started_at": "2025-09-19T05:51:37.978Z",
+      "claimed_by": "dev_session_1758256820938_1_general_9d70da20",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758208959509_1_general_6292969d",
+          "role": "primary",
+          "assignedAt": "2025-09-18T15:23:23.877Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758208959509_1_general_6292969d",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-18T18:56:58.102Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
+        },
+        {
+          "agentId": "dev_session_1758256820938_1_general_9d70da20",
+          "role": "primary",
+          "assignedAt": "2025-09-19T05:51:37.978Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T06:12:27.569Z",
+      "updated_at": "2025-09-19T06:12:27.569Z",
+      "archived_at": "2025-09-19T06:12:27.572Z",
+      "archive_version": "2.0.0"
     }
   ],
   "project_info": {
@@ -1464,8 +1525,8 @@
     "total_completed": 0,
     "last_archived": null
   },
-  "last_archived": "2025-09-19T06:07:19.116Z",
-  "total_completed": 54,
+  "last_archived": "2025-09-19T06:12:27.572Z",
+  "total_completed": 56,
   "metadata": {
     "last_bulk_archive": "2025-09-19T00:48:10.607Z",
     "bulk_archive_count": 12
