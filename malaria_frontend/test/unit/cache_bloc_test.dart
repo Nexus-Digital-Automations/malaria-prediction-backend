@@ -36,7 +36,7 @@ void main() {
         'size_mb': 5,
         'expired_entries': 2,
         'priority_counts': {'normal': 8, 'high': 2},
-      });
+      },);
 
       cacheBloc = CacheBloc(
         cacheService: mockCacheService,
@@ -81,14 +81,14 @@ void main() {
             ttl: any(named: 'ttl'),
             priority: any(named: 'priority'),
             tags: any(named: 'tags'),
-          )).thenAnswer((_) async {});
+          ),).thenAnswer((_) async {});
           return cacheBloc;
         },
         act: (bloc) => bloc.add(CacheData(
           key: 'test-key',
           data: testData,
           policy: testPolicy,
-        )),
+        ),),
         expect: () => [
           isA<CacheLoading>()
               .having((state) => state.operation, 'operation', CacheOperation.storing),
@@ -104,7 +104,7 @@ void main() {
             ttl: const Duration(hours: 1),
             priority: CachePriority.normal,
             tags: [],
-          )).called(1);
+          ),).called(1);
         },
       );
 
@@ -117,7 +117,7 @@ void main() {
             ttl: any(named: 'ttl'),
             priority: any(named: 'priority'),
             tags: any(named: 'tags'),
-          )).thenAnswer((_) async {});
+          ),).thenAnswer((_) async {});
           return cacheBloc;
         },
         act: (bloc) => bloc.add(CacheData(
@@ -129,7 +129,7 @@ void main() {
             enableEncryption: true,
           ),
           encrypt: true,
-        )),
+        ),),
         expect: () => [
           isA<CacheLoading>(),
           isA<CacheLoaded>()
@@ -146,7 +146,7 @@ void main() {
             ttl: any(named: 'ttl'),
             priority: any(named: 'priority'),
             tags: any(named: 'tags'),
-          )).thenAnswer((_) async {});
+          ),).thenAnswer((_) async {});
           return cacheBloc;
         },
         act: (bloc) => bloc.add(CacheData(
@@ -157,7 +157,7 @@ void main() {
             priority: CachePriority.normal,
             compressData: true,
           ),
-        )),
+        ),),
         expect: () => [
           isA<CacheLoading>(),
           isA<CacheLoaded>()
@@ -174,15 +174,15 @@ void main() {
             ttl: any(named: 'ttl'),
             priority: any(named: 'priority'),
             tags: any(named: 'tags'),
-          )).thenAnswer((_) async {});
+          ),).thenAnswer((_) async {});
           return cacheBloc;
         },
         act: (bloc) => bloc.add(CacheData(
           key: 'tagged-key',
           data: testData,
           policy: testPolicy,
-          tags: ['prediction', 'user-data'],
-        )),
+          tags: const ['prediction', 'user-data'],
+        ),),
         expect: () => [
           isA<CacheLoading>(),
           isA<CacheLoaded>()
@@ -195,7 +195,7 @@ void main() {
             ttl: any(named: 'ttl'),
             priority: any(named: 'priority'),
             tags: ['prediction', 'user-data'],
-          )).called(1);
+          ),).called(1);
         },
       );
 
@@ -208,14 +208,14 @@ void main() {
             ttl: any(named: 'ttl'),
             priority: any(named: 'priority'),
             tags: any(named: 'tags'),
-          )).thenThrow(Exception('Storage failed'));
+          ),).thenThrow(Exception('Storage failed'));
           return cacheBloc;
         },
         act: (bloc) => bloc.add(CacheData(
           key: 'error-key',
           data: testData,
           policy: testPolicy,
-        )),
+        ),),
         expect: () => [
           isA<CacheLoading>(),
           isA<CacheError>()
@@ -275,7 +275,7 @@ void main() {
                 '_encrypted': true,
                 '_data': 'base64EncodedData',
                 '_hash': 'someHash',
-              });
+              },);
           return cacheBloc;
         },
         act: (bloc) => bloc.add(const LoadFromCache(key: 'encrypted-key')),
@@ -293,7 +293,7 @@ void main() {
                 '_compressed': true,
                 '_data': '{"decompressed":"data"}',
                 '_original_size': 100,
-              });
+              },);
           return cacheBloc;
         },
         act: (bloc) => bloc.add(const LoadFromCache(key: 'compressed-key')),
@@ -328,7 +328,7 @@ void main() {
           when(mockCacheService.getStats()).thenAnswer((_) async => {
             'total_entries': 0,
             'size_mb': 0,
-          });
+          },);
           return cacheBloc;
         },
         act: (bloc) => bloc.add(const ClearCache(type: ClearCacheType.all)),
@@ -352,7 +352,7 @@ void main() {
         act: (bloc) => bloc.add(const ClearCache(
           type: ClearCacheType.byKeys,
           keys: ['key1', 'key2', 'key3'],
-        )),
+        ),),
         expect: () => [
           isA<CacheLoading>(),
           isA<CacheCleared>()
@@ -373,13 +373,13 @@ void main() {
           when(mockCacheService.clearByTags(any)).thenAnswer((_) async {});
           when(mockCacheService.getStats()).thenAnswer((_) async => {
             'total_entries': 5,
-          });
+          },);
           return cacheBloc;
         },
         act: (bloc) => bloc.add(const ClearCache(
           type: ClearCacheType.byTags,
           tags: ['prediction', 'user-data'],
-        )),
+        ),),
         expect: () => [
           isA<CacheLoading>(),
           isA<CacheCleared>()
@@ -396,7 +396,7 @@ void main() {
           when(mockCacheService.clearExpired()).thenAnswer((_) async {});
           when(mockCacheService.getStats()).thenAnswer((_) async => {
             'total_entries': 8,
-          });
+          },);
           return cacheBloc;
         },
         act: (bloc) => bloc.add(const ClearCache(type: ClearCacheType.expired)),
@@ -429,13 +429,13 @@ void main() {
       blocTest<CacheBloc, CacheState>(
         'should update cache policy configuration',
         build: () => cacheBloc,
-        act: (bloc) => bloc.add(UpdateCachePolicy(
-          config: const CacheConfiguration(
+        act: (bloc) => bloc.add(const UpdateCachePolicy(
+          config: CacheConfiguration(
             maxSizeMB: 200,
             enableAutoCleanup: true,
             cleanupInterval: Duration(hours: 12),
           ),
-        )),
+        ),),
         verify: (_) {
           expect(cacheBloc.config.maxSizeMB, equals(200));
           expect(cacheBloc.config.enableAutoCleanup, isTrue);
@@ -454,7 +454,7 @@ void main() {
         act: (bloc) => bloc.add(const InvalidateCache(
           keys: ['invalid1', 'invalid2'],
           reason: InvalidationReason.dataChanged,
-        )),
+        ),),
         expect: () => [
           isA<CacheCleared>()
               .having((state) => state.clearType, 'clearType', ClearCacheType.byKeys)
@@ -476,7 +476,7 @@ void main() {
         act: (bloc) => bloc.add(const InvalidateCache(
           keys: ['error-key'],
           reason: InvalidationReason.corruption,
-        )),
+        ),),
         expect: () => [
           isA<CacheError>()
               .having((state) => state.operation, 'operation', CacheOperation.clearing),
@@ -486,15 +486,15 @@ void main() {
 
     group('WarmCache Event', () {
       final warmupItems = {
-        'item1': CacheWarmupItem(
+        'item1': const CacheWarmupItem(
           key: 'warm1',
           data: {'warm': 'data1'},
-          policy: const CachePolicy(ttl: Duration(hours: 1)),
+          policy: CachePolicy(ttl: Duration(hours: 1)),
         ),
-        'item2': CacheWarmupItem(
+        'item2': const CacheWarmupItem(
           key: 'warm2',
           data: {'warm': 'data2'},
-          policy: const CachePolicy(ttl: Duration(hours: 2)),
+          policy: CachePolicy(ttl: Duration(hours: 2)),
         ),
       };
 
@@ -506,7 +506,7 @@ void main() {
             data: any(named: 'data'),
             ttl: any(named: 'ttl'),
             priority: any(named: 'priority'),
-          )).thenAnswer((_) async {});
+          ),).thenAnswer((_) async {});
           return cacheBloc;
         },
         act: (bloc) => bloc.add(WarmCache(items: warmupItems)),
@@ -522,13 +522,13 @@ void main() {
             data: {'warm': 'data1'},
             ttl: const Duration(hours: 1),
             priority: CachePriority.normal,
-          )).called(1);
+          ),).called(1);
           verify(mockCacheService.store(
             key: 'warm2',
             data: {'warm': 'data2'},
             ttl: const Duration(hours: 2),
             priority: CachePriority.normal,
-          )).called(1);
+          ),).called(1);
         },
       );
 
@@ -540,13 +540,13 @@ void main() {
             data: any(named: 'data'),
             ttl: any(named: 'ttl'),
             priority: any(named: 'priority'),
-          )).thenAnswer((_) async {});
+          ),).thenAnswer((_) async {});
           when(mockCacheService.store(
             key: 'warm2',
             data: any(named: 'data'),
             ttl: any(named: 'ttl'),
             priority: any(named: 'priority'),
-          )).thenThrow(Exception('Storage failed'));
+          ),).thenThrow(Exception('Storage failed'));
           return cacheBloc;
         },
         act: (bloc) => bloc.add(WarmCache(items: warmupItems)),
@@ -565,7 +565,7 @@ void main() {
             data: any(named: 'data'),
             ttl: any(named: 'ttl'),
             priority: any(named: 'priority'),
-          )).thenThrow(Exception('Complete failure'));
+          ),).thenThrow(Exception('Complete failure'));
           return cacheBloc;
         },
         act: (bloc) => bloc.add(WarmCache(items: {'single': warmupItems.values.first})),
@@ -586,7 +586,7 @@ void main() {
             'size_mb': 15,
             'expired_entries': 3,
             'priority_counts': {'normal': 20, 'high': 3, 'critical': 2},
-          });
+          },);
           return cacheBloc;
         },
         act: (bloc) => bloc.add(const GetCacheStats()),
@@ -710,7 +710,7 @@ void main() {
           when(mockCacheService.getStats()).thenAnswer((_) async => {
             'size_mb': 25, // 50% utilization (maxSizeMB is 50)
             'total_entries': 100,
-          });
+          },);
           return cacheBloc;
         },
         act: (bloc) => bloc.add(const MonitorCacheHealth()),
@@ -727,7 +727,7 @@ void main() {
           when(mockCacheService.getStats()).thenAnswer((_) async => {
             'size_mb': 42, // 84% utilization
             'total_entries': 100,
-          });
+          },);
           return cacheBloc;
         },
         act: (bloc) => bloc.add(const MonitorCacheHealth()),
@@ -745,7 +745,7 @@ void main() {
           when(mockCacheService.getStats()).thenAnswer((_) async => {
             'size_mb': 46, // 92% utilization
             'total_entries': 100,
-          });
+          },);
           return cacheBloc;
         },
         act: (bloc) => bloc.add(const MonitorCacheHealth()),
@@ -799,7 +799,7 @@ void main() {
 
         final state = CacheLoaded(
           key: 'test-key',
-          data: {'test': 'data'},
+          data: const {'test': 'data'},
           metadata: metadata,
           hitType: CacheHitType.hit,
         );
@@ -914,7 +914,7 @@ void main() {
             expiresAt: DateTime.now().add(const Duration(hours: 1)),
             accessCount: 10,
             sizeBytes: 2048,
-            tags: ['tag1', 'tag2'],
+            tags: const ['tag1', 'tag2'],
             priority: CachePriority.critical,
             isEncrypted: true,
             isCompressed: true,
@@ -1005,7 +1005,7 @@ void main() {
           when(mockCacheService.getStats()).thenAnswer((_) async => {
             'size_mb': 45, // Above threshold of 40 (80% of 50MB)
             'total_entries': 100,
-          });
+          },);
           when(mockCacheService.clearExpired()).thenAnswer((_) async {});
           return cacheBloc;
         },

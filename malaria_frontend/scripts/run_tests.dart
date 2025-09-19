@@ -6,7 +6,7 @@
 /// Author: Testing Agent 8
 /// Created: 2025-09-18
 /// Purpose: Orchestrate all testing phases with detailed reporting
-library run_tests;
+library;
 
 import 'dart:io';
 

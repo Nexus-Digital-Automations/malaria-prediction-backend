@@ -273,7 +273,7 @@ class _DataVerification {
   ) {
     verify(() => mockObject.noSuchMethod(
       Invocation.method(Symbol(methodName), [expectedParams]),
-    )).called(1);
+    ),).called(1);
   }
 
   /// Verify widget properties
@@ -291,7 +291,7 @@ class _DataVerification {
       // Use reflection or specific property accessors
       // This is a simplified version - implement based on specific widget types
       expect(widget.toString().contains(expectedValue.toString()), isTrue,
-          reason: 'Property $property should have value $expectedValue');
+          reason: 'Property $property should have value $expectedValue',);
     }
   }
 }
@@ -335,7 +335,7 @@ class _MockDataGenerator {
         'rainfall': 100.0 + (index % 200),
         'humidity': 60.0 + (index % 30),
       },
-    });
+    },);
   }
 
   /// Generate mock API responses

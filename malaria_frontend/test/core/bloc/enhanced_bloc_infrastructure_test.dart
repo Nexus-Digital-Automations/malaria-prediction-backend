@@ -8,7 +8,7 @@
 /// - Service scoping and dependency injection
 /// - Configuration management
 /// - Memory management and cleanup
-library enhanced_bloc_infrastructure_test;
+library;
 
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,7 +17,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 
-import '../../../lib/core/bloc/enhanced_bloc_infrastructure.dart';
+import 'package:malaria_frontend/core/bloc/enhanced_bloc_infrastructure.dart';
 
 // Generate mocks
 @GenerateMocks([

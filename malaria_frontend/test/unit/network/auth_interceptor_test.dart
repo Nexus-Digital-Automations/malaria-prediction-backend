@@ -13,8 +13,8 @@ import 'package:logger/logger.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../../lib/core/auth/token_manager.dart';
-import '../../../lib/core/network/auth_interceptor.dart';
+import 'package:malaria_frontend/core/auth/token_manager.dart';
+import 'package:malaria_frontend/core/network/auth_interceptor.dart';
 
 import 'auth_interceptor_test.mocks.dart';
 
@@ -41,7 +41,7 @@ void main() {
         final handler = MockRequestInterceptorHandler();
 
         // Act
-        await authInterceptor.onRequest(options, handler);
+        authInterceptor.onRequest(options, handler);
 
         // Assert
         verify(handler.next(options)).called(1);
@@ -60,7 +60,7 @@ void main() {
             .thenAnswer((_) async => false);
 
         // Act
-        await authInterceptor.onRequest(options, handler);
+        authInterceptor.onRequest(options, handler);
 
         // Assert
         expect(options.headers['Authorization'], equals('Bearer $accessToken'));
@@ -80,7 +80,7 @@ void main() {
         when(mockTokenManager.refreshToken()).thenAnswer((_) async => true);
 
         // Act
-        await authInterceptor.onRequest(options, handler);
+        authInterceptor.onRequest(options, handler);
 
         // Assert
         verify(mockTokenManager.refreshToken()).called(1);
@@ -98,7 +98,7 @@ void main() {
         when(mockTokenManager.isTokenExpired()).thenAnswer((_) async => true);
         when(mockTokenManager.refreshToken()).thenAnswer((_) async {
           // Simulate slow refresh
-          await Future.delayed(Duration(milliseconds: 100));
+          await Future.delayed(const Duration(milliseconds: 100));
           return true;
         });
 
@@ -157,7 +157,7 @@ void main() {
         final handler = MockResponseInterceptorHandler();
 
         // Act
-        await authInterceptor.onResponse(response, handler);
+        authInterceptor.onResponse(response, handler);
 
         // Assert
         verify(handler.next(response)).called(1);
@@ -183,7 +183,7 @@ void main() {
         when(mockTokenManager.getAccessToken()).thenAnswer((_) async => 'new_token');
 
         // Act
-        await authInterceptor.onError(dioError, handler);
+        authInterceptor.onError(dioError, handler);
 
         // Assert
         verify(mockTokenManager.refreshToken()).called(1);
@@ -203,7 +203,7 @@ void main() {
         final handler = MockErrorInterceptorHandler();
 
         // Act
-        await authInterceptor.onError(dioError, handler);
+        authInterceptor.onError(dioError, handler);
 
         // Assert
         verify(handler.next(dioError)).called(1);
@@ -224,7 +224,7 @@ void main() {
         final handler = MockErrorInterceptorHandler();
 
         // Act
-        await authInterceptor.onError(dioError, handler);
+        authInterceptor.onError(dioError, handler);
 
         // Assert
         verify(handler.next(any)).called(1);
@@ -247,7 +247,7 @@ void main() {
         when(mockTokenManager.refreshToken()).thenAnswer((_) async => false);
 
         // Act
-        await authInterceptor.onError(dioError, handler);
+        authInterceptor.onError(dioError, handler);
 
         // Assert
         verify(mockTokenManager.clearAuthData()).called(1);

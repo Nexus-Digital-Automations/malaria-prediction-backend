@@ -6,6 +6,7 @@
 ///
 /// Author: Claude AI Agent - Caching Specialist
 /// Created: 2025-09-19
+library;
 
 import 'dart:convert';
 
@@ -324,14 +325,14 @@ void main() {
       test('should import cache data', () async {
         final importData = {
           'data': {
-            'import_test': {'value': 'imported_data'}
+            'import_test': {'value': 'imported_data'},
           },
           'metadata': {
             'import_test': {
               'priority': 'normal',
               'tags': ['imported'],
               'timestamp': DateTime.now().toIso8601String(),
-            }
+            },
           },
           'version': '1.0',
         };
@@ -358,7 +359,7 @@ void main() {
             key: 'large_data_test',
             data: largeData,
           );
-        }, returnsNormally);
+        }, returnsNormally,);
       });
 
       test('should handle offline connectivity', () async {

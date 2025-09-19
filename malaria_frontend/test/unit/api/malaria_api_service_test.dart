@@ -7,14 +7,13 @@
 /// Created: 2025-09-19
 library;
 
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../../lib/core/api/malaria_api_service.dart';
-import '../../../lib/core/models/models.dart';
+import 'package:malaria_frontend/core/api/malaria_api_service.dart';
+import 'package:malaria_frontend/core/models/models.dart';
 
 import 'malaria_api_service_test.mocks.dart';
 
@@ -32,7 +31,7 @@ void main() {
     group('Authentication Endpoints', () {
       test('login should return AuthResponse on success', () async {
         // Arrange
-        final loginRequest = LoginRequest(
+        const loginRequest = LoginRequest(
           email: 'test@example.com',
           password: 'password123',
         );
@@ -47,7 +46,7 @@ void main() {
             isVerified: true,
             createdAt: DateTime.now(),
           ),
-          tokens: TokenResponse(
+          tokens: const TokenResponse(
             accessToken: 'access_token_123',
             tokenType: 'Bearer',
             expiresIn: 3600,
@@ -57,11 +56,11 @@ void main() {
         when(mockDio.post<Map<String, dynamic>>(
           '/auth/login',
           data: anyNamed('data'),
-        )).thenAnswer((_) async => Response(
+        ),).thenAnswer((_) async => Response(
           data: expectedResponse.toJson(),
           statusCode: 200,
           requestOptions: RequestOptions(path: '/auth/login'),
-        ));
+        ),);
 
         // Act
         final result = await apiService.login(loginRequest);
@@ -72,16 +71,16 @@ void main() {
         verify(mockDio.post<Map<String, dynamic>>(
           '/auth/login',
           data: loginRequest.toJson(),
-        )).called(1);
+        ),).called(1);
       });
 
       test('refreshToken should return TokenResponse on success', () async {
         // Arrange
-        final refreshRequest = RefreshTokenRequest(
+        const refreshRequest = RefreshTokenRequest(
           refreshToken: 'refresh_token_123',
         );
 
-        final expectedResponse = TokenResponse(
+        const expectedResponse = TokenResponse(
           accessToken: 'new_access_token',
           refreshToken: 'new_refresh_token',
           tokenType: 'Bearer',
@@ -91,11 +90,11 @@ void main() {
         when(mockDio.post<Map<String, dynamic>>(
           '/auth/refresh',
           data: anyNamed('data'),
-        )).thenAnswer((_) async => Response(
+        ),).thenAnswer((_) async => Response(
           data: expectedResponse.toJson(),
           statusCode: 200,
           requestOptions: RequestOptions(path: '/auth/refresh'),
-        ));
+        ),);
 
         // Act
         final result = await apiService.refreshToken(refreshRequest);
@@ -108,7 +107,7 @@ void main() {
       test('validateSession should return ValidationResponse', () async {
         // Arrange
         const token = 'Bearer valid_token';
-        final expectedResponse = ValidationResponse(
+        const expectedResponse = ValidationResponse(
           valid: true,
           message: 'Session is valid',
         );
@@ -116,11 +115,11 @@ void main() {
         when(mockDio.get<Map<String, dynamic>>(
           '/auth/validate',
           options: anyNamed('options'),
-        )).thenAnswer((_) async => Response(
+        ),).thenAnswer((_) async => Response(
           data: expectedResponse.toJson(),
           statusCode: 200,
           requestOptions: RequestOptions(path: '/auth/validate'),
-        ));
+        ),);
 
         // Act
         final result = await apiService.validateSession(token);
@@ -134,7 +133,7 @@ void main() {
     group('Prediction Endpoints', () {
       test('getSinglePrediction should return PredictionResult', () async {
         // Arrange
-        final request = SinglePredictionRequest(
+        const request = SinglePredictionRequest(
           location: LocationPoint(
             latitude: -1.2921,
             longitude: 36.8219,
@@ -162,11 +161,11 @@ void main() {
           '/predict/single',
           data: anyNamed('data'),
           options: anyNamed('options'),
-        )).thenAnswer((_) async => Response(
+        ),).thenAnswer((_) async => Response(
           data: expectedResponse.toJson(),
           statusCode: 200,
           requestOptions: RequestOptions(path: '/predict/single'),
-        ));
+        ),);
 
         // Act
         final result = await apiService.getSinglePrediction(request, null);
@@ -179,7 +178,7 @@ void main() {
 
       test('getBatchPredictions should return BatchPredictionResult', () async {
         // Arrange
-        final request = BatchPredictionRequest(
+        const request = BatchPredictionRequest(
           locations: [
             LocationPoint(latitude: -1.2921, longitude: 36.8219, name: 'Nairobi'),
             LocationPoint(latitude: -1.9536, longitude: 30.0605, name: 'Kigali'),
@@ -207,18 +206,18 @@ void main() {
             ),
           ],
           batchId: 'batch_123',
-          processingTimeMs: 1500.0,
+          processingTimeMs: 1500,
         );
 
         when(mockDio.post<Map<String, dynamic>>(
           '/predict/batch',
           data: anyNamed('data'),
           options: anyNamed('options'),
-        )).thenAnswer((_) async => Response(
+        ),).thenAnswer((_) async => Response(
           data: expectedResponse.toJson(),
           statusCode: 200,
           requestOptions: RequestOptions(path: '/predict/batch'),
-        ));
+        ),);
 
         // Act
         final result = await apiService.getBatchPredictions(request, null);
@@ -232,10 +231,10 @@ void main() {
 
       test('getSpatialPredictions should return SpatialPredictionResult', () async {
         // Arrange
-        final request = SpatialPredictionRequest(
+        const request = SpatialPredictionRequest(
           boundingBox: GeographicBounds(
-            northEast: LocationPoint(latitude: -1.0, longitude: 37.0),
-            southWest: LocationPoint(latitude: -2.0, longitude: 36.0),
+            northEast: LocationPoint(latitude: -1, longitude: 37),
+            southWest: LocationPoint(latitude: -2, longitude: 36),
           ),
           resolution: 0.1,
           timeHorizonDays: 30,
@@ -243,7 +242,7 @@ void main() {
 
         final expectedResponse = SpatialPredictionResult(
           gridPoints: [
-            SpatialGridPoint(
+            const SpatialGridPoint(
               location: LocationPoint(latitude: -1.5, longitude: 36.5),
               riskScore: 0.6,
               riskLevel: 'medium',
@@ -259,11 +258,11 @@ void main() {
           '/predict/spatial',
           data: anyNamed('data'),
           options: anyNamed('options'),
-        )).thenAnswer((_) async => Response(
+        ),).thenAnswer((_) async => Response(
           data: expectedResponse.toJson(),
           statusCode: 200,
           requestOptions: RequestOptions(path: '/predict/spatial'),
-        ));
+        ),);
 
         // Act
         final result = await apiService.getSpatialPredictions(request, null);
@@ -276,7 +275,7 @@ void main() {
 
       test('getTimeSeriesPredictions should return TimeSeriesPredictionResult', () async {
         // Arrange
-        final request = TimeSeriesPredictionRequest(
+        const request = TimeSeriesPredictionRequest(
           location: LocationPoint(
             latitude: -1.2921,
             longitude: 36.8219,
@@ -295,7 +294,7 @@ void main() {
               riskLevel: 'medium',
             ),
             TimeSeriesPoint(
-              date: DateTime.now().add(Duration(days: 7)),
+              date: DateTime.now().add(const Duration(days: 7)),
               riskScore: 0.7,
               riskLevel: 'high',
             ),
@@ -308,11 +307,11 @@ void main() {
           '/predict/time-series',
           data: anyNamed('data'),
           options: anyNamed('options'),
-        )).thenAnswer((_) async => Response(
+        ),).thenAnswer((_) async => Response(
           data: expectedResponse.toJson(),
           statusCode: 200,
           requestOptions: RequestOptions(path: '/predict/time-series'),
-        ));
+        ),);
 
         // Act
         final result = await apiService.getTimeSeriesPredictions(request, null);
@@ -330,7 +329,7 @@ void main() {
         final expectedResponse = HealthStatusResponse(
           status: 'healthy',
           timestamp: DateTime.now(),
-          uptimeSeconds: 86400.0,
+          uptimeSeconds: 86400,
           version: '1.0.0',
         );
 
@@ -339,7 +338,7 @@ void main() {
               data: expectedResponse.toJson(),
               statusCode: 200,
               requestOptions: RequestOptions(path: '/health/status'),
-            ));
+            ),);
 
         // Act
         final result = await apiService.getHealthStatus();
@@ -369,7 +368,7 @@ void main() {
               data: expectedResponse.toJson(),
               statusCode: 200,
               requestOptions: RequestOptions(path: '/health/system'),
-            ));
+            ),);
 
         // Act
         final result = await apiService.getSystemHealth();
@@ -389,7 +388,7 @@ void main() {
             'transformer_model': {'status': 'healthy', 'accuracy': 0.87},
             'ensemble_model': {'status': 'healthy', 'accuracy': 0.89},
           },
-          lastTraining: DateTime.now().subtract(Duration(days: 1)),
+          lastTraining: DateTime.now().subtract(const Duration(days: 1)),
           modelVersions: {
             'lstm_model': 'v2.1',
             'transformer_model': 'v1.5',
@@ -406,7 +405,7 @@ void main() {
               data: expectedResponse.toJson(),
               statusCode: 200,
               requestOptions: RequestOptions(path: '/health/models'),
-            ));
+            ),);
 
         // Act
         final result = await apiService.getModelHealth();
@@ -421,7 +420,7 @@ void main() {
     group('Alert System Endpoints', () {
       test('subscribeToAlerts should return SubscriptionResponse', () async {
         // Arrange
-        final request = SubscriptionRequest(
+        const request = SubscriptionRequest(
           alertTypes: ['outbreak_prediction', 'high_risk_alert'],
           regions: ['kenya', 'uganda'],
           severityThreshold: 'medium',
@@ -440,11 +439,11 @@ void main() {
           '/alerts/subscribe',
           data: anyNamed('data'),
           options: anyNamed('options'),
-        )).thenAnswer((_) async => Response(
+        ),).thenAnswer((_) async => Response(
           data: expectedResponse.toJson(),
           statusCode: 200,
           requestOptions: RequestOptions(path: '/alerts/subscribe'),
-        ));
+        ),);
 
         // Act
         final result = await apiService.subscribeToAlerts(request, 'Bearer token');
@@ -482,11 +481,11 @@ void main() {
           '/alerts/active',
           queryParameters: anyNamed('queryParameters'),
           options: anyNamed('options'),
-        )).thenAnswer((_) async => Response(
+        ),).thenAnswer((_) async => Response(
           data: expectedResponse.toJson(),
           statusCode: 200,
           requestOptions: RequestOptions(path: '/alerts/active'),
-        ));
+        ),);
 
         // Act
         final result = await apiService.getActiveAlerts('kenya', 'Bearer token');
@@ -501,7 +500,7 @@ void main() {
     group('Error Handling', () {
       test('should handle DioException properly', () async {
         // Arrange
-        final loginRequest = LoginRequest(
+        const loginRequest = LoginRequest(
           email: 'invalid@example.com',
           password: 'wrongpassword',
         );
@@ -509,7 +508,7 @@ void main() {
         when(mockDio.post<Map<String, dynamic>>(
           '/auth/login',
           data: anyNamed('data'),
-        )).thenThrow(DioException(
+        ),).thenThrow(DioException(
           requestOptions: RequestOptions(path: '/auth/login'),
           response: Response(
             statusCode: 401,
@@ -517,7 +516,7 @@ void main() {
             data: {'message': 'Invalid credentials'},
             requestOptions: RequestOptions(path: '/auth/login'),
           ),
-        ));
+        ),);
 
         // Act & Assert
         expect(
@@ -528,18 +527,18 @@ void main() {
 
       test('should handle network timeout', () async {
         // Arrange
-        final request = SinglePredictionRequest(
-          location: LocationPoint(latitude: 0.0, longitude: 0.0),
+        const request = SinglePredictionRequest(
+          location: LocationPoint(latitude: 0, longitude: 0),
         );
 
         when(mockDio.post<Map<String, dynamic>>(
           '/predict/single',
           data: anyNamed('data'),
           options: anyNamed('options'),
-        )).thenThrow(DioException(
+        ),).thenThrow(DioException(
           requestOptions: RequestOptions(path: '/predict/single'),
           type: DioExceptionType.receiveTimeout,
-        ));
+        ),);
 
         // Act & Assert
         expect(
@@ -559,7 +558,7 @@ void main() {
             data: {'message': 'Database connection failed'},
             requestOptions: RequestOptions(path: '/health/status'),
           ),
-        ));
+        ),);
 
         // Act & Assert
         expect(
@@ -573,7 +572,7 @@ void main() {
       test('should include Authorization header when token provided', () async {
         // Arrange
         const token = 'Bearer test_token_123';
-        final request = SinglePredictionRequest(
+        const request = SinglePredictionRequest(
           location: LocationPoint(latitude: -1.2921, longitude: 36.8219),
         );
 
@@ -590,11 +589,11 @@ void main() {
           '/predict/single',
           data: anyNamed('data'),
           options: anyNamed('options'),
-        )).thenAnswer((_) async => Response(
+        ),).thenAnswer((_) async => Response(
           data: expectedResponse.toJson(),
           statusCode: 200,
           requestOptions: RequestOptions(path: '/predict/single'),
-        ));
+        ),);
 
         // Act
         await apiService.getSinglePrediction(request, token);
@@ -604,7 +603,7 @@ void main() {
           '/predict/single',
           data: captureAnyNamed('data'),
           options: captureAnyNamed('options'),
-        )).captured;
+        ),).captured;
 
         // Verify the authorization header would be set by Retrofit
         expect(captured[0], equals(request.toJson()));

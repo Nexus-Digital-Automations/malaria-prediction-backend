@@ -136,7 +136,7 @@ void main() {
             OfflineOperation(
               id: 'test-1',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
             ),
           ],
@@ -215,7 +215,7 @@ void main() {
             OfflineOperation(
               id: 'test-1',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
             ),
           ],
@@ -238,7 +238,7 @@ void main() {
         seed: () => Online(
           connectionType: ConnectivityResult.wifi,
           connectedAt: DateTime.now(),
-          queuedOperations: [],
+          queuedOperations: const [],
           config: const OfflineConfiguration(),
           networkQuality: NetworkQuality.good,
         ),
@@ -259,13 +259,13 @@ void main() {
             OfflineOperation(
               id: 'test-1',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
             ),
             OfflineOperation(
               id: 'test-2',
               type: 'alert',
-              data: {'alert': 'data'},
+              data: const {'alert': 'data'},
               queuedAt: DateTime.now(),
             ),
           ],
@@ -294,13 +294,13 @@ void main() {
             OfflineOperation(
               id: 'test-1',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
             ),
             OfflineOperation(
               id: 'test-2',
               type: 'alert',
-              data: {'alert': 'data'},
+              data: const {'alert': 'data'},
               queuedAt: DateTime.now(),
             ),
           ],
@@ -328,7 +328,7 @@ void main() {
             OfflineOperation(
               id: 'test-1',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
             ),
           ],
@@ -378,13 +378,13 @@ void main() {
               .thenAnswer((_) async => ConnectivityResult.wifi);
           return offlineBloc;
         },
-        act: (bloc) => bloc.add(EnableOfflineMode(
-          config: const OfflineConfiguration(
+        act: (bloc) => bloc.add(const EnableOfflineMode(
+          config: OfflineConfiguration(
             enableOfflineMode: true,
             autoSyncOnConnect: false,
             maxQueuedOperations: 50,
           ),
-        )),
+        ),),
         expect: () => [
           isA<Offline>()
               .having((state) => state.config.maxQueuedOperations, 'maxQueuedOperations', 50)
@@ -400,7 +400,7 @@ void main() {
         seed: () => Online(
           connectionType: ConnectivityResult.wifi,
           connectedAt: DateTime.now(),
-          queuedOperations: [],
+          queuedOperations: const [],
           config: const OfflineConfiguration(),
           networkQuality: NetworkQuality.good,
         ),
@@ -408,10 +408,10 @@ void main() {
           operation: OfflineOperation(
             id: 'test-1',
             type: 'prediction',
-            data: {'test': 'data'},
+            data: const {'test': 'data'},
             queuedAt: DateTime.now(),
           ),
-        )),
+        ),),
         expect: () => [
           isA<Online>()
               .having((state) => state.queuedOperations.length, 'queuedOperations.length', 1),
@@ -424,7 +424,7 @@ void main() {
         seed: () => Offline(
           disconnectedAt: DateTime.now(),
           lastConnectionType: ConnectivityResult.none,
-          queuedOperations: [],
+          queuedOperations: const [],
           config: const OfflineConfiguration(),
           mode: OfflineMode.automatic,
         ),
@@ -432,10 +432,10 @@ void main() {
           operation: OfflineOperation(
             id: 'test-1',
             type: 'prediction',
-            data: {'test': 'data'},
+            data: const {'test': 'data'},
             queuedAt: DateTime.now(),
           ),
-        )),
+        ),),
         expect: () => [
           isA<Offline>()
               .having((state) => state.queuedOperations.length, 'queuedOperations.length', 1),
@@ -453,7 +453,7 @@ void main() {
             (index) => OfflineOperation(
               id: 'test-$index',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
               priority: false,
             ),
@@ -465,10 +465,10 @@ void main() {
           operation: OfflineOperation(
             id: 'test-new',
             type: 'prediction',
-            data: {'test': 'data'},
+            data: const {'test': 'data'},
             queuedAt: DateTime.now(),
           ),
-        )),
+        ),),
         expect: () => [
           isA<Online>()
               .having((state) => state.queuedOperations.length, 'queuedOperations.length', 5)
@@ -488,13 +488,13 @@ void main() {
             OfflineOperation(
               id: 'test-1',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
             ),
             OfflineOperation(
               id: 'test-2',
               type: 'alert',
-              data: {'alert': 'data'},
+              data: const {'alert': 'data'},
               queuedAt: DateTime.now(),
             ),
           ],
@@ -521,13 +521,13 @@ void main() {
             OfflineOperation(
               id: 'test-1',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
             ),
             OfflineOperation(
               id: 'test-2',
               type: 'alert',
-              data: {'alert': 'data'},
+              data: const {'alert': 'data'},
               queuedAt: DateTime.now(),
             ),
           ],
@@ -553,7 +553,7 @@ void main() {
             OfflineOperation(
               id: 'test-1',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
             ),
           ],
@@ -583,7 +583,7 @@ void main() {
             OfflineOperation(
               id: 'test-1',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
             ),
           ],
@@ -608,7 +608,7 @@ void main() {
         seed: () => Offline(
           disconnectedAt: DateTime.now(),
           lastConnectionType: ConnectivityResult.none,
-          queuedOperations: [],
+          queuedOperations: const [],
           config: const OfflineConfiguration(),
           mode: OfflineMode.manual,
         ),
@@ -634,7 +634,7 @@ void main() {
             OfflineOperation(
               id: 'test-1',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
             ),
           ],
@@ -658,7 +658,7 @@ void main() {
             OfflineOperation(
               id: 'test-1',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
             ),
           ],
@@ -710,8 +710,8 @@ void main() {
             SyncConflict(
               operationId: 'test-1',
               conflictType: 'data_conflict',
-              localData: {'local': 'data'},
-              serverData: {'server': 'data'},
+              localData: const {'local': 'data'},
+              serverData: const {'server': 'data'},
               resolution: ConflictResolutionStrategy.clientWins,
               resolvedAt: DateTime.now(),
             ),
@@ -741,7 +741,7 @@ void main() {
           final operation = OfflineOperation(
             id: 'test-1',
             type: 'prediction',
-            data: {'test': 'data'},
+            data: const {'test': 'data'},
             queuedAt: DateTime.now(),
             priority: true,
           );
@@ -756,7 +756,7 @@ void main() {
           final operation = OfflineOperation(
             id: 'test-1',
             type: 'prediction',
-            data: {'test': 'data'},
+            data: const {'test': 'data'},
             queuedAt: DateTime.now(),
             retryCount: 1,
           );
@@ -770,7 +770,7 @@ void main() {
           final operation = OfflineOperation(
             id: 'test-1',
             type: 'prediction',
-            data: {'test': 'data'},
+            data: const {'test': 'data'},
             queuedAt: DateTime.now(),
             priority: true,
             status: OperationStatus.inProgress,
@@ -846,7 +846,7 @@ void main() {
             OfflineOperation(
               id: 'test-1',
               type: 'prediction',
-              data: {'test': 'data'},
+              data: const {'test': 'data'},
               queuedAt: DateTime.now(),
               priority: true, // High priority should stop sync on failure
             ),
@@ -863,13 +863,13 @@ void main() {
       );
 
       test('should handle queue size limits correctly', () {
-        final config = const OfflineConfiguration(maxQueuedOperations: 2);
+        const config = OfflineConfiguration(maxQueuedOperations: 2);
         final operations = List.generate(
           3,
           (index) => OfflineOperation(
             id: 'test-$index',
             type: 'prediction',
-            data: {'test': 'data'},
+            data: const {'test': 'data'},
             queuedAt: DateTime.now(),
             priority: index == 0, // First operation has priority
           ),

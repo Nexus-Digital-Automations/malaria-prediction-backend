@@ -70,6 +70,7 @@ dependencies:
   # HTTP Inspection (Debug only)
   alice: ^0.4.1
 
+  uuid: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -6,6 +6,7 @@
 ///
 /// Author: Claude AI Agent - Caching Specialist
 /// Created: 2025-09-19
+library;
 
 import 'dart:convert';
 
@@ -58,7 +59,7 @@ void main() {
         final handler = MockRequestInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Should proceed to network (not resolve with cache)
         verify(handler.next(requestOptions)).called(1);
@@ -89,7 +90,7 @@ void main() {
         final handler = MockRequestInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Should resolve with cached response
         verify(handler.resolve(any)).called(1);
@@ -109,7 +110,7 @@ void main() {
         final handler = MockRequestInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Should proceed to network
         verify(handler.next(requestOptions)).called(1);
@@ -140,7 +141,7 @@ void main() {
         final handler = MockRequestInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Should resolve with stale response
         verify(handler.resolve(any)).called(1);
@@ -158,7 +159,7 @@ void main() {
         final handler = MockRequestInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Should proceed to network without checking cache
         verify(handler.next(requestOptions)).called(1);
@@ -187,7 +188,7 @@ void main() {
         final handler = MockRequestInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Should reject the request
         verify(handler.reject(any)).called(1);
@@ -217,7 +218,7 @@ void main() {
         final handler = MockResponseInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onResponse(response, handler);
+        interceptor.onResponse(response, handler);
 
         // Should store in cache
         verify(mockCacheManager.store(
@@ -228,7 +229,7 @@ void main() {
           tags: any,
           etag: 'test-etag',
           lastModified: any,
-        )).called(1);
+        ),).called(1);
 
         verify(handler.next(response)).called(1);
       });
@@ -249,7 +250,7 @@ void main() {
         final handler = MockResponseInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onResponse(response, handler);
+        interceptor.onResponse(response, handler);
 
         // Should not store in cache
         verifyNever(mockCacheManager.store(
@@ -258,7 +259,7 @@ void main() {
           ttl: any,
           priority: any,
           tags: any,
-        ));
+        ),);
 
         verify(handler.next(response)).called(1);
       });
@@ -293,7 +294,7 @@ void main() {
         final handler = MockErrorInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onError(dioException, handler);
+        interceptor.onError(dioException, handler);
 
         // Should resolve with stale cache
         verify(handler.resolve(any)).called(1);
@@ -319,7 +320,7 @@ void main() {
         final handler = MockErrorInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onError(dioException, handler);
+        interceptor.onError(dioException, handler);
 
         // Should proceed with error
         verify(handler.next(dioException)).called(1);
@@ -387,7 +388,7 @@ void main() {
         final handler = MockRequestInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Should proceed to network (cache miss)
         verify(handler.next(requestOptions)).called(1);
@@ -407,16 +408,16 @@ void main() {
               'statusCode': 200,
               'data': {'cached': true},
               '_cached_at': DateTime.now().toIso8601String(),
-            });
+            },);
 
         final handler = MockRequestInterceptorHandler();
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Test cache miss
         when(mockCacheManager.retrieve(any))
             .thenAnswer((_) async => null);
 
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Verify metrics collection
         final metrics = interceptor.getMetrics();
@@ -436,7 +437,7 @@ void main() {
             .thenAnswer((_) async => null);
 
         final handler = MockRequestInterceptorHandler();
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Reset metrics
         interceptor.resetMetrics();
@@ -473,7 +474,7 @@ void main() {
         final handler = MockRequestInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Should resolve with fresh cache
         verify(handler.resolve(any)).called(1);
@@ -504,7 +505,7 @@ void main() {
         final handler = MockRequestInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Should proceed to network for fresh data
         verify(handler.next(requestOptions)).called(1);
@@ -540,7 +541,7 @@ void main() {
         final handler = MockRequestInterceptorHandler();
 
         // Execute interceptor
-        await interceptor.onRequest(requestOptions, handler);
+        interceptor.onRequest(requestOptions, handler);
 
         // Should resolve with stale cache when offline
         verify(handler.resolve(any)).called(1);
@@ -561,7 +562,7 @@ void main() {
           final handler = MockRequestInterceptorHandler();
 
           // Execute interceptor
-          await interceptor.onRequest(requestOptions, handler);
+          interceptor.onRequest(requestOptions, handler);
 
           // Should proceed to network without cache check
           verify(handler.next(requestOptions)).called(1);

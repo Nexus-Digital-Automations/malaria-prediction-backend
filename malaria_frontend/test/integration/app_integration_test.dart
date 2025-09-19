@@ -794,7 +794,7 @@ Future<void> _testScrollPerformance(WidgetTester tester) async {
   final scrollMetrics = await TestHelper.PerformanceHelper.measureScrollPerformance(
     tester,
     scrollable,
-    500.0, // Scroll distance
+    500, // Scroll distance
   );
 
   // Verify reasonable scroll performance

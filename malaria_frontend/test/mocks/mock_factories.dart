@@ -34,7 +34,7 @@ import 'package:geolocator/geolocator.dart';
   // Core network and cache services
 ], customMocks: [
   // Custom mock configurations if needed
-])
+],)
 class MockFactories {
   /// Create mock Dio client with predefined responses
   static Dio createMockDio({

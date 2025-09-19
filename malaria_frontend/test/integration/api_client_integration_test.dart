@@ -12,8 +12,8 @@ import 'package:logger/logger.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../lib/core/api_client_factory.dart';
-import '../../lib/core/models/models.dart';
+import 'package:malaria_frontend/core/api_client_factory.dart';
+import 'package:malaria_frontend/core/models/models.dart';
 
 void main() {
   group('API Client Integration Tests', () {
@@ -63,7 +63,7 @@ void main() {
 
     group('Request/Response Models', () {
       test('should serialize and deserialize LoginRequest correctly', () {
-        final request = LoginRequest(
+        const request = LoginRequest(
           email: 'test@example.com',
           password: 'password123',
           rememberMe: true,
@@ -80,7 +80,7 @@ void main() {
       });
 
       test('should serialize and deserialize SinglePredictionRequest correctly', () {
-        final request = SinglePredictionRequest(
+        const request = SinglePredictionRequest(
           location: LocationPoint(
             latitude: -1.2921,
             longitude: 36.8219,
@@ -139,7 +139,7 @@ void main() {
       test('should handle complex prediction response models', () {
         final response = SpatialPredictionResult(
           gridPoints: [
-            SpatialGridPoint(
+            const SpatialGridPoint(
               location: LocationPoint(latitude: -1.5, longitude: 36.5),
               riskScore: 0.75,
               riskLevel: 'high',
@@ -149,20 +149,20 @@ void main() {
                 'humidity': 85.0,
               },
             ),
-            SpatialGridPoint(
+            const SpatialGridPoint(
               location: LocationPoint(latitude: -1.6, longitude: 36.6),
               riskScore: 0.45,
               riskLevel: 'medium',
             ),
           ],
-          boundingBox: GeographicBounds(
-            northEast: LocationPoint(latitude: -1.0, longitude: 37.0),
-            southWest: LocationPoint(latitude: -2.0, longitude: 36.0),
+          boundingBox: const GeographicBounds(
+            northEast: LocationPoint(latitude: -1, longitude: 37),
+            southWest: LocationPoint(latitude: -2, longitude: 36),
           ),
           resolution: 0.1,
           predictionDate: DateTime(2025, 1, 1),
           modelVersion: 'v2.0',
-          processingTimeMs: 1500.0,
+          processingTimeMs: 1500,
         );
 
         final json = response.toJson();
@@ -280,7 +280,7 @@ void main() {
     group('Request Validation', () {
       test('should validate location coordinates', () {
         // Valid coordinates
-        final validLocation = LocationPoint(
+        const validLocation = LocationPoint(
           latitude: -1.2921,
           longitude: 36.8219,
           name: 'Nairobi',
@@ -290,10 +290,10 @@ void main() {
         expect(validLocation.longitude, isInRange(-180, 180));
 
         // Test boundary values
-        final northPole = LocationPoint(latitude: 90.0, longitude: 0.0);
-        final southPole = LocationPoint(latitude: -90.0, longitude: 0.0);
-        final dateLine = LocationPoint(latitude: 0.0, longitude: 180.0);
-        final antidateLine = LocationPoint(latitude: 0.0, longitude: -180.0);
+        const northPole = LocationPoint(latitude: 90, longitude: 0);
+        const southPole = LocationPoint(latitude: -90, longitude: 0);
+        const dateLine = LocationPoint(latitude: 0, longitude: 180);
+        const antidateLine = LocationPoint(latitude: 0, longitude: -180);
 
         expect(northPole.latitude, equals(90.0));
         expect(southPole.latitude, equals(-90.0));
@@ -302,8 +302,8 @@ void main() {
       });
 
       test('should validate time horizon constraints', () {
-        final request = SinglePredictionRequest(
-          location: LocationPoint(latitude: 0.0, longitude: 0.0),
+        const request = SinglePredictionRequest(
+          location: LocationPoint(latitude: 0, longitude: 0),
           timeHorizonDays: 30,
         );
 
@@ -312,7 +312,7 @@ void main() {
       });
 
       test('should validate alert subscription parameters', () {
-        final subscription = SubscriptionRequest(
+        const subscription = SubscriptionRequest(
           alertTypes: ['outbreak_prediction', 'high_risk_alert'],
           regions: ['kenya', 'uganda', 'tanzania'],
           severityThreshold: 'medium',
@@ -332,7 +332,7 @@ void main() {
           latitude: -1.0 + (index * 0.01),
           longitude: 36.0 + (index * 0.01),
           name: 'Location $index',
-        ));
+        ),);
 
         final batchRequest = BatchPredictionRequest(
           locations: locations,
@@ -348,12 +348,12 @@ void main() {
       });
 
       test('should handle spatial prediction grids efficiently', () {
-        final bounds = GeographicBounds(
-          northEast: LocationPoint(latitude: -1.0, longitude: 37.0),
-          southWest: LocationPoint(latitude: -2.0, longitude: 36.0),
+        const bounds = GeographicBounds(
+          northEast: LocationPoint(latitude: -1, longitude: 37),
+          southWest: LocationPoint(latitude: -2, longitude: 36),
         );
 
-        final spatialRequest = SpatialPredictionRequest(
+        const spatialRequest = SpatialPredictionRequest(
           boundingBox: bounds,
           resolution: 0.01, // High resolution grid
           timeHorizonDays: 30,
@@ -366,7 +366,7 @@ void main() {
 
     group('Security Considerations', () {
       test('should not expose sensitive data in serialization', () {
-        final loginRequest = LoginRequest(
+        const loginRequest = LoginRequest(
           email: 'test@example.com',
           password: 'sensitive_password_123',
         );
@@ -382,7 +382,7 @@ void main() {
       });
 
       test('should handle token refresh scenarios', () {
-        final refreshRequest = RefreshTokenRequest(
+        const refreshRequest = RefreshTokenRequest(
           refreshToken: 'refresh_token_abc123',
         );
 
