@@ -7,13 +7,9 @@ charts, maps, and dashboard widgets for epidemiological analysis.
 Author: AI Agent - Outbreak Pattern Recognition Specialist
 """
 
-from .charts import (
-    OutbreakTimelineChart,
-    EpidemicCurveChart,
-    TransmissionPatternChart
-)
-from .maps import GeographicClusterMap
+from .charts import EpidemicCurveChart, OutbreakTimelineChart, TransmissionPatternChart
 from .dashboard import SurveillanceDashboard
+from .maps import GeographicClusterMap
 
 __all__ = [
     "OutbreakTimelineChart",

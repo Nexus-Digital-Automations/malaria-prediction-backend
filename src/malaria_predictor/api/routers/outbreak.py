@@ -11,28 +11,12 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import structlog
-from fastapi import APIRouter, HTTPException, Query, Path, Depends
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
 from ...outbreak.services import (
     OutbreakDetector,
     PatternAnalyzer,
-    EpidemiologicalService,
-    SurveillanceService
-)
-from ...outbreak.models import (
-    OutbreakEvent,
-    EpidemiologicalPattern,
-    TransmissionPattern,
-    SurveillanceData,
-    OutbreakMetrics,
-    CaseCluster
-)
-from ...outbreak.widgets import OutbreakAlert, PatternSummary, RiskAssessment
-from ...outbreak.visualization import (
-    OutbreakTimelineChart,
-    EpidemicCurveChart,
-    TransmissionPatternChart
 )
 
 logger = structlog.get_logger(__name__)
@@ -160,7 +144,7 @@ async def detect_outbreaks(
                 },
                 "severity_distribution": {
                     severity.value: len([o for o in detected_outbreaks if o.severity == severity])
-                    for severity in set(o.severity for o in detected_outbreaks)
+                    for severity in {o.severity for o in detected_outbreaks}
                 } if detected_outbreaks else {},
                 "geographic_distribution": [
                     {

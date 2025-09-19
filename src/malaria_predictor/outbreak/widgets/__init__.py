@@ -8,10 +8,10 @@ Author: AI Agent - Outbreak Pattern Recognition Specialist
 """
 
 from .alerts import OutbreakAlert
-from .summaries import PatternSummary
 from .assessment import RiskAssessment
-from .forecasting import OutbreakForecast
 from .dashboard import OutbreakTab
+from .forecasting import OutbreakForecast
+from .summaries import PatternSummary
 
 __all__ = [
     "OutbreakAlert",
