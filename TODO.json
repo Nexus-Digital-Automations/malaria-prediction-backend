@@ -327,15 +327,15 @@
       "id": "test_1758221818104_i313147jl"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-18T15:22:58.546Z",
       "title": "Create specialized healthcare professional tools and patient management features",
       "description": "Implement comprehensive healthcare tools including: 1) Risk assessment workflow tools with guided questionnaires, 2) Patient case management system with tracking, 3) Treatment protocol recommendation engine with decision support, 4) Resource allocation planning tools with optimization, 5) Surveillance reporting features with form builders, 6) Professional dashboard for healthcare workers. Features must include multi-language support, integration capabilities with health record systems (DHIS2), and professional documentation tools.",
       "category": "feature",
       "id": "test_1758221818104_3ju3ywv61",
-      "assigned_agent": null,
-      "started_at": null,
-      "claimed_by": null,
+      "assigned_agent": "dev_session_1758256820938_1_general_9d70da20",
+      "started_at": "2025-09-19T05:51:37.978Z",
+      "claimed_by": "dev_session_1758256820938_1_general_9d70da20",
       "agent_assignment_history": [
         {
           "agentId": "dev_session_1758208959509_1_general_6292969d",
@@ -349,6 +349,13 @@
           "action": "auto_unassign_stale",
           "timestamp": "2025-09-18T18:56:58.102Z",
           "reason": "Agent became stale (inactive >30 minutes)"
+        },
+        {
+          "agentId": "dev_session_1758256820938_1_general_9d70da20",
+          "role": "primary",
+          "assignedAt": "2025-09-19T05:51:37.978Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
         }
       ]
     },
