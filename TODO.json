@@ -357,7 +357,7 @@
       "id": "feature_1758300343305_k1be2ajnwah"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-19T16:45:43.537Z",
       "title": "Build comprehensive real-time visualization system for live malaria risk data updates",
       "description": "Implement WebSocket integration, live risk data streaming, animated transitions, real-time marker/overlay updates, temporal visualization, data refresh indicators, and conflict resolution. Create: real_time_map_service.dart, real_time_overlay.dart, temporal_risk_slider.dart, real_time_update_model.dart, temporal_risk_data.dart, real_time_map_bloc.dart",
@@ -374,7 +374,9 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-19T16:58:00.229Z",
+      "updated_at": "2025-09-19T16:58:00.229Z"
     },
     {
       "status": "in_progress",

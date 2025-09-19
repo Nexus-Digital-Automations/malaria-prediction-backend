@@ -2322,6 +2322,30 @@
       "updated_at": "2025-09-19T16:53:35.740Z",
       "archived_at": "2025-09-19T16:53:35.744Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-19T16:45:43.537Z",
+      "title": "Build comprehensive real-time visualization system for live malaria risk data updates",
+      "description": "Implement WebSocket integration, live risk data streaming, animated transitions, real-time marker/overlay updates, temporal visualization, data refresh indicators, and conflict resolution. Create: real_time_map_service.dart, real_time_overlay.dart, temporal_risk_slider.dart, real_time_update_model.dart, temporal_risk_data.dart, real_time_map_bloc.dart",
+      "category": "feature",
+      "id": "feature_1758300343537_5t5phs0ybes",
+      "assigned_agent": "dev_session_1758300327440_1_general_42f594ba",
+      "started_at": "2025-09-19T16:46:03.557Z",
+      "claimed_by": "dev_session_1758300327440_1_general_42f594ba",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758300327440_1_general_42f594ba",
+          "role": "primary",
+          "assignedAt": "2025-09-19T16:46:03.557Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-19T16:58:00.229Z",
+      "updated_at": "2025-09-19T16:58:00.229Z",
+      "archived_at": "2025-09-19T16:58:00.232Z",
+      "archive_version": "2.0.0"
     }
   ],
   "project_info": {
@@ -2332,8 +2356,8 @@
     "total_completed": 0,
     "last_archived": null
   },
-  "last_archived": "2025-09-19T16:53:35.744Z",
-  "total_completed": 92,
+  "last_archived": "2025-09-19T16:58:00.232Z",
+  "total_completed": 93,
   "metadata": {
     "last_bulk_archive": "2025-09-19T16:39:39.801Z",
     "bulk_archive_count": 16
