@@ -801,38 +801,46 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   Map<String, dynamic>? _convertConfigurationToMap(ChartConfiguration? configuration) {
     if (configuration == null) return null;
 
-    return {
-      if (configuration.colorScheme != null) 'color_scheme': configuration.colorScheme,
-      if (configuration.dimensions != null) {
-        'dimensions': {
-          'width': configuration.dimensions!.width,
-          'height': configuration.dimensions!.height,
-          'aspect_ratio': configuration.dimensions!.aspectRatio,
-        },
-      },
-      if (configuration.animation != null) {
-        'animation': {
-          'enabled': configuration.animation!.enabled,
-          'duration': configuration.animation!.duration,
-          'curve': configuration.animation!.curve,
-        },
-      },
-      if (configuration.interaction != null) {
-        'interaction': {
-          'touch_enabled': configuration.interaction!.touchEnabled,
-          'zoom_enabled': configuration.interaction!.zoomEnabled,
-          'pan_enabled': configuration.interaction!.panEnabled,
-          'tooltips_enabled': configuration.interaction!.tooltipsEnabled,
-        },
-      },
-      if (configuration.export != null) {
-        'export': {
-          'available_formats': configuration.export!.availableFormats.map((f) => f.name).toList(),
-          'default_format': configuration.export!.defaultFormat.name,
-          'resolution': configuration.export!.resolution,
-        },
-      },
-    };
+    final result = <String, dynamic>{};
+
+    if (configuration.colorScheme != null) {
+      result['color_scheme'] = configuration.colorScheme;
+    }
+
+    if (configuration.dimensions != null) {
+      result['dimensions'] = {
+        'width': configuration.dimensions!.width,
+        'height': configuration.dimensions!.height,
+        'aspect_ratio': configuration.dimensions!.aspectRatio,
+      };
+    }
+
+    if (configuration.animation != null) {
+      result['animation'] = {
+        'enabled': configuration.animation!.enabled,
+        'duration': configuration.animation!.duration,
+        'curve': configuration.animation!.curve,
+      };
+    }
+
+    if (configuration.interaction != null) {
+      result['interaction'] = {
+        'touch_enabled': configuration.interaction!.touchEnabled,
+        'zoom_enabled': configuration.interaction!.zoomEnabled,
+        'pan_enabled': configuration.interaction!.panEnabled,
+        'tooltips_enabled': configuration.interaction!.tooltipsEnabled,
+      };
+    }
+
+    if (configuration.export != null) {
+      result['export'] = {
+        'available_formats': configuration.export!.availableFormats.map((f) => f.name).toList(),
+        'default_format': configuration.export!.defaultFormat.name,
+        'resolution': configuration.export!.resolution,
+      };
+    }
+
+    return result;
   }
 
   /// Generates cache key for chart data

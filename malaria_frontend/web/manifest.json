@@ -1,23 +1,76 @@
 {
-    "name": "malaria_frontend",
-    "short_name": "malaria_frontend",
-    "start_url": ".",
+    "name": "Malaria Prediction - AI-Powered Health Monitoring",
+    "short_name": "Malaria Prediction",
+    "description": "AI-powered malaria outbreak prediction and monitoring system providing real-time risk assessments, geospatial health data, and critical health alerts",
+    "start_url": "/?source=pwa",
+    "scope": "/",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "AI-powered malaria outbreak prediction and monitoring system",
-    "orientation": "portrait-primary",
+    "display_override": ["window-controls-overlay", "minimal-ui"],
+    "orientation": "any",
+    "background_color": "#2196F3",
+    "theme_color": "#2196F3",
     "prefer_related_applications": false,
+    "lang": "en-US",
+    "dir": "ltr",
+    "categories": ["health", "medical", "utilities", "productivity"],
+    "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+    "screenshots": [
+        {
+            "src": "screenshots/mobile-dashboard.png",
+            "sizes": "390x844",
+            "type": "image/png",
+            "platform": "narrow",
+            "label": "Main dashboard showing malaria risk predictions"
+        },
+        {
+            "src": "screenshots/mobile-map.png",
+            "sizes": "390x844",
+            "type": "image/png",
+            "platform": "narrow",
+            "label": "Interactive map with geospatial health data"
+        },
+        {
+            "src": "screenshots/desktop-dashboard.png",
+            "sizes": "1920x1080",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "Desktop dashboard with comprehensive analytics"
+        },
+        {
+            "src": "screenshots/desktop-analytics.png",
+            "sizes": "1920x1080",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "Advanced analytics and prediction charts"
+        }
+    ],
     "icons": [
+        {
+            "src": "icons/favicon-16x16.png",
+            "sizes": "16x16",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/favicon-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/favicon-96x96.png",
+            "sizes": "96x96",
+            "type": "image/png"
+        },
         {
             "src": "icons/Icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-maskable-192.png",
@@ -30,6 +83,134 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        },
+        {
+            "src": "icons/apple-touch-icon-180x180.png",
+            "sizes": "180x180",
+            "type": "image/png"
         }
+    ],
+    "shortcuts": [
+        {
+            "name": "Check Risk",
+            "short_name": "Risk Check",
+            "description": "Check malaria risk for your current location",
+            "url": "/risk-check?source=shortcut",
+            "icons": [
+                {
+                    "src": "icons/shortcut-risk.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "View Map",
+            "short_name": "Map",
+            "description": "View interactive malaria risk map",
+            "url": "/map?source=shortcut",
+            "icons": [
+                {
+                    "src": "icons/shortcut-map.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Alerts",
+            "short_name": "Alerts",
+            "description": "View health alerts and notifications",
+            "url": "/alerts?source=shortcut",
+            "icons": [
+                {
+                    "src": "icons/shortcut-alerts.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Analytics",
+            "short_name": "Analytics",
+            "description": "View prediction analytics and trends",
+            "url": "/analytics?source=shortcut",
+            "icons": [
+                {
+                    "src": "icons/shortcut-analytics.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        }
+    ],
+    "related_applications": [
+        {
+            "platform": "play",
+            "url": "https://play.google.com/store/apps/details?id=com.malariaprediction.app",
+            "id": "com.malariaprediction.app"
+        },
+        {
+            "platform": "itunes",
+            "url": "https://apps.apple.com/app/malaria-prediction/id123456789",
+            "id": "123456789"
+        }
+    ],
+    "protocol_handlers": [
+        {
+            "protocol": "web+malaria",
+            "url": "/handle-protocol?type=%s"
+        }
+    ],
+    "file_handlers": [
+        {
+            "action": "/handle-file",
+            "accept": {
+                "application/x-malaria-prediction-report": [".mpr"],
+                "text/csv": [".csv"],
+                "application/json": [".json"]
+            }
+        }
+    ],
+    "share_target": {
+        "action": "/share",
+        "method": "POST",
+        "enctype": "multipart/form-data",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url",
+            "files": [
+                {
+                    "name": "data",
+                    "accept": ["text/csv", "application/json", ".mpr"]
+                }
+            ]
+        }
+    },
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "handle_links": "preferred",
+    "capture_links": "new-client",
+    "tab_strip": {
+        "home_tab": {
+            "icons": [
+                {
+                    "src": "icons/tab-home.png",
+                    "sizes": "16x16",
+                    "type": "image/png"
+                }
+            ]
+        }
+    },
+    "permissions": [
+        "geolocation",
+        "notifications",
+        "persistent-storage",
+        "background-sync"
     ]
 }

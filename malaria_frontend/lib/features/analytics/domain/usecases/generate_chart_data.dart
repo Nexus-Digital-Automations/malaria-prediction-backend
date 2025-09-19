@@ -133,15 +133,13 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
         return [
           ChartDataType.predictionAccuracy,
           ChartDataType.environmentalTrends,
-          ChartDataType.riskTrends,
-          ChartDataType.temporalPatterns,
+          ChartDataType.timeSeriesComparison,
         ].contains(dataType);
 
       case ChartType.barChart:
         return [
           ChartDataType.alertStatistics,
           ChartDataType.riskDistribution,
-          ChartDataType.modelComparison,
           ChartDataType.dataQuality,
         ].contains(dataType);
 
@@ -154,8 +152,8 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
 
       case ChartType.scatterPlot:
         return [
-          ChartDataType.environmentalCorrelation,
-          ChartDataType.riskTrends,
+          ChartDataType.correlationMatrix,
+          ChartDataType.geographicDistribution,
         ].contains(dataType);
     }
   }

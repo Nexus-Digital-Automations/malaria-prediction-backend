@@ -15,9 +15,9 @@
 library;
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter/material.dart';
 import '../../../../core/errors/failures.dart';
 import '../entities/analytics_data.dart';
+import '../entities/analytics_filters.dart';
 import '../entities/chart_data.dart';
 
 /// Repository interface for analytics data operations
@@ -249,82 +249,6 @@ abstract class AnalyticsRepository {
   });
 }
 
-/// Analytics filters for customizing data retrieval
-class AnalyticsFilters {
-  /// Whether to include prediction accuracy data
-  final bool includePredictions;
-
-  /// Whether to include environmental trend data
-  final bool includeEnvironmental;
-
-  /// Whether to include risk trend data
-  final bool includeRisk;
-
-  /// Whether to include alert statistics
-  final bool includeAlerts;
-
-  /// Whether to include data quality metrics
-  final bool includeDataQuality;
-
-  /// Minimum confidence threshold for predictions (0.0 to 1.0)
-  final double? minConfidence;
-
-  /// Maximum data age in hours
-  final int? maxDataAgeHours;
-
-  const AnalyticsFilters({
-    this.includePredictions = true,
-    this.includeEnvironmental = true,
-    this.includeRisk = true,
-    this.includeAlerts = true,
-    this.includeDataQuality = true,
-    this.minConfidence,
-    this.maxDataAgeHours,
-  });
-}
-
-/// Chart configuration for customizing visualization
-class ChartConfiguration {
-  /// Chart title override
-  final String? title;
-
-  /// Chart subtitle override
-  final String? subtitle;
-
-  /// Custom color palette
-  final List<Color>? colors;
-
-  /// Chart width in pixels
-  final double? width;
-
-  /// Chart height in pixels
-  final double? height;
-
-  /// Whether to show legend
-  final bool showLegend;
-
-  /// Whether to show grid
-  final bool showGrid;
-
-  /// Whether to enable animations
-  final bool enableAnimations;
-
-  /// Animation duration in milliseconds
-  final int animationDuration;
-
-  const ChartConfiguration({
-    this.title,
-    this.subtitle,
-    this.colors,
-    this.width,
-    this.height,
-    this.showLegend = true,
-    this.showGrid = true,
-    this.enableAnimations = true,
-    this.animationDuration = 1000,
-  });
-}
-
 /// Data aggregation method enumeration
 enum AggregationMethod {
   /// Raw data points without aggregation
@@ -344,77 +268,5 @@ enum AggregationMethod {
 
   /// Yearly aggregation
   yearly,
-}
-
-/// Chart data type enumeration
-enum ChartDataType {
-  /// Prediction accuracy trends
-  predictionAccuracy,
-
-  /// Environmental factor trends
-  environmentalTrends,
-
-  /// Risk level trends
-  riskTrends,
-
-  /// Alert statistics
-  alertStatistics,
-
-  /// Data quality metrics
-  dataQuality,
-
-  /// Risk level distribution
-  riskDistribution,
-
-  /// Environmental factor correlation
-  environmentalCorrelation,
-
-  /// Model performance comparison
-  modelComparison,
-
-  /// Temporal patterns
-  temporalPatterns,
-}
-
-/// Export format enumeration
-enum ExportFormat {
-  /// Portable Document Format
-  pdf,
-
-  /// Comma-Separated Values
-  csv,
-
-  /// JavaScript Object Notation
-  json,
-
-  /// Microsoft Excel format
-  xlsx,
-
-  /// HyperText Markup Language
-  html,
-}
-
-/// Report section enumeration
-enum ReportSection {
-  /// Executive summary
-  summary,
-
-  /// Prediction accuracy analysis
-  predictionAccuracy,
-
-  /// Environmental trends analysis
-  environmentalTrends,
-
-  /// Risk assessment analysis
-  riskAnalysis,
-
-  /// Alert system performance
-  alertPerformance,
-
-  /// Data quality assessment
-  dataQuality,
-
-  /// Recommendations and insights
-  recommendations,
 }
 

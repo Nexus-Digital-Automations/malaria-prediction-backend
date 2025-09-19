@@ -25,6 +25,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/analytics_data.dart';
+import '../../domain/entities/analytics_filters.dart';
+import '../../domain/entities/chart_data.dart';
 import '../../domain/usecases/get_analytics_data.dart';
 import '../../domain/usecases/generate_chart_data.dart';
 import '../../domain/repositories/analytics_repository.dart';
