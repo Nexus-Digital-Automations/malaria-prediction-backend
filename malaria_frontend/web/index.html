@@ -1,38 +1,277 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
+    Malaria Prediction PWA - Progressive Web App Configuration
+    Optimized for cross-platform deployment and offline capabilities
   -->
   <base href="$FLUTTER_BASE_HREF">
 
+  <!-- Character encoding and viewport -->
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="AI-powered malaria outbreak prediction and monitoring system">
 
-  <!-- iOS meta tags & icons -->
+  <!-- SEO and Description -->
+  <meta name="description" content="AI-powered malaria outbreak prediction and monitoring system providing real-time risk assessments and health alerts">
+  <meta name="keywords" content="malaria, prediction, health, outbreak, monitoring, AI, medical, public health, geospatial">
+  <meta name="author" content="Malaria Prediction Team">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://malaria-prediction.app">
+  <meta property="og:title" content="Malaria Prediction - AI-Powered Health Monitoring">
+  <meta property="og:description" content="Real-time malaria outbreak prediction and monitoring system using AI and geospatial data">
+  <meta property="og:image" content="icons/Icon-512.png">
+  <meta property="og:site_name" content="Malaria Prediction">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://malaria-prediction.app">
+  <meta property="twitter:title" content="Malaria Prediction - AI-Powered Health Monitoring">
+  <meta property="twitter:description" content="Real-time malaria outbreak prediction and monitoring system using AI and geospatial data">
+  <meta property="twitter:image" content="icons/Icon-512.png">
+
+  <!-- PWA Configuration -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="malaria_frontend">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Malaria Prediction">
+  <meta name="application-name" content="Malaria Prediction">
+  <meta name="msapplication-TileColor" content="#2196F3">
+  <meta name="msapplication-tap-highlight" content="no">
+  <meta name="theme-color" content="#2196F3">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <!-- Apple Touch Icons -->
+  <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
 
-  <title>malaria_frontend</title>
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="icons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/Icon-512.png">
+  <link rel="shortcut icon" href="favicon.ico">
+
+  <!-- Microsoft Tiles -->
+  <meta name="msapplication-TileImage" content="icons/ms-icon-144x144.png">
+  <meta name="msapplication-square70x70logo" content="icons/ms-icon-70x70.png">
+  <meta name="msapplication-square150x150logo" content="icons/ms-icon-150x150.png">
+  <meta name="msapplication-wide310x150logo" content="icons/ms-icon-310x150.png">
+  <meta name="msapplication-square310x310logo" content="icons/ms-icon-310x310.png">
+
+  <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json">
+
+  <!-- Preload Critical Resources -->
+  <link rel="preload" href="fonts/Roboto-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="flutter_bootstrap.js" as="script">
+
+  <!-- DNS Prefetch for External Resources -->
+  <link rel="dns-prefetch" href="//fonts.googleapis.com">
+  <link rel="dns-prefetch" href="//fonts.gstatic.com">
+  <link rel="dns-prefetch" href="//api.malaria-prediction.app">
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js')
+          .then(function(registration) {
+            console.log('SW registered: ', registration);
+          })
+          .catch(function(registrationError) {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+  </script>
+
+  <!-- Loading Screen Styles -->
+  <style>
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #2196F3 0%, #388E3C 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .loading-logo {
+      width: 120px;
+      height: 120px;
+      background: white;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: #2196F3;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .loading-title {
+      color: white;
+      font-size: 32px;
+      font-weight: 300;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .loading-subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 16px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .loading-logo {
+        width: 80px;
+        height: 80px;
+        font-size: 32px;
+      }
+      .loading-title {
+        font-size: 24px;
+      }
+    }
+  </style>
+
+  <title>Malaria Prediction - AI-Powered Health Monitoring</title>
 </head>
 <body>
+  <!-- Loading Screen -->
+  <div class="loading-container" id="loading-screen">
+    <div class="loading-logo">🦟</div>
+    <div class="loading-title">Malaria Prediction</div>
+    <div class="loading-subtitle">AI-Powered Health Monitoring</div>
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Flutter App Container -->
+  <div id="flutter-app" style="display: none;"></div>
+
+  <!-- Flutter Bootstrap -->
+  <script>
+    // Hide loading screen when Flutter is ready
+    window.addEventListener('flutter-first-frame', function() {
+      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('flutter-app').style.display = 'block';
+    });
+
+    // Fallback: hide loading screen after 10 seconds
+    setTimeout(function() {
+      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('flutter-app').style.display = 'block';
+    }, 10000);
+  </script>
   <script src="flutter_bootstrap.js" async></script>
+
+  <!-- Analytics and Monitoring -->
+  <script>
+    // Performance monitoring
+    window.addEventListener('load', function() {
+      if ('performance' in window) {
+        const perfData = performance.getEntriesByType('navigation')[0];
+        console.log('Page load time:', perfData.loadEventEnd - perfData.fetchStart, 'ms');
+      }
+    });
+
+    // Error tracking
+    window.addEventListener('error', function(e) {
+      console.error('Global error:', e.error);
+      // Could send to analytics service
+    });
+
+    // Network status monitoring
+    function updateNetworkStatus() {
+      const status = navigator.onLine ? 'online' : 'offline';
+      document.body.setAttribute('data-network-status', status);
+    }
+
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+    updateNetworkStatus();
+  </script>
+
+  <!-- PWA Install Prompt -->
+  <script>
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+
+      // Show custom install button or banner
+      showInstallPrompt();
+    });
+
+    function showInstallPrompt() {
+      // This would trigger your custom install UI
+      console.log('PWA install prompt available');
+    }
+
+    window.addEventListener('appinstalled', (evt) => {
+      console.log('PWA was installed');
+    });
+  </script>
+
+  <!-- Critical CSS for above-the-fold content -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    /* Ensure app fills entire screen */
+    flt-glass-pane {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+  </style>
+
+  <!-- Noscript fallback -->
+  <noscript>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+      <h1>JavaScript Required</h1>
+      <p>This application requires JavaScript to run. Please enable JavaScript in your browser.</p>
+    </div>
+  </noscript>
 </body>
 </html>

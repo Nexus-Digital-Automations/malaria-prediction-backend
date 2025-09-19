@@ -27,6 +27,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/chart_data.dart';
 import '../entities/analytics_data.dart';
+import '../entities/analytics_filters.dart';
 import '../repositories/analytics_repository.dart';
 
 /// Use case for generating chart data for dashboard visualization
@@ -288,16 +289,16 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
       final config = params.configuration!;
 
       return LineChartDataEntity(
-        title: config.title ?? chartData.title,
-        subtitle: config.subtitle ?? chartData.subtitle,
-        series: _applySeriesStyling(chartData.series, config.colors),
+        title: chartData.title,
+        subtitle: chartData.subtitle,
+        series: _applySeriesStyling(chartData.series, config.colorScheme?.map((c) => Color(int.parse(c.substring(1, 7), radix: 16) + 0xFF000000)).toList()),
         xAxis: chartData.xAxis,
         yAxis: chartData.yAxis,
         style: chartData.style,
         showMarkers: chartData.showMarkers,
-        showGrid: config.showGrid,
+        showGrid: chartData.showGrid,
         enableTouch: chartData.enableTouch,
-        animationDuration: config.enableAnimations ? config.animationDuration : 0,
+        animationDuration: config.animation?.enabled == true ? config.animation!.duration : 0,
       );
     }
 
@@ -315,8 +316,8 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
       final config = params.configuration!;
 
       return BarChartDataEntity(
-        title: config.title ?? chartData.title,
-        subtitle: config.subtitle ?? chartData.subtitle,
+        title: chartData.title,
+        subtitle: chartData.subtitle,
         dataGroups: chartData.dataGroups,
         xAxis: chartData.xAxis,
         yAxis: chartData.yAxis,
@@ -324,7 +325,7 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
         barWidth: chartData.barWidth,
         showValueLabels: chartData.showValueLabels,
         enableTouch: chartData.enableTouch,
-        animationDuration: config.enableAnimations ? config.animationDuration : 0,
+        animationDuration: config.animation?.enabled == true ? config.animation!.duration : 0,
       );
     }
 
@@ -342,15 +343,15 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
       final config = params.configuration!;
 
       return PieChartDataEntity(
-        title: config.title ?? chartData.title,
-        subtitle: config.subtitle ?? chartData.subtitle,
+        title: chartData.title,
+        subtitle: chartData.subtitle,
         sections: chartData.sections,
         style: chartData.style,
         centerSpaceRadius: chartData.centerSpaceRadius,
         showPercentages: chartData.showPercentages,
         showValues: chartData.showValues,
         enableTouch: chartData.enableTouch,
-        animationDuration: config.enableAnimations ? config.animationDuration : 0,
+        animationDuration: config.animation?.enabled == true ? config.animation!.duration : 0,
       );
     }
 
@@ -368,8 +369,8 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
       final config = params.configuration!;
 
       return ScatterPlotDataEntity(
-        title: config.title ?? chartData.title,
-        subtitle: config.subtitle ?? chartData.subtitle,
+        title: chartData.title,
+        subtitle: chartData.subtitle,
         series: chartData.series,
         xAxis: chartData.xAxis,
         yAxis: chartData.yAxis,
@@ -377,7 +378,7 @@ class GenerateChartData implements UseCase<dynamic, GenerateChartDataParams> {
         pointSize: chartData.pointSize,
         showTrendLines: chartData.showTrendLines,
         enableTouch: chartData.enableTouch,
-        animationDuration: config.enableAnimations ? config.animationDuration : 0,
+        animationDuration: config.animation?.enabled == true ? config.animation!.duration : 0,
       );
     }
 

@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/network/network_info.dart';
 import '../../domain/entities/analytics_data.dart';
+import '../../domain/entities/analytics_filters.dart';
 import '../../domain/entities/chart_data.dart';
 import '../../domain/repositories/analytics_repository.dart';
 import '../datasources/analytics_local_datasource.dart';
@@ -777,13 +778,22 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     if (filters == null) return null;
 
     return {
-      'include_predictions': filters.includePredictions,
-      'include_environmental': filters.includeEnvironmental,
-      'include_risk': filters.includeRisk,
-      'include_alerts': filters.includeAlerts,
+      'include_environmental_data': filters.includeEnvironmentalData,
+      'include_prediction_accuracy': filters.includePredictionAccuracy,
+      'include_risk_trends': filters.includeRiskTrends,
+      'include_alert_statistics': filters.includeAlertStatistics,
       'include_data_quality': filters.includeDataQuality,
-      if (filters.minConfidence != null) 'min_confidence': filters.minConfidence,
+      if (filters.riskLevels != null) 'risk_levels': filters.riskLevels!.map((r) => r.name).toList(),
+      if (filters.environmentalFactors != null) 'environmental_factors': filters.environmentalFactors!.map((f) => f.name).toList(),
+      if (filters.alertSeverities != null) 'alert_severities': filters.alertSeverities!.map((s) => s.name).toList(),
+      if (filters.minDataQuality != null) 'min_data_quality': filters.minDataQuality,
       if (filters.maxDataAgeHours != null) 'max_data_age_hours': filters.maxDataAgeHours,
+      'aggregation_period': filters.aggregationPeriod.name,
+      'smooth_data': filters.smoothData,
+      'smoothing_window_days': filters.smoothingWindowDays,
+      'normalize_data': filters.normalizeData,
+      'include_confidence_intervals': filters.includeConfidenceIntervals,
+      'confidence_level': filters.confidenceLevel,
     };
   }
 
@@ -792,16 +802,36 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     if (configuration == null) return null;
 
     return {
-      if (configuration.title != null) 'title': configuration.title,
-      if (configuration.subtitle != null) 'subtitle': configuration.subtitle,
-      if (configuration.colors != null)
-        'colors': configuration.colors!.map((c) => c.toARGB32()).toList(),
-      if (configuration.width != null) 'width': configuration.width,
-      if (configuration.height != null) 'height': configuration.height,
-      'show_legend': configuration.showLegend,
-      'show_grid': configuration.showGrid,
-      'enable_animations': configuration.enableAnimations,
-      'animation_duration': configuration.animationDuration,
+      if (configuration.colorScheme != null) 'color_scheme': configuration.colorScheme,
+      if (configuration.dimensions != null) {
+        'dimensions': {
+          'width': configuration.dimensions!.width,
+          'height': configuration.dimensions!.height,
+          'aspect_ratio': configuration.dimensions!.aspectRatio,
+        },
+      },
+      if (configuration.animation != null) {
+        'animation': {
+          'enabled': configuration.animation!.enabled,
+          'duration': configuration.animation!.duration,
+          'curve': configuration.animation!.curve,
+        },
+      },
+      if (configuration.interaction != null) {
+        'interaction': {
+          'touch_enabled': configuration.interaction!.touchEnabled,
+          'zoom_enabled': configuration.interaction!.zoomEnabled,
+          'pan_enabled': configuration.interaction!.panEnabled,
+          'tooltips_enabled': configuration.interaction!.tooltipsEnabled,
+        },
+      },
+      if (configuration.export != null) {
+        'export': {
+          'available_formats': configuration.export!.availableFormats.map((f) => f.name).toList(),
+          'default_format': configuration.export!.defaultFormat.name,
+          'resolution': configuration.export!.resolution,
+        },
+      },
     };
   }
 

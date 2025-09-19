@@ -24,6 +24,7 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/analytics_data.dart';
+import '../entities/analytics_filters.dart';
 import '../repositories/analytics_repository.dart';
 
 /// Use case for fetching comprehensive analytics data for dashboard display
@@ -147,14 +148,22 @@ class GetAnalyticsData implements UseCase<AnalyticsData, GetAnalyticsDataParams>
   ///
   /// Returns null if validation passes, Failure otherwise
   Failure? _validateFilters(AnalyticsFilters filters) {
-    // Validate confidence threshold
-    if (filters.minConfidence != null) {
-      if (filters.minConfidence! < 0.0 || filters.minConfidence! > 1.0) {
+    // Validate data quality threshold
+    if (filters.minDataQuality != null) {
+      if (filters.minDataQuality! < 0.0 || filters.minDataQuality! > 1.0) {
         return const ValidationFailure(
-          message: 'Minimum confidence must be between 0.0 and 1.0',
-          field: 'minConfidence',
+          message: 'Minimum data quality must be between 0.0 and 1.0',
+          field: 'minDataQuality',
         );
       }
+    }
+
+    // Validate confidence level
+    if (filters.confidenceLevel < 0.0 || filters.confidenceLevel > 1.0) {
+      return const ValidationFailure(
+        message: 'Confidence level must be between 0.0 and 1.0',
+        field: 'confidenceLevel',
+      );
     }
 
     // Validate data age constraint
@@ -168,10 +177,10 @@ class GetAnalyticsData implements UseCase<AnalyticsData, GetAnalyticsDataParams>
     }
 
     // Validate at least one data type is included
-    if (!filters.includePredictions &&
-        !filters.includeEnvironmental &&
-        !filters.includeRisk &&
-        !filters.includeAlerts &&
+    if (!filters.includeEnvironmentalData &&
+        !filters.includePredictionAccuracy &&
+        !filters.includeRiskTrends &&
+        !filters.includeAlertStatistics &&
         !filters.includeDataQuality) {
       return const ValidationFailure(
         message: 'At least one data type must be included in analytics request',

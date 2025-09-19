@@ -2,10 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Basic App Information -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Malaria Frontend</string>
+	<string>Malaria Prediction</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,21 +14,33 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>malaria_frontend</string>
+	<string>Malaria Prediction</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
-	<string>????</string>
+	<string>MLPR</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+
+	<!-- iOS Requirements -->
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.medical</string>
+
+	<!-- App Description -->
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2024 Malaria Prediction Team. All rights reserved.</string>
+
+	<!-- Launch Configuration -->
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+
+	<!-- Orientation Support -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -41,9 +54,248 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+	<!-- Performance Optimizations -->
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- Location Services Permission -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs location access to provide accurate malaria risk predictions for your area and display geospatial health data on maps.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs location access to provide accurate malaria risk predictions for your area and send location-based health alerts.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs location access to provide background malaria risk monitoring and critical health alerts for your area.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>This app uses location to provide accurate malaria risk predictions and geospatial health data for your area.</string>
+
+	<!-- Camera Permission -->
+	<key>NSCameraUsageDescription</key>
+	<string>This app may use the camera for capturing images related to health monitoring and environmental data collection.</string>
+
+	<!-- Photo Library Permission -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your photo library to save health reports and share malaria prediction data.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app needs permission to save health reports and malaria prediction charts to your photo library.</string>
+
+	<!-- Notification Permission -->
+	<key>NSUserNotificationUsageDescription</key>
+	<string>This app sends critical malaria risk alerts and health notifications to keep you informed about outbreak predictions in your area.</string>
+
+	<!-- Health Data Permission -->
+	<key>NSHealthShareUsageDescription</key>
+	<string>This app can integrate with HealthKit to share malaria risk predictions and health insights with your health data.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>This app can update your health data with malaria risk assessments and health monitoring information.</string>
+
+	<!-- Network Usage -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>malaria-prediction.app</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<false/>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<true/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+			</dict>
+		</dict>
+	</dict>
+
+	<!-- Background Modes -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>background-fetch</string>
+		<string>background-processing</string>
+		<string>location</string>
+		<string>remote-notification</string>
+	</array>
+
+	<!-- Deep Linking and URL Schemes -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>malaria-prediction</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>malaria-prediction</string>
+				<string>https</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- Associated Domains -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:malaria-prediction.app</string>
+		<string>applinks:www.malaria-prediction.app</string>
+	</array>
+
+	<!-- Document Types -->
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Malaria Prediction Report</string>
+			<key>CFBundleTypeIconFiles</key>
+			<array>
+				<string>report-icon</string>
+			</array>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.comma-separated-values-text</string>
+				<string>public.json</string>
+				<string>public.pdf</string>
+			</array>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+	</array>
+
+	<!-- Exported Type Declarations -->
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.malariaprediction.report</string>
+			<key>UTTypeDescription</key>
+			<string>Malaria Prediction Report</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>mpr</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/x-malaria-prediction-report</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+
+	<!-- Siri and Shortcuts Integration -->
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>CheckMalariaRisk</string>
+		<string>ViewPredictions</string>
+		<string>GetHealthAlerts</string>
+	</array>
+
+	<!-- Widget Extension Support -->
+	<key>NSExtension</key>
+	<dict>
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.widgetkit-extension</string>
+	</dict>
+
+	<!-- Accessibility -->
+	<key>UIAccessibilityTraits</key>
+	<array>
+		<string>UIAccessibilityTraitUpdatesFrequently</string>
+	</array>
+
+	<!-- Required Device Capabilities -->
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>armv7</string>
+		<string>location-services</string>
+		<string>wifi</string>
+	</array>
+
+	<!-- Status Bar Configuration -->
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleDefault</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<true/>
+
+	<!-- Launch Screen Configuration -->
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIImageName</key>
+		<string>LaunchImage</string>
+		<key>UIColorName</key>
+		<string>LaunchColor</string>
+	</dict>
+
+	<!-- Scene Configuration -->
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<true/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>Default Configuration</string>
+					<key>UISceneDelegateClassName</key>
+					<string>SceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+
+	<!-- File Sharing -->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+
+	<!-- Prevent Screenshots of Sensitive Data -->
+	<key>UIApplicationExitsOnSuspend</key>
+	<false/>
+
+	<!-- Privacy Manifest -->
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeLocation</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+				<string>NSPrivacyCollectedDataTypePurposeAnalytics</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeDeviceID</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
