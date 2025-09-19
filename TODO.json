@@ -329,7 +329,7 @@
       "id": "feature_1758300342569_i1or22ru2m"
     },
     {
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2025-09-19T16:45:42.787Z",
       "title": "Setup comprehensive location services integration for risk mapping system",
       "description": "Integrate device GPS and location services, implement location permission handling, create current location tracking, build location-based risk assessment, add geofencing for risk zone notifications, implement location history tracking, and create location accuracy indicators",
@@ -346,15 +346,29 @@
           "reassignReason": null,
           "claimPriority": "normal"
         }
-      ]
+      ],
+      "completed_at": "2025-09-19T16:58:58.521Z",
+      "updated_at": "2025-09-19T16:58:58.521Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-19T16:45:43.305Z",
       "title": "Create comprehensive custom markers system for health facilities and points of interest",
       "description": "Design custom marker widgets for different facility types, implement marker clustering for performance, create interactive marker popups and info windows, build facility type categorization and filtering, add marker search and filtering capabilities, implement custom marker icons and styling, create facility data integration and display",
       "category": "feature",
-      "id": "feature_1758300343305_k1be2ajnwah"
+      "id": "feature_1758300343305_k1be2ajnwah",
+      "assigned_agent": "dev_session_1758300328541_1_general_d4c55109",
+      "started_at": "2025-09-19T16:58:50.336Z",
+      "claimed_by": "dev_session_1758300328541_1_general_d4c55109",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758300328541_1_general_d4c55109",
+          "role": "primary",
+          "assignedAt": "2025-09-19T16:58:50.336Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "completed",
