@@ -264,6 +264,18 @@ class AnalyticsLocalDataSourceImpl implements AnalyticsLocalDataSource {
         _metadataBox = metadataBox,
         _sharedPreferences = sharedPreferences;
 
+  /// Testing constructor with mock implementations
+  factory AnalyticsLocalDataSourceImpl.forTesting() {
+    return const AnalyticsLocalDataSourceImpl._forTesting();
+  }
+
+  /// Private constructor for testing with mock boxes
+  const AnalyticsLocalDataSourceImpl._forTesting()
+      : _analyticsBox = const _MockBox(),
+        _chartBox = const _MockBox(),
+        _metadataBox = const _MockBox(),
+        _sharedPreferences = const _MockSharedPreferences();
+
   @override
   Future<void> cacheAnalyticsData(
     AnalyticsDataModel analyticsData, {
@@ -786,4 +798,53 @@ class CacheEntry {
       'data_type': dataType,
     };
   }
+}
+
+/// Mock Hive Box implementation for testing
+class _MockBox implements Box<String> {
+  const _MockBox();
+
+  @override
+  Future<void> put(dynamic key, String value) async {}
+
+  @override
+  String? get(dynamic key, {String? defaultValue}) => null;
+
+  @override
+  Future<void> delete(dynamic key) async {}
+
+  @override
+  Future<void> deleteAll(Iterable<dynamic> keys) async {}
+
+  @override
+  Future<int> clear() async => 0;
+
+  @override
+  int get length => 0;
+
+  @override
+  Iterable<dynamic> get keys => [];
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+/// Mock SharedPreferences implementation for testing
+class _MockSharedPreferences implements SharedPreferences {
+  const _MockSharedPreferences();
+
+  @override
+  String? getString(String key) => null;
+
+  @override
+  Future<bool> setString(String key, String value) async => true;
+
+  @override
+  double? getDouble(String key) => null;
+
+  @override
+  int? getInt(String key) => null;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }

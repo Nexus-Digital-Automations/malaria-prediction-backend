@@ -314,6 +314,11 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
   /// Constructor requiring API service dependency
   const AnalyticsRemoteDataSourceImpl(this._apiService);
 
+  /// Testing constructor with mock implementation
+  factory AnalyticsRemoteDataSourceImpl.forTesting() {
+    return const AnalyticsRemoteDataSourceImpl(_MockAnalyticsApiService());
+  }
+
   @override
   Future<AnalyticsDataModel> getAnalyticsData({
     required String region,
@@ -630,5 +635,15 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
              data['detail'] as String?;
     }
     return null;
+  }
+}
+
+/// Mock AnalyticsApiService implementation for testing
+class _MockAnalyticsApiService implements AnalyticsApiService {
+  const _MockAnalyticsApiService();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) async {
+    throw UnimplementedError('Mock implementation');
   }
 }
