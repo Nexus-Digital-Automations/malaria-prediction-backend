@@ -14,6 +14,8 @@
 /// ```
 library;
 
+import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import '../../domain/entities/interactive_chart.dart';
@@ -1088,7 +1090,3 @@ class ChartConnectionsPainter extends CustomPainter {
            animationValue != oldDelegate.animationValue;
   }
 }
-
-// Import timer for debouncing
-import 'dart:async';
-import 'dart:math' as math;

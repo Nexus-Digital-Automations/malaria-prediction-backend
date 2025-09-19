@@ -232,7 +232,7 @@ class _AccuracyTrendChartState extends State<AccuracyTrendChart> {
         });
       },
       touchTooltipData: LineTouchTooltipData(
-        getTooltipColor: (_) => colorScheme.inverseSurface,
+        tooltipBgColor: colorScheme.inverseSurface,
         tooltipRoundedRadius: 8,
         getTooltipItems: _buildTooltipItems,
       ),

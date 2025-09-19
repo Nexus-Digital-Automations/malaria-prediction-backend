@@ -341,7 +341,7 @@ class _AlertCorrelationDisplayState extends State<AlertCorrelationDisplay>
                       'Risk: ${(correlation.riskScore * 100).toStringAsFixed(1)}%\n'
                       'Alerts: ${correlation.alertCount}\n'
                       'Effectiveness: ${(correlation.effectiveness * 100).toStringAsFixed(1)}%',
-                      TextStyle(
+                      textStyle: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -464,7 +464,7 @@ class _AlertCorrelationDisplayState extends State<AlertCorrelationDisplay>
               _buildSummaryItem(
                 'Alert Accuracy',
                 '${(alertAccuracy * 100).toStringAsFixed(1)}%',
-                Icons.target,
+                Icons.my_location,
                 _getAccuracyColor(alertAccuracy),
               ),
               const SizedBox(height: 8),
@@ -478,7 +478,7 @@ class _AlertCorrelationDisplayState extends State<AlertCorrelationDisplay>
               _buildSummaryItem(
                 'Coverage',
                 '${(_effectivenessMetrics.coverage * 100).toStringAsFixed(1)}%',
-                Icons.coverage,
+                Icons.shield,
                 Colors.teal,
               ),
             ],
@@ -755,7 +755,7 @@ class _AlertCorrelationDisplayState extends State<AlertCorrelationDisplay>
               _buildEffectivenessMetricCard(
                 'Coverage',
                 _effectivenessMetrics.coverage,
-                Icons.coverage,
+                Icons.shield,
                 'Percentage of high-risk areas covered',
               ),
             ],
