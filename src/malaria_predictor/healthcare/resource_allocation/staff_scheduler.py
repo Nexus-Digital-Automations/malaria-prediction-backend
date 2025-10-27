@@ -9,8 +9,8 @@ Date: 2025-09-19
 """
 
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Any
+from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +24,10 @@ class StaffScheduler:
 
     def optimize_staff_allocation(
         self,
-        facilities: List[str],
-        staff_pool: List[Dict[str, Any]],
-        requirements: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        facilities: list[str],
+        staff_pool: list[dict[str, Any]],
+        requirements: dict[str, Any]
+    ) -> dict[str, Any]:
         """Optimize staff allocation across facilities"""
         return {
             "allocation_plan": {
@@ -45,9 +45,9 @@ class StaffScheduler:
     def create_schedule(
         self,
         facility_id: str,
-        staff_list: List[Dict[str, Any]],
+        staff_list: list[dict[str, Any]],
         schedule_period_days: int = 7
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create detailed staff schedule"""
         return {
             "facility_id": facility_id,

@@ -342,3 +342,11 @@ TODO.json.*
 *.logs
 
 .turbo/
+# TaskManager and validation files
+.stop-hook-calls.json
+.validation-audit-trail.json
+.validation-criteria-history.json
+TASKS.json
+
+# Security scan reports
+bandit-report.json

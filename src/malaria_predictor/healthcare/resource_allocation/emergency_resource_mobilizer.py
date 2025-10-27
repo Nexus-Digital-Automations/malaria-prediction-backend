@@ -10,7 +10,7 @@ Date: 2025-09-19
 
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -24,11 +24,11 @@ class EmergencyResourceMobilizer:
 
     def mobilize_emergency_resources(
         self,
-        emergency_location: Tuple[float, float],
+        emergency_location: tuple[float, float],
         emergency_type: str,
         affected_population: int,
         response_time_hours: int = 24
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Mobilize resources for emergency response"""
         return {
             "emergency_id": f"EMR_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
@@ -50,7 +50,7 @@ class EmergencyResourceMobilizer:
             "generated_at": datetime.now()
         }
 
-    def track_response_status(self, emergency_id: str) -> Dict[str, Any]:
+    def track_response_status(self, emergency_id: str) -> dict[str, Any]:
         """Track emergency response status"""
         return {
             "emergency_id": emergency_id,

@@ -10,7 +10,7 @@ Date: 2025-09-19
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +25,9 @@ class BudgetOptimizer:
     def optimize_budget_allocation(
         self,
         total_budget: float,
-        cost_categories: List[str],
-        constraints: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        cost_categories: list[str],
+        constraints: dict[str, Any]
+    ) -> dict[str, Any]:
         """Optimize budget allocation across categories"""
         # Simplified budget allocation
         allocation = {
@@ -48,9 +48,9 @@ class BudgetOptimizer:
 
     def analyze_cost_effectiveness(
         self,
-        spending_data: List[Dict[str, Any]],
-        outcome_data: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        spending_data: list[dict[str, Any]],
+        outcome_data: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """Analyze cost effectiveness of spending"""
         return {
             "cost_per_outcome": 125.50,

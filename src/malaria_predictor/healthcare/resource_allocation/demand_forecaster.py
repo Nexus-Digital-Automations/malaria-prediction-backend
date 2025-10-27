@@ -10,7 +10,7 @@ Date: 2025-09-19
 
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -24,9 +24,9 @@ class DemandForecaster:
 
     def forecast_demand(
         self,
-        historical_data: List[Dict[str, Any]],
+        historical_data: list[dict[str, Any]],
         forecast_period_days: int = 30
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Forecast resource demand"""
         forecast_end = datetime.now() + timedelta(days=forecast_period_days)
 
@@ -45,7 +45,7 @@ class DemandForecaster:
             "generated_at": datetime.now()
         }
 
-    def generate_procurement_plan(self, forecast: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_procurement_plan(self, forecast: dict[str, Any]) -> dict[str, Any]:
         """Generate procurement recommendations"""
         return {
             "procurement_recommendations": [

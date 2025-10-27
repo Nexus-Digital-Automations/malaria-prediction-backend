@@ -10,7 +10,7 @@ Date: 2025-09-19
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class CostEffectivenessAnalyzer:
         """Initialize Cost Effectiveness Analyzer"""
         logger.info("Initializing Cost Effectiveness Analyzer")
 
-    def analyze_cost_effectiveness(self, cost_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def analyze_cost_effectiveness(self, cost_data: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze cost effectiveness"""
         return {
             "cost_per_cure": 45.50,
@@ -31,7 +31,7 @@ class CostEffectivenessAnalyzer:
             "analysis_date": datetime.now()
         }
 
-    def generate_cost_report(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_cost_report(self, analysis: dict[str, Any]) -> dict[str, Any]:
         """Generate cost effectiveness report"""
         return {
             "report_type": "cost_effectiveness",

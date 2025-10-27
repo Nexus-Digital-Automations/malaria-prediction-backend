@@ -7,19 +7,16 @@ emergency alerts, and analytics.
 """
 
 import logging
-from datetime import datetime, timezone, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
-from fastapi import APIRouter, HTTPException, Depends, Query, Body, Path, status
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from pydantic import BaseModel, Field, validator
-from sqlalchemy.orm import Session
 
-from ...notifications import NotificationManager
-from ...notifications.models import DevicePlatform, NotificationPriority
-from ...notifications.emergency_alerts import EmergencyLevel, EmergencyType
-from ...database.session import get_database_session
 from ...config import get_settings
+from ...notifications import NotificationManager
+from ...notifications.emergency_alerts import EmergencyLevel
+from ...notifications.models import DevicePlatform
 from ..auth import get_current_user, require_permissions
 
 logger = logging.getLogger(__name__)
@@ -32,10 +29,10 @@ class DeviceRegistrationRequest(BaseModel):
     """Request model for device registration."""
     token: str = Field(..., description="FCM device token", min_length=10)
     platform: DevicePlatform = Field(..., description="Device platform")
-    user_id: Optional[str] = Field(None, description="Associated user ID")
-    device_info: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Device metadata")
+    user_id: str | None = Field(None, description="Associated user ID")
+    device_info: dict[str, Any] | None = Field(default_factory=dict, description="Device metadata")
     auto_subscribe: bool = Field(True, description="Auto-subscribe to relevant topics")
-    user_preferences: Optional[Dict[str, Any]] = Field(default_factory=dict, description="User preferences")
+    user_preferences: dict[str, Any] | None = Field(default_factory=dict, description="User preferences")
 
     @validator('token')
     def validate_token(cls, v: str) -> str:
@@ -49,14 +46,14 @@ class MalariaAlertRequest(BaseModel):
     """Request model for malaria risk alerts."""
     risk_score: float = Field(..., ge=0.0, le=1.0, description="Risk score (0.0 to 1.0)")
     location_name: str = Field(..., description="Human-readable location name")
-    coordinates: Optional[Dict[str, float]] = Field(None, description="Geographic coordinates")
-    environmental_data: Optional[Dict[str, float]] = Field(None, description="Environmental conditions")
-    target_users: Optional[List[str]] = Field(None, description="Specific user IDs to target")
-    target_radius_km: Optional[float] = Field(50.0, description="Geographic targeting radius")
+    coordinates: dict[str, float] | None = Field(None, description="Geographic coordinates")
+    environmental_data: dict[str, float] | None = Field(None, description="Environmental conditions")
+    target_users: list[str] | None = Field(None, description="Specific user IDs to target")
+    target_radius_km: float | None = Field(50.0, description="Geographic targeting radius")
     immediate: bool = Field(True, description="Send immediately or schedule")
 
     @validator('coordinates')
-    def validate_coordinates(cls, v: Optional[Dict[str, float]]) -> Optional[Dict[str, float]]:
+    def validate_coordinates(cls, v: dict[str, float] | None) -> dict[str, float] | None:
         """Validate coordinate format."""
         if v is not None:
             if 'lat' not in v or 'lng' not in v:
@@ -72,27 +69,27 @@ class OutbreakAlertRequest(BaseModel):
     """Request model for outbreak alerts."""
     location_name: str = Field(..., description="Name of affected location")
     outbreak_probability: float = Field(..., ge=0.0, le=1.0, description="Outbreak probability")
-    affected_population: Optional[int] = Field(None, description="Number of people affected")
-    coordinates: Optional[Dict[str, float]] = Field(None, description="Geographic coordinates")
+    affected_population: int | None = Field(None, description="Number of people affected")
+    coordinates: dict[str, float] | None = Field(None, description="Geographic coordinates")
     radius_km: float = Field(50.0, description="Alert radius in kilometers")
-    severity: Optional[EmergencyLevel] = Field(None, description="Emergency severity level")
+    severity: EmergencyLevel | None = Field(None, description="Emergency severity level")
 
 
 class MedicationReminderRequest(BaseModel):
     """Request model for medication reminders."""
     user_id: str = Field(..., description="Target user ID")
     medication_name: str = Field(..., description="Name of medication")
-    dosage: Optional[str] = Field(None, description="Dosage information")
-    schedule_time: Optional[datetime] = Field(None, description="When to send reminder")
+    dosage: str | None = Field(None, description="Dosage information")
+    schedule_time: datetime | None = Field(None, description="When to send reminder")
 
 
 class TopicSubscriptionRequest(BaseModel):
     """Request model for topic subscriptions."""
     user_id: str = Field(..., description="User ID")
-    topics: List[str] = Field(..., description="List of topic names")
+    topics: list[str] = Field(..., description="List of topic names")
 
     @validator('topics')
-    def validate_topics(cls, v: List[str]) -> List[str]:
+    def validate_topics(cls, v: list[str]) -> list[str]:
         """Validate topic names."""
         if not v:
             raise ValueError("At least one topic must be specified")
@@ -132,8 +129,8 @@ async def get_notification_manager() -> NotificationManager:
 async def register_device(
     request: DeviceRegistrationRequest,
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(get_current_user),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, Any]:
     """
     Register a device for push notifications.
 
@@ -156,7 +153,7 @@ async def register_device(
                 "message": "Device registered successfully",
                 "token": request.token[:10] + "...",
                 "platform": request.platform,
-                "registered_at": datetime.now(timezone.utc).isoformat(),
+                "registered_at": datetime.now(UTC).isoformat(),
             }
         else:
             raise HTTPException(
@@ -176,8 +173,8 @@ async def register_device(
 async def unregister_device(
     token: str = Path(..., description="FCM device token"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(get_current_user),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, Any]:
     """
     Unregister a device from push notifications.
 
@@ -191,7 +188,7 @@ async def unregister_device(
                 "success": True,
                 "message": "Device unregistered successfully",
                 "token": token[:10] + "...",
-                "unregistered_at": datetime.now(timezone.utc).isoformat(),
+                "unregistered_at": datetime.now(UTC).isoformat(),
             }
         else:
             raise HTTPException(
@@ -213,8 +210,8 @@ async def unregister_device(
 async def send_malaria_alert(
     request: MalariaAlertRequest,
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(require_permissions(["send_notifications"])),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(require_permissions(["send_notifications"])),
+) -> dict[str, Any]:
     """
     Send malaria risk alert notification.
 
@@ -242,7 +239,7 @@ async def send_malaria_alert(
                     "immediate": request.immediate,
                 },
                 "delivery_results": result,
-                "sent_at": datetime.now(timezone.utc).isoformat(),
+                "sent_at": datetime.now(UTC).isoformat(),
             }
         else:
             raise HTTPException(
@@ -262,8 +259,8 @@ async def send_malaria_alert(
 async def send_outbreak_alert(
     request: OutbreakAlertRequest,
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(require_permissions(["send_emergency_alerts"])),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(require_permissions(["send_emergency_alerts"])),
+) -> dict[str, Any]:
     """
     Send emergency outbreak alert.
 
@@ -311,8 +308,8 @@ async def send_outbreak_alert(
 async def send_medication_reminder(
     request: MedicationReminderRequest,
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(get_current_user),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, Any]:
     """
     Send medication reminder notification.
 
@@ -344,7 +341,7 @@ async def send_medication_reminder(
                     "scheduled": request.schedule_time is not None,
                 },
                 "delivery_results": result,
-                "sent_at": datetime.now(timezone.utc).isoformat(),
+                "sent_at": datetime.now(UTC).isoformat(),
             }
         else:
             raise HTTPException(
@@ -366,8 +363,8 @@ async def send_medication_reminder(
 async def subscribe_to_topics(
     request: TopicSubscriptionRequest,
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(get_current_user),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, Any]:
     """
     Subscribe user to notification topics.
 
@@ -397,7 +394,7 @@ async def subscribe_to_topics(
                 "failed_topics": failed_topics,
                 "user_id": request.user_id,
             },
-            "subscribed_at": datetime.now(timezone.utc).isoformat(),
+            "subscribed_at": datetime.now(UTC).isoformat(),
         }
 
     except Exception as e:
@@ -411,8 +408,8 @@ async def subscribe_to_topics(
 @router.get("/topics/statistics")
 async def get_topic_statistics(
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(require_permissions(["view_analytics"])),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(require_permissions(["view_analytics"])),
+) -> dict[str, Any]:
     """
     Get topic subscription statistics.
 
@@ -424,7 +421,7 @@ async def get_topic_statistics(
         return {
             "success": True,
             "topic_statistics": stats,
-            "retrieved_at": datetime.now(timezone.utc).isoformat(),
+            "retrieved_at": datetime.now(UTC).isoformat(),
         }
 
     except Exception as e:
@@ -441,8 +438,8 @@ async def get_topic_statistics(
 async def get_notification_dashboard(
     days: int = Query(7, ge=1, le=365, description="Number of days for analysis"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(require_permissions(["view_analytics"])),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(require_permissions(["view_analytics"])),
+) -> dict[str, Any]:
     """
     Get comprehensive notification analytics dashboard.
 
@@ -455,7 +452,7 @@ async def get_notification_dashboard(
         return {
             "success": True,
             "dashboard_data": dashboard_data,
-            "retrieved_at": datetime.now(timezone.utc).isoformat(),
+            "retrieved_at": datetime.now(UTC).isoformat(),
         }
 
     except Exception as e:
@@ -471,15 +468,15 @@ async def get_delivery_summary(
     days: int = Query(7, ge=1, le=365, description="Number of days for analysis"),
     group_by: str = Query("day", description="Grouping period (hour, day, week, month)"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(require_permissions(["view_analytics"])),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(require_permissions(["view_analytics"])),
+) -> dict[str, Any]:
     """
     Get notification delivery summary with trends.
 
     Returns detailed delivery statistics grouped by specified time period.
     """
     try:
-        end_date = datetime.now(timezone.utc)
+        end_date = datetime.now(UTC)
         start_date = end_date - timedelta(days=days)
 
         summary = await notification_manager.analytics.get_delivery_summary(
@@ -491,7 +488,7 @@ async def get_delivery_summary(
         return {
             "success": True,
             "delivery_summary": summary,
-            "retrieved_at": datetime.now(timezone.utc).isoformat(),
+            "retrieved_at": datetime.now(UTC).isoformat(),
         }
 
     except Exception as e:
@@ -506,15 +503,15 @@ async def get_delivery_summary(
 async def get_engagement_metrics(
     days: int = Query(30, ge=1, le=365, description="Number of days for analysis"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(require_permissions(["view_analytics"])),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(require_permissions(["view_analytics"])),
+) -> dict[str, Any]:
     """
     Get user engagement metrics for notifications.
 
     Returns click-through rates, template performance, and engagement analysis.
     """
     try:
-        end_date = datetime.now(timezone.utc)
+        end_date = datetime.now(UTC)
         start_date = end_date - timedelta(days=days)
 
         engagement = await notification_manager.analytics.get_engagement_metrics(
@@ -525,7 +522,7 @@ async def get_engagement_metrics(
         return {
             "success": True,
             "engagement_metrics": engagement,
-            "retrieved_at": datetime.now(timezone.utc).isoformat(),
+            "retrieved_at": datetime.now(UTC).isoformat(),
         }
 
     except Exception as e:
@@ -541,15 +538,15 @@ async def get_error_analysis(
     days: int = Query(7, ge=1, le=365, description="Number of days for analysis"),
     limit: int = Query(50, ge=1, le=200, description="Maximum error details to return"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(require_permissions(["view_analytics"])),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(require_permissions(["view_analytics"])),
+) -> dict[str, Any]:
     """
     Get notification error analysis.
 
     Returns error patterns, failure analysis, and troubleshooting insights.
     """
     try:
-        end_date = datetime.now(timezone.utc)
+        end_date = datetime.now(UTC)
         start_date = end_date - timedelta(days=days)
 
         error_analysis = await notification_manager.analytics.get_error_analysis(
@@ -561,7 +558,7 @@ async def get_error_analysis(
         return {
             "success": True,
             "error_analysis": error_analysis,
-            "retrieved_at": datetime.now(timezone.utc).isoformat(),
+            "retrieved_at": datetime.now(UTC).isoformat(),
         }
 
     except Exception as e:
@@ -577,8 +574,8 @@ async def get_error_analysis(
 @router.get("/system/status")
 async def get_system_status(
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(require_permissions(["view_system_status"])),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(require_permissions(["view_system_status"])),
+) -> dict[str, Any]:
     """
     Get notification system status and health metrics.
 
@@ -590,7 +587,7 @@ async def get_system_status(
         return {
             "success": True,
             "system_status": status_data,
-            "checked_at": datetime.now(timezone.utc).isoformat(),
+            "checked_at": datetime.now(UTC).isoformat(),
         }
 
     except Exception as e:
@@ -606,8 +603,8 @@ async def cleanup_old_data(
     notification_retention_days: int = Query(90, ge=1, le=365, description="Days to retain notifications"),
     inactive_device_days: int = Query(30, ge=1, le=365, description="Days to consider device inactive"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(require_permissions(["system_admin"])),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(require_permissions(["system_admin"])),
+) -> dict[str, Any]:
     """
     Clean up old notification data and inactive devices.
 
@@ -624,7 +621,7 @@ async def cleanup_old_data(
             "success": True,
             "message": "Data cleanup completed successfully",
             "cleanup_statistics": cleanup_stats,
-            "cleaned_at": datetime.now(timezone.utc).isoformat(),
+            "cleaned_at": datetime.now(UTC).isoformat(),
         }
 
     except Exception as e:
@@ -640,8 +637,8 @@ async def cleanup_old_data(
 @router.get("/emergency/active-alerts")
 async def get_active_emergency_alerts(
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(require_permissions(["view_emergency_alerts"])),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(require_permissions(["view_emergency_alerts"])),
+) -> dict[str, Any]:
     """
     Get all currently active emergency alerts.
 
@@ -654,7 +651,7 @@ async def get_active_emergency_alerts(
             "success": True,
             "active_alerts": active_alerts,
             "alert_count": len(active_alerts),
-            "retrieved_at": datetime.now(timezone.utc).isoformat(),
+            "retrieved_at": datetime.now(UTC).isoformat(),
         }
 
     except Exception as e:
@@ -671,8 +668,8 @@ async def cancel_emergency_alert(
     reason: str = Body(..., description="Reason for cancellation"),
     send_notice: bool = Body(True, description="Send cancellation notice to users"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: Dict[str, Any] = Depends(require_permissions(["cancel_emergency_alerts"])),
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(require_permissions(["cancel_emergency_alerts"])),
+) -> dict[str, Any]:
     """
     Cancel an active emergency alert.
 

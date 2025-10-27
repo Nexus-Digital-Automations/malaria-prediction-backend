@@ -10,7 +10,7 @@ Date: 2025-09-19
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class TreatmentOutcomeAnalyzer:
         """Initialize Treatment Outcome Analyzer"""
         logger.info("Initializing Treatment Outcome Analyzer")
 
-    def analyze_outcomes(self, treatment_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def analyze_outcomes(self, treatment_data: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze treatment outcomes"""
         return {
             "cure_rate": 0.92,
@@ -31,7 +31,7 @@ class TreatmentOutcomeAnalyzer:
             "analysis_date": datetime.now()
         }
 
-    def generate_outcome_report(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_outcome_report(self, analysis: dict[str, Any]) -> dict[str, Any]:
         """Generate outcome analysis report"""
         return {
             "report_type": "treatment_outcomes",

@@ -10,9 +10,9 @@ Date: 2025-09-19
 """
 
 import logging
-from datetime import datetime
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Any
+from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class HealthcareAnalytics:
         """Initialize Healthcare Analytics"""
         logger.info("Initializing Healthcare Analytics Engine")
 
-    def calculate_metrics(self, data: Dict[str, Any]) -> List[AnalyticsResult]:
+    def calculate_metrics(self, data: dict[str, Any]) -> list[AnalyticsResult]:
         """Calculate healthcare metrics"""
         results = []
 
@@ -49,7 +49,7 @@ class HealthcareAnalytics:
 
         return results
 
-    def generate_report(self, metrics: List[AnalyticsResult]) -> Dict[str, Any]:
+    def generate_report(self, metrics: list[AnalyticsResult]) -> dict[str, Any]:
         """Generate analytics report"""
         return {
             "generated_at": datetime.now(),

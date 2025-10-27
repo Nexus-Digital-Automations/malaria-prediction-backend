@@ -10,7 +10,7 @@ Date: 2025-09-19
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class InventoryManager:
         logger.info("Initializing Inventory Manager")
         self._inventory = {}
 
-    def track_inventory(self, facility_id: str, resources: Dict[str, Any]) -> Dict[str, Any]:
+    def track_inventory(self, facility_id: str, resources: dict[str, Any]) -> dict[str, Any]:
         """Track inventory levels"""
         self._inventory[facility_id] = resources
         return {
@@ -33,7 +33,7 @@ class InventoryManager:
             "updated_at": datetime.now()
         }
 
-    def check_stock_levels(self, facility_id: str) -> Dict[str, Any]:
+    def check_stock_levels(self, facility_id: str) -> dict[str, Any]:
         """Check current stock levels"""
         inventory = self._inventory.get(facility_id, {})
         return {

@@ -10,7 +10,7 @@ Date: 2025-09-19
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class ResourceUtilizationAnalyzer:
         """Initialize Resource Utilization Analyzer"""
         logger.info("Initializing Resource Utilization Analyzer")
 
-    def analyze_utilization(self, resource_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def analyze_utilization(self, resource_data: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze resource utilization"""
         return {
             "bed_utilization": 0.78,
@@ -31,7 +31,7 @@ class ResourceUtilizationAnalyzer:
             "analysis_date": datetime.now()
         }
 
-    def generate_utilization_report(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_utilization_report(self, analysis: dict[str, Any]) -> dict[str, Any]:
         """Generate utilization analysis report"""
         return {
             "report_type": "resource_utilization",
