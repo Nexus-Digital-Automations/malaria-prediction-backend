@@ -1,5 +1,18 @@
 # Malaria Prediction Flutter Frontend
 
+> **⚠️ DEPRECATION NOTICE**
+> This directory contains an early prototype/proof-of-concept of the Flutter frontend.
+> **Active development has moved to [`malaria_frontend/`](../malaria_frontend/)**
+>
+> The `malaria_frontend/` directory contains the production-ready implementation with:
+> - 5x more code (445 vs 89 Dart files)
+> - Complete feature implementation (Firebase, push notifications, PDF generation)
+> - Comprehensive testing infrastructure (unit, integration, e2e, performance)
+> - Active development and maintenance
+>
+> **This directory is kept for reference only.**
+> For all new development, please use `malaria_frontend/`.
+
 AI-powered malaria outbreak prediction and monitoring mobile application built with Flutter.
 
 ## 🏗️ Architecture Overview
