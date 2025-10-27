@@ -418,6 +418,41 @@ Real-time production operations visibility at `/operations/dashboard`:
 - **🔧 Uptime**: 99.9% availability target with health checks
 - **📈 Data Sources**: 5 primary sources with 80+ derived features
 
+## 📚 Documentation
+
+Comprehensive documentation covering all aspects of the system.
+
+### 📖 **[Documentation Index](./docs/README.md)** ← Start Here
+
+### Quick Access
+
+| Category | Description | Link |
+|----------|-------------|------|
+| **🔌 API** | REST API endpoints, auth, WebSockets | [docs/api/](./docs/api/) |
+| **🤖 ML Models** | LSTM, Transformer, training, deployment | [docs/ml/](./docs/ml/) |
+| **🌍 Data Sources** | ERA5, CHIRPS, MODIS integration | [docs/data-sources/](./docs/data-sources/) |
+| **🚀 Deployment** | Docker, Kubernetes, production setup | [docs/deployment/](./docs/deployment/) |
+| **📊 Monitoring** | Prometheus, Grafana, operations | [docs/monitoring/](./docs/monitoring/) |
+| **🧪 Testing** | Testing framework, standards | [tests/README.md](./tests/README.md) |
+| **⚙️ CI/CD** | Pipelines, runbooks, incident response | [docs/cicd/](./docs/cicd/) |
+
+### Key Documentation
+
+- **API Reference**: [docs/api/endpoints.md](./docs/api/endpoints.md) - Complete endpoint catalog
+- **Authentication**: [docs/api/authentication.md](./docs/api/authentication.md) - JWT authentication guide
+- **ML Architecture**: [docs/ml/model-architecture.md](./docs/ml/model-architecture.md) - Model details
+- **Training Guide**: [docs/ml/training-guide.md](./docs/ml/training-guide.md) - Train models from scratch
+- **Data Integration**: [docs/data-sources/overview.md](./docs/data-sources/overview.md) - 80+ data sources
+- **Production Deployment**: [docs/ml/deployment-workflow.md](./docs/ml/deployment-workflow.md) - Deploy to production
+
+### Learning Paths
+
+- **New Developers**: Start with [Documentation Index](./docs/README.md) → [API Overview](./docs/api/overview.md)
+- **Data Scientists**: [ML Models](./docs/ml/model-architecture.md) → [Training Guide](./docs/ml/training-guide.md)
+- **DevOps**: [Deployment](./docs/deployment/DOCKER.md) → [Monitoring](./docs/monitoring/PRODUCTION_MONITORING_GUIDE.md)
+
+---
+
 ## 🤝 Contributing
 
 ### Development Workflow
