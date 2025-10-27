@@ -10,76 +10,15 @@
       "id": "feature_1758221818104_8n3zdain2"
     },
     {
-      "status": "completed",
-      "created_at": "2025-09-18T15:22:59.418Z",
-      "title": "Build comprehensive analytics dashboard with advanced data visualization",
-      "description": "Implement fl_chart for data visualization, create prediction accuracy metrics displays, build environmental trend analysis charts, develop outbreak pattern recognition visuals, setup custom report generation system, and create interactive data exploration tools",
-      "category": "feature",
-      "id": "feature_1758208979418_2bpcwrxsuei",
-      "assigned_agent": "dev_session_1758300019459_1_general_82536a2a",
-      "started_at": "2025-09-19T16:41:12.447Z",
-      "claimed_by": "dev_session_1758300019459_1_general_82536a2a",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758208959697_1_general_eac876fc",
-          "role": "primary",
-          "assignedAt": "2025-09-18T15:24:26.326Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        },
-        {
-          "agent": "dev_session_1758208959697_1_general_eac876fc",
-          "action": "auto_unassign_stale",
-          "timestamp": "2025-09-18T18:56:58.102Z",
-          "reason": "Agent became stale (inactive >30 minutes)"
-        },
-        {
-          "agentId": "dev_session_1758264189032_1_general_bd3ba7cc",
-          "role": "primary",
-          "assignedAt": "2025-09-19T06:44:36.964Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        },
-        {
-          "agent": "dev_session_1758264189032_1_general_bd3ba7cc",
-          "action": "auto_unassign_stale",
-          "timestamp": "2025-09-19T07:26:19.418Z",
-          "reason": "Agent became stale (inactive >30 minutes)"
-        },
-        {
-          "agentId": "dev_session_1758296989471_1_general_f28d6768",
-          "role": "primary",
-          "assignedAt": "2025-09-19T16:07:32.169Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        },
-        {
-          "agent": "dev_session_1758296989471_1_general_f28d6768",
-          "action": "auto_unassign_stale",
-          "timestamp": "2025-09-19T16:39:39.796Z",
-          "reason": "Agent became stale (inactive >30 minutes)"
-        },
-        {
-          "agentId": "dev_session_1758300019459_1_general_82536a2a",
-          "role": "primary",
-          "assignedAt": "2025-09-19T16:41:12.447Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-19T16:44:13.846Z",
-      "updated_at": "2025-09-19T16:44:13.846Z"
-    },
-    {
-      "status": "in_progress",
+      "status": "pending",
       "created_at": "2025-09-18T15:23:04.441Z",
       "title": "Implement interactive risk maps with malaria prediction overlays",
       "description": "Build comprehensive mapping system with flutter_map integration, choropleth risk overlays, geographic controls, location services, real-time visualization, and map-based data filtering. Include risk level overlays, multiple map layers, offline caching, and custom markers for health facilities.",
       "category": "feature",
       "id": "feature_1758208984441_lo0lxjqrhqc",
-      "assigned_agent": "dev_session_1758300019459_1_general_82536a2a",
-      "started_at": "2025-09-19T16:44:27.351Z",
-      "claimed_by": "dev_session_1758300019459_1_general_82536a2a",
+      "assigned_agent": null,
+      "started_at": null,
+      "claimed_by": null,
       "agent_assignment_history": [
         {
           "agentId": "dev_session_1758208966468_1_general_6292789e",
@@ -100,6 +39,12 @@
           "assignedAt": "2025-09-19T16:44:27.351Z",
           "reassignReason": null,
           "claimPriority": "normal"
+        },
+        {
+          "agent": "system",
+          "action": "auto_reset_stale",
+          "timestamp": "2025-09-19T17:14:27.931Z",
+          "reason": "Task stale for 30 minutes"
         }
       ]
     },
@@ -180,15 +125,15 @@
       "id": "feature_1758298242282_2gfzcfl2ywm"
     },
     {
-      "status": "in_progress",
+      "status": "pending",
       "created_at": "2025-09-19T16:10:42.511Z",
       "title": "Setup custom report generation system for analytics dashboard",
       "description": "Create comprehensive report generation system with PDF export, CSV export, customizable templates, chart embedding, scheduling, and sharing features. Integrate with existing analytics BLoC and entities.",
       "category": "feature",
       "id": "feature_1758298242511_lpc7pxlhyz",
-      "assigned_agent": "dev_session_1758298227391_1_general_1de350b9",
-      "started_at": "2025-09-19T16:11:00.700Z",
-      "claimed_by": "dev_session_1758298227391_1_general_1de350b9",
+      "assigned_agent": null,
+      "started_at": null,
+      "claimed_by": null,
       "agent_assignment_history": [
         {
           "agentId": "dev_session_1758298227391_1_general_1de350b9",
@@ -196,8 +141,56 @@
           "assignedAt": "2025-09-19T16:11:00.700Z",
           "reassignReason": null,
           "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758298227391_1_general_1de350b9",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-19T17:02:56.888Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
         }
       ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-19T16:45:42.569Z",
+      "title": "Implement comprehensive geographic controls and user interactions for risk maps",
+      "description": "Create interactive map controls (zoom, pan, rotation), custom map gestures, coordinate display, measurement tools, location search, bookmarks, and export capabilities. Build multiple widgets and services for complete geographic functionality.",
+      "category": "feature",
+      "id": "feature_1758300342569_i1or22ru2m"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-19T16:45:43.805Z",
+      "title": "Implement comprehensive multi-layer mapping system with various overlays and data layers",
+      "description": "Create a complete mapping system with multiple layer management, environmental data layers, infrastructure layers, population overlays, and comprehensive controls for the malaria prediction system. Includes base maps, overlays, markers, layer switching, visibility controls, temperature/rainfall/vegetation data, hospitals/health facilities/transportation, population density, demographics, custom configuration, styling, opacity and blending controls.",
+      "category": "feature",
+      "id": "feature_1758300343805_mtqvxbgn7nb",
+      "assigned_agent": null,
+      "started_at": null,
+      "claimed_by": null,
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758300327770_1_general_327800f4",
+          "role": "primary",
+          "assignedAt": "2025-09-19T16:46:03.444Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758300327770_1_general_327800f4",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-19T17:15:27.782Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
+        }
+      ]
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-19T16:45:44.052Z",
+      "title": "Implement comprehensive offline caching system for map data and tiles",
+      "description": "Setup map tile caching for offline access, implement risk data caching and synchronization, create cache management and storage optimization, build offline mode detection and handling, add cache invalidation and update strategies, implement cache size limits and cleanup, create cache status indicators and controls",
+      "category": "feature",
+      "id": "feature_1758300344052_28noe59mcks"
     },
     {
       "status": "pending",
@@ -281,15 +274,15 @@
       "id": "test_1758294858769_8p9sy1vxty6"
     },
     {
-      "status": "in_progress",
+      "status": "pending",
       "created_at": "2025-09-19T16:10:44.197Z",
       "title": "Test analytics functionality and validate implementation",
       "description": "Create comprehensive unit tests for widgets, integration tests for BLoC interactions, widget tests for UI components, test data visualization accuracy, validate chart responsiveness, test error handling scenarios, verify performance with large datasets. Create test files: charts_test.dart, dashboard_test.dart, analytics_bloc_test.dart, analytics_integration_test.dart",
       "category": "test",
       "id": "test_1758298244197_tzride9g0oq",
-      "assigned_agent": "dev_session_1758298229301_1_general_74bffc08",
-      "started_at": "2025-09-19T16:11:03.678Z",
-      "claimed_by": "dev_session_1758298229301_1_general_74bffc08",
+      "assigned_agent": null,
+      "started_at": null,
+      "claimed_by": null,
       "agent_assignment_history": [
         {
           "agentId": "dev_session_1758298229301_1_general_74bffc08",
@@ -297,142 +290,14 @@
           "assignedAt": "2025-09-19T16:11:03.678Z",
           "reassignReason": null,
           "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758298229301_1_general_74bffc08",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-19T17:02:56.888Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
         }
       ]
-    },
-    {
-      "status": "completed",
-      "created_at": "2025-09-19T16:45:42.475Z",
-      "title": "Create comprehensive choropleth risk overlay system for malaria prediction visualization",
-      "description": "Design and implement risk data visualization with color-coded overlays, polygon-based risk area mapping, dynamic risk level calculation, interactive risk zone selection, risk gradient visualization, risk threshold configuration, and risk legend indicators. Create required files in lib/features/risk_maps/ and integrate with existing analytics data.",
-      "category": "feature",
-      "id": "feature_1758300342475_8746157c76",
-      "assigned_agent": "dev_session_1758300327078_1_general_cc82bf87",
-      "started_at": "2025-09-19T16:46:00.990Z",
-      "claimed_by": "dev_session_1758300327078_1_general_cc82bf87",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758300327078_1_general_cc82bf87",
-          "role": "primary",
-          "assignedAt": "2025-09-19T16:46:00.990Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-19T17:00:00.737Z",
-      "updated_at": "2025-09-19T17:00:00.737Z"
-    },
-    {
-      "status": "pending",
-      "created_at": "2025-09-19T16:45:42.569Z",
-      "title": "Implement comprehensive geographic controls and user interactions for risk maps",
-      "description": "Create interactive map controls (zoom, pan, rotation), custom map gestures, coordinate display, measurement tools, location search, bookmarks, and export capabilities. Build multiple widgets and services for complete geographic functionality.",
-      "category": "feature",
-      "id": "feature_1758300342569_i1or22ru2m"
-    },
-    {
-      "status": "completed",
-      "created_at": "2025-09-19T16:45:42.787Z",
-      "title": "Setup comprehensive location services integration for risk mapping system",
-      "description": "Integrate device GPS and location services, implement location permission handling, create current location tracking, build location-based risk assessment, add geofencing for risk zone notifications, implement location history tracking, and create location accuracy indicators",
-      "category": "feature",
-      "id": "feature_1758300342787_3cf2cg1lgmx",
-      "assigned_agent": "dev_session_1758300328059_1_general_b344a1cd",
-      "started_at": "2025-09-19T16:46:01.908Z",
-      "claimed_by": "dev_session_1758300328059_1_general_b344a1cd",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758300328059_1_general_b344a1cd",
-          "role": "primary",
-          "assignedAt": "2025-09-19T16:46:01.908Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-19T16:58:58.521Z",
-      "updated_at": "2025-09-19T16:58:58.521Z"
-    },
-    {
-      "status": "completed",
-      "created_at": "2025-09-19T16:45:43.305Z",
-      "title": "Create comprehensive custom markers system for health facilities and points of interest",
-      "description": "Design custom marker widgets for different facility types, implement marker clustering for performance, create interactive marker popups and info windows, build facility type categorization and filtering, add marker search and filtering capabilities, implement custom marker icons and styling, create facility data integration and display",
-      "category": "feature",
-      "id": "feature_1758300343305_k1be2ajnwah",
-      "assigned_agent": "dev_session_1758300328541_1_general_d4c55109",
-      "started_at": "2025-09-19T16:58:50.336Z",
-      "claimed_by": "dev_session_1758300328541_1_general_d4c55109",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758300328541_1_general_d4c55109",
-          "role": "primary",
-          "assignedAt": "2025-09-19T16:58:50.336Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-19T16:59:32.302Z",
-      "updated_at": "2025-09-19T16:59:32.303Z"
-    },
-    {
-      "status": "completed",
-      "created_at": "2025-09-19T16:45:43.537Z",
-      "title": "Build comprehensive real-time visualization system for live malaria risk data updates",
-      "description": "Implement WebSocket integration, live risk data streaming, animated transitions, real-time marker/overlay updates, temporal visualization, data refresh indicators, and conflict resolution. Create: real_time_map_service.dart, real_time_overlay.dart, temporal_risk_slider.dart, real_time_update_model.dart, temporal_risk_data.dart, real_time_map_bloc.dart",
-      "category": "feature",
-      "id": "feature_1758300343537_5t5phs0ybes",
-      "assigned_agent": "dev_session_1758300327440_1_general_42f594ba",
-      "started_at": "2025-09-19T16:46:03.557Z",
-      "claimed_by": "dev_session_1758300327440_1_general_42f594ba",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758300327440_1_general_42f594ba",
-          "role": "primary",
-          "assignedAt": "2025-09-19T16:46:03.557Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ],
-      "completed_at": "2025-09-19T16:58:00.229Z",
-      "updated_at": "2025-09-19T16:58:00.229Z"
-    },
-    {
-      "status": "in_progress",
-      "created_at": "2025-09-19T16:45:43.805Z",
-      "title": "Implement comprehensive multi-layer mapping system with various overlays and data layers",
-      "description": "Create a complete mapping system with multiple layer management, environmental data layers, infrastructure layers, population overlays, and comprehensive controls for the malaria prediction system. Includes base maps, overlays, markers, layer switching, visibility controls, temperature/rainfall/vegetation data, hospitals/health facilities/transportation, population density, demographics, custom configuration, styling, opacity and blending controls.",
-      "category": "feature",
-      "id": "feature_1758300343805_mtqvxbgn7nb",
-      "assigned_agent": "dev_session_1758300327770_1_general_327800f4",
-      "started_at": "2025-09-19T16:46:03.444Z",
-      "claimed_by": "dev_session_1758300327770_1_general_327800f4",
-      "agent_assignment_history": [
-        {
-          "agentId": "dev_session_1758300327770_1_general_327800f4",
-          "role": "primary",
-          "assignedAt": "2025-09-19T16:46:03.444Z",
-          "reassignReason": null,
-          "claimPriority": "normal"
-        }
-      ]
-    },
-    {
-      "status": "pending",
-      "created_at": "2025-09-19T16:45:44.052Z",
-      "title": "Implement comprehensive offline caching system for map data and tiles",
-      "description": "Setup map tile caching for offline access, implement risk data caching and synchronization, create cache management and storage optimization, build offline mode detection and handling, add cache invalidation and update strategies, implement cache size limits and cleanup, create cache status indicators and controls",
-      "category": "feature",
-      "id": "feature_1758300344052_28noe59mcks"
-    },
-    {
-      "status": "completed",
-      "created_at": "2025-09-19T16:45:44.088Z",
-      "title": "Implement core flutter_map infrastructure for malaria prediction risk maps",
-      "description": "Analyze existing flutter_map integration, create base map widget, setup map controller, implement map configuration, add tile layers, create theming system, and implement responsive layout following Clean Architecture patterns",
-      "category": "feature",
-      "id": "feature_1758300344088_3az9js7w4fn",
-      "completed_at": "2025-09-19T16:53:35.740Z",
-      "updated_at": "2025-09-19T16:53:35.740Z"
     }
   ],
   "current_mode": "DEVELOPMENT",
@@ -441,344 +306,7 @@
   "review_strikes": 0,
   "strikes_completed_last_run": false,
   "last_hook_activation": 1755045713680,
-  "agents": {
-    "dev_session_1758298227175_1_general_7cf52d81": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:10:27.176Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:10:27.176Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758298227312_1_general_86e11489": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:10:27.313Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:10:27.313Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758298227391_1_general_1de350b9": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:10:27.391Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:10:27.391Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758298227422_1_general_824d5d1e": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:10:27.423Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:10:27.423Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758298227568_1_general_b80f9d28": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:10:27.568Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:10:27.568Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758298227633_1_general_4979d795": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:10:27.633Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:10:27.634Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758298228400_1_general_ecc8b552": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:10:28.400Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:10:28.400Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758298229301_1_general_74bffc08": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:10:29.302Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:10:29.302Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758300327078_1_general_cc82bf87": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:45:27.078Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:45:27.078Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758300327142_1_general_2f4548b7": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:45:27.142Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:45:27.142Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758300327440_1_general_42f594ba": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:45:27.440Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:45:27.440Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758300327770_1_general_327800f4": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:45:27.771Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:45:27.771Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758300328059_1_general_b344a1cd": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:45:28.059Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:45:28.059Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758300328125_1_general_b1eda15c": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:45:28.126Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:45:28.126Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758300328541_1_general_d4c55109": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:45:28.541Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:45:28.541Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758300329419_1_general_79e0505d": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-19T16:45:29.419Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-19T16:45:29.419Z",
-      "sessionId": null,
-      "metadata": {}
-    }
-  },
+  "agents": {},
   "completed_tasks": [],
   "features": [],
   "settings": {
