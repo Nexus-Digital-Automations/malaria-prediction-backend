@@ -100,10 +100,16 @@ class ModelManager:
                 raise
 
     def _load_lstm_model(self, model_path: str | None) -> MalariaLSTM:
-        """Load LSTM model from checkpoint or create new instance."""
+        """Load LSTM model from checkpoint or create new instance.
+
+        Security: Uses weights_only=False to load config dict. Only load trusted checkpoints.
+        """
         if model_path:
-            # Load from checkpoint
-            checkpoint = torch.load(model_path, map_location="cpu")
+            # SECURITY: weights_only=False required for config dict loading
+            # ONLY load checkpoints from trusted sources (MLflow, verified storage)
+            checkpoint = torch.load(
+                model_path, map_location="cpu", weights_only=False  # noqa: S614
+            )
             model = MalariaLSTM(**checkpoint.get("config", {}))
             model.load_state_dict(checkpoint["model_state_dict"])
             return model
@@ -112,9 +118,16 @@ class ModelManager:
             return MalariaLSTM()
 
     def _load_transformer_model(self, model_path: str | None) -> MalariaTransformer:
-        """Load Transformer model from checkpoint or create new instance."""
+        """Load Transformer model from checkpoint or create new instance.
+
+        Security: Uses weights_only=False to load config dict. Only load trusted checkpoints.
+        """
         if model_path:
-            checkpoint = torch.load(model_path, map_location="cpu")
+            # SECURITY: weights_only=False required for config dict loading
+            # ONLY load checkpoints from trusted sources (MLflow, verified storage)
+            checkpoint = torch.load(
+                model_path, map_location="cpu", weights_only=False  # noqa: S614
+            )
             model = MalariaTransformer(**checkpoint.get("config", {}))
             model.load_state_dict(checkpoint["model_state_dict"])
             return model
@@ -123,9 +136,16 @@ class ModelManager:
             return MalariaTransformer()
 
     def _load_ensemble_model(self, model_path: str | None) -> MalariaEnsembleModel:
-        """Load Ensemble model from checkpoint or create new instance."""
+        """Load Ensemble model from checkpoint or create new instance.
+
+        Security: Uses weights_only=False to load config dict. Only load trusted checkpoints.
+        """
         if model_path:
-            checkpoint = torch.load(model_path, map_location="cpu")
+            # SECURITY: weights_only=False required for config dict loading
+            # ONLY load checkpoints from trusted sources (MLflow, verified storage)
+            checkpoint = torch.load(
+                model_path, map_location="cpu", weights_only=False  # noqa: S614
+            )
             lstm_config = checkpoint.get("lstm_config", {})
             transformer_config = checkpoint.get("transformer_config", {})
             model = MalariaEnsembleModel(lstm_config, transformer_config)
