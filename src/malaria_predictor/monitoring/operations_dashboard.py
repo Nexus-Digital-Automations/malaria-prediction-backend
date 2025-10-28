@@ -52,7 +52,7 @@ class OperationsDashboardManager:
         self.alert_history: list[dict[str, Any]] = []
 
         # Monitoring task
-        self.monitoring_task = None
+        self.monitoring_task: asyncio.Task[None] | None = None
         self.monitoring_active = False
 
     def load_operations_config(self) -> dict[str, Any]:

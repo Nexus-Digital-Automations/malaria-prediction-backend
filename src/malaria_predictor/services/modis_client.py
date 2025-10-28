@@ -503,7 +503,7 @@ class MODISClient:
     def process_vegetation_indices(
         self,
         file_path: Path,
-        vegetation_indices: list[str] = None,
+        vegetation_indices: list[str] | None = None,
         apply_quality_filter: bool = True,
         output_format: str = "geotiff",
     ) -> list[MODISProcessingResult]:

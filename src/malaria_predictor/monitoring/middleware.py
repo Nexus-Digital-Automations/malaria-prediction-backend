@@ -559,7 +559,7 @@ class MonitoringMiddleware(BaseHTTPMiddleware):
         request.state.request_id = request_id
 
         # Start tracing context if enabled
-        tracing_context = None
+        tracing_context: Any = None
         if self.enable_tracing:
             tracing_context = self.tracer.trace_api_request(
                 method, endpoint, request_id=request_id

@@ -156,8 +156,8 @@ class AlertAnalyticsEngine:
         self.cache_ttl_seconds = 300  # 5 minutes
 
         # Background tasks
-        self._monitoring_task = None
-        self._anomaly_detection_task = None
+        self._monitoring_task: asyncio.Task[None] | None = None
+        self._anomaly_detection_task: asyncio.Task[None] | None = None
 
     async def start_monitoring(self):
         """Start background monitoring tasks."""

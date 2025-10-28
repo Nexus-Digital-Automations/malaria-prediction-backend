@@ -658,7 +658,7 @@ class WorldPopClient:
         self,
         country_codes: list[str],
         target_year: int = 2020,
-        age_groups: list[str] = None,
+        age_groups: list[str] | None = None,
         area_bounds: tuple[float, float, float, float] | None = None,
     ) -> dict[str, dict[str, float]]:
         """Get age-specific population data for specified countries.

@@ -216,8 +216,8 @@ class EnhancedFirebaseService:
         self.batch_size = 500  # Maximum batch size for FCM
 
         # Background tasks
-        self._queue_processor_task = None
-        self._analytics_processor_task = None
+        self._queue_processor_task: asyncio.Task[None] | None = None
+        self._analytics_processor_task: asyncio.Task[None] | None = None
 
         # Statistics
         self.stats = {

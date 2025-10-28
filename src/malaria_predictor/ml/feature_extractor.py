@@ -565,7 +565,7 @@ class EnvironmentalFeatureExtractor:
         return np.clip(climate_stress, 0, 1)
 
     def _validate_and_clean_features(
-        self, features: dict[str, np.ndarray | None]
+        self, features: dict[str, Any]
     ) -> dict[str, np.ndarray]:
         """Validate and clean extracted features."""
 
