@@ -64,7 +64,7 @@ class MalariaTrainingPipeline:
         self.training_data = None
         self.validation_data = None
         self.best_model = None
-        self.best_metrics = None
+        self.best_metrics: dict[str, Any] | None = None
 
         # MLflow setup
         self.experiment_name = self.config.get("experiment_name", "malaria_prediction")

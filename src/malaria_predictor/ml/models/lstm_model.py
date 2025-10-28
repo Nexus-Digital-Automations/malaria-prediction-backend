@@ -494,10 +494,7 @@ class MalariaLSTM(pl.LightningModule):
         self.eval()
         with torch.no_grad():
             # Convert numpy to tensor
-            if isinstance(features, np.ndarray):
-                features_tensor = torch.from_numpy(features).float()
-            else:
-                features_tensor = features
+            features_tensor = torch.from_numpy(features).float()
 
             # Add batch dimension if needed
             if features_tensor.dim() == 2:
@@ -507,14 +504,14 @@ class MalariaLSTM(pl.LightningModule):
             outputs = self.forward(features_tensor)
 
             # Convert to numpy and extract probabilities
-            if isinstance(outputs, tuple):
-                logits, uncertainty = outputs
-                probabilities = torch.softmax(logits, dim=1).cpu().numpy()[0]
-                uncertainty_val = (
-                    uncertainty.cpu().numpy()[0] if uncertainty is not None else 0.2
-                )
+            # Note: forward() returns dict[str, Tensor], extracting risk_mean
+            risk_mean = outputs.get("risk_mean", outputs.get("logits", list(outputs.values())[0]))
+            probabilities = torch.softmax(risk_mean, dim=1).cpu().numpy()[0]
+
+            # Extract uncertainty if available
+            if "risk_variance" in outputs:
+                uncertainty_val = outputs["risk_variance"].cpu().numpy()[0][0]
             else:
-                probabilities = torch.softmax(outputs, dim=1).cpu().numpy()[0]
                 uncertainty_val = 0.2
 
             # Calculate risk score and confidence
