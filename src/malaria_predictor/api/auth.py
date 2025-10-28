@@ -16,6 +16,7 @@ from fastapi.security import (
     HTTPBearer,
     OAuth2PasswordBearer,
 )
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.security_models import APIKey, AuditLog, User
@@ -85,12 +86,15 @@ async def get_current_user(
         )
         raise AuthenticationError("Invalid token")
 
-    # Get user from database
+    # Get user from database (using parameterized query to prevent SQL injection)
     try:
         result = await session.execute(
-            f"SELECT * FROM users WHERE id = '{token_data.sub}' AND is_active = true"
+            select(User).where(
+                (User.id == token_data.sub) & (User.is_active == True)  # noqa: E712
+            )
         )
-        user_data = result.fetchone()
+        user = result.scalar_one_or_none()
+        user_data = user if user else None
 
         if not user_data:
             SecurityAuditor.log_security_event(
@@ -115,9 +119,9 @@ async def get_current_user(
             last_login=user_data.last_login,
         )
 
-        # Update last login
+        # Update last login (using parameterized query to prevent SQL injection)
         await session.execute(
-            f"UPDATE users SET last_login = '{datetime.utcnow()}' WHERE id = '{user.id}'"
+            update(User).where(User.id == user.id).values(last_login=datetime.utcnow())
         )
         await session.commit()
 
@@ -160,11 +164,14 @@ async def get_current_api_key(
     hashed_key = hash_api_key(api_key)
 
     try:
-        # Get API key from database
+        # Get API key from database (using parameterized query to prevent SQL injection)
         result = await session.execute(
-            f"SELECT * FROM api_keys WHERE hashed_key = '{hashed_key}' AND is_active = true"
+            select(APIKey).where(
+                (APIKey.hashed_key == hashed_key) & (APIKey.is_active == True)  # noqa: E712
+            )
         )
-        api_key_data = result.fetchone()
+        api_key_obj = result.scalar_one_or_none()
+        api_key_data = api_key_obj if api_key_obj else None
 
         if not api_key_data:
             SecurityAuditor.log_security_event(
@@ -213,10 +220,11 @@ async def get_current_api_key(
             user_id=api_key_data.user_id,
         )
 
-        # Update usage statistics
+        # Update usage statistics (using parameterized query to prevent SQL injection)
         await session.execute(
-            f"UPDATE api_keys SET last_used = '{datetime.utcnow()}', "
-            f"usage_count = usage_count + 1 WHERE id = '{api_key_obj.id}'"
+            update(APIKey)
+            .where(APIKey.id == api_key_obj.id)
+            .values(last_used=datetime.utcnow(), usage_count=APIKey.usage_count + 1)
         )
         await session.commit()
 
@@ -255,12 +263,15 @@ async def authenticate_user(
         User: Authenticated user or None if authentication fails
     """
     try:
-        # Get user by username or email
+        # Get user by username or email (using parameterized query to prevent SQL injection)
         result = await session.execute(
-            f"SELECT * FROM users WHERE (username = '{username}' OR email = '{username}') "
-            f"AND is_active = true"
+            select(User).where(
+                ((User.username == username) | (User.email == username))
+                & (User.is_active == True)  # noqa: E712
+            )
         )
-        user_data = result.fetchone()
+        user_obj = result.scalar_one_or_none()
+        user_data = user_obj if user_obj else None
 
         if not user_data:
             SecurityAuditor.log_security_event(
@@ -289,11 +300,11 @@ async def authenticate_user(
             if failed_attempts >= 5:
                 locked_until = datetime.utcnow() + timedelta(minutes=30)
 
-            locked_until_value = "NULL" if locked_until is None else f"'{locked_until}'"
+            # Update failed attempts (using parameterized query to prevent SQL injection)
             await session.execute(
-                f"UPDATE users SET failed_login_attempts = {failed_attempts}, "
-                f"locked_until = {locked_until_value} "
-                f"WHERE id = '{user_data.id}'"
+                update(User)
+                .where(User.id == user_data.id)
+                .values(failed_login_attempts=failed_attempts, locked_until=locked_until)
             )
             await session.commit()
 
@@ -305,10 +316,13 @@ async def authenticate_user(
             )
             return None
 
-        # Reset failed login attempts on successful authentication
+        # Reset failed login attempts on successful authentication (parameterized query)
         await session.execute(
-            f"UPDATE users SET failed_login_attempts = 0, locked_until = NULL, "
-            f"last_login = '{datetime.utcnow()}' WHERE id = '{user_data.id}'"
+            update(User)
+            .where(User.id == user_data.id)
+            .values(
+                failed_login_attempts=0, locked_until=None, last_login=datetime.utcnow()
+            )
         )
         await session.commit()
 
