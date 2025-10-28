@@ -19,6 +19,7 @@ import logging
 import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 import schedule
 from pydantic import BaseModel, ConfigDict, Field

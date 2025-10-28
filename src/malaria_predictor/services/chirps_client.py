@@ -21,6 +21,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import requests
