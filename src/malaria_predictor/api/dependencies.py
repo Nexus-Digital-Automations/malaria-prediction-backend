@@ -108,7 +108,7 @@ class ModelManager:
             # SECURITY: weights_only=False required for config dict loading
             # ONLY load checkpoints from trusted sources (MLflow, verified storage)
             checkpoint = torch.load(
-                model_path, map_location="cpu", weights_only=False  # noqa: S614
+                model_path, map_location="cpu", weights_only=False
             )
             model = MalariaLSTM(**checkpoint.get("config", {}))
             model.load_state_dict(checkpoint["model_state_dict"])
@@ -126,7 +126,7 @@ class ModelManager:
             # SECURITY: weights_only=False required for config dict loading
             # ONLY load checkpoints from trusted sources (MLflow, verified storage)
             checkpoint = torch.load(
-                model_path, map_location="cpu", weights_only=False  # noqa: S614
+                model_path, map_location="cpu", weights_only=False
             )
             model = MalariaTransformer(**checkpoint.get("config", {}))
             model.load_state_dict(checkpoint["model_state_dict"])
@@ -144,7 +144,7 @@ class ModelManager:
             # SECURITY: weights_only=False required for config dict loading
             # ONLY load checkpoints from trusted sources (MLflow, verified storage)
             checkpoint = torch.load(
-                model_path, map_location="cpu", weights_only=False  # noqa: S614
+                model_path, map_location="cpu", weights_only=False
             )
             lstm_config = checkpoint.get("lstm_config", {})
             transformer_config = checkpoint.get("transformer_config", {})

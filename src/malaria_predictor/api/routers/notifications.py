@@ -17,7 +17,7 @@ from ...config import get_settings
 from ...notifications import NotificationManager
 from ...notifications.emergency_alerts import EmergencyLevel
 from ...notifications.models import DevicePlatform
-from ..auth import get_current_user, require_permissions
+from ..auth import get_current_user, require_scopes
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +166,7 @@ async def register_device(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error during device registration"
-        )
+        ) from e
 
 
 @router.delete("/devices/{token}")
@@ -201,7 +201,7 @@ async def unregister_device(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error during device unregistration"
-        )
+        ) from e
 
 
 # Notification Sending Endpoints
@@ -210,7 +210,7 @@ async def unregister_device(
 async def send_malaria_alert(
     request: MalariaAlertRequest,
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_permissions(["send_notifications"])),
+    current_user: dict[str, Any] = Depends(require_scopes(["send_notifications"])),
 ) -> dict[str, Any]:
     """
     Send malaria risk alert notification.
@@ -252,14 +252,14 @@ async def send_malaria_alert(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while sending malaria alert"
-        )
+        ) from e
 
 
 @router.post("/send/outbreak-alert")
 async def send_outbreak_alert(
     request: OutbreakAlertRequest,
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_permissions(["send_emergency_alerts"])),
+    current_user: dict[str, Any] = Depends(require_scopes(["send_emergency_alerts"])),
 ) -> dict[str, Any]:
     """
     Send emergency outbreak alert.
@@ -301,7 +301,7 @@ async def send_outbreak_alert(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while issuing outbreak alert"
-        )
+        ) from e
 
 
 @router.post("/send/medication-reminder")
@@ -354,7 +354,7 @@ async def send_medication_reminder(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while sending medication reminder"
-        )
+        ) from e
 
 
 # Topic Management Endpoints
@@ -402,13 +402,13 @@ async def subscribe_to_topics(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error during topic subscription"
-        )
+        ) from e
 
 
 @router.get("/topics/statistics")
 async def get_topic_statistics(
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_permissions(["view_analytics"])),
+    current_user: dict[str, Any] = Depends(require_scopes(["view_analytics"])),
 ) -> dict[str, Any]:
     """
     Get topic subscription statistics.
@@ -429,7 +429,7 @@ async def get_topic_statistics(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while retrieving topic statistics"
-        )
+        ) from e
 
 
 # Analytics Endpoints
@@ -438,7 +438,7 @@ async def get_topic_statistics(
 async def get_notification_dashboard(
     days: int = Query(7, ge=1, le=365, description="Number of days for analysis"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_permissions(["view_analytics"])),
+    current_user: dict[str, Any] = Depends(require_scopes(["view_analytics"])),
 ) -> dict[str, Any]:
     """
     Get comprehensive notification analytics dashboard.
@@ -460,7 +460,7 @@ async def get_notification_dashboard(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while retrieving dashboard analytics"
-        )
+        ) from e
 
 
 @router.get("/analytics/delivery-summary")
@@ -468,7 +468,7 @@ async def get_delivery_summary(
     days: int = Query(7, ge=1, le=365, description="Number of days for analysis"),
     group_by: str = Query("day", description="Grouping period (hour, day, week, month)"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_permissions(["view_analytics"])),
+    current_user: dict[str, Any] = Depends(require_scopes(["view_analytics"])),
 ) -> dict[str, Any]:
     """
     Get notification delivery summary with trends.
@@ -496,14 +496,14 @@ async def get_delivery_summary(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while retrieving delivery summary"
-        )
+        ) from e
 
 
 @router.get("/analytics/engagement")
 async def get_engagement_metrics(
     days: int = Query(30, ge=1, le=365, description="Number of days for analysis"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_permissions(["view_analytics"])),
+    current_user: dict[str, Any] = Depends(require_scopes(["view_analytics"])),
 ) -> dict[str, Any]:
     """
     Get user engagement metrics for notifications.
@@ -530,7 +530,7 @@ async def get_engagement_metrics(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while retrieving engagement metrics"
-        )
+        ) from e
 
 
 @router.get("/analytics/errors")
@@ -538,7 +538,7 @@ async def get_error_analysis(
     days: int = Query(7, ge=1, le=365, description="Number of days for analysis"),
     limit: int = Query(50, ge=1, le=200, description="Maximum error details to return"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_permissions(["view_analytics"])),
+    current_user: dict[str, Any] = Depends(require_scopes(["view_analytics"])),
 ) -> dict[str, Any]:
     """
     Get notification error analysis.
@@ -566,7 +566,7 @@ async def get_error_analysis(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while retrieving error analysis"
-        )
+        ) from e
 
 
 # System Management Endpoints
@@ -574,7 +574,7 @@ async def get_error_analysis(
 @router.get("/system/status")
 async def get_system_status(
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_permissions(["view_system_status"])),
+    current_user: dict[str, Any] = Depends(require_scopes(["view_system_status"])),
 ) -> dict[str, Any]:
     """
     Get notification system status and health metrics.
@@ -595,7 +595,7 @@ async def get_system_status(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while checking system status"
-        )
+        ) from e
 
 
 @router.post("/system/cleanup")
@@ -603,7 +603,7 @@ async def cleanup_old_data(
     notification_retention_days: int = Query(90, ge=1, le=365, description="Days to retain notifications"),
     inactive_device_days: int = Query(30, ge=1, le=365, description="Days to consider device inactive"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_permissions(["system_admin"])),
+    current_user: dict[str, Any] = Depends(require_scopes(["system_admin"])),
 ) -> dict[str, Any]:
     """
     Clean up old notification data and inactive devices.
@@ -629,7 +629,7 @@ async def cleanup_old_data(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error during data cleanup"
-        )
+        ) from e
 
 
 # Emergency Alert Management
@@ -637,7 +637,7 @@ async def cleanup_old_data(
 @router.get("/emergency/active-alerts")
 async def get_active_emergency_alerts(
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_permissions(["view_emergency_alerts"])),
+    current_user: dict[str, Any] = Depends(require_scopes(["view_emergency_alerts"])),
 ) -> dict[str, Any]:
     """
     Get all currently active emergency alerts.
@@ -659,7 +659,7 @@ async def get_active_emergency_alerts(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while retrieving active alerts"
-        )
+        ) from e
 
 
 @router.post("/emergency/cancel-alert/{alert_id}")
@@ -668,7 +668,7 @@ async def cancel_emergency_alert(
     reason: str = Body(..., description="Reason for cancellation"),
     send_notice: bool = Body(True, description="Send cancellation notice to users"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_permissions(["cancel_emergency_alerts"])),
+    current_user: dict[str, Any] = Depends(require_scopes(["cancel_emergency_alerts"])),
 ) -> dict[str, Any]:
     """
     Cancel an active emergency alert.
@@ -701,4 +701,4 @@ async def cancel_emergency_alert(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while cancelling emergency alert"
-        )
+        ) from e

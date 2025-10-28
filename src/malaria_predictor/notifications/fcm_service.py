@@ -7,10 +7,24 @@ retry logic, and delivery tracking.
 """
 
 import logging
+from typing import TYPE_CHECKING
 
-import firebase_admin
-from firebase_admin import credentials, messaging
-from google.cloud.firestore_v1.client import Client as FirestoreClient
+if TYPE_CHECKING:
+    from firebase_admin import credentials, messaging
+    from google.cloud.firestore_v1.client import Client as FirestoreClient
+
+try:
+    import firebase_admin
+    from firebase_admin import credentials, messaging
+    from google.cloud.firestore_v1.client import Client as FirestoreClient
+    FIREBASE_AVAILABLE = True
+except ImportError:
+    firebase_admin = None  # type: ignore
+    credentials = None  # type: ignore
+    messaging = None  # type: ignore
+    FirestoreClient = None  # type: ignore
+    FIREBASE_AVAILABLE = False
+
 from pydantic import BaseModel, Field, field_validator
 
 from ..config import settings
@@ -403,7 +417,7 @@ class FCMService:
         android_config: AndroidConfig | None = None,
         apns_config: APNSConfig | None = None,
         web_config: WebConfig | None = None,
-    ) -> messaging.Message:
+    ) -> "messaging.Message":
         """Build FCM message with platform-specific configurations."""
         # Build notification
         notification = messaging.Notification(
@@ -486,7 +500,7 @@ class FCMService:
         android_config: AndroidConfig | None = None,
         apns_config: APNSConfig | None = None,
         web_config: WebConfig | None = None,
-    ) -> messaging.MulticastMessage:
+    ) -> "messaging.MulticastMessage":
         """Build FCM multicast message for batch sending."""
         # Build notification
         notification = messaging.Notification(
