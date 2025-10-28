@@ -401,7 +401,7 @@ async def create_patient_case(
     patient_id: str,
     location: LocationPoint,
     case_type: str,
-    symptoms: list[str] = None,
+    symptoms: list[str] | None = None,
     initial_notes: str | None = None,
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
 ):
@@ -580,7 +580,7 @@ async def get_treatment_protocols(
 async def recommend_treatment_protocol(
     case_id: str,
     patient_weight: float | None = None,
-    comorbidities: list[str] = None,
+    comorbidities: list[str] | None = None,
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
 ):
     """
@@ -908,9 +908,9 @@ async def submit_surveillance_report(
     location: LocationPoint,
     population_monitored: int,
     case_data: dict[str, Any],
-    vector_data: dict[str, Any] = None,
-    environmental_observations: dict[str, Any] = None,
-    intervention_activities: list[dict[str, Any]] = None,
+    vector_data: dict[str, Any] | None = None,
+    environmental_observations: dict[str, Any] | None = None,
+    intervention_activities: list[dict[str, Any]] | None = None,
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
 ):
     """

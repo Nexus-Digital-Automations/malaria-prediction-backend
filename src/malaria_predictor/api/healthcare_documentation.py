@@ -371,7 +371,7 @@ async def create_clinical_note(
     case_id: str,
     note_type: str,
     content: str,
-    structured_data: dict[str, Any] = None,
+    structured_data: dict[str, Any] | None = None,
     is_confidential: bool = False,
     current_user = Depends(get_current_healthcare_professional)
 ):
