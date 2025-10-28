@@ -664,5 +664,19 @@ def validate_configuration(settings: Settings) -> list[str]:
     return warnings
 
 
+# Alias for FastAPI dependency injection pattern
+def get_settings() -> Settings:
+    """
+    Get configuration settings instance.
+
+    This is an alias for load_settings() following FastAPI's dependency injection pattern.
+    Used with FastAPI's Depends() for request-scoped settings access.
+
+    Returns:
+        Configured Settings instance
+    """
+    return load_settings()
+
+
 # Global settings instance
 settings = load_settings()
