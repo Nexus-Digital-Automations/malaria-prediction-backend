@@ -146,7 +146,7 @@ class HealthcareService:
         self,
         case_id: str,
         patient_weight: float | None = None,
-        comorbidities: list[str] = None
+        comorbidities: list[str] | None = None
     ) -> dict[str, Any]:
         """
         Get personalized treatment protocol recommendations.
@@ -498,7 +498,7 @@ class TreatmentProtocolAdvisor:
         self,
         case_data: dict[str, Any],
         patient_weight: float | None = None,
-        comorbidities: list[str] = None
+        comorbidities: list[str] | None = None
     ) -> dict[str, Any]:
         """Generate personalized treatment recommendations."""
         if comorbidities is None:

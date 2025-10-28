@@ -64,9 +64,9 @@ class TokenData:
     access_token: str
     refresh_token: str | None = None
     token_type: str = "Bearer"
-    expires_at: datetime = None
-    issued_at: datetime = None
-    scopes: set[str] = None
+    expires_at: datetime | None = None
+    issued_at: datetime | None = None
+    scopes: set[str] | None = None
     user_id: str | None = None
     session_id: str | None = None
     client_id: str | None = None

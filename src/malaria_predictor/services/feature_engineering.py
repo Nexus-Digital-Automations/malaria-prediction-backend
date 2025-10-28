@@ -417,7 +417,7 @@ class FeatureEngineer:
         return quality_features
 
     def _validate_and_normalize(
-        self, features: dict[str, np.ndarray]
+        self, features: dict[str, np.ndarray | None]
     ) -> dict[str, np.ndarray]:
         """Validate and normalize feature arrays."""
         validated_features = {}
