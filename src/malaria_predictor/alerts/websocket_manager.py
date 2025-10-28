@@ -200,10 +200,10 @@ class WebSocketAlertManager:
         self.redis_client: redis.Redis | None = None
 
         # Background tasks
-        self._cleanup_task = None
-        self._heartbeat_task = None
-        self._metrics_task = None
-        self._queue_processor_task = None
+        self._cleanup_task: asyncio.Task[None] | None = None
+        self._heartbeat_task: asyncio.Task[None] | None = None
+        self._metrics_task: asyncio.Task[None] | None = None
+        self._queue_processor_task: asyncio.Task[None] | None = None
 
         # Message queues for offline users
         self.offline_queues: dict[str, list[dict]] = defaultdict(list)

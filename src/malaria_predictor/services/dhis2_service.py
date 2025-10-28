@@ -43,9 +43,9 @@ class DHIS2Client:
         self.username = username
         self.password = password
         self.timeout = timeout
-        self.session = None
-        self.auth_token = None
-        self.session_expires = None
+        self.session: aiohttp.ClientSession | None = None
+        self.auth_token: str | None = None
+        self.session_expires: datetime | None = None
         logger.info(f"DHIS2 client initialized for {self.base_url}")
 
     async def __aenter__(self):

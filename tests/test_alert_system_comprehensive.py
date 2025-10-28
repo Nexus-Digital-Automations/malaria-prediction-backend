@@ -42,7 +42,9 @@ from src.malaria_predictor.alerts.enhanced_firebase_service import (
 )
 from src.malaria_predictor.database.models import (
     Alert,
-    AlertTemplate,
+    AlertChannel,
+    AlertStatus,
+    AlertType,
     User,
 )
 

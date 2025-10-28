@@ -42,6 +42,9 @@ def test_alert_system_component_initialization():
     """Test alert system components can be initialized without errors."""
     from src.malaria_predictor.alerts.alert_analytics import AlertAnalyticsEngine
     from src.malaria_predictor.alerts.alert_history_manager import AlertHistoryManager
+    from src.malaria_predictor.alerts.alert_template_manager import (
+        AlertTemplateManager,
+    )
 
     # Initialize components that don't require external dependencies
     analytics_engine = AlertAnalyticsEngine()
@@ -94,6 +97,9 @@ def test_alert_history_manager_functionality():
 
 def test_alert_template_manager_functionality():
     """Test AlertTemplateManager has expected methods and can be used."""
+    from src.malaria_predictor.alerts.alert_template_manager import (
+        AlertTemplateManager,
+    )
 
     manager = AlertTemplateManager()
 
@@ -176,6 +182,9 @@ def test_alert_system_integration_readiness():
     # Test that all main components can be imported together
     from src.malaria_predictor.alerts.alert_analytics import AlertAnalyticsEngine
     from src.malaria_predictor.alerts.alert_history_manager import AlertHistoryManager
+    from src.malaria_predictor.alerts.alert_template_manager import (
+        AlertTemplateManager,
+    )
 
     # Initialize the components that can be safely initialized
     analytics = AlertAnalyticsEngine()
@@ -203,7 +212,7 @@ def test_alert_system_validation_complete():
             AlertHistoryManager,
         )
         from src.malaria_predictor.alerts.alert_template_manager import (
-            AlertTemplateDefinitionManager,
+            AlertTemplateManager,
         )
         from src.malaria_predictor.alerts.bulk_notification_manager import (
             BulkNotificationManager,

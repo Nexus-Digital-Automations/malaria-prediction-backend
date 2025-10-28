@@ -545,7 +545,7 @@ class EnvironmentalFeatureExtractor:
         return habitat_score
 
     def _calculate_climate_stress(
-        self, temperature: np.ndarray, precipitation: np.ndarray
+        self, temperature: np.ndarray | None, precipitation: np.ndarray | None
     ) -> np.ndarray:
         """Calculate composite climate stress index."""
 
@@ -565,7 +565,7 @@ class EnvironmentalFeatureExtractor:
         return np.clip(climate_stress, 0, 1)
 
     def _validate_and_clean_features(
-        self, features: dict[str, np.ndarray]
+        self, features: dict[str, np.ndarray | None]
     ) -> dict[str, np.ndarray]:
         """Validate and clean extracted features."""
 

@@ -5,6 +5,8 @@ predictions, and risk assessments. Models are designed to work with
 PostgreSQL and TimescaleDB for efficient time-series storage.
 """
 
+from enum import Enum
+
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -20,6 +22,40 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import declarative_base, relationship
+
+
+class AlertType(str, Enum):
+    """Alert type enumeration for categorizing alerts."""
+
+    HIGH_RISK = "high_risk"
+    MEDIUM_RISK = "medium_risk"
+    LOW_RISK = "low_risk"
+    OUTBREAK_RISK = "outbreak_risk"
+    SYSTEM_HEALTH = "system_health"
+    DATA_QUALITY = "data_quality"
+
+
+class AlertStatus(str, Enum):
+    """Alert status enumeration tracking alert lifecycle."""
+
+    GENERATED = "generated"
+    PENDING = "pending"
+    SENT = "sent"
+    DELIVERED = "delivered"
+    READ = "read"
+    ACKNOWLEDGED = "acknowledged"
+    RESOLVED = "resolved"
+    FAILED = "failed"
+
+
+class AlertChannel(str, Enum):
+    """Alert delivery channel enumeration."""
+
+    PUSH = "push"
+    EMAIL = "email"
+    SMS = "sms"
+    WEBHOOK = "webhook"
+
 
 Base = declarative_base()
 
