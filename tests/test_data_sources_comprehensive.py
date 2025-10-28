@@ -163,7 +163,7 @@ class DataSourceTester:
 
             # Check for rasterio (required for processing)
             try:
-                import rasterio
+                import rasterio  # noqa: F401
                 self.results[source_name]['details'].append("✓ rasterio library available for GeoTIFF processing")
             except ImportError:
                 self.results[source_name]['errors'].append(
@@ -222,7 +222,7 @@ class DataSourceTester:
 
             # Check for required libraries
             try:
-                import rasterio
+                import rasterio  # noqa: F401
                 self.results[source_name]['details'].append("✓ rasterio library available")
             except ImportError:
                 self.results[source_name]['errors'].append(
@@ -230,7 +230,7 @@ class DataSourceTester:
                 )
 
             try:
-                import pyproj
+                import pyproj  # noqa: F401
                 self.results[source_name]['details'].append("✓ pyproj library available for coordinate transformation")
             except ImportError:
                 self.results[source_name]['errors'].append(
@@ -362,7 +362,7 @@ class DataSourceTester:
 
             # Check for rasterio (required for processing)
             try:
-                import rasterio
+                import rasterio  # noqa: F401
                 self.results[source_name]['details'].append("✓ rasterio library available")
             except ImportError:
                 self.results[source_name]['errors'].append(

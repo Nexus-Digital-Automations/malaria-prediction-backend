@@ -8,18 +8,20 @@ def test_alert_system_imports():
     """Test all enhanced alert system components can be imported successfully."""
     # Test main component imports
     try:
-        from src.malaria_predictor.alerts.alert_analytics import AlertAnalyticsEngine
+        from src.malaria_predictor.alerts.alert_analytics import (
+            AlertAnalyticsEngine,  # noqa: F401
+        )
         from src.malaria_predictor.alerts.alert_history_manager import (
-            AlertHistoryManager,
+            AlertHistoryManager,  # noqa: F401
         )
         from src.malaria_predictor.alerts.alert_template_manager import (
-            AlertTemplateManager,
+            AlertTemplateManager,  # noqa: F401
         )
         from src.malaria_predictor.alerts.bulk_notification_manager import (
-            BulkNotificationManager,
+            BulkNotificationManager,  # noqa: F401
         )
         from src.malaria_predictor.alerts.enhanced_firebase_service import (
-            EnhancedFirebaseService,
+            EnhancedFirebaseService,  # noqa: F401
         )
         imports_successful = True
     except ImportError as e:

@@ -8,6 +8,7 @@ prediction services, and other shared resources in the FastAPI application.
 import asyncio
 import logging
 from datetime import datetime
+from typing import Any
 
 import torch
 from fastapi import HTTPException, status

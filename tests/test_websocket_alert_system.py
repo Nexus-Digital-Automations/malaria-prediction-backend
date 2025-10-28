@@ -131,7 +131,7 @@ class TestWebSocketAlertManager:
             connections.append(connection_id)
 
         # Try to create one more connection (should fail)
-        with pytest.raises(Exception):  # Should raise HTTPException
+        with pytest.raises(Exception):  # noqa: B017 - Should raise HTTPException
             await websocket_manager.connect(
                 websocket=mock_websocket,
                 user_id=user_id

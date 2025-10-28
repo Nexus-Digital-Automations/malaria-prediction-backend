@@ -117,7 +117,7 @@ class TestTokenManager:
         await asyncio.sleep(65)  # Wait longer than 1 minute expiry
 
         # Validation should fail
-        with pytest.raises(Exception):  # TokenExpiredError
+        with pytest.raises(Exception):  # noqa: B017 - TokenExpiredError
             await token_manager.validate_token(token_data.access_token)
 
     @pytest.mark.asyncio

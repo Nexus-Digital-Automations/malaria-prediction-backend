@@ -215,10 +215,10 @@ def test_alert_system_validation_complete():
             AlertTemplateManager,
         )
         from src.malaria_predictor.alerts.bulk_notification_manager import (
-            BulkNotificationManager,
+            BulkNotificationManager,  # noqa: F401
         )
         from src.malaria_predictor.alerts.enhanced_firebase_service import (
-            EnhancedFirebaseService,
+            EnhancedFirebaseService,  # noqa: F401
         )
         imports_successful = True
     except ImportError:
