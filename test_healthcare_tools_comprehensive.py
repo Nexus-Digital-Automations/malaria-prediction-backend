@@ -10,47 +10,46 @@ Author: Claude Healthcare Tools Agent
 Date: 2025-09-19
 """
 
-import sys
-import os
 import logging
+import os
+import sys
 from datetime import datetime
 
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from malaria_predictor.healthcare import (
-    WHOGuidelinesEngine,
-    DrugResistanceAnalyzer,
-    PatientSpecificRecommender,
-    TreatmentProtocolEngine,
-    TreatmentEffectivenessTracker,
-    ResourceAllocationEngine,
-    InventoryManager,
-    DemandForecaster,
-    StaffScheduler,
-    EmergencyResourceMobilizer,
     BudgetOptimizer,
-    HealthcareAnalytics,
-    TreatmentOutcomeAnalyzer,
-    ResourceUtilizationAnalyzer,
     CostEffectivenessAnalyzer,
-    ManagementDashboard
+    DemandForecaster,
+    DrugResistanceAnalyzer,
+    EmergencyResourceMobilizer,
+    HealthcareAnalytics,
+    InventoryManager,
+    ManagementDashboard,
+    PatientSpecificRecommender,
+    ResourceAllocationEngine,
+    ResourceUtilizationAnalyzer,
+    StaffScheduler,
+    TreatmentEffectivenessTracker,
+    TreatmentOutcomeAnalyzer,
+    TreatmentProtocolEngine,
+    WHOGuidelinesEngine,
+)
+from malaria_predictor.healthcare.resource_allocation.resource_allocation_engine import (
+    AllocationStrategy,
+    ResourceRequest,
+    ResourceType,
+    ResourceUrgency,
 )
 
 # Import data classes
 from malaria_predictor.healthcare.treatment_protocols.who_guidelines_engine import (
-    PatientProfile,
     ClinicalPresentation,
     MalariaSpecies,
-    DiseaseSeverity
+    PatientProfile,
 )
 
-from malaria_predictor.healthcare.resource_allocation.resource_allocation_engine import (
-    ResourceRequest,
-    ResourceType,
-    ResourceUrgency,
-    AllocationStrategy
-)
 
 def setup_logging():
     """Set up logging for tests"""
@@ -240,7 +239,7 @@ def test_resource_allocation_engine():
         total_budget=50000.0
     )
 
-    print(f"✅ Multi-facility optimization completed")
+    print("✅ Multi-facility optimization completed")
     print(f"✅ Budget utilization: {optimization.get('budget_utilization', 0.0):.2%}")
 
     return True
@@ -252,8 +251,8 @@ def test_analytics_modules():
     # Test Healthcare Analytics
     analytics = HealthcareAnalytics()
     metrics = analytics.calculate_metrics({"test_data": "sample"})
-    report = analytics.generate_report(metrics)
-    print(f"✅ Healthcare analytics: {len(metrics)} metrics calculated")
+    analytics.generate_report(metrics)
+    print(f"✅ Healthcare analytics: {len(metrics)} metrics calculated, report generated")
 
     # Test Treatment Outcome Analyzer
     outcome_analyzer = TreatmentOutcomeAnalyzer()
