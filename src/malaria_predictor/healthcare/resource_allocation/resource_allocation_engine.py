@@ -22,6 +22,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +91,7 @@ class ResourceRequest:
     needed_by: datetime
     alternative_resources: list[str] = field(default_factory=list)
     cost_limit: float | None = None
-    delivery_constraints: dict[str, any] = field(default_factory=dict)
+    delivery_constraints: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -221,7 +222,7 @@ class ResourceAllocationEngine:
         resource_type: ResourceType,
         total_budget: float,
         time_horizon_days: int = 30
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """
         Optimize resource allocation across multiple facilities.
 
@@ -267,7 +268,7 @@ class ResourceAllocationEngine:
         emergency_type: str,
         affected_population: int,
         response_time_hours: int = 24
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """
         Emergency resource allocation for outbreak response.
 
@@ -324,7 +325,7 @@ class ResourceAllocationEngine:
         self,
         time_period_days: int = 30,
         facility_ids: list[str] | None = None
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """
         Analyze allocation efficiency and performance metrics.
 
@@ -395,7 +396,7 @@ class ResourceAllocationEngine:
 
         return dict(categorized)
 
-    def _assess_available_resources(self) -> dict[str, any]:
+    def _assess_available_resources(self) -> dict[str, Any]:
         """Assess currently available resources across all facilities"""
         available_resources = {
             "facility_stocks": {},
@@ -423,7 +424,7 @@ class ResourceAllocationEngine:
         available_resources: dict,
         strategy: AllocationStrategy,
         objectives: OptimizationObjective
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Build mathematical optimization problem formulation"""
 
         problem = {
@@ -435,7 +436,7 @@ class ResourceAllocationEngine:
 
         return problem
 
-    def _solve_optimization_problem(self, problem: dict[str, any]) -> dict[str, any]:
+    def _solve_optimization_problem(self, problem: dict[str, Any]) -> dict[str, Any]:
         """Solve the optimization problem using appropriate algorithm"""
 
         # For this implementation, we'll use a simplified heuristic approach
@@ -456,7 +457,7 @@ class ResourceAllocationEngine:
 
     def _generate_allocation_results(
         self,
-        solution: dict[str, any],
+        solution: dict[str, Any],
         requests: list[ResourceRequest]
     ) -> list[AllocationResult]:
         """Generate allocation results from optimization solution"""
@@ -561,7 +562,7 @@ class ResourceAllocationEngine:
         risk_priorities: dict[str, float],
         total_budget: float,
         resource_type: ResourceType
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Solve multi-facility optimization problem"""
 
         # Simplified optimization using priority-based allocation

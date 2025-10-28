@@ -22,6 +22,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +85,7 @@ class ResistanceProfile:
     temporal_trend: list[tuple[datetime, float]]  # time -> prevalence
     confidence_score: float
     treatment_efficacy: float  # Expected treatment success rate
-    surveillance_data: dict[str, any] = field(default_factory=dict)
+    surveillance_data: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -176,7 +177,7 @@ class DrugResistanceAnalyzer:
         location: str,
         drug: str,
         prediction_horizon_months: int = 12
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """
         Predict future resistance emergence using temporal trend analysis.
 
@@ -269,8 +270,8 @@ class DrugResistanceAnalyzer:
         self,
         drug: str,
         location: str,
-        patient_factors: dict[str, any] | None = None
-    ) -> dict[str, any]:
+        patient_factors: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """
         Assess treatment failure risk based on resistance patterns.
 
@@ -319,7 +320,7 @@ class DrugResistanceAnalyzer:
         self,
         location: str,
         time_window_days: int = 90
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """
         Generate molecular surveillance summary for a location.
 

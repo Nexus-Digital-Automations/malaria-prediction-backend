@@ -22,6 +22,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any
 
 from .drug_resistance_analyzer import DrugResistanceAnalyzer
 from .who_guidelines_engine import (
@@ -85,9 +86,9 @@ class PersonalizedRecommendation:
     alternative_treatments: list[TreatmentRecommendation]
     contraindications: list[Contraindication]
     drug_interactions: list[DrugInteraction]
-    risk_assessment: dict[str, any]
-    personalization_factors: dict[str, any]
-    monitoring_plan: dict[str, any]
+    risk_assessment: dict[str, Any]
+    personalization_factors: dict[str, Any]
+    monitoring_plan: dict[str, Any]
     safety_alerts: list[str]
     confidence_score: float
     generated_at: datetime
@@ -256,7 +257,7 @@ class PatientSpecificRecommender:
         self,
         patient_profile: PatientProfile,
         clinical_presentation: ClinicalPresentation
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Assess patient-specific risk factors"""
 
         risk_factors = {}
@@ -541,7 +542,7 @@ class PatientSpecificRecommender:
         treatment: TreatmentRecommendation,
         risk_assessment: dict,
         contraindications: list[Contraindication]
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Create personalized monitoring plan"""
 
         monitoring_plan = {
@@ -656,7 +657,7 @@ class PatientSpecificRecommender:
 
         return max(0.5, min(1.0, base_confidence))
 
-    def _extract_personalization_factors(self, patient_profile: PatientProfile) -> dict[str, any]:
+    def _extract_personalization_factors(self, patient_profile: PatientProfile) -> dict[str, Any]:
         """Extract factors used for personalization"""
 
         return {

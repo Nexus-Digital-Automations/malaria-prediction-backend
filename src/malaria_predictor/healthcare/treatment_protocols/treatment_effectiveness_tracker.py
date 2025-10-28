@@ -22,6 +22,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -67,12 +68,12 @@ class TreatmentRecord:
     prescriber_id: str
     start_date: datetime
     end_date: datetime | None
-    drug_regimen: list[dict[str, any]]
+    drug_regimen: list[dict[str, Any]]
     initial_parasitemia: float
     initial_symptoms: list[str]
     malaria_species: str
     severity_at_start: str
-    patient_demographics: dict[str, any]
+    patient_demographics: dict[str, Any]
     comorbidities: list[str]
     previous_treatments: list[str] = field(default_factory=list)
 
@@ -89,7 +90,7 @@ class FollowUpVisit:
     vital_signs: dict[str, float]
     clinical_assessment: str
     adherence_score: float  # 0-1
-    adverse_events: list[dict[str, any]]
+    adverse_events: list[dict[str, Any]]
     provider_notes: str
 
 
@@ -104,7 +105,7 @@ class TreatmentOutcomeRecord:
     parasitemia_clearance_day: int | None
     symptom_resolution_day: int | None
     final_parasitemia: float
-    adverse_events_summary: list[dict[str, any]]
+    adverse_events_summary: list[dict[str, Any]]
     compliance_rate: float
     cost_data: dict[str, float]
     provider_assessment: str
@@ -121,7 +122,7 @@ class EffectivenessAnalysis:
     demographic_breakdown: dict[str, dict[str, float]]
     severity_breakdown: dict[str, dict[str, float]]
     resistance_correlation: dict[str, float]
-    comparative_analysis: dict[str, any]
+    comparative_analysis: dict[str, Any]
     statistical_significance: dict[str, float]
     recommendations: list[str]
     confidence_intervals: dict[str, tuple[float, float]]
@@ -169,9 +170,9 @@ class TreatmentEffectivenessTracker:
     def record_treatment_start(
         self,
         patient_id: str,
-        treatment_details: dict[str, any],
-        clinical_data: dict[str, any],
-        provider_info: dict[str, any]
+        treatment_details: dict[str, Any],
+        clinical_data: dict[str, Any],
+        provider_info: dict[str, Any]
     ) -> str:
         """
         Record the start of a new treatment.
@@ -216,8 +217,8 @@ class TreatmentEffectivenessTracker:
     def record_followup_visit(
         self,
         record_id: str,
-        visit_data: dict[str, any],
-        clinical_assessment: dict[str, any]
+        visit_data: dict[str, Any],
+        clinical_assessment: dict[str, Any]
     ) -> str:
         """
         Record a treatment follow-up visit.
@@ -257,7 +258,7 @@ class TreatmentEffectivenessTracker:
     def record_treatment_outcome(
         self,
         record_id: str,
-        outcome_data: dict[str, any]
+        outcome_data: dict[str, Any]
     ) -> str:
         """
         Record final treatment outcome.
@@ -417,7 +418,7 @@ class TreatmentEffectivenessTracker:
         self,
         facility_id: str | None = None,
         time_period_days: int = 30
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """
         Generate treatment quality report for facility or system-wide.
 
@@ -501,7 +502,7 @@ class TreatmentEffectivenessTracker:
 
         return None
 
-    def _aggregate_adverse_events(self, record_id: str) -> list[dict[str, any]]:
+    def _aggregate_adverse_events(self, record_id: str) -> list[dict[str, Any]]:
         """Aggregate adverse events across all visits"""
         all_events = []
         followups = self._followup_visits.get(record_id, [])

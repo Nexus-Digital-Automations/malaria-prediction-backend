@@ -22,6 +22,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 from .drug_resistance_analyzer import DrugResistanceAnalyzer
 from .patient_specific_recommender import (
@@ -64,7 +65,7 @@ class ProtocolStep:
     step_id: str
     step_name: str
     description: str
-    decision_criteria: dict[str, any]
+    decision_criteria: dict[str, Any]
     actions: list[str]
     next_steps: list[str]
     alternative_steps: list[str] = field(default_factory=list)
@@ -80,13 +81,13 @@ class TreatmentProtocol:
     protocol_name: str
     version: str
     source: ProtocolSource
-    applicable_conditions: dict[str, any]
+    applicable_conditions: dict[str, Any]
     protocol_steps: list[ProtocolStep]
-    decision_tree: dict[str, any]
+    decision_tree: dict[str, Any]
     evidence_level: str
     last_updated: datetime
     next_review_date: datetime
-    local_adaptations: dict[str, any] = field(default_factory=dict)
+    local_adaptations: dict[str, Any] = field(default_factory=dict)
     performance_metrics: dict[str, float] = field(default_factory=dict)
 
 
@@ -100,7 +101,7 @@ class ProtocolRecommendation:
     confidence_score: float
     evidence_summary: str
     alternative_protocols: list[TreatmentProtocol]
-    quality_indicators: dict[str, any]
+    quality_indicators: dict[str, Any]
     implementation_notes: str
     follow_up_protocol: str | None = None
 
@@ -250,10 +251,10 @@ class TreatmentProtocolEngine:
     def update_local_protocols(
         self,
         location: str,
-        protocol_updates: dict[str, any],
+        protocol_updates: dict[str, Any],
         evidence_basis: str,
         updated_by: str
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """
         Update local treatment protocol adaptations.
 
@@ -297,7 +298,7 @@ class TreatmentProtocolEngine:
         protocol_id: str,
         evaluation_period_days: int = 90,
         performance_metrics: list[str] | None = None
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """
         Evaluate treatment protocol performance.
 
@@ -592,7 +593,7 @@ class TreatmentProtocolEngine:
         self,
         protocol: TreatmentProtocol,
         personalized_rec: PersonalizedRecommendation
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Calculate quality indicators"""
         return {
             "evidence_grade": protocol.evidence_level,
