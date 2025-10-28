@@ -219,9 +219,9 @@ def test_alert_system_validation_complete():
 
     # Test 2: Core components can be initialized
     try:
-        analytics_engine = AlertAnalyticsEngine()
-        history_manager = AlertHistoryManager()
-        template_manager = AlertTemplateManager()
+        AlertAnalyticsEngine()
+        AlertHistoryManager()
+        AlertTemplateManager()
         initialization_successful = True
     except Exception:
         initialization_successful = False
@@ -237,13 +237,13 @@ def test_alert_system_validation_complete():
             AlertTemplateDefinition,
         )
 
-        query = AlertHistoryQuery(
+        AlertHistoryQuery(
             user_id="1",
             start_date=datetime.now() - timedelta(days=1),
             end_date=datetime.now()
         )
 
-        template = AlertTemplateDefinition(
+        AlertTemplateDefinition(
             name="Validation Test",
             subject="Test",
             body="Test body",

@@ -10,12 +10,9 @@ Tests cover:
 """
 
 import asyncio
-import json
 import tempfile
-import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from unittest.mock import AsyncMock, patch
 
 import pytest
 from cryptography.fernet import Fernet
@@ -24,7 +21,6 @@ from src.malaria_predictor.security import (
     AuditEventType,
     AuditRiskLevel,
     CircuitBreakerConfig,
-    CircuitBreakerOpenError,
     ComplianceFramework,
     DetailedError,
     ErrorCategory,

@@ -119,7 +119,7 @@ class TestWebSocketAlertManager:
         user_id = "test_user_rate_limit"
         connections = []
 
-        for i in range(websocket_manager.rate_limit_config.max_connections_per_user):
+        for _i in range(websocket_manager.rate_limit_config.max_connections_per_user):
             mock_ws = MagicMock(spec=WebSocket)
             mock_ws.accept = AsyncMock()
             mock_ws.send_text = AsyncMock()
@@ -242,7 +242,7 @@ class TestWebSocketAlertManager:
         mock_websocket.accept = AsyncMock()
         mock_websocket.send_text = AsyncMock()
 
-        connection_id = await websocket_manager.connect(
+        await websocket_manager.connect(
             websocket=mock_websocket,
             user_id=user_id
         )
@@ -288,8 +288,8 @@ class TestWebSocketAlertManager:
         websocket_manager._filter_connections_for_alert_enhanced = AsyncMock(return_value=[connection_id])
 
         # Broadcast multiple alerts to generate metrics
-        start_time = time.time()
-        for i in range(5):
+        time.time()
+        for _i in range(5):
             await websocket_manager.broadcast_alert(mock_alert)
 
         # Check that latency is being tracked
@@ -304,7 +304,6 @@ class TestWebSocketAlertManager:
     @pytest.mark.asyncio
     async def test_concurrent_connections(self, websocket_manager):
         """Test handling multiple concurrent connections."""
-        connections = []
 
         # Create multiple concurrent connections
         async def create_connection(user_id):

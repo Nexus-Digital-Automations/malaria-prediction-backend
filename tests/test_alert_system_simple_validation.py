@@ -211,7 +211,7 @@ def test_alert_system_validation_summary():
 
         from src.malaria_predictor.alerts.alert_history_manager import AlertHistoryQuery
 
-        query = AlertHistoryQuery(
+        AlertHistoryQuery(
             user_id="test",
             start_date=datetime.now() - timedelta(days=1),
             end_date=datetime.now()
@@ -222,9 +222,9 @@ def test_alert_system_validation_summary():
 
     # Test 5: Stats methods work
     try:
-        analytics_stats = analytics.get_stats()
-        history_stats = history.get_stats()
-        templates_stats = templates.get_stats()
+        analytics.get_stats()
+        history.get_stats()
+        templates.get_stats()
         validation_results["stats"] = True
     except Exception:
         pass

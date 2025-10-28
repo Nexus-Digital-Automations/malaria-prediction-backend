@@ -7,7 +7,6 @@ documenting what works, what doesn't, and what actions are needed.
 
 import logging
 import sys
-from datetime import date, timedelta
 from pathlib import Path
 
 # Add src to Python path

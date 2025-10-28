@@ -6,36 +6,31 @@ FCM service, templates, scheduling, emergency alerts, analytics, and API endpoin
 """
 
 import asyncio
-import json
-import pytest
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from fastapi.testclient import TestClient
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from src.malaria_predictor.database.models import Base
 from src.malaria_predictor.notifications import (
     FCMService,
     NotificationManager,
     NotificationTemplateEngine,
 )
-from src.malaria_predictor.notifications.models import (
-    DeviceToken,
-    NotificationLog,
-    NotificationPriority,
-    NotificationStatus,
-    DevicePlatform,
-    TopicSubscription,
-)
-from src.malaria_predictor.notifications.templates import TemplateContext
 from src.malaria_predictor.notifications.emergency_alerts import (
+    EmergencyAlert,
     EmergencyLevel,
     EmergencyType,
-    EmergencyAlert,
 )
 from src.malaria_predictor.notifications.fcm_service import FCMMessageData
-from src.malaria_predictor.database.models import Base
+from src.malaria_predictor.notifications.models import (
+    DevicePlatform,
+    DeviceToken,
+    NotificationPriority,
+)
+from src.malaria_predictor.notifications.templates import TemplateContext
 
 
 # Test Fixtures
@@ -448,7 +443,7 @@ class TestNotificationAnalytics:
     @pytest.mark.asyncio
     async def test_delivery_summary(self, notification_manager):
         """Test delivery summary analytics."""
-        end_date = datetime.now(timezone.utc)
+        end_date = datetime.now(UTC)
         start_date = end_date - timedelta(days=7)
 
         summary = await notification_manager.analytics.get_delivery_summary(
