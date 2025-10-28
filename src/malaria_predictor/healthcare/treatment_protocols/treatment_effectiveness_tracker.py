@@ -155,10 +155,10 @@ class TreatmentEffectivenessTracker:
         self.analytics_config = analytics_config or {}
 
         # Initialize data stores
-        self._treatment_records = {}  # record_id -> TreatmentRecord
-        self._followup_visits = defaultdict(list)  # record_id -> List[FollowUpVisit]
-        self._outcome_records = {}  # record_id -> TreatmentOutcomeRecord
-        self._effectiveness_cache = {}  # Cache for calculated metrics
+        self._treatment_records: dict[str, TreatmentRecord] = {}  # record_id -> TreatmentRecord
+        self._followup_visits: defaultdict[str, list[FollowUpVisit]] = defaultdict(list)  # record_id -> List[FollowUpVisit]
+        self._outcome_records: dict[str, TreatmentOutcomeRecord] = {}  # record_id -> TreatmentOutcomeRecord
+        self._effectiveness_cache: dict[str, Any] = {}  # Cache for calculated metrics
 
         # Load configuration
         self._effectiveness_thresholds = self._load_effectiveness_thresholds()

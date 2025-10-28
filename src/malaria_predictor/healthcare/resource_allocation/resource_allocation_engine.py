@@ -148,11 +148,11 @@ class ResourceAllocationEngine:
         self.supply_chain_config = supply_chain_config or {}
 
         # Initialize data structures
-        self._facilities = {}  # facility_id -> HealthcareFacility
-        self._pending_requests = {}  # request_id -> ResourceRequest
-        self._allocation_history = []  # Historical allocations
-        self._supply_chain_network = {}  # Supply chain topology
-        self._transportation_matrix = {}  # Transportation costs/times
+        self._facilities: dict[str, Any] = {}  # facility_id -> HealthcareFacility
+        self._pending_requests: dict[str, Any] = {}  # request_id -> ResourceRequest
+        self._allocation_history: list[Any] = []  # Historical allocations
+        self._supply_chain_network: dict[str, Any] = {}  # Supply chain topology
+        self._transportation_matrix: dict[str, Any] = {}  # Transportation costs/times
 
         # Load optimization parameters
         self._optimization_config = self._load_optimization_config()

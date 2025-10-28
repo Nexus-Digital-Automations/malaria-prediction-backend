@@ -121,10 +121,10 @@ class DrugResistanceAnalyzer:
         logger.info("Initializing Drug Resistance Analyzer")
 
         self.surveillance_db_url = surveillance_database_url
-        self._resistance_profiles = {}
-        self._geographic_data = {}
-        self._temporal_trends = defaultdict(list)
-        self._molecular_markers = {}
+        self._resistance_profiles: dict[str, Any] = {}
+        self._geographic_data: dict[str, Any] = {}
+        self._temporal_trends: defaultdict[str, list[Any]] = defaultdict(list)
+        self._molecular_markers: dict[str, Any] = {}
 
         # Load resistance databases
         self._load_resistance_markers()
