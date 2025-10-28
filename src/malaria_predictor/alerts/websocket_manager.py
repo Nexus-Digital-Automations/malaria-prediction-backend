@@ -929,7 +929,7 @@ class WebSocketAlertManager:
 
             # Check permissions for sensitive alerts
             if hasattr(alert, 'required_permissions'):
-                required_perms = getattr(alert, 'required_permissions', set())
+                required_perms: set[str] = getattr(alert, 'required_permissions', set())
                 if required_perms and not connection.permissions.intersection(required_perms):
                     continue
 

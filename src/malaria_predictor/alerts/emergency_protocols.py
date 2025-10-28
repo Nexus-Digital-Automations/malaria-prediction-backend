@@ -89,7 +89,7 @@ class EmergencyResponseProtocolManager:
         }
 
         # Active escalations tracking
-        self.active_escalations = {}
+        self.active_escalations: dict[str, Any] = {}
 
     async def process_emergency_alert(self, alert: Alert) -> dict:
         """Process an emergency alert and execute appropriate protocols.

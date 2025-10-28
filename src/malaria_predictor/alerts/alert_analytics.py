@@ -152,7 +152,7 @@ class AlertAnalyticsEngine:
         }
 
         # In-memory cache for frequently accessed metrics
-        self.metrics_cache = {}
+        self.metrics_cache: dict[str, Any] = {}
         self.cache_ttl_seconds = 300  # 5 minutes
 
         # Background tasks
@@ -351,7 +351,7 @@ class AlertAnalyticsEngine:
                     failed_deliveries = [d for d in deliveries if d.status == "failed"]
                     failure_rate = (len(failed_deliveries) / max(messages_sent, 1)) * 100
 
-                    error_types = {}
+                    error_types: dict[str, int] = {}
                     for delivery in failed_deliveries:
                         error_code = delivery.error_code or "unknown"
                         error_types[error_code] = error_types.get(error_code, 0) + 1

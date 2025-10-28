@@ -359,7 +359,7 @@ class PatternAnalyzer:
         """Detect anomalies in patterns."""
         self.logger.debug("Detecting pattern anomalies")
 
-        anomalies = []
+        anomalies: list[dict[str, Any]] = []
 
         # Calculate rolling statistics
         window_size = min(12, len(df) // 4)  # 12 weeks or quarter of data

@@ -809,7 +809,7 @@ async def enhanced_websocket_endpoint(
             alert_types_set = set(alert_types.split(","))
 
         # Get user permissions and roles (implement according to your auth system)
-        permissions = getattr(current_user, 'permissions', set())
+        permissions: list[str] = getattr(current_user, 'permissions', set())
         user_roles = getattr(current_user, 'roles', [])
 
         # Initialize WebSocket manager if not already done

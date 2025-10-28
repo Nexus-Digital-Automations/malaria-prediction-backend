@@ -200,7 +200,7 @@ class EnhancedFirebaseService:
 
         # Analytics and performance tracking
         self.analytics: list[NotificationAnalytics] = []
-        self.performance_metrics = {
+        self.performance_metrics: dict[str, Any] = {
             "templates_used": {},
             "campaign_performance": {},
             "segment_performance": {},
@@ -211,7 +211,7 @@ class EnhancedFirebaseService:
         }
 
         # Rate limiting and queuing
-        self.send_queue = asyncio.Queue()
+        self.send_queue: list[Any] = asyncio.Queue()
         self.rate_limit_per_second = 100  # FCM rate limit
         self.batch_size = 500  # Maximum batch size for FCM
 

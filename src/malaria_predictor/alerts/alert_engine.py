@@ -97,10 +97,10 @@ class AlertEngine:
         }
 
         # Alert suppression tracking
-        self.suppression_cache = {}  # rule_id -> last_triggered_timestamp
+        self.suppression_cache: dict[str, Any] = {}  # rule_id -> last_triggered_timestamp
 
         # Template cache for performance
-        self.template_cache = {}
+        self.template_cache: dict[str, Any] = {}
 
     async def evaluate_risk_for_alerts(
         self,

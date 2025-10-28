@@ -398,7 +398,7 @@ class ResourceAllocationEngine:
 
     def _assess_available_resources(self) -> dict[str, Any]:
         """Assess currently available resources across all facilities"""
-        available_resources = {
+        available_resources: dict[str, Any] = {
             "facility_stocks": {},
             "supplier_availability": {},
             "transportation_capacity": {},

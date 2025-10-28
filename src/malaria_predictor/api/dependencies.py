@@ -50,8 +50,8 @@ class ModelManager:
     """
 
     def __init__(self) -> None:
-        self.models = {}
-        self.model_health = {}
+        self.models: dict[Any, Any] = {}
+        self.model_health: dict[Any, Any] = {}
         self.last_health_check = None
         self._lock = asyncio.Lock()
 

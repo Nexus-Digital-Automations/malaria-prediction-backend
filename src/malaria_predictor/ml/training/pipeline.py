@@ -476,7 +476,7 @@ class MalariaTrainingPipeline:
             return {}
 
         # Collect all metric values
-        metric_names = set()
+        metric_names: set[str] = set()
         for metrics in fold_metrics:
             metric_names.update(metrics.keys())
 

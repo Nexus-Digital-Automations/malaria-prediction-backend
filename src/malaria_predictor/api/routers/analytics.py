@@ -73,7 +73,7 @@ async def get_prediction_accuracy_metrics(
 
         # Model performance metrics
         model_accuracy = {}
-        confidence_distribution = {}
+        confidence_distribution: dict[str, int] = {}
         risk_level_accuracy = {}
         temporal_accuracy = {}
 
@@ -208,7 +208,7 @@ async def get_environmental_trend_analysis(
 
             if aggregation == "daily":
                 # Group by day
-                daily_groups = {}
+                daily_groups: dict[str, list[Any]] = {}
                 for point in era5_data:
                     day_key = point.timestamp.date().isoformat()
                     if day_key not in daily_groups:
@@ -412,9 +412,9 @@ async def get_outbreak_pattern_recognition(
                 normal_events.append(event_data)
 
         # Analyze outbreak patterns
-        outbreak_frequency = {}
+        outbreak_frequency: dict[str, int] = {}
         seasonal_patterns = {}
-        geographic_distribution = {}
+        geographic_distribution: dict[str, int] = {}
 
         # Frequency analysis by time scale
         for event in outbreak_events:
@@ -435,7 +435,7 @@ async def get_outbreak_pattern_recognition(
 
         # Seasonal pattern analysis
         if include_seasonality:
-            monthly_outbreaks = {}
+            monthly_outbreaks: dict[str, int] = {}
             for event in outbreak_events:
                 month = datetime.fromisoformat(event["date"]).month
                 monthly_outbreaks[month] = monthly_outbreaks.get(month, 0) + 1

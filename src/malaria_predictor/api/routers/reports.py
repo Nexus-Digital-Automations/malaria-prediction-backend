@@ -798,14 +798,14 @@ async def get_report_metrics(
                 avg_generation_time = sum(times) / len(times)
 
         # Format distribution
-        format_usage = {}
+        format_usage: dict[str, int] = {}
         for report in reports:
             if report.export_formats:
                 for fmt in report.export_formats:
                     format_usage[fmt] = format_usage.get(fmt, 0) + 1
 
         # Template usage
-        template_usage = {}
+        template_usage: dict[str, int] = {}
         for report in reports:
             if report.template_id:
                 template_usage[report.template_id] = template_usage.get(report.template_id, 0) + 1

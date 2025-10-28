@@ -194,8 +194,8 @@ class BulkNotificationManager:
         self.jobs: dict[str, BulkNotificationJob] = {}
 
         # Processing queues
-        self.job_queue = asyncio.Queue()
-        self.retry_queue = asyncio.Queue()
+        self.job_queue: list[Any] = asyncio.Queue()
+        self.retry_queue: list[Any] = asyncio.Queue()
 
         # Background tasks
         self._scheduler_task: asyncio.Task | None = None
@@ -958,7 +958,7 @@ class BulkNotificationManager:
 
     def _get_jobs_by_status(self) -> dict[str, int]:
         """Get job count by status."""
-        status_counts = {}
+        status_counts: dict[str, int] = {}
         for job in self.jobs.values():
             status_counts[job.status] = status_counts.get(job.status, 0) + 1
         return status_counts

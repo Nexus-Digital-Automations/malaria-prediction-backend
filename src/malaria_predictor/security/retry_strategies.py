@@ -665,7 +665,7 @@ class RetryExecutor:
                 return None
 
         # Create new request future
-        future = asyncio.Future()
+        future: asyncio.Future[Any] = asyncio.Future()
         self.active_requests[idempotency_key] = future
 
         try:

@@ -122,7 +122,7 @@ class NotificationService:
         }
 
         # Retry queue
-        self.retry_queue = asyncio.Queue()
+        self.retry_queue: list[Any] = asyncio.Queue()
         self.retry_task = None
 
     async def start_retry_processor(self):
