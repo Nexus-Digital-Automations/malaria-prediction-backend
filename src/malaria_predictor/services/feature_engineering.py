@@ -23,7 +23,7 @@ class FeatureEngineer:
     relevant to malaria transmission dynamics and vector ecology.
     """
 
-    def __init__(self, feature_schema: dict[str, str] | None = None):
+    def __init__(self, feature_schema: dict[str, str] | None = None) -> None:
         self.schema = feature_schema or self._get_default_schema()
         self.scalers = {}
 
@@ -448,7 +448,7 @@ class QualityManager:
     and consistency checks for harmonized environmental data.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.quality_thresholds = {
             "era5": {
                 "temperature_range": (-50, 60),  # Celsius

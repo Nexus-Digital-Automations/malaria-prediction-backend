@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class SpatialGridProcessor:
     """Processor for spatial grid operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize spatial grid processor."""
         logger.info("Spatial grid processor initialized")
 

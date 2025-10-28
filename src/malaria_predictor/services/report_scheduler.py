@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 class EmailDeliveryService:
     """Email delivery service for scheduled reports."""
 
-    def __init__(self, smtp_config: dict[str, Any]):
+    def __init__(self, smtp_config: dict[str, Any]) -> None:
         """
         Initialize email delivery service.
 

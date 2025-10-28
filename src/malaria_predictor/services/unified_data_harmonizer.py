@@ -35,7 +35,7 @@ class CacheManager:
     based on data freshness and processing parameters.
     """
 
-    def __init__(self, cache_dir: Path):
+    def __init__(self, cache_dir: Path) -> None:
         self.cache_dir = cache_dir
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.metadata_store = {}
@@ -185,7 +185,7 @@ class UnifiedDataHarmonizer:
     for obtaining ML-ready harmonized environmental features.
     """
 
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings) -> None:
         # Initialize existing data clients
         self.era5_client = ERA5Client(settings)
         self.chirps_client = CHIRPSClient(settings)

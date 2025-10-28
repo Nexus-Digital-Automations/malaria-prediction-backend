@@ -43,7 +43,7 @@ class PersistenceResult(BaseModel):
 class ERA5DataPersistence:
     """Service for persisting ERA5 data to database."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize data persistence service."""
         self.processor = ERA5DataProcessor()
         logger.info("ERA5 data persistence service initialized")

@@ -34,7 +34,7 @@ class EnvironmentalFeatureExtractor:
     5. Cross-modal interaction features
     """
 
-    def __init__(self, feature_config: dict[str, Any] | None = None):
+    def __init__(self, feature_config: dict[str, Any] | None = None) -> None:
         self.config = feature_config or self._get_default_config()
         self.scalers = {}
         self.historical_stats = {}

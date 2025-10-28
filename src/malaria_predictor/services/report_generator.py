@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 class ChartRenderer:
     """High-quality chart rendering for multiple export formats."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize chart renderer with default settings."""
         self.dpi = 300  # High DPI for quality exports
         self.default_style = {
@@ -240,7 +240,7 @@ class ChartRenderer:
 class TemplateProcessor:
     """Template processing engine for report generation."""
 
-    def __init__(self, template_dir: str | None = None):
+    def __init__(self, template_dir: str | None = None) -> None:
         """
         Initialize template processor.
 
@@ -433,7 +433,7 @@ class TemplateProcessor:
 class ReportExporter:
     """Multi-format report export engine."""
 
-    def __init__(self, temp_dir: str | None = None):
+    def __init__(self, temp_dir: str | None = None) -> None:
         """
         Initialize report exporter.
 
@@ -674,7 +674,7 @@ class ReportExporter:
 class ReportGenerator:
     """Main report generation engine with comprehensive functionality."""
 
-    def __init__(self, db_session: Session):
+    def __init__(self, db_session: Session) -> None:
         """
         Initialize report generator.
 

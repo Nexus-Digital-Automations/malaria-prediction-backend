@@ -246,7 +246,7 @@ class ErrorClassifier:
     Uses pattern matching and heuristics to classify errors for appropriate handling.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize error classifier with default patterns."""
         self.patterns: list[ErrorPattern] = []
         self._initialize_default_patterns()

@@ -216,7 +216,7 @@ class AnomalyDetector:
     or compliance violations.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize anomaly detector with baseline patterns."""
         self.baseline_patterns: dict[str, Any] = {}
         self.thresholds: dict[str, float] = {

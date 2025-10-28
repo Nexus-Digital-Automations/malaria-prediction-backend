@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class CostEffectivenessAnalyzer:
     """Cost effectiveness analysis engine"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Cost Effectiveness Analyzer"""
         logger.info("Initializing Cost Effectiveness Analyzer")
 

@@ -70,7 +70,7 @@ class CHIRPSClient:
 
     BASE_URL = "https://data.chc.ucsb.edu/products/CHIRPS-2.0"
 
-    def __init__(self, settings: Settings | None = None):
+    def __init__(self, settings: Settings | None = None) -> None:
         """Initialize CHIRPS client with configuration.
 
         Args:

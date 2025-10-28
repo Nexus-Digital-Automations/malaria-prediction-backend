@@ -149,7 +149,7 @@ class TracingMiddleware(BaseHTTPMiddleware):
     attributes and context propagation.
     """
 
-    def __init__(self, app):
+    def __init__(self, app) -> None:
         super().__init__(app)
         self.tracer = get_api_tracer()
         self.logger = get_logger(__name__)
@@ -214,7 +214,7 @@ class HealthCheckMiddleware(BaseHTTPMiddleware):
     component status and metrics.
     """
 
-    def __init__(self, app, health_endpoint: str = "/health"):
+    def __init__(self, app, health_endpoint: str = "/health") -> None:
         super().__init__(app)
         self.health_endpoint = health_endpoint
         self.health_checker = get_health_checker()

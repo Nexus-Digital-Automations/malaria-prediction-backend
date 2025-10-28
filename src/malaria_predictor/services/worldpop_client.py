@@ -133,7 +133,7 @@ class WorldPopClient:
         "unconstrained": "wpgp",
     }
 
-    def __init__(self, settings: Settings | None = None):
+    def __init__(self, settings: Settings | None = None) -> None:
         """Initialize WorldPop client with configuration.
 
         Args:

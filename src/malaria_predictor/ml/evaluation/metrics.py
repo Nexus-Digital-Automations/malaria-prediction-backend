@@ -37,7 +37,7 @@ class ModelEvaluationMetrics:
     calibration assessment, and temporal consistency evaluation.
     """
 
-    def __init__(self, risk_thresholds: dict[str, float] | None = None):
+    def __init__(self, risk_thresholds: dict[str, float] | None = None) -> None:
         """
         Initialize evaluation metrics.
 

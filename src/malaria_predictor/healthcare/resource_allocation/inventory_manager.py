@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class InventoryManager:
     """Healthcare inventory management system"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Inventory Manager"""
         logger.info("Initializing Inventory Manager")
         self._inventory = {}

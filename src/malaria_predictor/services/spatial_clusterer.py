@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class SpatialClusterer:
     """Clusterer for spatial risk zone analysis."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize spatial clusterer."""
         logger.info("Spatial clusterer initialized")
 

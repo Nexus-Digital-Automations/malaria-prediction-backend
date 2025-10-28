@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class DemandForecaster:
     """Resource demand forecasting system"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Demand Forecaster"""
         logger.info("Initializing Demand Forecaster")
 

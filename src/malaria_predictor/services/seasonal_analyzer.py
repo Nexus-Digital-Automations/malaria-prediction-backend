@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class SeasonalAnalyzer:
     """Analyzer for seasonal patterns in malaria risk data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize seasonal analyzer."""
         logger.info("Seasonal analyzer initialized")
 

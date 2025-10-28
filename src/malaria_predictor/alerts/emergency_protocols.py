@@ -71,7 +71,7 @@ class EmergencyResponseProtocolManager:
     - Emergency contact management
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the emergency response protocol manager."""
         self.settings = settings
 

@@ -40,7 +40,7 @@ class OutbreakDetector:
     including statistical thresholds, time-series anomalies, and spatial clustering.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize outbreak detector with configuration."""
         self.logger = logger.bind(service="outbreak_detector")
 

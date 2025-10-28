@@ -167,7 +167,7 @@ class WebSocketAlertManager:
     - Performance tracking and comprehensive diagnostics
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the enhanced WebSocket alert manager."""
         self.connections: dict[str, WebSocketConnection] = {}
         self.user_connections: dict[str, set[str]] = defaultdict(set)

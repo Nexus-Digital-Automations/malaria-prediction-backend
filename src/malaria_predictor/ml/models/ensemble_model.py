@@ -387,7 +387,7 @@ class MalariaEnsembleModel(pl.LightningModule):
 class AttentionFusion(nn.Module):
     """Attention-based fusion of model predictions."""
 
-    def __init__(self, input_dim: int, hidden_dim: int, dropout: float = 0.1):
+    def __init__(self, input_dim: int, hidden_dim: int, dropout: float = 0.1) -> None:
         super().__init__()
         self.attention = nn.MultiheadAttention(
             embed_dim=input_dim, num_heads=1, dropout=dropout, batch_first=True
@@ -442,7 +442,7 @@ class MLPFusion(nn.Module):
 class WeightedFusion(nn.Module):
     """Learnable weighted fusion of model predictions."""
 
-    def __init__(self, num_models: int, prediction_horizon: int):
+    def __init__(self, num_models: int, prediction_horizon: int) -> None:
         super().__init__()
         self.weights = nn.Parameter(torch.ones(num_models, prediction_horizon))
         self.temperature = nn.Parameter(torch.ones(1))

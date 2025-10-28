@@ -27,7 +27,7 @@ class TopicManager:
     demographic targeting, and automatic subscription management.
     """
 
-    def __init__(self, fcm_service: FCMService, db_session: Session | None = None):
+    def __init__(self, fcm_service: FCMService, db_session: Session | None = None) -> None:
         """
         Initialize topic manager.
 

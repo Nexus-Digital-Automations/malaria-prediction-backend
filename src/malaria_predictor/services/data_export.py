@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 class DataExportService:
     """Comprehensive data export service for analytics dashboards."""
 
-    def __init__(self, db_session: Session):
+    def __init__(self, db_session: Session) -> None:
         """
         Initialize the data export service.
 

@@ -123,7 +123,7 @@ class AlertAnalyticsEngine:
     - Anomaly detection and alerting
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the alert analytics engine."""
         self.settings = settings
 

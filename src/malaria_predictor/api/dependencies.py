@@ -49,7 +49,7 @@ class ModelManager:
     and Ensemble models for malaria prediction.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.models = {}
         self.model_health = {}
         self.last_health_check = None
@@ -228,7 +228,7 @@ class PredictionService:
     into a unified service for malaria risk prediction.
     """
 
-    def __init__(self, model_manager: ModelManager):
+    def __init__(self, model_manager: ModelManager) -> None:
         self.model_manager = model_manager
         self.data_harmonizer = None
         self._initialize_harmonizer()

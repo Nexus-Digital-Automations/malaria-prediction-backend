@@ -38,7 +38,7 @@ class HealthCheckError(Exception):
 class ConfigValidationError(Exception):
     """Raised when configuration validation fails."""
 
-    def __init__(self, message: str, cause: Exception = None):
+    def __init__(self, message: str, cause: Exception = None) -> None:
         super().__init__(message)
         self.cause = cause
 
@@ -98,7 +98,7 @@ class ConfigValidator:
     Comprehensive configuration validator with health checks.
     """
 
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings) -> None:
         """
         Initialize the configuration validator.
 

@@ -30,7 +30,7 @@ class OperationsDashboardManager:
     alerting, and integration with operational procedures.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.config_path = Path(__file__).parent / "operations_dashboard_config.json"
         self.dashboard_config = get_dashboard_config()
         self.metrics = get_metrics()

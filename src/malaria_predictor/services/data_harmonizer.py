@@ -153,7 +153,7 @@ class TemporalHarmonizer:
     data to a unified temporal framework for ML feature engineering.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.gap_filling_methods = {
             "era5": "linear_interpolation",  # Weather continuity
             "chirps": "zero_fill_drought",  # Dry periods
@@ -409,7 +409,7 @@ class TemporalHarmonizer:
 class DataHarmonizer:
     """Legacy service maintained for backward compatibility."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the data harmonizer."""
         self.grid_resolution = 0.05  # Target resolution in degrees (matches CHIRPS)
         self.africa_bounds = (-20.0, -35.0, 55.0, 40.0)  # W, S, E, N
@@ -473,7 +473,7 @@ class SpatialHarmonizer:
     to a unified target grid while preserving data characteristics.
     """
 
-    def __init__(self, target_resolution: str = "1km", target_crs: str = "EPSG:4326"):
+    def __init__(self, target_resolution: str = "1km", target_crs: str = "EPSG:4326") -> None:
         self.target_resolution = target_resolution
         self.target_crs = target_crs
         self.resampling_methods = SPATIAL_HARMONIZATION["resampling_methods"]

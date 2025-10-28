@@ -22,7 +22,7 @@ class HealthcareService:
     including case management, risk assessment, and surveillance operations.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize healthcare service with required components."""
         self.case_repository = CaseRepository()
         self.risk_processor = RiskAssessmentProcessor()
@@ -376,7 +376,7 @@ class HealthcareService:
 class CaseRepository:
     """Repository for patient case data management."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize case repository."""
         self._cases = {}  # In production, use actual database
         logger.info("Case repository initialized")

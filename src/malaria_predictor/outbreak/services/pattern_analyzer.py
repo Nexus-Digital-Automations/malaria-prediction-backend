@@ -33,7 +33,7 @@ class PatternAnalyzer:
     trends, and transmission dynamics in malaria surveillance data.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize pattern analyzer with configuration."""
         self.logger = logger.bind(service="pattern_analyzer")
 

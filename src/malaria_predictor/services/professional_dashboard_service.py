@@ -68,7 +68,7 @@ class ProfessionalDashboardService:
     real-time updates, performance analytics, and personalized insights.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize professional dashboard service."""
         self.metrics_calculator = MetricsCalculator()
         self.alert_manager = DashboardAlertManager()

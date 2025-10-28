@@ -185,7 +185,7 @@ class BulkNotificationManager:
     - Retry logic and failure handling
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the bulk notification manager."""
         self.settings = settings
 

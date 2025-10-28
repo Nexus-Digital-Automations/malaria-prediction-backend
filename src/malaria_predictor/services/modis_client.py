@@ -153,7 +153,7 @@ class MODISClient:
         "cloudy": 0x0003,
     }
 
-    def __init__(self, settings: Settings | None = None):
+    def __init__(self, settings: Settings | None = None) -> None:
         """Initialize MODIS client with configuration.
 
         Args:

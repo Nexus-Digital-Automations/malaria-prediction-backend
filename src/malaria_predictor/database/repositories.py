@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 class ERA5Repository:
     """Repository for ERA5 climate data operations."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         """Initialize repository with database session.
 
         Args:
@@ -204,7 +204,7 @@ class ERA5Repository:
 class ProcessedClimateRepository:
     """Repository for processed climate data operations."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         """Initialize repository with database session.
 
         Args:
@@ -366,7 +366,7 @@ class ProcessedClimateRepository:
 class MalariaRiskRepository:
     """Repository for malaria risk index operations."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         """Initialize repository with database session.
 
         Args:
@@ -599,7 +599,7 @@ class MalariaRiskRepository:
 class EnvironmentalDataRepository:
     """Repository for environmental data operations."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         """Initialize repository with database session.
 
         Args:
@@ -722,7 +722,7 @@ class EnvironmentalDataRepository:
 class MalariaIncidenceRepository:
     """Repository for malaria incidence data operations."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         """Initialize repository with database session.
 
         Args:
@@ -794,7 +794,7 @@ class MalariaIncidenceRepository:
 class PredictionRepository:
     """Repository for prediction data operations."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         """Initialize repository with database session.
 
         Args:
@@ -873,7 +873,7 @@ class PredictionRepository:
 class UserRepository:
     """Repository for user data operations."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         """Initialize repository with database session.
 
         Args:

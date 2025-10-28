@@ -86,7 +86,7 @@ class OutbreakAlert:
     monitoring, risk-based prioritization, and automated response coordination.
     """
 
-    def __init__(self, config: AlertConfiguration | None = None):
+    def __init__(self, config: AlertConfiguration | None = None) -> None:
         """Initialize outbreak alert widget."""
         self.logger = logger.bind(service="outbreak_alert")
         self.config = config or AlertConfiguration()

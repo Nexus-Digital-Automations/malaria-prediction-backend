@@ -111,7 +111,7 @@ class DrugResistanceAnalyzer:
     mapping, temporal trends, and predictive modeling for treatment optimization.
     """
 
-    def __init__(self, surveillance_database_url: str | None = None):
+    def __init__(self, surveillance_database_url: str | None = None) -> None:
         """
         Initialize Drug Resistance Analyzer.
 

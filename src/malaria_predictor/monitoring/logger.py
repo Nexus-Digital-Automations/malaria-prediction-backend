@@ -353,7 +353,7 @@ def get_logger(name: str) -> logging.Logger:
 class PerformanceLogger:
     """Utility class for logging performance metrics."""
 
-    def __init__(self, logger: logging.Logger, operation: str):
+    def __init__(self, logger: logging.Logger, operation: str) -> None:
         self.logger = logger
         self.operation = operation
         self.start_time = None

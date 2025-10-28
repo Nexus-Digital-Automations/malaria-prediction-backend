@@ -107,7 +107,7 @@ class NotificationTemplateEngine:
     context-aware content generation, and multi-language support.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the template engine."""
         self.jinja_env = Environment(
             autoescape=True,
@@ -429,7 +429,7 @@ class MessageComposer:
     for streamlined notification creation.
     """
 
-    def __init__(self, template_engine: NotificationTemplateEngine):
+    def __init__(self, template_engine: NotificationTemplateEngine) -> None:
         """
         Initialize message composer.
 

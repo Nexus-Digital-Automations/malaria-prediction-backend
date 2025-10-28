@@ -97,7 +97,7 @@ class NotificationService:
     - Batch delivery optimization
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the notification service."""
         self.settings = settings
 

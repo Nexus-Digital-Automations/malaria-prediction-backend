@@ -58,7 +58,7 @@ class BaseHealthCheck:
     with consistent error handling and response formatting.
     """
 
-    def __init__(self, name: str, timeout: float = 5.0):
+    def __init__(self, name: str, timeout: float = 5.0) -> None:
         self.name = name
         self.timeout = timeout
 
@@ -126,7 +126,7 @@ class DatabaseHealthCheck(BaseHealthCheck):
     Checks database connectivity, query performance, and connection pool status.
     """
 
-    def __init__(self, timeout: float = 5.0):
+    def __init__(self, timeout: float = 5.0) -> None:
         super().__init__("database", timeout)
 
     async def _check_health(self) -> dict[str, Any]:
@@ -195,7 +195,7 @@ class RedisHealthCheck(BaseHealthCheck):
     Checks Redis connectivity, latency, and memory usage.
     """
 
-    def __init__(self, timeout: float = 5.0):
+    def __init__(self, timeout: float = 5.0) -> None:
         super().__init__("redis", timeout)
 
     async def _check_health(self) -> dict[str, Any]:
@@ -283,7 +283,7 @@ class ModelHealthCheck(BaseHealthCheck):
     Checks model availability, loading status, and inference performance.
     """
 
-    def __init__(self, timeout: float = 10.0):
+    def __init__(self, timeout: float = 10.0) -> None:
         super().__init__("ml_models", timeout)
 
     async def _check_health(self) -> dict[str, Any]:
@@ -349,7 +349,7 @@ class ExternalAPIHealthCheck(BaseHealthCheck):
     Checks connectivity to external APIs used for data ingestion.
     """
 
-    def __init__(self, timeout: float = 10.0):
+    def __init__(self, timeout: float = 10.0) -> None:
         super().__init__("external_apis", timeout)
 
     async def _check_health(self) -> dict[str, Any]:
@@ -451,7 +451,7 @@ class HealthChecker:
     and aggregating results into an overall system health status.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.checks = [
             DatabaseHealthCheck(),
             RedisHealthCheck(),

@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class StaffScheduler:
     """Multi-facility staff scheduling system"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Staff Scheduler"""
         logger.info("Initializing Staff Scheduler")
 

@@ -33,7 +33,7 @@ class NotificationAnalytics:
     user engagement, and system optimization opportunities.
     """
 
-    def __init__(self, db_session: Session | None = None):
+    def __init__(self, db_session: Session | None = None) -> None:
         """
         Initialize notification analytics.
 

@@ -93,7 +93,7 @@ class SecureTokenStorage:
     - Automatic cleanup of expired tokens
     """
 
-    def __init__(self, storage_path: Path, master_key: str | None = None):
+    def __init__(self, storage_path: Path, master_key: str | None = None) -> None:
         """
         Initialize secure token storage.
 

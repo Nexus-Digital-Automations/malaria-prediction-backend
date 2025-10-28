@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class TreatmentOutcomeAnalyzer:
     """Treatment outcome analysis engine"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Treatment Outcome Analyzer"""
         logger.info("Initializing Treatment Outcome Analyzer")
 

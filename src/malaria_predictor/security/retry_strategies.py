@@ -481,7 +481,7 @@ class RetryExecutor:
     request de-duplication, and comprehensive metrics collection.
     """
 
-    def __init__(self, default_config: RetryConfig | None = None):
+    def __init__(self, default_config: RetryConfig | None = None) -> None:
         """
         Initialize retry executor.
 

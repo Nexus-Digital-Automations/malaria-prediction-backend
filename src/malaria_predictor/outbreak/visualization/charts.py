@@ -45,7 +45,7 @@ class OutbreakTimelineChart:
     key events, and intervention timelines with interactive features.
     """
 
-    def __init__(self, config: ChartConfiguration | None = None):
+    def __init__(self, config: ChartConfiguration | None = None) -> None:
         """Initialize outbreak timeline chart."""
         self.logger = logger.bind(service="outbreak_timeline_chart")
         self.config = config or ChartConfiguration(title="Outbreak Timeline")
@@ -401,7 +401,7 @@ class EpidemicCurveChart:
     epidemiological indicators for outbreak analysis.
     """
 
-    def __init__(self, config: ChartConfiguration | None = None):
+    def __init__(self, config: ChartConfiguration | None = None) -> None:
         """Initialize epidemic curve chart."""
         self.logger = logger.bind(service="epidemic_curve_chart")
         self.config = config or ChartConfiguration(title="Epidemic Curve")
@@ -679,7 +679,7 @@ class TransmissionPatternChart:
     network diagrams, flow maps, and intensity heatmaps.
     """
 
-    def __init__(self, config: ChartConfiguration | None = None):
+    def __init__(self, config: ChartConfiguration | None = None) -> None:
         """Initialize transmission pattern chart."""
         self.logger = logger.bind(service="transmission_pattern_chart")
         self.config = config or ChartConfiguration(title="Transmission Patterns")

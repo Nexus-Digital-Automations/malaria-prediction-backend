@@ -34,7 +34,7 @@ class MetricsCollector:
     standardized labeling, error handling, and metric management.
     """
 
-    def __init__(self, registry: CollectorRegistry | None = None):
+    def __init__(self, registry: CollectorRegistry | None = None) -> None:
         self.registry = registry or CollectorRegistry()
         self.enabled = settings.monitoring.enable_metrics
         self._metrics: dict[str, Counter | Gauge | Histogram | Summary] = {}
@@ -188,7 +188,7 @@ class APIMetrics(MetricsCollector):
     including request counts, duration, error rates, and endpoint usage.
     """
 
-    def __init__(self, registry: CollectorRegistry | None = None):
+    def __init__(self, registry: CollectorRegistry | None = None) -> None:
         super().__init__(registry)
         self._setup_metrics()
 
@@ -332,7 +332,7 @@ class MLModelMetrics(MetricsCollector):
     latency, accuracy, model loading times, and inference statistics.
     """
 
-    def __init__(self, registry: CollectorRegistry | None = None):
+    def __init__(self, registry: CollectorRegistry | None = None) -> None:
         super().__init__(registry)
         self._setup_metrics()
 
@@ -476,7 +476,7 @@ class SystemMetrics(MetricsCollector):
     disk usage, network statistics, and database connections.
     """
 
-    def __init__(self, registry: CollectorRegistry | None = None):
+    def __init__(self, registry: CollectorRegistry | None = None) -> None:
         super().__init__(registry)
         self._setup_metrics()
         self._collection_interval = 30  # seconds
@@ -695,7 +695,7 @@ class PrometheusMetrics:
     for accessing metrics from different collectors.
     """
 
-    def __init__(self, registry: CollectorRegistry | None = None):
+    def __init__(self, registry: CollectorRegistry | None = None) -> None:
         self.registry = registry or CollectorRegistry()
 
         # Initialize metric collectors
@@ -797,7 +797,7 @@ def reset_metrics():
 class PredictionMetrics:
     """Metrics collector for prediction pipeline performance."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize prediction metrics collector."""
         self.enabled = True
 

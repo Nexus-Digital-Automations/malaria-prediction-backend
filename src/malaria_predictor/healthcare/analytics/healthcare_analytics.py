@@ -30,7 +30,7 @@ class AnalyticsResult:
 class HealthcareAnalytics:
     """Core healthcare analytics engine"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Healthcare Analytics"""
         logger.info("Initializing Healthcare Analytics Engine")
 

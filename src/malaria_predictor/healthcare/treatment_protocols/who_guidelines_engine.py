@@ -118,7 +118,7 @@ class WHOGuidelinesEngine:
     WHO guidelines with decision support algorithms for healthcare professionals.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize WHO Guidelines Engine with protocol data"""
         logger.info("Initializing WHO Guidelines Engine")
 

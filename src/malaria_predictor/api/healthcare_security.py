@@ -294,7 +294,7 @@ class DHIS2Integration:
     systems for surveillance data reporting and management.
     """
 
-    def __init__(self, base_url: str, username: str, password: str):
+    def __init__(self, base_url: str, username: str, password: str) -> None:
         """
         Initialize DHIS2 integration.
 
@@ -397,7 +397,7 @@ class MultiLanguageSupport:
     tools and documentation in multiple African languages.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize multi-language support."""
         self.translations = self._load_translations()
 

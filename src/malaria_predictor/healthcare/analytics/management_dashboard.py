@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class ManagementDashboard:
     """Management dashboard and reporting interface"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Management Dashboard"""
         logger.info("Initializing Management Dashboard")
 

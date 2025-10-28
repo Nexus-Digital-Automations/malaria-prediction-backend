@@ -84,7 +84,7 @@ class ProcessingResult(BaseModel):
 class ERA5DataProcessor:
     """Processor for ERA5 climate data focused on malaria risk factors."""
 
-    def __init__(self, config: ProcessingConfig | None = None):
+    def __init__(self, config: ProcessingConfig | None = None) -> None:
         """Initialize processor with configuration.
 
         Args:
@@ -504,7 +504,7 @@ class ERA5DataProcessor:
 class BatchDataProcessor:
     """Processor for batch data processing operations."""
 
-    def __init__(self, config: ProcessingConfig | None = None):
+    def __init__(self, config: ProcessingConfig | None = None) -> None:
         """Initialize batch processor with configuration.
 
         Args:
@@ -540,7 +540,7 @@ class BatchDataProcessor:
 class TimeSeriesDataProcessor:
     """Processor for time series data operations."""
 
-    def __init__(self, config: ProcessingConfig | None = None):
+    def __init__(self, config: ProcessingConfig | None = None) -> None:
         """Initialize time series processor with configuration.
 
         Args:
@@ -569,7 +569,7 @@ class TimeSeriesDataProcessor:
 class DataProcessor:
     """Main data processor with async process method."""
 
-    def __init__(self, config: ProcessingConfig | None = None):
+    def __init__(self, config: ProcessingConfig | None = None) -> None:
         """Initialize data processor.
 
         Args:

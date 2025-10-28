@@ -117,7 +117,7 @@ class FCMService:
     - Error handling and logging
     """
 
-    def __init__(self, credentials_path: str | None = None, project_id: str | None = None):
+    def __init__(self, credentials_path: str | None = None, project_id: str | None = None) -> None:
         """
         Initialize FCM service with Firebase credentials.
 

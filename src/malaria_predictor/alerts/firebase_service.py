@@ -108,7 +108,7 @@ class FirebaseNotificationService:
     - Template-based notification generation
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Firebase Cloud Messaging service."""
         self.settings = settings
         self.app = None

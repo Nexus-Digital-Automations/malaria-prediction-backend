@@ -93,7 +93,7 @@ class AlertHistoryManager:
     - Cleanup and optimization
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the alert history manager."""
         self.settings = settings
 

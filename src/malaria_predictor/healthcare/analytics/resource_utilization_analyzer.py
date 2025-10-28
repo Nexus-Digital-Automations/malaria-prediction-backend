@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class ResourceUtilizationAnalyzer:
     """Resource utilization analysis engine"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Resource Utilization Analyzer"""
         logger.info("Initializing Resource Utilization Analyzer")
 

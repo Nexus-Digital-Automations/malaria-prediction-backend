@@ -13,7 +13,7 @@ from typing import Any
 class DashboardConfig:
     """Configuration class for Grafana dashboards and alerts."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.config_path = Path(__file__).parent / "grafana_dashboards_config.json"
 
     def load_config(self) -> dict[str, Any]:

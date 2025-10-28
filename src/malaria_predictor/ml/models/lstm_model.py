@@ -26,7 +26,7 @@ class PositionalEncoding(nn.Module):
     understand the sequential nature of environmental time-series data.
     """
 
-    def __init__(self, d_model: int, max_len: int = 365):
+    def __init__(self, d_model: int, max_len: int = 365) -> None:
         super().__init__()
 
         pe = torch.zeros(max_len, d_model)
@@ -53,7 +53,7 @@ class AttentionWeights(nn.Module):
     data sequence for malaria risk prediction.
     """
 
-    def __init__(self, hidden_size: int):
+    def __init__(self, hidden_size: int) -> None:
         super().__init__()
         self.attention = nn.Sequential(
             nn.Linear(hidden_size, hidden_size // 2),

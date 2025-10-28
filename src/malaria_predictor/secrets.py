@@ -22,7 +22,7 @@ class SecretsManager:
     and file-based secrets with proper fallback mechanisms.
     """
 
-    def __init__(self, secrets_dir: str | Path = "/run/secrets"):
+    def __init__(self, secrets_dir: str | Path = "/run/secrets") -> None:
         """
         Initialize the secrets manager.
 

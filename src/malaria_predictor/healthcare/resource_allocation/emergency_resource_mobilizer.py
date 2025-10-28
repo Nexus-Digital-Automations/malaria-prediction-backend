@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class EmergencyResourceMobilizer:
     """Emergency resource mobilization system"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Emergency Resource Mobilizer"""
         logger.info("Initializing Emergency Resource Mobilizer")
 

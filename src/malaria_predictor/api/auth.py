@@ -354,7 +354,7 @@ async def authenticate_user(
         return None
 
 
-def require_scopes(*required_scopes: str):
+def require_scopes(*required_scopes: str) -> callable:
     """
     Dependency factory for requiring specific scopes.
 
@@ -416,7 +416,7 @@ def require_scopes(*required_scopes: str):
     return scope_dependency
 
 
-def require_role(*allowed_roles: str):
+def require_role(*allowed_roles: str) -> callable:
     """
     Dependency factory for requiring specific user roles.
 

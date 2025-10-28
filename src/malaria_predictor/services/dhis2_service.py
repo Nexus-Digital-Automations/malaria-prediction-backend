@@ -340,7 +340,7 @@ class DHIS2DataMapper:
     into DHIS2-compatible data structures and formats.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize DHIS2 data mapper with standard mappings."""
         self.data_element_mappings = {
             # Malaria case data elements
@@ -496,7 +496,7 @@ class DHIS2Service:
     surveillance data export, organization management, and data validation.
     """
 
-    def __init__(self, client: DHIS2Client):
+    def __init__(self, client: DHIS2Client) -> None:
         """
         Initialize DHIS2 service.
 

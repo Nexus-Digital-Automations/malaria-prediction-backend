@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class BudgetOptimizer:
     """Healthcare budget optimization system"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Budget Optimizer"""
         logger.info("Initializing Budget Optimizer")
 

@@ -100,7 +100,7 @@ class MAPClient:
     RASTER_URL = "https://data.malariaatlas.org/rasters"
     PR_POINTS_URL = "https://malariaatlas.org/explorer-api/getPR"
 
-    def __init__(self, settings: Settings | None = None):
+    def __init__(self, settings: Settings | None = None) -> None:
         """Initialize MAP client with configuration.
 
         Args:

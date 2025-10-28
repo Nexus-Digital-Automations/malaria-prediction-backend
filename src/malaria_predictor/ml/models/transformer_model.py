@@ -88,7 +88,7 @@ class PositionalEncoding(nn.Module):
 class SpatialTemporalAttention(nn.Module):
     """Multi-head attention with spatial-temporal awareness."""
 
-    def __init__(self, d_model: int, num_heads: int = 8, dropout: float = 0.1):
+    def __init__(self, d_model: int, num_heads: int = 8, dropout: float = 0.1) -> None:
         super().__init__()
         self.d_model = d_model
         self.num_heads = num_heads

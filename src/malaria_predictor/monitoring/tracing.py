@@ -342,7 +342,7 @@ class MLModelTracer:
     attributes and metrics.
     """
 
-    def __init__(self, tracer: trace.Tracer | None = None):
+    def __init__(self, tracer: trace.Tracer | None = None) -> None:
         self.tracer = tracer or get_tracer(__name__)
 
     def trace_model_loading(
@@ -435,7 +435,7 @@ class DatabaseTracer:
     connection pooling metrics, and performance data.
     """
 
-    def __init__(self, tracer: trace.Tracer | None = None):
+    def __init__(self, tracer: trace.Tracer | None = None) -> None:
         self.tracer = tracer or get_tracer(__name__)
 
     def trace_query(
@@ -491,7 +491,7 @@ class APITracer:
     user context, and request/response metrics.
     """
 
-    def __init__(self, tracer: trace.Tracer | None = None):
+    def __init__(self, tracer: trace.Tracer | None = None) -> None:
         self.tracer = tracer or get_tracer(__name__)
 
     def trace_api_request(

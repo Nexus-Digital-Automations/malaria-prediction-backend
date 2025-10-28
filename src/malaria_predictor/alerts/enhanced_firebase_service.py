@@ -187,7 +187,7 @@ class EnhancedFirebaseService:
     - Batch processing and rate limiting
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize enhanced Firebase service."""
         self.settings = settings
         self.app = None

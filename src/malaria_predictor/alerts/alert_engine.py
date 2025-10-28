@@ -84,7 +84,7 @@ class AlertEngine:
     - Performance monitoring and optimization
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the alert engine."""
         self.settings = settings
         self.stats = {

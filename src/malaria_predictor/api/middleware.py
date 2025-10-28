@@ -30,7 +30,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     and error details for monitoring and debugging purposes.
     """
 
-    def __init__(self, app, enable_body_logging: bool = False):
+    def __init__(self, app, enable_body_logging: bool = False) -> None:
         super().__init__(app)
         self.enable_body_logging = enable_body_logging
 
@@ -120,7 +120,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     In production, consider using Redis for distributed rate limiting.
     """
 
-    def __init__(self, app, calls: int = 100, period: int = 60):
+    def __init__(self, app, calls: int = 100, period: int = 60) -> None:
         super().__init__(app)
         self.calls = calls  # Number of calls allowed
         self.period = period  # Time period in seconds
@@ -195,7 +195,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
     Collects request counts, response times, and error rates for monitoring.
     """
 
-    def __init__(self, app):
+    def __init__(self, app) -> None:
         super().__init__(app)
         self.request_count = defaultdict(int)
         self.response_times = defaultdict(list)
@@ -271,7 +271,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     and provides HIPAA-compliant security measures.
     """
 
-    def __init__(self, app, environment: str = "production"):
+    def __init__(self, app, environment: str = "production") -> None:
         super().__init__(app)
         self.environment = environment
 
@@ -345,7 +345,7 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
     Provides protection against injection attacks and malformed data.
     """
 
-    def __init__(self, app, max_content_length: int = 10 * 1024 * 1024):  # 10MB default
+    def __init__(self, app, max_content_length: int = 10 * 1024 * 1024) -> None:  # 10MB default
         super().__init__(app)
         self.max_content_length = max_content_length
 
@@ -431,7 +431,7 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
     Middleware for adding unique request IDs for tracing.
     """
 
-    def __init__(self, app):
+    def __init__(self, app) -> None:
         super().__init__(app)
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
@@ -458,7 +458,7 @@ class AuditLoggingMiddleware(BaseHTTPMiddleware):
     Logs all requests for security and compliance monitoring.
     """
 
-    def __init__(self, app, log_sensitive_data: bool = False):
+    def __init__(self, app, log_sensitive_data: bool = False) -> None:
         super().__init__(app)
         self.log_sensitive_data = log_sensitive_data
 
