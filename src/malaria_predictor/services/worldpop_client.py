@@ -5,24 +5,26 @@ data including population density, age/sex structure, and population-at-risk
 calculations using malaria risk surfaces.
 
 WorldPop provides global population datasets at multiple resolutions (100m, 1km)
-with temporal coverage from 2000-2030. The data is available via both REST API
-and FTP access methods.
+with temporal coverage from 2000-2030. The data is available via secure HTTPS REST API.
 
 Dependencies:
 - requests: HTTP client for API access and data downloads
 - rasterio: GeoTIFF file reading and processing
 - numpy: Array operations for population calculations
 - pathlib: File system path handling
-- ftplib: FTP access for bulk data downloads
 
 Assumptions:
 - No authentication required (open access data)
 - Sufficient disk space for population raster files
 - Internet connectivity to WorldPop servers
-- Optional FTP access for bulk downloads
+
+SECURITY NOTE:
+    FTP support has been removed due to security concerns (unencrypted transmission).
+    All downloads now use HTTPS REST API exclusively.
 """
 
-import ftplib
+# Removed insecure FTP support - use HTTPS REST API instead
+# import ftplib  # SECURITY: FTP is insecure (unencrypted), removed
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
@@ -119,10 +121,10 @@ class PopulationAtRiskResult(BaseModel):
 class WorldPopClient:
     """Client for downloading and processing WorldPop population data."""
 
-    # WorldPop API and FTP endpoints
+    # WorldPop API endpoints (HTTPS only for security)
     BASE_API_URL = "https://www.worldpop.org/rest/data"
-    FTP_BASE_URL = "ftp.worldpop.org"
     REST_BASE_URL = "https://data.worldpop.org"
+    # FTP_BASE_URL removed - SECURITY: FTP is insecure (unencrypted)
 
     # Common data paths and patterns
     POPULATION_DATASETS = {
@@ -236,7 +238,7 @@ class WorldPopClient:
         target_year: int = 2020,
         data_type: str = "population_density",
         resolution: str = "100m",
-        use_ftp: bool = False,
+        use_ftp: bool = False,  # DEPRECATED: Ignored for security, always uses HTTPS
     ) -> WorldPopDownloadResult:
         """Download WorldPop population data for specified countries.
 
@@ -245,11 +247,19 @@ class WorldPopClient:
             target_year: Year for population data
             data_type: Type of population data to download
             resolution: Spatial resolution of data
-            use_ftp: Whether to use FTP for download (faster for bulk)
+            use_ftp: DEPRECATED. Ignored for security. All downloads use HTTPS.
 
         Returns:
             Download result with file paths and metadata
+
+        Security:
+            FTP support has been removed. All downloads use secure HTTPS REST API.
         """
+        if use_ftp:
+            logger.warning(
+                "FTP download deprecated for security (unencrypted transmission). "
+                "Using secure HTTPS REST API instead."
+            )
         logger.info(
             f"Starting WorldPop {data_type} download for {country_codes}, year {target_year}"
         )
@@ -279,22 +289,14 @@ class WorldPopClient:
                     continue
 
                 for dataset in available_datasets[country_code]:
-                    if use_ftp:
-                        task = self.executor.submit(
-                            self._download_via_ftp,
-                            country_code,
-                            dataset,
-                            data_type,
-                            resolution,
-                        )
-                    else:
-                        task = self.executor.submit(
-                            self._download_via_rest,
-                            country_code,
-                            dataset,
-                            data_type,
-                            resolution,
-                        )
+                    # Always use secure HTTPS REST API (FTP deprecated for security)
+                    task = self.executor.submit(
+                        self._download_via_rest,
+                        country_code,
+                        dataset,
+                        data_type,
+                        resolution,
+                    )
                     download_tasks.append(task)
 
             # Wait for downloads to complete
@@ -424,56 +426,28 @@ class WorldPopClient:
         data_type: str,
         resolution: str,
     ) -> tuple[Path | None, int, dict[str, str | float]]:
-        """Download single file via FTP (for bulk downloads).
+        """DEPRECATED: FTP download method removed for security.
+
+        SECURITY: This method has been deprecated and disabled due to security concerns.
+        FTP transmits data unencrypted, making it vulnerable to interception.
+        Use _download_via_rest() instead, which uses secure HTTPS.
+
+        Raises:
+            NotImplementedError: Always raised - FTP support removed for security
 
         Returns:
-            Tuple of (file_path, file_size, metadata) or (None, 0, {}) if failed
+            Never returns - always raises NotImplementedError
         """
-        try:
-            # Build FTP path based on WorldPop structure
-            year = dataset.get("year", 2020)
-            filename = f"{country_code.lower()}_{data_type}_{year}_{resolution}.tif"
-            remote_path = (
-                f"/GIS/Population/Global_2000_2020/{year}/{resolution}/{filename}"
-            )
-
-            output_path = self.download_directory / data_type / filename
-
-            # Skip if already downloaded
-            if output_path.exists():
-                logger.info(f"File already exists, skipping: {filename}")
-                return output_path, output_path.stat().st_size, {"cached": True}
-
-            # Connect to FTP server
-            logger.info(f"Downloading {country_code} via FTP: {filename}")
-
-            with ftplib.FTP(self.FTP_BASE_URL) as ftp:
-                ftp.login()  # Anonymous login
-
-                # Download file
-                with open(output_path, "wb") as f:
-                    ftp.retrbinary(f"RETR {remote_path}", f.write)
-
-            file_size = output_path.stat().st_size
-            logger.info(
-                f"Downloaded via FTP: {filename} ({file_size / 1024 / 1024:.2f} MB)"
-            )
-
-            metadata = {
-                "country_code": country_code,
-                "year": year,
-                "download_method": "ftp",
-                "cached": False,
-            }
-
-            return output_path, file_size, metadata
-
-        except ftplib.all_errors as e:
-            logger.error(f"FTP download failed for {country_code}: {e}")
-            return None, 0, {}
-        except Exception as e:
-            logger.error(f"Unexpected error in FTP download {country_code}: {e}")
-            return None, 0, {}
+        logger.error(
+            "FTP download method called but has been removed for security. "
+            "FTP transmits data unencrypted. Use HTTPS REST API instead."
+        )
+        raise NotImplementedError(
+            "FTP download has been removed for security reasons. "
+            "FTP is insecure (unencrypted transmission). "
+            "All downloads now use secure HTTPS REST API. "
+            "Update your code to use download_population_data() without use_ftp parameter."
+        )
 
     def extract_population_for_region(
         self,
