@@ -1076,8 +1076,8 @@ class ReportSchedule(Base):
     # Performance tracking
     execution_count = Column(Integer, default=0)
     success_count = Column(Integer, default=0)
-    average_execution_time = Column(Float, nullable=True)
-    last_execution_time = Column(Float, nullable=True)
+    average_execution_time: float | None = Column(Float, nullable=True)
+    last_execution_time: float | None = Column(Float, nullable=True)
 
     # Relationships
     template = relationship("ReportTemplate", back_populates="schedules")

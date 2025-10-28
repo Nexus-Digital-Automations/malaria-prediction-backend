@@ -6,6 +6,7 @@ and automated response protocols for critical malaria risk situations.
 
 import logging
 from datetime import datetime
+from typing import Any
 
 import aiohttp
 from pydantic import BaseModel

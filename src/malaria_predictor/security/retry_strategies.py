@@ -159,8 +159,6 @@ class BackoffCalculator:
             # Adaptive strategy combines exponential with error-type adjustments
             delay = base_delay * (config.backoff_multiplier ** (attempt - 1))
             delay = BackoffCalculator._apply_adaptive_adjustments(delay, error_context, last_delay)
-        else:
-            delay = base_delay
 
         # Apply jitter if enabled
         if config.jitter and delay > 0:
@@ -320,8 +318,6 @@ class CircuitBreaker:
         elif self.state == CircuitBreakerState.HALF_OPEN:
             # Allow limited number of calls in half-open state
             return self.success_count < self.config.half_open_max_calls
-
-        return False
 
     async def _record_success(self, response_time: float):
         """Record successful request."""

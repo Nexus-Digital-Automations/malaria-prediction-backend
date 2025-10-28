@@ -6,7 +6,7 @@ generates alerts, and manages alert lifecycle.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Any, Union
 
 from pydantic import BaseModel
 from sqlalchemy import or_, select
