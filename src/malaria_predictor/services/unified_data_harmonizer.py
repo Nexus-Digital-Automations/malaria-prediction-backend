@@ -38,7 +38,7 @@ class CacheManager:
     def __init__(self, cache_dir: Path) -> None:
         self.cache_dir = cache_dir
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.metadata_store = {}
+        self.metadata_store: dict[str, Any] = {}
 
     def get_cached_harmonized_data(
         self,

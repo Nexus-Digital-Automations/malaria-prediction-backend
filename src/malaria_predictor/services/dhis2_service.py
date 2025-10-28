@@ -505,8 +505,8 @@ class DHIS2Service:
         """
         self.client = client
         self.mapper = DHIS2DataMapper()
-        self._org_units_cache = {}
-        self._data_sets_cache = {}
+        self._org_units_cache: dict[str, Any] = {}
+        self._data_sets_cache: dict[str, Any] = {}
         logger.info("DHIS2 service initialized")
 
     async def export_surveillance_report(

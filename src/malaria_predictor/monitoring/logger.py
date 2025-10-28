@@ -200,7 +200,7 @@ class RequestContextLogger:
         self.user_id = user_id
         self.session_id = session_id
         self.operation = operation
-        self.tokens = []
+        self.tokens: list[str] = []
 
     def __enter__(self):
         """Enter request context."""

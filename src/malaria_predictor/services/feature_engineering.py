@@ -25,7 +25,7 @@ class FeatureEngineer:
 
     def __init__(self, feature_schema: dict[str, str] | None = None) -> None:
         self.schema = feature_schema or self._get_default_schema()
-        self.scalers = {}
+        self.scalers: dict[str, Any] = {}
 
     def _get_default_schema(self) -> dict[str, str]:
         """Get default feature schema."""

@@ -159,7 +159,7 @@ class WorldPopClient:
         )  # Conservative for large files
 
         # Cache for dataset discovery
-        self._dataset_cache = {}
+        self._dataset_cache: dict[str, Any] = {}
 
         logger.info(
             f"WorldPop client initialized with download directory: {self.download_directory}"
@@ -744,7 +744,7 @@ class WorldPopClient:
         Returns:
             Dictionary with validation results
         """
-        validation_result = {
+        validation_result: dict[str, Any] = {
             "file_exists": False,
             "file_size_valid": False,
             "data_accessible": False,

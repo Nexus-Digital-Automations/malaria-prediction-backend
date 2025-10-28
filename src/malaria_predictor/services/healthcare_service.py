@@ -378,7 +378,7 @@ class CaseRepository:
 
     def __init__(self) -> None:
         """Initialize case repository."""
-        self._cases = {}  # In production, use actual database
+        self._cases: dict[str, dict[str, Any]] = {}  # In production, use actual database
         logger.info("Case repository initialized")
 
     async def store_case(self, case_data: dict[str, Any]) -> None:

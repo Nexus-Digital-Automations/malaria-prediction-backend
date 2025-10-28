@@ -36,8 +36,8 @@ class EnvironmentalFeatureExtractor:
 
     def __init__(self, feature_config: dict[str, Any] | None = None) -> None:
         self.config = feature_config or self._get_default_config()
-        self.scalers = {}
-        self.historical_stats = {}
+        self.scalers: dict[str, Any] = {}
+        self.historical_stats: dict[str, Any] = {}
 
     def _get_default_config(self) -> dict[str, Any]:
         """Get default feature extraction configuration."""

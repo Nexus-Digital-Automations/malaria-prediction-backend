@@ -440,7 +440,7 @@ class AlertHistoryManager:
                 ).all()
 
                 archived_count = 0
-                archived_by_level = {}
+                archived_by_level: dict[str, int] = {}
                 storage_saved_mb = 0
 
                 if not dry_run:

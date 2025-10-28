@@ -197,9 +197,9 @@ class MetricsMiddleware(BaseHTTPMiddleware):
 
     def __init__(self, app) -> None:
         super().__init__(app)
-        self.request_count = defaultdict(int)
-        self.response_times = defaultdict(list)
-        self.error_count = defaultdict(int)
+        self.request_count: defaultdict[str, int] = defaultdict(int)
+        self.response_times: defaultdict[str, list[float]] = defaultdict(list)
+        self.error_count: defaultdict[str, int] = defaultdict(int)
         self.start_time = time.time()
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:

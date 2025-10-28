@@ -878,7 +878,7 @@ class MODISClient:
         Returns:
             Dict with validation results
         """
-        validation_result = {
+        validation_result: dict[str, Any] = {
             "file_exists": False,
             "file_size_valid": False,
             "hdf_readable": False,

@@ -188,7 +188,7 @@ class ERA5Client:
         self._cds_client = None
 
         # Cache for request optimization
-        self._request_cache = {}
+        self._request_cache: dict[str, Any] = {}
 
         logger.info(
             f"ERA5 client initialized with download directory: {self.download_directory}"
@@ -545,7 +545,7 @@ class ERA5Client:
         Returns:
             Dict with validation results including success status and details
         """
-        validation_result = {
+        validation_result: dict[str, Any] = {
             "file_exists": False,
             "file_size_valid": False,
             "data_accessible": False,

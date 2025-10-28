@@ -939,14 +939,14 @@ class AlertTemplateManager:
 
     def _get_templates_by_category(self) -> dict[str, int]:
         """Get template count by category."""
-        categories = {}
+        categories: dict[str, int] = {}
         for template in self.templates.values():
             categories[template.category] = categories.get(template.category, 0) + 1
         return categories
 
     def _get_templates_by_language(self) -> dict[str, int]:
         """Get template count by supported languages."""
-        languages = {}
+        languages: dict[str, int] = {}
         for template in self.templates.values():
             all_languages = [template.default_language] + [t.language_code for t in template.translations]
             for lang in all_languages:

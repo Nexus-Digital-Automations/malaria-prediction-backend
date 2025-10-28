@@ -21,7 +21,7 @@ class InventoryManager:
     def __init__(self) -> None:
         """Initialize Inventory Manager"""
         logger.info("Initializing Inventory Manager")
-        self._inventory = {}
+        self._inventory: dict[str, Any] = {}
 
     def track_inventory(self, facility_id: str, resources: dict[str, Any]) -> dict[str, Any]:
         """Track inventory levels"""

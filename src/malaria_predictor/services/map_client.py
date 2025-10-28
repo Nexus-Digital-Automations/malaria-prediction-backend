@@ -808,7 +808,7 @@ tryCatch({{
         Returns:
             Dict with validation results
         """
-        validation_result = {
+        validation_result: dict[str, Any] = {
             "file_exists": False,
             "file_size_valid": False,
             "data_accessible": False,
