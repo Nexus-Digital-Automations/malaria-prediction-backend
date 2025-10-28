@@ -4,7 +4,7 @@ Validates that all alert system components can be imported and basic functionali
 """
 
 
-def test_alert_system_imports():
+def test_alert_system_imports() -> None:
     """Test all enhanced alert system components can be imported successfully."""
     # Test main component imports
     try:
@@ -31,7 +31,7 @@ def test_alert_system_imports():
     assert imports_successful, "All alert system components should be importable"
 
 
-def test_alert_core_components_initialization():
+def test_alert_core_components_initialization() -> None:
     """Test core alert system components can be initialized."""
     from src.malaria_predictor.alerts.alert_analytics import AlertAnalyticsEngine
     from src.malaria_predictor.alerts.alert_history_manager import AlertHistoryManager
@@ -54,7 +54,7 @@ def test_alert_core_components_initialization():
     assert initialization_successful, "Core alert components should initialize"
 
 
-def test_alert_analytics_methods():
+def test_alert_analytics_methods() -> None:
     """Test AlertAnalyticsEngine has expected methods."""
     from src.malaria_predictor.alerts.alert_analytics import AlertAnalyticsEngine
 
@@ -75,7 +75,7 @@ def test_alert_analytics_methods():
         assert callable(getattr(engine, method_name)), f"{method_name} should be callable"
 
 
-def test_alert_history_manager_methods():
+def test_alert_history_manager_methods() -> None:
     """Test AlertHistoryManager has expected methods."""
     from src.malaria_predictor.alerts.alert_history_manager import AlertHistoryManager
 
@@ -95,7 +95,7 @@ def test_alert_history_manager_methods():
         assert callable(getattr(manager, method_name)), f"{method_name} should be callable"
 
 
-def test_alert_template_manager_methods():
+def test_alert_template_manager_methods() -> None:
     """Test AlertTemplateManager has expected methods."""
     from src.malaria_predictor.alerts.alert_template_manager import AlertTemplateManager
 
@@ -115,7 +115,7 @@ def test_alert_template_manager_methods():
         assert callable(getattr(manager, method_name)), f"{method_name} should be callable"
 
 
-def test_alert_data_models():
+def test_alert_data_models() -> None:
     """Test alert data models can be imported and basic instances created."""
     from datetime import datetime, timedelta
 
@@ -138,7 +138,7 @@ def test_alert_data_models():
     assert model_creation_successful, "Basic data models should work"
 
 
-def test_stats_methods_return_dicts():
+def test_stats_methods_return_dicts() -> None:
     """Test that stats methods return dictionaries for monitoring."""
     from src.malaria_predictor.alerts.alert_analytics import AlertAnalyticsEngine
     from src.malaria_predictor.alerts.alert_history_manager import AlertHistoryManager
@@ -166,7 +166,7 @@ def test_stats_methods_return_dicts():
     assert stats_successful, "Stats methods should work and return dicts"
 
 
-def test_alert_system_validation_summary():
+def test_alert_system_validation_summary() -> dict[str, bool]:
     """Comprehensive validation summary for alert system."""
     validation_results = {
         "imports": False,

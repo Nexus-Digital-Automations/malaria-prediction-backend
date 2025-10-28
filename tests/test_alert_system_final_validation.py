@@ -4,7 +4,8 @@ Validates that all alert system components can be imported, initialized,
 and have the expected methods and functionality.
 """
 
-def test_all_alert_components_import():
+
+def test_all_alert_components_import() -> None:
     """Test all enhanced alert system components can be imported successfully."""
     # Test individual component imports
     from src.malaria_predictor.alerts.alert_analytics import AlertAnalyticsEngine
@@ -38,7 +39,7 @@ def test_all_alert_components_import():
     ])
 
 
-def test_alert_system_component_initialization():
+def test_alert_system_component_initialization() -> None:
     """Test alert system components can be initialized without errors."""
     from src.malaria_predictor.alerts.alert_analytics import AlertAnalyticsEngine
     from src.malaria_predictor.alerts.alert_history_manager import AlertHistoryManager
@@ -56,7 +57,7 @@ def test_alert_system_component_initialization():
     assert template_manager is not None
 
 
-def test_alert_analytics_engine_functionality():
+def test_alert_analytics_engine_functionality() -> None:
     """Test AlertAnalyticsEngine has expected methods and can be used."""
     from src.malaria_predictor.alerts.alert_analytics import AlertAnalyticsEngine
 
@@ -76,7 +77,7 @@ def test_alert_analytics_engine_functionality():
     assert callable(engine.detect_anomalies)
 
 
-def test_alert_history_manager_functionality():
+def test_alert_history_manager_functionality() -> None:
     """Test AlertHistoryManager has expected methods and can be used."""
     from src.malaria_predictor.alerts.alert_history_manager import AlertHistoryManager
 
@@ -95,7 +96,7 @@ def test_alert_history_manager_functionality():
     assert callable(manager.export_alert_history)
 
 
-def test_alert_template_manager_functionality():
+def test_alert_template_manager_functionality() -> None:
     """Test AlertTemplateManager has expected methods and can be used."""
     from src.malaria_predictor.alerts.alert_template_manager import (
         AlertTemplateManager,
@@ -116,7 +117,7 @@ def test_alert_template_manager_functionality():
     assert callable(manager.validate_template)
 
 
-def test_alert_data_models_creation():
+def test_alert_data_models_creation() -> None:
     """Test alert data models can be created with valid data."""
     from datetime import datetime, timedelta
 
@@ -151,7 +152,7 @@ def test_alert_data_models_creation():
     assert template.is_active is True
 
 
-def test_enhanced_firebase_service_structure():
+def test_enhanced_firebase_service_structure() -> None:
     """Test EnhancedFirebaseService has expected structure."""
     from src.malaria_predictor.alerts.enhanced_firebase_service import (
         EnhancedFirebaseService,
@@ -164,7 +165,7 @@ def test_enhanced_firebase_service_structure():
     # but we can test the class structure exists
 
 
-def test_bulk_notification_manager_structure():
+def test_bulk_notification_manager_structure() -> None:
     """Test BulkNotificationManager has expected structure."""
     from src.malaria_predictor.alerts.bulk_notification_manager import (
         BulkNotificationManager,
@@ -177,7 +178,7 @@ def test_bulk_notification_manager_structure():
     # but we can test the class structure exists
 
 
-def test_alert_system_integration_readiness():
+def test_alert_system_integration_readiness() -> None:
     """Test that alert system components are ready for integration."""
     # Test that all main components can be imported together
     from src.malaria_predictor.alerts.alert_analytics import AlertAnalyticsEngine
@@ -202,7 +203,7 @@ def test_alert_system_integration_readiness():
     assert callable(templates.get_stats)
 
 
-def test_alert_system_validation_complete():
+def test_alert_system_validation_complete() -> None:
     """Final validation that the alert system is properly implemented."""
 
     # Test 1: All components can be imported

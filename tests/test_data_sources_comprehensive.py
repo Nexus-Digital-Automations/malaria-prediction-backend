@@ -8,6 +8,7 @@ documenting what works, what doesn't, and what actions are needed.
 import logging
 import sys
 from pathlib import Path
+from typing import Any
 
 # Add src to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -30,10 +31,10 @@ logger = logging.getLogger(__name__)
 class DataSourceTester:
     """Comprehensive tester for all data source clients."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize tester with settings."""
         self.settings = Settings()
-        self.results = {
+        self.results: dict[str, dict[str, Any]] = {
             'era5': {'status': 'pending', 'details': [], 'errors': []},
             'chirps': {'status': 'pending', 'details': [], 'errors': []},
             'modis': {'status': 'pending', 'details': [], 'errors': []},
@@ -41,7 +42,7 @@ class DataSourceTester:
             'worldpop': {'status': 'pending', 'details': [], 'errors': []}
         }
 
-    def test_era5_client(self):
+    def test_era5_client(self) -> None:
         """Test ERA5 climate data client."""
         logger.info("Testing ERA5 Client...")
         source_name = 'era5'
@@ -112,7 +113,7 @@ class DataSourceTester:
             self.results[source_name]['status'] = 'failed'
             self.results[source_name]['errors'].append(f"✗ Unexpected error: {e}")
 
-    def test_chirps_client(self):
+    def test_chirps_client(self) -> None:
         """Test CHIRPS precipitation data client."""
         logger.info("Testing CHIRPS Client...")
         source_name = 'chirps'
@@ -177,7 +178,7 @@ class DataSourceTester:
             self.results[source_name]['status'] = 'failed'
             self.results[source_name]['errors'].append(f"✗ Unexpected error: {e}")
 
-    def test_modis_client(self):
+    def test_modis_client(self) -> None:
         """Test MODIS vegetation indices client."""
         logger.info("Testing MODIS Client...")
         source_name = 'modis'
@@ -243,7 +244,7 @@ class DataSourceTester:
             self.results[source_name]['status'] = 'failed'
             self.results[source_name]['errors'].append(f"✗ Unexpected error: {e}")
 
-    def test_map_client(self):
+    def test_map_client(self) -> None:
         """Test Malaria Atlas Project client."""
         logger.info("Testing MAP Client...")
         source_name = 'map'
@@ -306,7 +307,7 @@ class DataSourceTester:
             self.results[source_name]['status'] = 'failed'
             self.results[source_name]['errors'].append(f"✗ Unexpected error: {e}")
 
-    def test_worldpop_client(self):
+    def test_worldpop_client(self) -> None:
         """Test WorldPop population data client."""
         logger.info("Testing WorldPop Client...")
         source_name = 'worldpop'
@@ -375,7 +376,7 @@ class DataSourceTester:
             self.results[source_name]['status'] = 'failed'
             self.results[source_name]['errors'].append(f"✗ Unexpected error: {e}")
 
-    def run_all_tests(self):
+    def run_all_tests(self) -> dict[str, dict[str, Any]]:
         """Run all data source tests."""
         logger.info("=" * 80)
         logger.info("STARTING COMPREHENSIVE DATA SOURCE TESTS")
@@ -389,7 +390,7 @@ class DataSourceTester:
 
         return self.results
 
-    def generate_summary(self):
+    def generate_summary(self) -> None:
         """Generate test summary."""
         logger.info("\n" + "=" * 80)
         logger.info("TEST SUMMARY")
@@ -417,7 +418,7 @@ class DataSourceTester:
                     logger.info(f"    {error}")
 
 
-def main():
+def main() -> dict[str, dict[str, Any]]:
     """Run comprehensive data source tests."""
     tester = DataSourceTester()
     results = tester.run_all_tests()
