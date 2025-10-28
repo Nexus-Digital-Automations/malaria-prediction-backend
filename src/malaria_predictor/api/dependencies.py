@@ -230,7 +230,7 @@ class PredictionService:
 
     def __init__(self, model_manager: ModelManager) -> None:
         self.model_manager = model_manager
-        self.data_harmonizer = None
+        self.data_harmonizer: UnifiedDataHarmonizer | None = None
         self._initialize_harmonizer()
 
     def _initialize_harmonizer(self):

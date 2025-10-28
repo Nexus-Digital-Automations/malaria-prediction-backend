@@ -427,7 +427,7 @@ class SecurityAuditLogger:
     def __init__(
         self,
         storage_path: Path,
-        encryption_key: str | None = None,
+        encryption_key: str | bytes | None = None,
         application_name: str = "malaria_predictor",
         environment: str = "production",
         enable_anomaly_detection: bool = True,

@@ -5,33 +5,36 @@ This module provides shared fixtures and configuration for all tests,
 including base test setup and common utilities.
 """
 
-import asyncio
 import os
 import tempfile
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-# Set testing environment variables before importing application modules
-os.environ["TESTING"] = "true"
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["DATABASE_URL"] = (
-    "postgresql+asyncpg://test_user:test_password@localhost:5433/test_malaria_prediction"
-)
-os.environ["REDIS_URL"] = "redis://localhost:6380/0"
+
+@pytest.fixture(scope="session", autouse=True)
+def setup_test_environment() -> None:
+    """Configure test environment variables for entire test session.
+
+    Uses autouse=True to ensure environment is set up before any tests run.
+    Modern pattern replaces module-level os.environ assignments.
+    """
+    test_env = {
+        "TESTING": "true",
+        "ENVIRONMENT": "testing",
+        "DATABASE_URL": "postgresql+asyncpg://test_user:test_password@localhost:5433/test_malaria_prediction",
+        "REDIS_URL": "redis://localhost:6380/0",
+    }
+    for key, value in test_env.items():
+        os.environ[key] = value
 
 
-@pytest.fixture(scope="session")
-def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
-    """Create an instance of the default event loop for the test session."""
-    policy = asyncio.get_event_loop_policy()
-    loop = policy.new_event_loop()
-    yield loop
-    loop.close()
+# Note: Session-scoped event_loop fixture removed - pytest-asyncio 0.21+
+# with asyncio_mode="auto" manages event loops automatically
 
 
 @pytest.fixture
@@ -165,34 +168,55 @@ def pytest_configure(config):
 
 # Integration test database fixtures
 @pytest.fixture
-async def test_db_engine():
-    """Create a test database engine using SQLite for integration tests."""
-    # Use in-memory SQLite for fast testing
+async def test_db_engine() -> AsyncGenerator[AsyncEngine, None]:
+    """Create isolated test database engine with proper cleanup.
+
+    Uses in-memory SQLite for fast, isolated testing.
+    NullPool prevents connection pooling issues in tests.
+    """
+    from sqlalchemy.pool import NullPool
+
     engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:", echo=False, future=True
+        "sqlite+aiosqlite:///:memory:",
+        echo=False,
+        future=True,
+        poolclass=NullPool,  # Disable pooling for test isolation
     )
+
+    # Import and create all tables
+    from malaria_predictor.database.models import Base
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
     yield engine
+
+    # Cleanup: dispose engine and close all connections
     await engine.dispose()
 
 
 @pytest.fixture
-async def test_db_session(test_db_engine):
-    """Create a test database session for integration tests."""
-    # Import models here to avoid circular imports
-    from malaria_predictor.database.models import Base
+async def test_db_session(
+    test_db_engine: AsyncEngine,
+) -> AsyncGenerator[AsyncSession, None]:
+    """Create test database session with automatic rollback for isolation.
 
-    # Create all tables
-    async with test_db_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-    # Create session
-    async_session = sessionmaker(
-        test_db_engine, class_=AsyncSession, expire_on_commit=False
+    Each test gets a fresh transaction that is automatically rolled back,
+    preventing test pollution and ensuring complete isolation.
+    """
+    async_session_factory = sessionmaker(
+        test_db_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+        autoflush=False,  # Manual flush control for better test control
+        autocommit=False,  # Explicit transaction management
     )
 
-    async with async_session() as session:
-        yield session
-        await session.rollback()
+    async with async_session_factory() as session:
+        async with session.begin():
+            yield session
+            # Automatic rollback on fixture teardown
+            await session.rollback()
 
 
 @pytest.fixture
