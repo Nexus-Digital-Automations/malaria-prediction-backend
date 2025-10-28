@@ -124,7 +124,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.calls = calls  # Number of calls allowed
         self.period = period  # Time period in seconds
-        self.requests = defaultdict(list)  # IP -> list of timestamps
+        self.requests: defaultdict[str, list[float]] = defaultdict(list)  # IP -> list of timestamps
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Apply rate limiting based on client IP."""

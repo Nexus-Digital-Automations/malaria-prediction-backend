@@ -115,7 +115,7 @@ async def detect_outbreaks(
     try:
         # This would typically fetch real surveillance data
         # For now, we'll return a structured response indicating the service is ready
-        mock_surveillance_data = []  # Would be populated from database
+        mock_surveillance_data: list[dict[str, Any]] = []  # Would be populated from database
 
         # Perform outbreak detection
         detected_outbreaks = await detector.detect_outbreaks(

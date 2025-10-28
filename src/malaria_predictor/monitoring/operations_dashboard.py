@@ -37,10 +37,10 @@ class OperationsDashboardManager:
         self.health_manager = HealthChecker()
 
         # Real-time connections
-        self.websocket_connections = set()
+        self.websocket_connections: set[Any] = set()
 
         # Dashboard state
-        self.dashboard_state = {
+        self.dashboard_state: dict[str, Any] = {
             "system_status": "healthy",
             "active_alerts": [],
             "performance_summary": {},
@@ -48,8 +48,8 @@ class OperationsDashboardManager:
         }
 
         # Alert state management
-        self.active_alerts = {}
-        self.alert_history = []
+        self.active_alerts: dict[str, Any] = {}
+        self.alert_history: list[dict[str, Any]] = []
 
         # Monitoring task
         self.monitoring_task = None

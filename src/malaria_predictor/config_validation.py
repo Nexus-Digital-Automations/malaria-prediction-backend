@@ -823,7 +823,7 @@ class ConfigValidator:
 
     async def _run_health_checks(self) -> dict[str, Any]:
         """Run health checks for external dependencies."""
-        results = {}
+        results: dict[str, Any] = {}
 
         # Database health check
         try:

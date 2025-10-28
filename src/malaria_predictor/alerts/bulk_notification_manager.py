@@ -951,7 +951,7 @@ class BulkNotificationManager:
 
     def _get_campaigns_by_status(self) -> dict[str, int]:
         """Get campaign count by status."""
-        status_counts = {}
+        status_counts: dict[str, int] = {}
         for campaign in self.campaigns.values():
             status_counts[campaign.status] = status_counts.get(campaign.status, 0) + 1
         return status_counts

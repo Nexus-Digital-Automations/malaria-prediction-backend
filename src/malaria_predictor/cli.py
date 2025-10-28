@@ -2425,7 +2425,7 @@ def harmonize_data(
 
             # Show feature summary
             typer.echo("\n📋 Feature Summary:")
-            feature_groups = {}
+            feature_groups: dict[str, list[str]] = {}
             for feature_name in result.feature_names:
                 group = feature_name.split("_")[0]
                 if group not in feature_groups:
@@ -2549,7 +2549,7 @@ def validate_harmonization(
 
     # Load feature data
     harmonized_data = {}
-    feature_groups = {}
+    feature_groups: dict[str, list[str]] = {}
 
     for feature_name in metadata["feature_names"]:
         feature_file = data_path / f"{feature_name}.npy"

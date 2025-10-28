@@ -198,7 +198,7 @@ class WorldPopClient:
             data = response.json()
 
             # Process and filter results
-            available_datasets = {}
+            available_datasets: dict[str, Any] = {}
 
             for dataset in data.get("data", []):
                 country = dataset.get("iso3", "unknown")
