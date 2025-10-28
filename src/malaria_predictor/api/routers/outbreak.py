@@ -214,7 +214,7 @@ async def detect_outbreaks(
         raise HTTPException(
             status_code=500,
             detail=f"Outbreak detection failed: {str(e)}"
-        )
+        ) from e
 
 
 @router.post("/analyze/patterns")
@@ -340,7 +340,7 @@ async def analyze_patterns(
         raise HTTPException(
             status_code=500,
             detail=f"Pattern analysis failed: {str(e)}"
-        )
+        ) from e
 
 
 @router.post("/visualizations/{chart_type}")
@@ -491,7 +491,7 @@ async def generate_visualization(
         raise HTTPException(
             status_code=500,
             detail=f"Visualization generation failed: {str(e)}"
-        )
+        ) from e
 
 
 @router.get("/alerts")
@@ -636,7 +636,7 @@ async def get_outbreak_alerts(
         raise HTTPException(
             status_code=500,
             detail=f"Alert retrieval failed: {str(e)}"
-        )
+        ) from e
 
 
 @router.get("/surveillance/dashboard")
@@ -764,7 +764,7 @@ async def get_surveillance_dashboard() -> dict[str, Any]:
         raise HTTPException(
             status_code=500,
             detail=f"Surveillance dashboard generation failed: {str(e)}"
-        )
+        ) from e
 
 
 @router.get("/health")

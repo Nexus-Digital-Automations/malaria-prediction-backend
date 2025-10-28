@@ -182,7 +182,7 @@ async def generate_report(
 
     except Exception as e:
         logger.error(f"Error generating report: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}") from e
 
 
 @router.get("/", response_model=list[ReportResponse])
@@ -242,7 +242,7 @@ async def list_reports(
 
     except Exception as e:
         logger.error(f"Error listing reports: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve reports")
+        raise HTTPException(status_code=500, detail="Failed to retrieve reports") from e
 
 
 @router.get("/{report_id}", response_model=ReportResponse)
@@ -286,7 +286,7 @@ async def get_report(
         raise
     except Exception as e:
         logger.error(f"Error retrieving report {report_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve report")
+        raise HTTPException(status_code=500, detail="Failed to retrieve report") from e
 
 
 @router.get("/{report_id}/download/{format_name}")
@@ -340,7 +340,7 @@ async def download_report(
         raise
     except Exception as e:
         logger.error(f"Error downloading report {report_id} format {format_name}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to download report")
+        raise HTTPException(status_code=500, detail="Failed to download report") from e
 
 
 @router.delete("/{report_id}")
@@ -386,7 +386,7 @@ async def delete_report(
     except Exception as e:
         logger.error(f"Error deleting report {report_id}: {str(e)}")
         db.rollback()
-        raise HTTPException(status_code=500, detail="Failed to delete report")
+        raise HTTPException(status_code=500, detail="Failed to delete report") from e
 
 
 # Template Management Endpoints
@@ -453,7 +453,7 @@ async def list_templates(
 
     except Exception as e:
         logger.error(f"Error listing templates: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve templates")
+        raise HTTPException(status_code=500, detail="Failed to retrieve templates") from e
 
 
 @router.post("/templates/", response_model=ReportTemplateResponse)
@@ -509,7 +509,7 @@ async def create_template(
     except Exception as e:
         logger.error(f"Error creating template: {str(e)}")
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to create template: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create template: {str(e)}") from e
 
 
 @router.get("/templates/{template_id}", response_model=dict[str, Any])
@@ -563,7 +563,7 @@ async def get_template(
         raise
     except Exception as e:
         logger.error(f"Error retrieving template {template_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve template")
+        raise HTTPException(status_code=500, detail="Failed to retrieve template") from e
 
 
 # Schedule Management Endpoints
@@ -614,7 +614,7 @@ async def list_schedules(
 
     except Exception as e:
         logger.error(f"Error listing schedules: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve schedules")
+        raise HTTPException(status_code=500, detail="Failed to retrieve schedules") from e
 
 
 @router.post("/schedules/", response_model=ReportScheduleResponse)
@@ -678,7 +678,7 @@ async def create_schedule(
 
     except Exception as e:
         logger.error(f"Error creating schedule: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to create schedule: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create schedule: {str(e)}") from e
 
 
 @router.put("/schedules/{schedule_id}", response_model=ReportScheduleResponse)
@@ -724,7 +724,7 @@ async def update_schedule(
 
     except Exception as e:
         logger.error(f"Error updating schedule {schedule_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to update schedule: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to update schedule: {str(e)}") from e
 
 
 @router.delete("/schedules/{schedule_id}")
@@ -757,7 +757,7 @@ async def delete_schedule(
         raise
     except Exception as e:
         logger.error(f"Error deleting schedule {schedule_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to delete schedule: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete schedule: {str(e)}") from e
 
 
 # Analytics and Metrics Endpoints
@@ -825,4 +825,4 @@ async def get_report_metrics(
 
     except Exception as e:
         logger.error(f"Error retrieving report metrics: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve metrics")
+        raise HTTPException(status_code=500, detail="Failed to retrieve metrics") from e
