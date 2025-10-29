@@ -279,7 +279,7 @@ class OperationsDashboardManager:
         # Remove disconnected clients
         self.websocket_connections -= disconnected_clients
 
-    async def add_websocket_connection(self, websocket: WebSocket):
+    async def add_websocket_connection(self, websocket: WebSocket) -> None:
         """Add a WebSocket connection for real-time updates."""
         await websocket.accept()
         self.websocket_connections.add(websocket)
@@ -299,7 +299,7 @@ class OperationsDashboardManager:
             f"WebSocket client connected. Total: {len(self.websocket_connections)}"
         )
 
-    async def remove_websocket_connection(self, websocket: WebSocket):
+    async def remove_websocket_connection(self, websocket: WebSocket) -> None:
         """Remove a WebSocket connection."""
         self.websocket_connections.discard(websocket)
         logger.info(

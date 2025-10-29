@@ -219,7 +219,7 @@ class BulkNotificationManager:
             "queued_jobs": 0
         }
 
-    async def start_background_tasks(self):
+    async def start_background_tasks(self) -> None:
         """Start background processing tasks."""
         if not self._scheduler_task:
             self._scheduler_task = asyncio.create_task(self._campaign_scheduler())
@@ -228,7 +228,7 @@ class BulkNotificationManager:
         if not self._retry_task:
             self._retry_task = asyncio.create_task(self._retry_processor())
 
-    async def stop_background_tasks(self):
+    async def stop_background_tasks(self) -> None:
         """Stop background processing tasks."""
         for task in [self._scheduler_task, self._processor_task, self._retry_task]:
             if task:

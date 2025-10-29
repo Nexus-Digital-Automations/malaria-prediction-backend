@@ -263,14 +263,14 @@ class EnhancedFirebaseService:
             logger.error(f"Failed to initialize enhanced Firebase service: {e}")
             return False
 
-    async def start_background_tasks(self):
+    async def start_background_tasks(self) -> None:
         """Start background processing tasks."""
         if not self._queue_processor_task:
             self._queue_processor_task = asyncio.create_task(self._process_send_queue())
         if not self._analytics_processor_task:
             self._analytics_processor_task = asyncio.create_task(self._process_analytics())
 
-    async def stop_background_tasks(self):
+    async def stop_background_tasks(self) -> None:
         """Stop background processing tasks."""
         if self._queue_processor_task:
             self._queue_processor_task.cancel()
@@ -625,7 +625,7 @@ class EnhancedFirebaseService:
             logger.error(f"Failed to load Firebase credentials: {e}")
             return None
 
-    async def _load_default_templates(self):
+    async def _load_default_templates(self) -> None:
         """Load default notification templates."""
         try:
             # Malaria alert template
@@ -765,7 +765,7 @@ class EnhancedFirebaseService:
         self,
         payload: PushNotificationPayload,
         template: NotificationTemplate
-    ):
+    ) -> None:
         """Apply platform-specific settings from template."""
         # Apply Android settings
         android_settings = template.android_settings
@@ -843,7 +843,7 @@ class EnhancedFirebaseService:
                 error_message=str(e)
             )
 
-    def _build_enhanced_fcm_message(self, device_token: str, payload: PushNotificationPayload):
+    def _build_enhanced_fcm_message(self, device_token: str, payload: PushNotificationPayload) -> Any:
         """Build enhanced FCM message with platform-specific features."""
         # Build notification object
         notification = messaging.Notification(
@@ -916,7 +916,7 @@ class EnhancedFirebaseService:
         device_token: str,
         payload: PushNotificationPayload,
         result: FirebaseNotificationResult
-    ):
+    ) -> None:
         """Track notification analytics."""
         try:
             analytics = NotificationAnalytics(
@@ -968,7 +968,7 @@ class EnhancedFirebaseService:
         # For now, return empty list
         return []
 
-    async def _execute_campaign(self, campaign_id: str):
+    async def _execute_campaign(self, campaign_id: str) -> None:
         """Execute a notification campaign."""
         try:
             campaign = self.campaigns.get(campaign_id)
@@ -991,19 +991,19 @@ class EnhancedFirebaseService:
         except Exception as e:
             logger.error(f"Failed to execute campaign: {e}")
 
-    async def _schedule_campaign(self, campaign: NotificationCampaign):
+    async def _schedule_campaign(self, campaign: NotificationCampaign) -> None:
         """Schedule a campaign for future execution."""
         # This would implement campaign scheduling
         # For now, just log the scheduling
         logger.info(f"Campaign {campaign.campaign_id} scheduled for {campaign.scheduled_time}")
 
-    async def _update_segment_membership(self, segment: UserSegment):
+    async def _update_segment_membership(self, segment: UserSegment) -> None:
         """Update user membership for a segment based on criteria."""
         # This would implement dynamic segment updates
         # For now, just update the timestamp
         segment.last_updated = datetime.now()
 
-    async def _process_send_queue(self):
+    async def _process_send_queue(self) -> None:
         """Background task to process notification send queue with rate limiting."""
         while True:
             try:
@@ -1026,13 +1026,13 @@ class EnhancedFirebaseService:
             except Exception as e:
                 logger.error(f"Error in send queue processor: {e}")
 
-    async def _process_notification_batch(self, batch: list[tuple]):
+    async def _process_notification_batch(self, batch: list[tuple]) -> None:
         """Process a batch of notifications."""
         # This would implement batch notification sending
         # For now, just log the batch processing
         logger.debug(f"Processing notification batch of size {len(batch)}")
 
-    async def _process_analytics(self):
+    async def _process_analytics(self) -> None:
         """Background task to process and aggregate analytics."""
         while True:
             try:
@@ -1047,7 +1047,7 @@ class EnhancedFirebaseService:
             except Exception as e:
                 logger.error(f"Error in analytics processor: {e}")
 
-    async def _update_performance_metrics(self):
+    async def _update_performance_metrics(self) -> None:
         """Update aggregated performance metrics."""
         try:
             # Calculate delivery rates by platform
@@ -1070,7 +1070,7 @@ class EnhancedFirebaseService:
         except Exception as e:
             logger.error(f"Failed to update performance metrics: {e}")
 
-    def _update_render_time_stats(self, render_time: float):
+    def _update_render_time_stats(self, render_time: float) -> None:
         """Update template render time statistics."""
         current_avg = self.stats["avg_template_render_time_ms"]
         render_count = self.stats["templates_rendered"]

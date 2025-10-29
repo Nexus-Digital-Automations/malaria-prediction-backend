@@ -126,12 +126,12 @@ class NotificationService:
         self.retry_queue: list[Any] = asyncio.Queue()
         self.retry_task: asyncio.Task[None] | None = None
 
-    async def start_retry_processor(self):
+    async def start_retry_processor(self) -> None:
         """Start the retry processor task."""
         if not self.retry_task:
             self.retry_task = asyncio.create_task(self._process_retries())
 
-    async def stop_retry_processor(self):
+    async def stop_retry_processor(self) -> None:
         """Stop the retry processor task."""
         if self.retry_task:
             self.retry_task.cancel()
@@ -728,7 +728,7 @@ class NotificationService:
         self,
         alert: Alert,
         config: AlertConfiguration
-    ):
+    ) -> None:
         """Escalate alert to emergency contacts.
 
         Args:
@@ -775,7 +775,7 @@ class NotificationService:
         self,
         request: NotificationRequest,
         result: DeliveryResult
-    ):
+    ) -> None:
         """Track notification delivery in database.
 
         Args:
@@ -816,7 +816,7 @@ class NotificationService:
         finally:
             db.close()
 
-    def _update_stats(self, channel: str, result: DeliveryResult):
+    def _update_stats(self, channel: str, result: DeliveryResult) -> None:
         """Update delivery statistics.
 
         Args:
@@ -844,7 +844,7 @@ class NotificationService:
         self.stats["total_delivery_time_ms"] = total_time
         self.stats["avg_delivery_time_ms"] = total_time / max(total_deliveries, 1)
 
-    async def _schedule_retry(self, request: NotificationRequest, retry_after: int):
+    async def _schedule_retry(self, request: NotificationRequest, retry_after: int) -> None:
         """Schedule notification for retry.
 
         Args:
@@ -856,7 +856,7 @@ class NotificationService:
 
         await self.retry_queue.put(retry_request)
 
-    async def _process_retries(self):
+    async def _process_retries(self) -> None:
         """Background task to process retry queue."""
         while True:
             try:
