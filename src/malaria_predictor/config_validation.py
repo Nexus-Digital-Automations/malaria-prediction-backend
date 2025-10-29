@@ -123,10 +123,11 @@ class ConfigValidator:
         Returns:
             Dictionary containing all validation results
         """
+        validation_summary: dict[str, int] = {"passed": 0, "failed": 0, "warnings": 0}
         results = {
             "timestamp": time.time(),
             "environment": self.settings.environment,
-            "validation_summary": {"passed": 0, "failed": 0, "warnings": 0},
+            "validation_summary": validation_summary,
             "configuration_validation": {},
             "secrets_validation": {},
             "health_checks": {} if include_health_checks else None,
@@ -136,7 +137,7 @@ class ConfigValidator:
         try:
             config_results = self._validate_configuration_original()
             results["configuration_validation"] = config_results
-            self._update_summary(results["validation_summary"], config_results)
+            self._update_summary(validation_summary, config_results)
         except Exception as e:
             logger.error(f"Configuration validation failed: {e}")
             results["configuration_validation"] = {"error": str(e)}
@@ -146,7 +147,7 @@ class ConfigValidator:
         try:
             secrets_results = self._validate_secrets()
             results["secrets_validation"] = secrets_results
-            self._update_summary(results["validation_summary"], secrets_results)
+            self._update_summary(validation_summary, secrets_results)
         except Exception as e:
             logger.error(f"Secrets validation failed: {e}")
             results["secrets_validation"] = {"error": str(e)}
@@ -157,7 +158,7 @@ class ConfigValidator:
             try:
                 health_results = asyncio.run(self._run_health_checks())
                 results["health_checks"] = health_results
-                self._update_summary(results["validation_summary"], health_results)
+                self._update_summary(validation_summary, health_results)
             except Exception as e:
                 logger.error(f"Health checks failed: {e}")
                 results["health_checks"] = {"error": str(e)}
