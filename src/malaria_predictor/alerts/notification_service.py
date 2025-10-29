@@ -309,7 +309,7 @@ class NotificationService:
 
         for email in config.email_addresses:
             request = NotificationRequest(
-                alert_id=alert.id,
+                alert_id=int(alert.id),
                 channel="email",
                 recipient=email,
                 subject=subject,
@@ -346,7 +346,7 @@ class NotificationService:
 
         for phone in config.phone_numbers:
             request = NotificationRequest(
-                alert_id=alert.id,
+                alert_id=int(alert.id),
                 channel="sms",
                 recipient=phone,
                 message=message
@@ -381,7 +381,7 @@ class NotificationService:
 
         for webhook_url in config.webhook_urls:
             request = NotificationRequest(
-                alert_id=alert.id,
+                alert_id=int(alert.id),
                 channel="webhook",
                 recipient=webhook_url,
                 message=json.dumps(payload),
@@ -743,7 +743,7 @@ class NotificationService:
             if config.emergency_contact_emails:
                 for email in config.emergency_contact_emails:
                     request = NotificationRequest(
-                        alert_id=alert.id,
+                        alert_id=int(alert.id),
                         channel="email",
                         recipient=email,
                         recipient_type="emergency_contact",
@@ -757,7 +757,7 @@ class NotificationService:
             if config.emergency_contact_phones:
                 for phone in config.emergency_contact_phones:
                     request = NotificationRequest(
-                        alert_id=alert.id,
+                        alert_id=int(alert.id),
                         channel="sms",
                         recipient=phone,
                         recipient_type="emergency_contact",
