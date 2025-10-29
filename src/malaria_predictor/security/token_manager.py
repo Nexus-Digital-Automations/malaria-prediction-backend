@@ -294,7 +294,7 @@ class SecureTokenStorage:
                     "token_type": token_data.token_type,
                     "expires_at": token_data.expires_at.isoformat(),
                     "issued_at": token_data.issued_at.isoformat(),
-                    "scopes": list(token_data.scopes),
+                    "scopes": list(token_data.scopes) if token_data.scopes else [],
                     "user_id": token_data.user_id,
                     "session_id": token_data.session_id,
                     "client_id": token_data.client_id,
@@ -666,7 +666,7 @@ class TokenManager:
                 # Create new access token
                 new_token_data = await self.create_tokens(
                     user_id=user_id,
-                    scopes=stored_token.scopes,
+                    scopes=stored_token.scopes if stored_token.scopes else set(),
                     client_id=client_id,
                     session_data=user_context,
                 )
