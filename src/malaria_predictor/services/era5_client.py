@@ -149,10 +149,10 @@ class ERA5Client:
 
     # Regional presets for malaria-endemic areas
     REGIONAL_PRESETS = {
-        "africa": [40, -20, -35, 55],  # North, West, South, East
-        "west_africa": [20, -20, 5, 20],
-        "east_africa": [15, 30, -12, 52],
-        "southern_africa": [0, 10, -35, 35],
+        "africa": [40.0, -20.0, -35.0, 55.0],  # North, West, South, East
+        "west_africa": [20.0, -20.0, 5.0, 20.0],
+        "east_africa": [15.0, 30.0, -12.0, 52.0],
+        "southern_africa": [0.0, 10.0, -35.0, 35.0],
     }
 
     # Quality thresholds for data validation
