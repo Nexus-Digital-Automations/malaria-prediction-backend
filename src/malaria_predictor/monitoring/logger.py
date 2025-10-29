@@ -11,10 +11,11 @@ import logging
 import logging.handlers
 import sys
 import time
+from collections.abc import Callable
 from contextvars import ContextVar
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from ..config import settings
 

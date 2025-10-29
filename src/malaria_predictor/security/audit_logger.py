@@ -18,6 +18,7 @@ import hashlib
 import json
 import logging
 import time
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path

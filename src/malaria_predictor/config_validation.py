@@ -9,8 +9,9 @@ deployment troubleshooting.
 import asyncio
 import logging
 import time
+from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import Any, Awaitable, Callable
+from typing import Any
 from urllib.parse import urlparse
 
 import httpx

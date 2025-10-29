@@ -61,6 +61,9 @@ Example:
     )
 """
 
+from collections.abc import Callable
+from typing import Any
+
 from .audit_logger import (
     AnomalyDetector,
     AuditEvent,
@@ -101,7 +104,6 @@ from .token_manager import (
     TokenManager,
     TokenValidationError,
 )
-from typing import Any, Callable
 
 # Version information
 __version__ = "1.0.0"

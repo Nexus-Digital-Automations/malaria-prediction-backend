@@ -194,9 +194,9 @@ class NotificationAnalytics:
                 NotificationTemplate.name,
                 NotificationTemplate.category,
                 func.count(NotificationLog.id).label('sent_count'),
-                func.sum(case([(NotificationLog.clicked, 1)], else_=0)).label('clicked_count'),
+                func.sum(case(*[(NotificationLog.clicked, 1)], else_=0)).label('clicked_count'),
                 func.avg(
-                    case([
+                    case(*[
                         (NotificationLog.clicked_at.isnot(None),
                          func.extract('epoch', NotificationLog.clicked_at - NotificationLog.sent_at))
                     ])
@@ -229,7 +229,7 @@ class NotificationAnalytics:
             priority_engagement = session.query(
                 NotificationLog.priority,
                 func.count(NotificationLog.id).label('sent_count'),
-                func.sum(case([(NotificationLog.clicked, 1)], else_=0)).label('clicked_count'),
+                func.sum(case(*[(NotificationLog.clicked, 1)], else_=0)).label('clicked_count'),
             ).filter(
                 and_(
                     NotificationLog.created_at >= start_date,
@@ -339,7 +339,7 @@ class NotificationAnalytics:
             retry_analysis = session.query(
                 NotificationLog.retry_count,
                 func.count(NotificationLog.id).label('notification_count'),
-                func.sum(case([(NotificationLog.status == NotificationStatus.SENT, 1)], else_=0)).label('eventually_sent'),
+                func.sum(case(*[(NotificationLog.status == NotificationStatus.SENT, 1)], else_=0)).label('eventually_sent'),
             ).filter(
                 and_(
                     NotificationLog.created_at >= start_date,
@@ -452,7 +452,7 @@ class NotificationAnalytics:
             # Device activity (last seen)
             now = datetime.now(UTC)
             device_activity = session.query(
-                case([
+                case(*[
                     (DeviceToken.last_seen >= now - timedelta(days=1), 'active_24h'),
                     (DeviceToken.last_seen >= now - timedelta(days=7), 'active_7d'),
                     (DeviceToken.last_seen >= now - timedelta(days=30), 'active_30d'),
@@ -523,9 +523,9 @@ class NotificationAnalytics:
             hourly_performance = session.query(
                 extract('hour', NotificationLog.created_at).label('hour'),
                 func.count(NotificationLog.id).label('total'),
-                func.sum(case([(NotificationLog.status == NotificationStatus.SENT, 1)], else_=0)).label('sent'),
+                func.sum(case(*[(NotificationLog.status == NotificationStatus.SENT, 1)], else_=0)).label('sent'),
                 func.avg(
-                    case([
+                    case(*[
                         (NotificationLog.sent_at.isnot(None),
                          func.extract('epoch', NotificationLog.sent_at - NotificationLog.created_at))
                     ])
@@ -566,7 +566,7 @@ class NotificationAnalytics:
             template_perf = session.query(
                 NotificationTemplate.name,
                 func.count(NotificationLog.id).label('total'),
-                func.sum(case([(NotificationLog.status == NotificationStatus.FAILED, 1)], else_=0)).label('failed'),
+                func.sum(case(*[(NotificationLog.status == NotificationStatus.FAILED, 1)], else_=0)).label('failed'),
             ).join(NotificationLog).filter(
                 and_(
                     NotificationLog.created_at >= start_date,
@@ -602,8 +602,8 @@ class NotificationAnalytics:
 
             # Analyze retry effectiveness
             retry_effectiveness = session.query(
-                func.sum(case([(NotificationLog.retry_count > 0, 1)], else_=0)).label('retried'),
-                func.sum(case([
+                func.sum(case(*[(NotificationLog.retry_count > 0, 1)], else_=0)).label('retried'),
+                func.sum(case(*[
                     (and_(NotificationLog.retry_count > 0, NotificationLog.status == NotificationStatus.SENT), 1)
                 ], else_=0)).label('recovered'),
             ).filter(
@@ -687,9 +687,9 @@ class NotificationAnalytics:
             trends = session.query(
                 date_trunc.label('period'),
                 func.count(NotificationLog.id).label('total'),
-                func.sum(case([(NotificationLog.status == NotificationStatus.SENT, 1)], else_=0)).label('sent'),
-                func.sum(case([(NotificationLog.status == NotificationStatus.FAILED, 1)], else_=0)).label('failed'),
-                func.sum(case([(NotificationLog.status == NotificationStatus.PENDING, 1)], else_=0)).label('pending'),
+                func.sum(case(*[(NotificationLog.status == NotificationStatus.SENT, 1)], else_=0)).label('sent'),
+                func.sum(case(*[(NotificationLog.status == NotificationStatus.FAILED, 1)], else_=0)).label('failed'),
+                func.sum(case(*[(NotificationLog.status == NotificationStatus.PENDING, 1)], else_=0)).label('pending'),
             ).filter(
                 and_(
                     NotificationLog.created_at >= start_date,
@@ -725,8 +725,8 @@ class NotificationAnalytics:
             platform_stats = session.query(
                 DeviceToken.platform,
                 func.count(NotificationLog.id).label('total'),
-                func.sum(case([(NotificationLog.status == NotificationStatus.SENT, 1)], else_=0)).label('sent'),
-                func.sum(case([(NotificationLog.status == NotificationStatus.FAILED, 1)], else_=0)).label('failed'),
+                func.sum(case(*[(NotificationLog.status == NotificationStatus.SENT, 1)], else_=0)).label('sent'),
+                func.sum(case(*[(NotificationLog.status == NotificationStatus.FAILED, 1)], else_=0)).label('failed'),
             ).join(NotificationLog).filter(
                 and_(
                     NotificationLog.created_at >= start_date,
@@ -761,10 +761,10 @@ class NotificationAnalytics:
             priority_stats = session.query(
                 NotificationLog.priority,
                 func.count(NotificationLog.id).label('total'),
-                func.sum(case([(NotificationLog.status == NotificationStatus.SENT, 1)], else_=0)).label('sent'),
-                func.sum(case([(NotificationLog.status == NotificationStatus.FAILED, 1)], else_=0)).label('failed'),
+                func.sum(case(*[(NotificationLog.status == NotificationStatus.SENT, 1)], else_=0)).label('sent'),
+                func.sum(case(*[(NotificationLog.status == NotificationStatus.FAILED, 1)], else_=0)).label('failed'),
                 func.avg(
-                    case([
+                    case(*[
                         (NotificationLog.sent_at.isnot(None),
                          func.extract('epoch', NotificationLog.sent_at - NotificationLog.created_at))
                     ])

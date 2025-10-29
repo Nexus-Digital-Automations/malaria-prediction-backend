@@ -7,6 +7,7 @@ and audit logging to support comprehensive security features.
 
 import copy
 import uuid
+from typing import Any
 
 from sqlalchemy import (
     JSON,
