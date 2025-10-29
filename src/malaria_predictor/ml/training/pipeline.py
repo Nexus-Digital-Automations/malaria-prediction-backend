@@ -108,7 +108,7 @@ class MalariaTrainingPipeline:
             "generate_report": True,
         }
 
-    def _setup_mlflow(self):
+    def _setup_mlflow(self) -> None:
         """Setup MLflow experiment tracking."""
         try:
             mlflow.set_experiment(self.experiment_name)
@@ -673,7 +673,7 @@ class MalariaTrainingPipeline:
             },
         }
 
-    def _log_to_mlflow(self, model: MalariaLSTM, metrics: dict[str, Any]):
+    def _log_to_mlflow(self, model: MalariaLSTM, metrics: dict[str, Any]) -> None:
         """Log model and metrics to MLflow."""
         try:
             with mlflow.start_run():

@@ -9,6 +9,7 @@ import logging
 import platform
 import time
 from datetime import datetime
+from typing import Any
 
 import psutil
 from fastapi import APIRouter, Depends, Request
@@ -24,7 +25,7 @@ router = APIRouter()
 @router.get("/", response_model=HealthResponse)
 async def health_check(
     request: Request, model_manager: ModelManager = Depends(get_model_manager)
-):
+) -> HealthResponse:
     """
     Basic health check endpoint.
 
@@ -85,7 +86,7 @@ async def health_check(
 @router.get("/detailed")
 async def detailed_health_check(
     request: Request, model_manager: ModelManager = Depends(get_model_manager)
-):
+) -> dict[str, Any]:
     """
     Detailed health check with comprehensive system information.
 
@@ -143,7 +144,7 @@ async def detailed_health_check(
 
 
 @router.get("/models")
-async def model_health_check(model_manager: ModelManager = Depends(get_model_manager)):
+async def model_health_check(model_manager: ModelManager = Depends(get_model_manager)) -> dict[str, Any]:
     """
     Model-specific health check endpoint.
 
@@ -193,7 +194,7 @@ async def model_health_check(model_manager: ModelManager = Depends(get_model_man
 
 
 @router.get("/metrics")
-async def system_metrics():
+async def system_metrics() -> dict[str, Any]:
     """
     System metrics endpoint for monitoring and alerting.
 
@@ -237,7 +238,7 @@ async def system_metrics():
 
 
 @router.get("/readiness")
-async def readiness_check(model_manager: ModelManager = Depends(get_model_manager)):
+async def readiness_check(model_manager: ModelManager = Depends(get_model_manager)) -> dict[str, Any]:
     """
     Kubernetes-style readiness probe.
 
@@ -270,7 +271,7 @@ async def readiness_check(model_manager: ModelManager = Depends(get_model_manage
 
 
 @router.get("/liveness")
-async def liveness_check():
+async def liveness_check() -> dict[str, Any]:
     """
     Kubernetes-style liveness probe.
 

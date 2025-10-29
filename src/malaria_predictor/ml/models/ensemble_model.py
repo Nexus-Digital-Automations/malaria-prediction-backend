@@ -279,7 +279,7 @@ class MalariaEnsembleModel(pl.LightningModule):
 
         return result
 
-    def _freeze_base_models(self):
+    def _freeze_base_models(self) -> None:
         """Freeze parameters of base models."""
         for param in self.lstm_model.parameters():
             param.requires_grad = False

@@ -7,7 +7,9 @@ for malaria risk prediction, health monitoring, and model management.
 
 import logging
 import time
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import Any
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, status
@@ -44,7 +46,7 @@ prediction_service = None
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan management for startup and shutdown."""
     global model_manager, prediction_service
 
@@ -177,7 +179,7 @@ app.include_router(reports.router, prefix="/api/v1", tags=["Custom Reports"])
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """Custom HTTP exception handler with structured error responses."""
     return JSONResponse(
         status_code=exc.status_code,
@@ -193,7 +195,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 
 @app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception):
+async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """General exception handler for unexpected errors."""
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
 
@@ -211,7 +213,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 
 @app.get("/", tags=["Root"])
-async def root():
+async def root() -> dict[str, Any]:
     """Root endpoint with API information."""
     return {
         "name": "Malaria Prediction API",
@@ -234,7 +236,7 @@ async def root():
 
 
 @app.get("/info", tags=["Root"])
-async def api_info():
+async def api_info() -> dict[str, Any]:
     """Detailed API information and capabilities."""
     return {
         "api": {

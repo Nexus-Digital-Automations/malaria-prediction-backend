@@ -158,7 +158,7 @@ class ModelManager:
             transformer_config = {}
             return MalariaEnsembleModel(lstm_config, transformer_config)
 
-    async def get_model(self, model_type: ModelType):
+    async def get_model(self, model_type: ModelType) -> MalariaLSTM | MalariaTransformer | MalariaEnsembleModel:
         """Get a model instance, loading if necessary."""
         if model_type not in self.models:
             await self.load_model(model_type)
@@ -213,7 +213,7 @@ class ModelManager:
             "historical": torch.randn(batch_size, seq_len, 4),
         }
 
-    async def cleanup(self):
+    async def cleanup(self) -> None:
         """Cleanup resources."""
         async with self._lock:
             self.models.clear()
@@ -234,7 +234,7 @@ class PredictionService:
         self.data_harmonizer: UnifiedDataHarmonizer | None = None
         self._initialize_harmonizer()
 
-    def _initialize_harmonizer(self):
+    def _initialize_harmonizer(self) -> None:
         """Initialize the data harmonization service."""
         try:
             import os
@@ -403,7 +403,7 @@ async def get_prediction_service() -> PredictionService:
     return _prediction_service
 
 
-async def cleanup_dependencies():
+async def cleanup_dependencies() -> None:
     """Cleanup all dependencies."""
     global _model_manager, _prediction_service
     if _model_manager:

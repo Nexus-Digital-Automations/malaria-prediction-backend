@@ -871,7 +871,7 @@ async def enhanced_websocket_endpoint(
             pass
 
 
-async def handle_websocket_message(websocket_manager, connection_id: str, message: dict):
+async def handle_websocket_message(websocket_manager, connection_id: str, message: dict) -> None:
     """Handle incoming WebSocket messages with enhanced functionality."""
     try:
         message_type = message.get("type")

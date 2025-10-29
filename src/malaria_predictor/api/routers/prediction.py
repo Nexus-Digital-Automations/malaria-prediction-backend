@@ -8,7 +8,7 @@ single location predictions, batch processing, and time series analysis.
 import asyncio
 import logging
 import time
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 
@@ -50,7 +50,7 @@ async def predict_single_location(
     current_user: Annotated[
         object, Depends(require_scopes("read:predictions", "write:predictions"))
     ] = None,
-):
+) -> PredictionResult:
     """
     Make malaria risk prediction for a single location.
 
@@ -127,7 +127,7 @@ async def predict_batch_locations(
     current_user: Annotated[
         object, Depends(require_scopes("read:predictions", "write:predictions"))
     ] = None,
-):
+) -> BatchPredictionResult:
     """
     Make malaria risk predictions for multiple locations.
 
@@ -248,7 +248,7 @@ async def predict_spatial_grid(
     current_user: Annotated[
         object, Depends(require_scopes("read:predictions", "write:predictions"))
     ] = None,
-):
+) -> dict[str, Any]:
     """
     Make predictions across a spatial grid.
 
@@ -379,7 +379,7 @@ async def predict_time_series(
     current_user: Annotated[
         object, Depends(require_scopes("read:predictions", "write:predictions"))
     ] = None,
-):
+) -> TimeSeriesPredictionResult:
     """
     Generate time series predictions for a location.
 
