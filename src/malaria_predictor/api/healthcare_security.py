@@ -18,6 +18,8 @@ from jose import JWTError
 if TYPE_CHECKING:
     from .routers.healthcare import HealthcareProfessional
 
+from .models import LocationPoint
+
 logger = logging.getLogger(__name__)
 
 # Security configuration
@@ -126,14 +128,14 @@ async def get_current_healthcare_professional(
             name="Dr. Sarah Mwangi",
             role="doctor",
             organization="Nairobi General Hospital",
-            location={
-                "latitude": -1.2921,
-                "longitude": 36.8219,
-                "name": "Nairobi"
-            },
+            location=LocationPoint(
+                latitude=-1.2921,
+                longitude=36.8219,
+                name="Nairobi"
+            ),
             specialization=["internal_medicine", "tropical_diseases"],
             languages=["en", "sw"],
-            permissions=HEALTHCARE_ROLES["doctor"]["permissions"]
+            permissions=list(HEALTHCARE_ROLES["doctor"]["permissions"])
         )
 
         logger.info(f"Authenticated healthcare professional: {healthcare_professional.name}")
