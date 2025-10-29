@@ -63,7 +63,7 @@ class MalariaTrainingPipeline:
         # Training state
         self.training_data = None
         self.validation_data = None
-        self.best_model = None
+        self.best_model: MalariaLSTM | None = None
         self.best_metrics: dict[str, Any] | None = None
 
         # MLflow setup
@@ -646,6 +646,7 @@ class MalariaTrainingPipeline:
 
         # Train final model
         self.best_model = self._train_single_fold(X_train, y_train, X_test, y_test)
+        assert self.best_model is not None, "Model training failed"
 
         # Final evaluation
         predictions = self._predict_with_model(self.best_model, X_test)
