@@ -242,7 +242,7 @@ class WebSocketAlertManager:
         if not self._queue_processor_task:
             self._queue_processor_task = asyncio.create_task(self._process_offline_queues())
 
-    async def stop_background_tasks(self):
+    async def stop_background_tasks(self) -> None:
         """Stop enhanced background maintenance tasks."""
         tasks = [
             self._cleanup_task,
@@ -294,7 +294,7 @@ class WebSocketAlertManager:
 
         return True
 
-    async def _refresh_rate_limit_tokens(self, connection: WebSocketConnection):
+    async def _refresh_rate_limit_tokens(self, connection: WebSocketConnection) -> None:
         """Refresh rate limit tokens for a connection."""
         current_time = datetime.now()
         time_diff = (current_time - connection.last_token_refresh).total_seconds()
@@ -773,7 +773,7 @@ class WebSocketAlertManager:
             await self.disconnect(connection_id)
             return False
 
-    async def _persist_connection(self, connection: WebSocketConnection):
+    async def _persist_connection(self, connection: WebSocketConnection) -> None:
         """Persist connection information to Redis for scaling."""
         if not self.redis_client:
             return
@@ -801,7 +801,7 @@ class WebSocketAlertManager:
         except Exception as e:
             logger.warning(f"Failed to persist connection to Redis: {e}")
 
-    async def _process_user_offline_queue(self, user_id: str, connection_id: str):
+    async def _process_user_offline_queue(self, user_id: str, connection_id: str) -> None:
         """Process queued messages for a user coming online."""
         if user_id not in self.offline_queues:
             return
@@ -819,7 +819,7 @@ class WebSocketAlertManager:
         # Clear offline queue
         del self.offline_queues[user_id]
 
-    async def _queue_alert_for_offline_users(self, alert: Alert):
+    async def _queue_alert_for_offline_users(self, alert: Alert) -> None:
         """Queue alert for users who are currently offline."""
         try:
             # Get all users who should receive this alert but are offline
@@ -857,7 +857,7 @@ class WebSocketAlertManager:
         except Exception as e:
             logger.error(f"Failed to queue alert for offline users: {e}")
 
-    async def _queue_alert_for_failed_connections(self, alert: Alert, failed_connection_ids: list[str]):
+    async def _queue_alert_for_failed_connections(self, alert: Alert, failed_connection_ids: list[str]) -> None:
         """Queue alert for connections that failed to receive it."""
         for connection_id in failed_connection_ids:
             if connection_id in self.connections:
@@ -1019,7 +1019,7 @@ class WebSocketAlertManager:
 
         return target_connections
 
-    async def _cleanup_connections(self):
+    async def _cleanup_connections(self) -> None:
         """Background task to clean up stale connections."""
         while True:
             try:
@@ -1049,7 +1049,7 @@ class WebSocketAlertManager:
             except Exception as e:
                 logger.error(f"Error in WebSocket cleanup task: {e}")
 
-    async def _heartbeat_monitor(self):
+    async def _heartbeat_monitor(self) -> None:
         """Enhanced background task to monitor connection health."""
         while True:
             try:
@@ -1108,7 +1108,7 @@ class WebSocketAlertManager:
             except Exception as e:
                 logger.error(f"Error in enhanced WebSocket heartbeat task: {e}")
 
-    async def _metrics_collector(self):
+    async def _metrics_collector(self) -> None:
         """Background task to collect and update performance metrics."""
         while True:
             try:
@@ -1156,7 +1156,7 @@ class WebSocketAlertManager:
             except Exception as e:
                 logger.error(f"Error in WebSocket metrics collector: {e}")
 
-    async def _process_offline_queues(self):
+    async def _process_offline_queues(self) -> None:
         """Background task to process offline message queues."""
         while True:
             try:
@@ -1205,7 +1205,7 @@ class WebSocketAlertManager:
             except Exception as e:
                 logger.error(f"Error in WebSocket offline queue processor: {e}")
 
-    async def _cleanup_connections(self):
+    async def _cleanup_connections(self) -> None:
         """Enhanced background task to clean up stale connections."""
         while True:
             try:
@@ -1250,7 +1250,7 @@ class WebSocketAlertManager:
             except Exception as e:
                 logger.error(f"Error in enhanced WebSocket cleanup task: {e}")
 
-    async def _heartbeat_monitor_old(self):
+    async def _heartbeat_monitor_old(self) -> None:
         """Background task to monitor connection health."""
         while True:
             try:

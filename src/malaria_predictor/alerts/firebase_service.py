@@ -692,7 +692,7 @@ class FirebaseNotificationService:
         message_id: str | None = None,
         error_code: str | None = None,
         error_message: str | None = None
-    ):
+    ) -> None:
         """Track notification delivery in database.
 
         Args:
@@ -741,7 +741,7 @@ class FirebaseNotificationService:
         finally:
             db.close()
 
-    async def _invalidate_token(self, device_token: str):
+    async def _invalidate_token(self, device_token: str) -> None:
         """Mark a device token as invalid.
 
         Args:

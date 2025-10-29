@@ -845,7 +845,7 @@ class AlertTemplateManager:
         except Exception:
             return "1.0"
 
-    async def _save_template_to_db(self, template: AlertTemplateDefinition):
+    async def _save_template_to_db(self, template: AlertTemplateDefinition) -> None:
         """Save template to database."""
         try:
             async with get_session() as db:
@@ -894,13 +894,13 @@ class AlertTemplateManager:
         except Exception as e:
             logger.error(f"Failed to save template to database: {e}")
 
-    async def _save_customization_to_db(self, customization: UserTemplateCustomization):
+    async def _save_customization_to_db(self, customization: UserTemplateCustomization) -> None:
         """Save user customization to database."""
         # This would implement database storage for user customizations
         # For now, just log the action
         logger.info(f"Saving customization for user {customization.user_id}")
 
-    async def _track_template_usage(self, template_id: str):
+    async def _track_template_usage(self, template_id: str) -> None:
         """Track template usage for analytics."""
         try:
             template = self.templates.get(template_id)
@@ -914,7 +914,7 @@ class AlertTemplateManager:
         except Exception as e:
             logger.error(f"Failed to track template usage: {e}")
 
-    def _update_render_stats(self, render_time: float):
+    def _update_render_stats(self, render_time: float) -> None:
         """Update rendering performance statistics."""
         current_avg = self.stats["avg_render_time_ms"]
         render_count = self.stats["templates_rendered"]

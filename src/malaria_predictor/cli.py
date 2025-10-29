@@ -5,7 +5,7 @@ import typer
 from . import __version__
 
 
-def version_callback(value: bool):
+def version_callback(value: bool) -> None:
     """Show version and exit."""
     if value:
         typer.echo(f"malaria-predictor {__version__}")

@@ -733,7 +733,7 @@ class AlertHistoryManager:
             logger.error(f"Trend analysis calculation failed: {e}")
             return {}
 
-    def _update_query_stats(self, processing_time: float):
+    def _update_query_stats(self, processing_time: float) -> None:
         """Update query performance statistics.
 
         Args:
