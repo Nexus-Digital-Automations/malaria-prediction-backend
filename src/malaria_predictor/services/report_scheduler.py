@@ -232,10 +232,10 @@ class ReportScheduler:
         try:
             # Generate report
             report_result = await self.report_generator.generate_report(
-                template_id=schedule.template_id,
-                report_config=schedule.report_configuration,
+                template_id=int(schedule.template_id) if schedule.template_id else None,
+                report_config=dict(schedule.report_configuration) if schedule.report_configuration else None,
                 user_id=f"schedule_{schedule.id}",
-                export_formats=schedule.export_formats
+                export_formats=list(schedule.export_formats) if schedule.export_formats else None
             )
 
             if report_result['status'] == 'completed':
@@ -355,7 +355,7 @@ class ReportScheduler:
 
             # Send email
             success = await self.email_service.send_report_email(
-                recipients=schedule.email_recipients,
+                recipients=list(schedule.email_recipients) if schedule.email_recipients else [],
                 subject=subject,
                 body=body,
                 attachments=attachments
@@ -397,7 +397,7 @@ class ReportScheduler:
             }
 
             results = await self.webhook_service.send_report_webhook(
-                webhook_urls=schedule.webhook_urls,
+                webhook_urls=list(schedule.webhook_urls) if schedule.webhook_urls else [],
                 report_data=webhook_data
             )
 
@@ -458,7 +458,7 @@ class ReportScheduler:
             if not schedule.cron_expression:
                 raise ValueError(f"Cron expression required for schedule {schedule.id}")
 
-            cron = croniter(schedule.cron_expression, current_time)
+            cron = croniter(str(schedule.cron_expression), current_time)
             next_time = cron.get_next(datetime)
 
             # Respect end date
@@ -472,7 +472,7 @@ class ReportScheduler:
             if not schedule.interval_minutes:
                 raise ValueError(f"Interval minutes required for schedule {schedule.id}")
 
-            next_time = current_time + timedelta(minutes=schedule.interval_minutes)
+            next_time = current_time + timedelta(minutes=int(schedule.interval_minutes))
 
             # Respect end date
             if schedule.end_date and next_time > schedule.end_date:
