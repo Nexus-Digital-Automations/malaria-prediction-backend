@@ -18,7 +18,7 @@ def test_all_alert_components_import() -> None:
     )
     from src.malaria_predictor.alerts.alert_template_manager import (
         AlertTemplateDefinition,
-        AlertTemplateDefinitionManager,
+        AlertTemplateManager,
     )
     from src.malaria_predictor.alerts.bulk_notification_manager import (
         BulkNotificationManager,
@@ -30,7 +30,7 @@ def test_all_alert_components_import() -> None:
     assert all([
         AlertAnalyticsEngine,
         AlertHistoryManager,
-        AlertTemplateDefinitionManager,
+        AlertTemplateManager,
         EnhancedFirebaseService,
         BulkNotificationManager,
         AlertHistoryQuery,
@@ -124,6 +124,7 @@ def test_alert_data_models_creation() -> None:
     from src.malaria_predictor.alerts.alert_history_manager import AlertHistoryQuery
     from src.malaria_predictor.alerts.alert_template_manager import (
         AlertTemplateDefinition,
+        TemplateVariable,
     )
 
     # Test AlertHistoryQuery creation
@@ -136,19 +137,27 @@ def test_alert_data_models_creation() -> None:
     assert query.start_date is not None
     assert query.end_date is not None
 
-    # Test AlertTemplate creation
+    # Test AlertTemplateDefinition creation
     template = AlertTemplateDefinition(
+        template_id="test_template_1",
         name="Test Template",
-        subject="Test Subject",
-        body="Test Body",
-        template_type="test",
-        variables=["var1"],
+        description="Test template description",
+        category="test",
+        title_template="Test Title: {var1}",
+        body_template="Test Body with {var1}",
+        variables=[
+            TemplateVariable(
+                name="var1",
+                type="string",
+                description="Test variable"
+            )
+        ],
+        required_variables=["var1"],
         is_active=True,
-        language="en"
+        default_language="en"
     )
     assert template.name == "Test Template"
-    assert template.subject == "Test Subject"
-    assert template.template_type == "test"
+    assert template.category == "test"
     assert template.is_active is True
 
 
@@ -254,13 +263,16 @@ def test_alert_system_validation_complete() -> None:
         )
 
         AlertTemplateDefinition(
+            template_id="validation_test_1",
             name="Validation Test",
-            subject="Test",
-            body="Test body",
-            template_type="validation",
+            description="Test template for validation",
+            category="validation",
+            title_template="Validation Test",
+            body_template="Test body",
             variables=[],
+            required_variables=[],
             is_active=True,
-            language="en"
+            default_language="en"
         )
 
         models_successful = True
