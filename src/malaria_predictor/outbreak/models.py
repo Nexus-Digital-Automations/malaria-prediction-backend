@@ -133,7 +133,7 @@ class OutbreakEvent(BaseModel):
     created_by: str = Field(..., description="User/system that created record")
 
     @validator('case_fatality_rate')
-    def validate_cfr(cls, v, values):
+    def validate_cfr(cls, v: float | None, values: dict[str, Any]) -> float | None:
         """Validate case fatality rate calculation."""
         if v is not None and 'total_cases' in values:
             if values['total_cases'] == 0 and v > 0:
@@ -141,7 +141,7 @@ class OutbreakEvent(BaseModel):
         return v
 
     @validator('attack_rate')
-    def validate_attack_rate(cls, v, values):
+    def validate_attack_rate(cls, v: float | None, values: dict[str, Any]) -> float | None:
         """Validate attack rate calculation."""
         if v is not None and 'population_at_risk' in values:
             if values['population_at_risk'] == 0 and v > 0:
