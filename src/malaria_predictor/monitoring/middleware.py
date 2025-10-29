@@ -163,8 +163,10 @@ class TracingMiddleware(BaseHTTPMiddleware):
         endpoint = request.url.path
 
         # Extract request ID if available
-        request_id = getattr(request.state, "request_id", None)
-        user_id = getattr(request.state, "user_id", None)
+        request_id_raw = getattr(request.state, "request_id", None)
+        user_id_raw = getattr(request.state, "user_id", None)
+        request_id = str(request_id_raw) if request_id_raw else ""
+        user_id = str(user_id_raw) if user_id_raw else ""
 
         with self.tracer.trace_api_request(
             method, endpoint, user_id, request_id
