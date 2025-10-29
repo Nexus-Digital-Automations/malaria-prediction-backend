@@ -48,6 +48,7 @@ from src.malaria_predictor.database.models import (
 )
 from src.malaria_predictor.database.security_models import User
 
+
 # Placeholder classes for incomplete BulkNotificationManager API
 # These tests are skipped until the API is completed
 class NotificationTemplate:
