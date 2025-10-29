@@ -124,6 +124,7 @@ class SecretsManager:
         password = self.get_secret(
             password_secret, env_var_name=password_env_var, required=True
         )
+        assert password is not None, "Password is required but was None"
 
         # Replace password placeholder in URL
         if "REPLACE_WITH_DB_PASSWORD" in base_url:
