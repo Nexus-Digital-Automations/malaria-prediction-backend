@@ -298,7 +298,7 @@ class UnifiedDataHarmonizer:
         """Download ERA5 temperature data."""
         try:
             result = await asyncio.to_thread(
-                self.era5_client.download_temperature_data, start_date, end_date, bounds
+                self.era5_client.download_temperature_data, start_date, end_date, list(bounds)
             )
             return result
         except Exception as e:
