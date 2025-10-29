@@ -517,7 +517,7 @@ class BulkNotificationManager:
                     })
 
             # Sort by creation date (newest first)
-            user_campaigns.sort(key=lambda c: c["created_at"], reverse=True)
+            user_campaigns.sort(key=lambda c: str(c["created_at"]), reverse=True)
 
             return user_campaigns
 
