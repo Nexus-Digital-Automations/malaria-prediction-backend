@@ -420,7 +420,7 @@ class ERA5DataProcessor:
         """
 
         # Magnus formula for saturation vapor pressure
-        def saturation_vapor_pressure(temp_c: float) -> float:
+        def saturation_vapor_pressure(temp_c: float | xr.DataArray) -> float | xr.DataArray:
             return 6.112 * np.exp((17.67 * temp_c) / (temp_c + 243.5))
 
         temp_c = temp_k - 273.15
