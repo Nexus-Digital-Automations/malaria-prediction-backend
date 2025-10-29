@@ -10,7 +10,7 @@ import asyncio
 import logging
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Awaitable, Callable
 from urllib.parse import urlparse
 
 import httpx
@@ -1035,7 +1035,7 @@ def validate_configuration_cli(settings: Settings) -> bool:
         return True
 
 
-def create_health_check_endpoint(settings: Settings):
+def create_health_check_endpoint(settings: Settings) -> Callable[[], Awaitable[dict[str, Any]]]:
     """
     Create a health check endpoint for the application.
 
@@ -1046,7 +1046,7 @@ def create_health_check_endpoint(settings: Settings):
         FastAPI endpoint function
     """
 
-    async def health_check():
+    async def health_check() -> dict[str, Any]:
         """Health check endpoint."""
         validator = ConfigValidator(settings)
         try:
