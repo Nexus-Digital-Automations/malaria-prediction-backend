@@ -127,7 +127,7 @@ class MetricsCollector:
 
     def increment_counter(
         self, name: str, labels: dict[str, str] | None = None, value: float = 1
-    ):
+    ) -> None:
         """Increment a counter metric."""
         if not self.enabled:
             return
@@ -139,7 +139,7 @@ class MetricsCollector:
             else:
                 metric.inc(value)
 
-    def set_gauge(self, name: str, value: float, labels: dict[str, str] | None = None):
+    def set_gauge(self, name: str, value: float, labels: dict[str, str] | None = None) -> None:
         """Set a gauge metric value."""
         if not self.enabled:
             return
@@ -153,7 +153,7 @@ class MetricsCollector:
 
     def observe_histogram(
         self, name: str, value: float, labels: dict[str, str] | None = None
-    ):
+    ) -> None:
         """Observe a value in a histogram metric."""
         if not self.enabled:
             return
@@ -167,7 +167,7 @@ class MetricsCollector:
 
     def observe_summary(
         self, name: str, value: float, labels: dict[str, str] | None = None
-    ):
+    ) -> None:
         """Observe a value in a summary metric."""
         if not self.enabled:
             return
@@ -192,7 +192,7 @@ class APIMetrics(MetricsCollector):
         super().__init__(registry)
         self._setup_metrics()
 
-    def _setup_metrics(self):
+    def _setup_metrics(self) -> None:
         """Initialize API metrics."""
         # Request metrics
         self.request_count = self._create_counter(
