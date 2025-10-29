@@ -558,7 +558,7 @@ class EmergencyAlertSystem:
 
         for i in range(0, len(target_devices), batch_size):
             batch_devices = target_devices[i:i + batch_size]
-            batch_tokens = [device.token for device in batch_devices]
+            batch_tokens = [str(device.token) for device in batch_devices]
 
             try:
                 # Send batch via FCM
@@ -695,7 +695,7 @@ class EmergencyAlertSystem:
                 priority="normal",
             )
 
-            tokens = [device.token for device in devices if device.is_active]
+            tokens = [str(device.token) for device in devices if device.is_active]
             if tokens:
                 await self.fcm_service.send_to_tokens(tokens, cancellation_message)
                 logger.info(f"Sent cancellation notice for alert {alert_id} to {len(tokens)} devices")
