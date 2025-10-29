@@ -635,11 +635,11 @@ class TreatmentEffectivenessTracker:
         """Load statistical analysis method configurations"""
         return {}
 
-    def _log_treatment_event(self, record_id: str, event_type: str, event_data: dict):
+    def _log_treatment_event(self, record_id: str, event_type: str, event_data: dict) -> None:
         """Log treatment-related events"""
         logger.info(f"Treatment event {event_type} for record {record_id}")
 
-    def _update_treatment_progress(self, record_id: str, visit: FollowUpVisit):
+    def _update_treatment_progress(self, record_id: str, visit: FollowUpVisit) -> None:
         """Update treatment progress based on follow-up visit"""
         # Update treatment record with progress information
         pass
