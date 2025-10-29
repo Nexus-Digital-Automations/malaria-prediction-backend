@@ -18,7 +18,7 @@ from fastapi import (
     Query,
 )
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
 
@@ -83,6 +83,8 @@ class ReportScheduleRequest(BaseModel):
 
 class ReportResponse(BaseModel):
     """Response model for report details."""
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
     description: str | None
@@ -100,6 +102,8 @@ class ReportResponse(BaseModel):
 
 class ReportTemplateResponse(BaseModel):
     """Response model for report template details."""
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     description: str | None
@@ -115,6 +119,8 @@ class ReportTemplateResponse(BaseModel):
 
 class ReportScheduleResponse(BaseModel):
     """Response model for report schedule details."""
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     description: str | None
@@ -222,21 +228,7 @@ async def list_reports(
         reports = query.order_by(desc(Report.generated_at)).offset(skip).limit(limit).all()
 
         return [
-            ReportResponse(
-                id=report.id,
-                title=report.title,
-                description=report.description,
-                report_type=report.report_type,
-                template_id=report.template_id,
-                generated_by=report.generated_by,
-                generated_at=report.generated_at,
-                status=report.status,
-                export_formats=report.export_formats,
-                export_status=report.export_status,
-                file_paths=report.file_paths,
-                generation_time_seconds=report.generation_time_seconds,
-                data_points_count=report.data_points_count
-            )
+            ReportResponse.model_validate(report)
             for report in reports
         ]
 
@@ -266,21 +258,7 @@ async def get_report(
         if not report:
             raise HTTPException(status_code=404, detail="Report not found")
 
-        return ReportResponse(
-            id=report.id,
-            title=report.title,
-            description=report.description,
-            report_type=report.report_type,
-            template_id=report.template_id,
-            generated_by=report.generated_by,
-            generated_at=report.generated_at,
-            status=report.status,
-            export_formats=report.export_formats,
-            export_status=report.export_status,
-            file_paths=report.file_paths,
-            generation_time_seconds=report.generation_time_seconds,
-            data_points_count=report.data_points_count
-        )
+        return ReportResponse.model_validate(report)
 
     except HTTPException:
         raise
@@ -435,19 +413,7 @@ async def list_templates(
                          .offset(skip).limit(limit).all()
 
         return [
-            ReportTemplateResponse(
-                id=template.id,
-                name=template.name,
-                description=template.description,
-                category=template.category,
-                template_type=template.template_type,
-                created_by=template.created_by,
-                created_at=template.created_at,
-                is_active=template.is_active,
-                is_public=template.is_public,
-                usage_count=template.usage_count,
-                version=template.version
-            )
+            ReportTemplateResponse.model_validate(template)
             for template in templates
         ]
 
@@ -492,19 +458,7 @@ async def create_template(
 
         logger.info(f"Created template {template.id}: {request.name}")
 
-        return ReportTemplateResponse(
-            id=template.id,
-            name=template.name,
-            description=template.description,
-            category=template.category,
-            template_type=template.template_type,
-            created_by=template.created_by,
-            created_at=template.created_at,
-            is_active=template.is_active,
-            is_public=template.is_public,
-            usage_count=template.usage_count,
-            version=template.version
-        )
+        return ReportTemplateResponse.model_validate(template)
 
     except Exception as e:
         logger.error(f"Error creating template: {str(e)}")
@@ -593,22 +547,7 @@ async def list_schedules(
         schedules = query.order_by(desc(ReportSchedule.created_at)).offset(skip).limit(limit).all()
 
         return [
-            ReportScheduleResponse(
-                id=schedule.id,
-                name=schedule.name,
-                description=schedule.description,
-                template_id=schedule.template_id,
-                schedule_type=schedule.schedule_type,
-                cron_expression=schedule.cron_expression,
-                interval_minutes=schedule.interval_minutes,
-                next_execution=schedule.next_execution,
-                last_execution=schedule.last_execution,
-                is_active=schedule.is_active,
-                status=schedule.status,
-                execution_count=schedule.execution_count,
-                success_count=schedule.success_count,
-                error_count=schedule.error_count
-            )
+            ReportScheduleResponse.model_validate(schedule)
             for schedule in schedules
         ]
 
@@ -659,22 +598,7 @@ async def create_schedule(
             user_id=current_user['sub']
         )
 
-        return ReportScheduleResponse(
-            id=schedule.id,
-            name=schedule.name,
-            description=schedule.description,
-            template_id=schedule.template_id,
-            schedule_type=schedule.schedule_type,
-            cron_expression=schedule.cron_expression,
-            interval_minutes=schedule.interval_minutes,
-            next_execution=schedule.next_execution,
-            last_execution=schedule.last_execution,
-            is_active=schedule.is_active,
-            status=schedule.status,
-            execution_count=schedule.execution_count,
-            success_count=schedule.success_count,
-            error_count=schedule.error_count
-        )
+        return ReportScheduleResponse.model_validate(schedule)
 
     except Exception as e:
         logger.error(f"Error creating schedule: {str(e)}")
@@ -705,22 +629,7 @@ async def update_schedule(
             user_id=current_user['sub']
         )
 
-        return ReportScheduleResponse(
-            id=schedule.id,
-            name=schedule.name,
-            description=schedule.description,
-            template_id=schedule.template_id,
-            schedule_type=schedule.schedule_type,
-            cron_expression=schedule.cron_expression,
-            interval_minutes=schedule.interval_minutes,
-            next_execution=schedule.next_execution,
-            last_execution=schedule.last_execution,
-            is_active=schedule.is_active,
-            status=schedule.status,
-            execution_count=schedule.execution_count,
-            success_count=schedule.success_count,
-            error_count=schedule.error_count
-        )
+        return ReportScheduleResponse.model_validate(schedule)
 
     except Exception as e:
         logger.error(f"Error updating schedule {schedule_id}: {str(e)}")
