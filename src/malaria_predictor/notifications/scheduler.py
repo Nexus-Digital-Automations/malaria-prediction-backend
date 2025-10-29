@@ -169,10 +169,10 @@ class NotificationScheduler:
 
             # Schedule delivery task
             if self.celery_app:
-                self._schedule_celery_task(notification_log.id, scheduled_time)
+                self._schedule_celery_task(int(notification_log.id), scheduled_time)
             else:
                 # Fall back to immediate delivery for testing
-                await self._deliver_notification(notification_log.id)
+                await self._deliver_notification(int(notification_log.id))
 
             logger.info(f"Scheduled notification {notification_log.id} for {scheduled_time}")
             return notification_log.id
@@ -314,7 +314,7 @@ class NotificationScheduler:
 
                     # Process batch concurrently
                     tasks = [
-                        self._deliver_notification(notification.id)
+                        self._deliver_notification(int(notification.id))
                         for notification in batch
                     ]
 
@@ -377,7 +377,7 @@ class NotificationScheduler:
                     notification.status = NotificationStatus.PENDING
 
                     # Retry delivery
-                    success, error = await self._deliver_notification(notification.id)
+                    success, error = await self._deliver_notification(int(notification.id))
                     if success:
                         retried_count += 1
 
@@ -421,10 +421,10 @@ class NotificationScheduler:
 
             # Prepare FCM message data
             message_data = FCMMessageData(
-                title=notification.title,
-                body=notification.body,
-                data=notification.data_payload or {},
-                priority=notification.priority,
+                title=str(notification.title),
+                body=str(notification.body),
+                data=dict(notification.data_payload) if notification.data_payload else {},
+                priority=str(notification.priority),
             )
 
             # Get platform-specific configurations
@@ -454,7 +454,7 @@ class NotificationScheduler:
 
                 if device and device.is_active:
                     success, fcm_message_id, error_message = await self.fcm_service.send_to_token(
-                        token=device.token,
+                        token=str(device.token),
                         message_data=message_data,
                         android_config=android_config,
                         apns_config=apns_config,
@@ -466,7 +466,7 @@ class NotificationScheduler:
             elif notification.topic:
                 # Send to topic
                 success, fcm_message_id, error_message = await self.fcm_service.send_to_topic(
-                    topic=notification.topic,
+                    topic=str(notification.topic),
                     message_data=message_data,
                     android_config=android_config,
                     apns_config=apns_config,
