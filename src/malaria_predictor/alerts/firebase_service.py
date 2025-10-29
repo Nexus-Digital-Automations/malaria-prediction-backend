@@ -401,7 +401,7 @@ class FirebaseNotificationService:
             tokens_and_payloads = [(token, payload) for token in device_tokens]
 
             # Send batch notifications
-            results = await self.send_batch_notifications(tokens_and_payloads, alert.id)
+            results = await self.send_batch_notifications(tokens_and_payloads, int(alert.id))
 
             logger.info(
                 f"Sent push notifications for alert {alert.id} to "
@@ -645,8 +645,8 @@ class FirebaseNotificationService:
             data["longitude"] = str(alert.longitude)
 
         return PushNotificationPayload(
-            title=alert.alert_title,
-            body=alert.alert_message,
+            title=str(alert.alert_title),
+            body=str(alert.alert_message),
             data=data,
             android_priority=priority,
             ios_priority=priority,
