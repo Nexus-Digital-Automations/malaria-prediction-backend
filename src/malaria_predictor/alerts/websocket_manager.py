@@ -515,20 +515,20 @@ class WebSocketAlertManager:
 
         # Create enhanced alert message
         alert_message = AlertMessage(
-            alert_id=alert.id,
-            alert_level=alert.alert_level,
-            alert_type=alert.alert_type,
-            title=alert.alert_title,
-            message=alert.alert_message,
+            alert_id=int(alert.id),
+            alert_level=str(alert.alert_level),
+            alert_type=str(alert.alert_type),
+            title=str(alert.alert_title),
+            message=str(alert.alert_message),
             location={
                 "latitude": alert.latitude,
                 "longitude": alert.longitude,
                 "name": alert.location_name
             } if alert.latitude and alert.longitude else None,
-            risk_score=alert.risk_score,
+            risk_score=float(alert.risk_score) if alert.risk_score is not None else None,
             priority=getattr(alert, 'priority', 'normal'),
             category=getattr(alert, 'alert_category', 'outbreak_risk'),
-            confidence_score=alert.confidence_score,
+            confidence_score=float(alert.confidence_score) if alert.confidence_score is not None else None,
             affected_population=getattr(alert, 'affected_population', None),
             metadata={
                 "country_code": alert.country_code,
