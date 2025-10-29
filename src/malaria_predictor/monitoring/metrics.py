@@ -823,7 +823,7 @@ class PredictionMetrics:
         # In a real implementation this would record to a metrics backend
         pass
 
-    def increment_prediction_count(self):
+    def increment_prediction_count(self) -> None:
         """Increment the prediction count metric."""
         if not self.enabled:
             return

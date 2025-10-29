@@ -178,7 +178,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         return request.client.host if request.client else "unknown"
 
-    def _cleanup_old_requests(self, client_ip: str, current_time: float):
+    def _cleanup_old_requests(self, client_ip: str, current_time: float) -> None:
         """Remove requests outside the time window."""
         cutoff_time = current_time - self.period
         self.requests[client_ip] = [

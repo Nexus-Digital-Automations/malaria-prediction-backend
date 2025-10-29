@@ -16,13 +16,13 @@ import h5py
 import xarray as xr
 
 from ..config import Settings
-from .chirps_client import CHIRPSClient
+from .chirps_client import CHIRPSClient, CHIRPSDownloadResult
 from .data_harmonizer import HarmonizedDataResult, SpatialHarmonizer, TemporalHarmonizer
-from .era5_client import ERA5Client
+from .era5_client import ERA5Client, ERA5DownloadResult
 from .feature_engineering import FeatureEngineer, QualityManager
-from .map_client import MAPClient
-from .modis_client import MODISClient
-from .worldpop_client import WorldPopClient
+from .map_client import MAPClient, MAPDownloadResult
+from .modis_client import MODISClient, MODISDownloadResult
+from .worldpop_client import WorldPopClient, WorldPopDownloadResult
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -294,7 +294,7 @@ class UnifiedDataHarmonizer:
         start_date: date,
         end_date: date,
         bounds: tuple[float, float, float, float],
-    ):
+    ) -> ERA5DownloadResult | None:
         """Download ERA5 temperature data."""
         try:
             result = await asyncio.to_thread(
@@ -310,7 +310,7 @@ class UnifiedDataHarmonizer:
         start_date: date,
         end_date: date,
         bounds: tuple[float, float, float, float],
-    ):
+    ) -> CHIRPSDownloadResult | None:
         """Download CHIRPS rainfall data."""
         try:
             result = await asyncio.to_thread(
@@ -330,7 +330,7 @@ class UnifiedDataHarmonizer:
         start_date: date,
         end_date: date,
         bounds: tuple[float, float, float, float],
-    ):
+    ) -> MODISDownloadResult | None:
         """Download MODIS vegetation data."""
         try:
             result = await asyncio.to_thread(
@@ -347,7 +347,7 @@ class UnifiedDataHarmonizer:
 
     async def _download_map_data(
         self, target_date: date, bounds: tuple[float, float, float, float]
-    ):
+    ) -> MAPDownloadResult | None:
         """Download MAP malaria risk data."""
         try:
             result = await asyncio.to_thread(
@@ -365,7 +365,7 @@ class UnifiedDataHarmonizer:
 
     async def _download_worldpop_data(
         self, target_date: date, bounds: tuple[float, float, float, float]
-    ):
+    ) -> WorldPopDownloadResult | None:
         """Download WorldPop population data."""
         try:
             # Convert bounds to country list (simplified)

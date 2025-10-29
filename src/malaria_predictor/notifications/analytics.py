@@ -45,7 +45,7 @@ class NotificationAnalytics:
 
         logger.info("Notification analytics system initialized")
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "NotificationAnalytics":
         """Async context manager entry."""
         if self._should_close_session:
             self.db_session = await get_database_session()

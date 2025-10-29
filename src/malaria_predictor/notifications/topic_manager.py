@@ -70,7 +70,7 @@ class TopicManager:
 
         logger.info("Topic manager initialized with FCM integration")
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "TopicManager":
         """Async context manager entry."""
         if self._should_close_session:
             self.db_session = await get_database_session()

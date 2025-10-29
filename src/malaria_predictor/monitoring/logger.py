@@ -14,6 +14,7 @@ import time
 from contextvars import ContextVar
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Callable
 
 from ..config import settings
 
@@ -396,7 +397,7 @@ class PerformanceLogger:
             )
 
 
-def log_performance(operation: str):
+def log_performance(operation: str) -> Callable[[Callable], Callable]:
     """
     Decorator for automatic performance logging.
 
@@ -404,10 +405,10 @@ def log_performance(operation: str):
         operation: Name of the operation being timed
     """
 
-    def decorator(func):
+    def decorator(func: Callable) -> Callable:
         if hasattr(func, "__aenter__"):  # Async function
 
-            async def async_wrapper(*args, **kwargs):
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
                 logger = get_logger(func.__module__)
                 with PerformanceLogger(logger, operation):
                     return await func(*args, **kwargs)
@@ -415,7 +416,7 @@ def log_performance(operation: str):
             return async_wrapper
         else:  # Sync function
 
-            def sync_wrapper(*args, **kwargs):
+            def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
                 logger = get_logger(func.__module__)
                 with PerformanceLogger(logger, operation):
                     return func(*args, **kwargs)

@@ -7,6 +7,7 @@ prediction system's healthcare tools.
 """
 
 import logging
+from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
@@ -154,7 +155,7 @@ async def get_current_healthcare_professional(
         ) from e
 
 
-def require_healthcare_permission(permission: str):
+def require_healthcare_permission(permission: str) -> Callable:
     """
     Decorator to require specific healthcare permission.
 
@@ -181,7 +182,7 @@ def require_healthcare_permission(permission: str):
     return permission_dependency
 
 
-def require_healthcare_role(allowed_roles: list[str]):
+def require_healthcare_role(allowed_roles: list[str]) -> Callable:
     """
     Decorator to require specific healthcare role(s).
 
@@ -225,7 +226,7 @@ class HealthcareAuditLogger:
         patient_id: str | None = None,
         case_id: str | None = None,
         additional_data: dict[str, Any] | None = None
-    ):
+    ) -> None:
         """
         Log healthcare professional access to resources.
 
@@ -260,7 +261,7 @@ class HealthcareAuditLogger:
         modification_type: str,
         before_data: dict[str, Any] | None = None,
         after_data: dict[str, Any] | None = None
-    ):
+    ) -> None:
         """
         Log data modification activities.
 

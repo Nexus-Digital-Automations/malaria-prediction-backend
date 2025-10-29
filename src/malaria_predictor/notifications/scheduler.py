@@ -84,7 +84,7 @@ class NotificationScheduler:
 
         logger.info("Notification scheduler initialized with delivery optimization")
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "NotificationScheduler":
         """Async context manager entry."""
         if self._should_close_session:
             self.db_session = await get_database_session()
@@ -553,7 +553,7 @@ class NotificationScheduler:
         # Convert back to UTC
         return next_delivery - timedelta(hours=timezone_offset)
 
-    async def _get_template(self, template_name: str):
+    async def _get_template(self, template_name: str) -> Any:
         """Get template by name from database or built-in templates."""
         try:
             session = self.db_session or await get_database_session()
@@ -586,7 +586,7 @@ class NotificationScheduler:
             if self._should_close_session and session:
                 session.close()
 
-    def _schedule_celery_task(self, notification_id: int, scheduled_time: datetime):
+    def _schedule_celery_task(self, notification_id: int, scheduled_time: datetime) -> None:
         """Schedule notification delivery using Celery."""
         if not self.celery_app:
             return

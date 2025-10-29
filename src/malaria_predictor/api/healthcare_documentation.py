@@ -86,7 +86,7 @@ class ProfessionalNote(BaseModel):
 async def generate_professional_documentation(
     request: DocumentationRequest,
     current_user = Depends(get_current_healthcare_professional)
-):
+) -> ClinicalReport:
     """
     Generate professional documentation and reports.
 
@@ -123,7 +123,7 @@ async def get_documentation_templates(
     category: str | None = None,
     language: str = "en",
     current_user = Depends(get_current_healthcare_professional)
-):
+) -> dict[str, Any]:
     """
     Get available documentation templates.
 
@@ -322,7 +322,7 @@ async def search_knowledge_base(
     language: str = "en",
     limit: int = 10,
     current_user = Depends(get_current_healthcare_professional)
-):
+) -> dict[str, Any]:
     """
     Search the knowledge base.
 
