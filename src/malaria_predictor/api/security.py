@@ -18,7 +18,7 @@ from typing import Any
 from cryptography.fernet import Fernet
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +59,7 @@ class UserCreate(BaseModel):
 
 class UserResponse(BaseModel):
     """User response model (excludes sensitive data)."""
+    model_config = ConfigDict(from_attributes=True)
 
     id: str
     username: str

@@ -105,17 +105,17 @@ async def register_user(
             },
         )
 
-        return UserResponse(
-            id=str(new_user.id),
-            username=new_user.username,
-            email=new_user.email,
-            full_name=new_user.full_name,
-            organization=new_user.organization,
-            role=new_user.role,
-            is_active=new_user.is_active,
-            created_at=new_user.created_at,
-            last_login=new_user.last_login,
-        )
+        return UserResponse.model_validate({
+            'id': str(new_user.id),
+            'username': new_user.username,
+            'email': new_user.email,
+            'full_name': new_user.full_name,
+            'organization': new_user.organization,
+            'role': new_user.role,
+            'is_active': new_user.is_active,
+            'created_at': new_user.created_at,
+            'last_login': new_user.last_login,
+        })
 
     except HTTPException:
         raise
@@ -368,17 +368,17 @@ async def get_current_user_info(
     Returns:
         UserResponse: Current user information
     """
-    return UserResponse(
-        id=str(current_user.id),
-        username=current_user.username,
-        email=current_user.email,
-        full_name=current_user.full_name,
-        organization=current_user.organization,
-        role=current_user.role,
-        is_active=current_user.is_active,
-        created_at=current_user.created_at,
-        last_login=current_user.last_login,
-    )
+    return UserResponse.model_validate({
+        'id': str(current_user.id),
+        'username': current_user.username,
+        'email': current_user.email,
+        'full_name': current_user.full_name,
+        'organization': current_user.organization,
+        'role': current_user.role,
+        'is_active': current_user.is_active,
+        'created_at': current_user.created_at,
+        'last_login': current_user.last_login,
+    })
 
 
 @router.post(
