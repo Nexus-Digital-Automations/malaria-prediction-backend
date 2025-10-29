@@ -8,7 +8,7 @@ quality assessment and validation frameworks.
 
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -96,7 +96,7 @@ class FeatureEngineer:
         # Calculate quality and uncertainty features
         features.update(self._calculate_quality_features(harmonized_data))
 
-        return self._validate_and_normalize(features)
+        return self._validate_and_normalize(cast(dict[str, np.ndarray | None], features))
 
     def _extract_basic_features(
         self, harmonized_data: dict[str, Any]
