@@ -14,6 +14,7 @@ import structlog
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
+from ...outbreak.models import SurveillanceData
 from ...outbreak.services import (
     OutbreakDetector,
     PatternAnalyzer,

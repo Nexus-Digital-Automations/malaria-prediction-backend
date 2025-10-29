@@ -9,9 +9,8 @@ custom span creation, and integration with various backends.
 import functools
 import inspect
 import time
-from collections.abc import Callable, Generator
+from collections.abc import Callable, Generator, Sequence
 from contextlib import contextmanager
-from collections.abc import Sequence
 from typing import Any
 
 from opentelemetry import trace

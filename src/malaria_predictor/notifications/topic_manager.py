@@ -448,8 +448,8 @@ class TopicManager:
 
             return {
                 "total_subscriptions": total_subscriptions,
-                "topics": dict((row[0], row[1]) for row in topic_stats),
-                "platforms": dict((row[0], row[1]) for row in platform_stats),
+                "topics": {row[0]: row[1] for row in topic_stats},
+                "platforms": {row[0]: row[1] for row in platform_stats},
                 "topic_categories": self.topic_categories,
             }
 
