@@ -11,6 +11,7 @@ import inspect
 import time
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
+from collections.abc import Sequence
 from typing import Any
 
 from opentelemetry import trace
@@ -472,7 +473,10 @@ class DatabaseTracer:
         if not span:
             return
 
-        attributes = {
+        attributes: dict[
+            str,
+            str | bool | int | float | Sequence[str] | Sequence[bool] | Sequence[int] | Sequence[float]
+        ] = {
             "db.rows_affected": rows_affected,
             "db.execution_time_ms": execution_time_ms,
         }
