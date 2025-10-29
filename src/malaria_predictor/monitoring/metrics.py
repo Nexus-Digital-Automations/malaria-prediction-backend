@@ -270,7 +270,7 @@ class APIMetrics(MetricsCollector):
         duration: float,
         request_size: int = 0,
         response_size: int = 0,
-    ):
+    ) -> None:
         """Record API request metrics."""
         labels = {
             "method": method,
@@ -301,25 +301,25 @@ class APIMetrics(MetricsCollector):
                 {"method": method, "endpoint": endpoint},
             )
 
-    def record_error(self, method: str, endpoint: str, error_type: str):
+    def record_error(self, method: str, endpoint: str, error_type: str) -> None:
         """Record API error metrics."""
         self.increment_counter(
             "malaria_api_errors_total",
             {"method": method, "endpoint": endpoint, "error_type": error_type},
         )
 
-    def record_rate_limit_hit(self, endpoint: str):
+    def record_rate_limit_hit(self, endpoint: str) -> None:
         """Record rate limit hit."""
         self.increment_counter(
             "malaria_api_rate_limit_hits_total", {"endpoint": endpoint}
         )
 
-    def record_auth_attempt(self, success: bool):
+    def record_auth_attempt(self, success: bool) -> None:
         """Record authentication attempt."""
         result = "success" if success else "failure"
         self.increment_counter("malaria_api_auth_attempts_total", {"result": result})
 
-    def set_active_connections(self, count: int):
+    def set_active_connections(self, count: int) -> None:
         """Set active connections count."""
         self.set_gauge("malaria_api_active_connections", count)
 
@@ -336,7 +336,7 @@ class MLModelMetrics(MetricsCollector):
         super().__init__(registry)
         self._setup_metrics()
 
-    def _setup_metrics(self):
+    def _setup_metrics(self) -> None:
         """Initialize ML model metrics."""
         # Prediction metrics
         self.prediction_count = self._create_counter(
@@ -410,7 +410,7 @@ class MLModelMetrics(MetricsCollector):
         duration: float,
         confidence: float,
         batch_size: int = 1,
-    ):
+    ) -> None:
         """Record ML prediction metrics."""
         labels = {"model_type": model_type, "model_version": model_version}
 
@@ -425,7 +425,7 @@ class MLModelMetrics(MetricsCollector):
 
     def record_model_loading(
         self, model_type: str, model_version: str, duration: float
-    ):
+    ) -> None:
         """Record model loading metrics."""
         labels = {"model_type": model_type, "model_version": model_version}
         self.observe_histogram(
@@ -434,7 +434,7 @@ class MLModelMetrics(MetricsCollector):
 
     def set_model_accuracy(
         self, model_type: str, model_version: str, metric_type: str, accuracy: float
-    ):
+    ) -> None:
         """Set model accuracy metric."""
         labels = {
             "model_type": model_type,
@@ -445,12 +445,12 @@ class MLModelMetrics(MetricsCollector):
 
     def set_model_memory_usage(
         self, model_type: str, model_version: str, memory_bytes: int
-    ):
+    ) -> None:
         """Set model memory usage metric."""
         labels = {"model_type": model_type, "model_version": model_version}
         self.set_gauge("malaria_ml_model_memory_usage_bytes", memory_bytes, labels)
 
-    def record_model_error(self, model_type: str, model_version: str, error_type: str):
+    def record_model_error(self, model_type: str, model_version: str, error_type: str) -> None:
         """Record model error."""
         labels = {
             "model_type": model_type,
@@ -459,7 +459,7 @@ class MLModelMetrics(MetricsCollector):
         }
         self.increment_counter("malaria_ml_model_errors_total", labels)
 
-    def record_feature_extraction(self, data_source: str, duration: float):
+    def record_feature_extraction(self, data_source: str, duration: float) -> None:
         """Record feature extraction metrics."""
         self.observe_histogram(
             "malaria_ml_feature_extraction_duration_seconds",
@@ -481,7 +481,7 @@ class SystemMetrics(MetricsCollector):
         self._setup_metrics()
         self._collection_interval = 30  # seconds
 
-    def _setup_metrics(self):
+    def _setup_metrics(self) -> None:
         """Initialize system metrics."""
         # CPU metrics
         self.cpu_usage_percent = self._create_gauge(
@@ -569,7 +569,7 @@ class SystemMetrics(MetricsCollector):
             "Cache memory usage in bytes",
         )
 
-    async def collect_system_metrics(self):
+    async def collect_system_metrics(self) -> None:
         """Collect system metrics periodically."""
         if not self.enabled:
             return
@@ -673,12 +673,12 @@ class SystemMetrics(MetricsCollector):
             logger = logging.getLogger(__name__)
             logger.error(f"Error collecting system metrics: {e}")
 
-    def start_collection(self):
+    def start_collection(self) -> None:
         """Start periodic system metrics collection."""
         if not self.enabled:
             return
 
-        async def collection_loop():
+        async def collection_loop() -> None:
             while True:
                 await self.collect_system_metrics()
                 await asyncio.sleep(self._collection_interval)
@@ -788,7 +788,7 @@ def get_metrics() -> PrometheusMetrics:
     return _metrics_instance
 
 
-def reset_metrics():
+def reset_metrics() -> None:
     """Reset the global metrics instance (for testing)."""
     global _metrics_instance
     _metrics_instance = None
@@ -801,7 +801,7 @@ class PredictionMetrics:
         """Initialize prediction metrics collector."""
         self.enabled = True
 
-    def record_prediction_time(self, duration: float):
+    def record_prediction_time(self, duration: float) -> None:
         """Record prediction processing time.
 
         Args:
@@ -812,7 +812,7 @@ class PredictionMetrics:
         # In a real implementation this would record to a metrics backend
         pass
 
-    def record_data_processing_time(self, duration: float):
+    def record_data_processing_time(self, duration: float) -> None:
         """Record data processing time.
 
         Args:

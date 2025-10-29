@@ -101,6 +101,7 @@ from .token_manager import (
     TokenManager,
     TokenValidationError,
 )
+from typing import Any, Callable
 
 # Version information
 __version__ = "1.0.0"
@@ -301,11 +302,11 @@ async def handle_api_error(
 async def execute_with_security(
     retry_executor: RetryExecutor,
     audit_logger: SecurityAuditLogger,
-    func: callable,
+    func: Callable,
     operation_name: str,
-    user_id: str = None,
-    **retry_kwargs
-):
+    user_id: str | None = None,
+    **retry_kwargs: Any
+) -> Any:
     """
     Execute function with retry logic and audit logging.
 
