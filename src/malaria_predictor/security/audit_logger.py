@@ -603,7 +603,7 @@ class SecurityAuditLogger:
         hash_string = json.dumps(hash_data, sort_keys=True)
         return hashlib.sha256(hash_string.encode()).hexdigest()
 
-    async def _persist_event(self, event: AuditEvent):
+    async def _persist_event(self, event: AuditEvent) -> None:
         """Persist audit event to encrypted storage."""
         try:
             # Generate filename with date for organization
@@ -629,7 +629,7 @@ class SecurityAuditLogger:
             logger.error(f"Failed to persist audit event {event.event_id}: {e}")
             # Continue operation even if persistence fails
 
-    async def _update_metrics(self, event: AuditEvent):
+    async def _update_metrics(self, event: AuditEvent) -> None:
         """Update security metrics based on event."""
         async with self._metrics_lock:
             # Authentication metrics
@@ -671,7 +671,7 @@ class SecurityAuditLogger:
             # Update timestamp
             self.metrics.last_updated = datetime.now(UTC)
 
-    async def _handle_anomaly(self, anomaly: dict[str, Any], triggering_event: AuditEvent):
+    async def _handle_anomaly(self, anomaly: dict[str, Any], triggering_event: AuditEvent) -> None:
         """Handle detected anomaly."""
         # Log anomaly as security alert
         await self.log_event(
@@ -700,7 +700,7 @@ class SecurityAuditLogger:
         }
         return level_map.get(risk_level, logging.INFO)
 
-    def add_alert_callback(self, callback: callable):
+    def add_alert_callback(self, callback: Callable) -> None:
         """Add callback function for security alerts."""
         self.alert_callbacks.append(callback)
         logger.info("Added security alert callback")
