@@ -147,17 +147,17 @@ class NotificationTemplateEngine:
             template_vars = context.to_template_vars()
 
             # Render title
-            title_template = Template(template.title_template)
+            title_template = Template(str(template.title_template))
             rendered_title = title_template.render(**template_vars)
 
             # Render body
-            body_template = Template(template.body_template)
+            body_template = Template(str(template.body_template))
             rendered_body = body_template.render(**template_vars)
 
             # Render deep link if present
             rendered_deep_link = None
             if template.deep_link:
-                deep_link_template = Template(template.deep_link)
+                deep_link_template = Template(str(template.deep_link))
                 rendered_deep_link = deep_link_template.render(**template_vars)
 
             logger.debug(f"Successfully rendered template '{template.name}' for context")
@@ -471,13 +471,17 @@ class MessageComposer:
             risk_level = "critical"
 
         # Create context
+        env_data = environmental_data or {}
         context = TemplateContext(
             user_id=user_id,
             risk_score=risk_score,
             risk_level=risk_level,
             location_name=location_name,
             coordinates=coordinates,
-            **(environmental_data or {}),
+            temperature=env_data.get("temperature"),
+            humidity=env_data.get("humidity"),
+            precipitation=env_data.get("precipitation"),
+            vegetation_index=env_data.get("vegetation_index"),
         )
 
         # Get template and render
