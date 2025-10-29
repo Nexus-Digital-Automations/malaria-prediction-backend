@@ -806,7 +806,7 @@ class ErrorHandler:
             "severity_breakdown": severity_stats,
             "top_error_categories": sorted(
                 category_stats.items(),
-                key=lambda x: x[1]["count"],
+                key=lambda x: int(x[1]["count"]) if isinstance(x[1]["count"], (int, float)) else 0,
                 reverse=True
             )[:5],
             "metrics_summary": {
