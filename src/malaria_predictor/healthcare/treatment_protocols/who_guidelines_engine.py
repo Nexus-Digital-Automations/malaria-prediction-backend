@@ -339,7 +339,7 @@ class WHOGuidelinesEngine:
         else:
             tablets_per_dose = 4
 
-        drug_regimen = [
+        drug_regimen: list[dict[str, str | float | int]] = [
             {
                 "drug_name": "Artemether-Lumefantrine",
                 "strength": "20mg/120mg tablets",
@@ -402,7 +402,7 @@ class WHOGuidelinesEngine:
         # Weight-based dosing: 2.4 mg/kg IV
         dose_mg = patient_profile.weight * 2.4
 
-        drug_regimen = [
+        drug_regimen: list[dict[str, str | float | int]] = [
             {
                 "drug_name": "Artesunate",
                 "strength": "60mg vials",
