@@ -817,7 +817,7 @@ class SecurityAuditLogger:
             "user_access_patterns": {
                 user_id: {
                     "access_count": data["count"],
-                    "unique_resources": len(data["resources"]),
+                    "unique_resources": len(data["resources"]) if isinstance(data["resources"], set) else 0,
                 }
                 for user_id, data in user_access.items()
             },
