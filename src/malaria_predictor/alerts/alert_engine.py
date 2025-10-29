@@ -8,7 +8,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -46,6 +46,7 @@ class AlertCondition(BaseModel):
 
 class AlertGenerationRequest(BaseModel):
     """Request to generate alerts for risk assessment."""
+    model_config = ConfigDict(from_attributes=True)
 
     risk_index_id: int | None = None
     latitude: float | None = None
@@ -60,6 +61,7 @@ class AlertGenerationRequest(BaseModel):
 
 class AlertEvaluationResult(BaseModel):
     """Result of alert rule evaluation."""
+    model_config = ConfigDict(from_attributes=True)
 
     rule_id: int
     triggered: bool
@@ -169,13 +171,13 @@ class AlertEngine:
         Returns:
             List of generated alerts
         """
-        request = AlertGenerationRequest(
-            risk_index_id=risk_index.id,
-            latitude=risk_index.latitude,
-            longitude=risk_index.longitude,
-            risk_score=risk_index.composite_risk_score,
-            location_name=risk_index.location_name,
-            environmental_data={
+        request = AlertGenerationRequest.model_validate({
+            'risk_index_id': risk_index.id,
+            'latitude': risk_index.latitude,
+            'longitude': risk_index.longitude,
+            'risk_score': risk_index.composite_risk_score,
+            'location_name': risk_index.location_name,
+            'environmental_data': {
                 "temperature_risk": risk_index.temperature_risk_component,
                 "precipitation_risk": risk_index.precipitation_risk_component,
                 "humidity_risk": risk_index.humidity_risk_component,
@@ -183,7 +185,7 @@ class AlertEngine:
                 "confidence": risk_index.confidence_score,
                 "risk_level": risk_index.risk_level
             }
-        )
+        })
 
         evaluation_results = await self.evaluate_risk_for_alerts(request)
 
@@ -405,34 +407,34 @@ class AlertEngine:
 
             evaluation_time = (datetime.now() - start_time).total_seconds() * 1000
 
-            return AlertEvaluationResult(
-                rule_id=rule.id,
-                triggered=triggered,
-                risk_score=request.risk_score or 0.0,
-                confidence_score=confidence,
-                conditions_met=conditions_met,
-                evaluation_time_ms=int(evaluation_time),
-                alert_level=alert_level,
-                alert_priority=rule.alert_priority,
-                suppressed=suppressed,
-                suppression_reason=suppression_reason
-            )
+            return AlertEvaluationResult.model_validate({
+                'rule_id': rule.id,
+                'triggered': triggered,
+                'risk_score': request.risk_score or 0.0,
+                'confidence_score': confidence,
+                'conditions_met': conditions_met,
+                'evaluation_time_ms': int(evaluation_time),
+                'alert_level': alert_level,
+                'alert_priority': rule.alert_priority,
+                'suppressed': suppressed,
+                'suppression_reason': suppression_reason
+            })
 
         except Exception as e:
             logger.error(f"Failed to evaluate alert rule {rule.id}: {e}")
 
-            return AlertEvaluationResult(
-                rule_id=rule.id,
-                triggered=False,
-                risk_score=request.risk_score or 0.0,
-                confidence_score=0.0,
-                conditions_met=[],
-                evaluation_time_ms=0,
-                alert_level="low",
-                alert_priority=rule.alert_priority,
-                suppressed=True,
-                suppression_reason="evaluation_error"
-            )
+            return AlertEvaluationResult.model_validate({
+                'rule_id': rule.id,
+                'triggered': False,
+                'risk_score': request.risk_score or 0.0,
+                'confidence_score': 0.0,
+                'conditions_met': [],
+                'evaluation_time_ms': 0,
+                'alert_level': "low",
+                'alert_priority': rule.alert_priority,
+                'suppressed': True,
+                'suppression_reason': "evaluation_error"
+            })
 
     async def _evaluate_conditions(
         self,
@@ -528,12 +530,20 @@ class AlertEngine:
 
         try:
             if operator == "gt":
+                if isinstance(condition_value, list):
+                    return False
                 return float(field_value) > float(condition_value)
             elif operator == "gte":
+                if isinstance(condition_value, list):
+                    return False
                 return float(field_value) >= float(condition_value)
             elif operator == "lt":
+                if isinstance(condition_value, list):
+                    return False
                 return float(field_value) < float(condition_value)
             elif operator == "lte":
+                if isinstance(condition_value, list):
+                    return False
                 return float(field_value) <= float(condition_value)
             elif operator == "eq":
                 return field_value == condition_value
@@ -594,7 +604,7 @@ class AlertEngine:
         # Check cooldown period
         if rule.id in self.suppression_cache:
             last_triggered = self.suppression_cache[rule.id]
-            cooldown_end = last_triggered + timedelta(hours=rule.cooldown_period_hours)
+            cooldown_end = last_triggered + timedelta(hours=int(rule.cooldown_period_hours))
 
             if now < cooldown_end:
                 return True, "cooldown_period"
