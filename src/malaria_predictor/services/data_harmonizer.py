@@ -15,7 +15,7 @@ import logging
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, TypedDict
 
 import numpy as np
 import pandas as pd
@@ -23,6 +23,25 @@ import rasterio
 import xarray as xr
 from pydantic import BaseModel, Field
 from rasterio.warp import Resampling, reproject
+
+
+# Type definitions for extracted data
+class ERA5TemperatureData(TypedDict, total=False):
+    """ERA5 temperature data structure."""
+
+    temperature_2m: float | None
+    temperature_min: float | None
+    temperature_max: float | None
+    source: str | None
+
+
+class CHIRPSRainfallData(TypedDict, total=False):
+    """CHIRPS rainfall data structure."""
+
+    rainfall_mm: float | None
+    anomaly: float | None
+    source: str | None
+
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -253,6 +272,7 @@ class TemporalHarmonizer:
         """Interpolate 16-day MODIS composites to daily resolution."""
         # Choose interpolation method based on available data points
         n_points = len(dataset.time)
+        method: Literal["cubic", "linear", "nearest"]
         if n_points >= 4:
             # Use cubic spline interpolation for smooth vegetation transitions
             method = "cubic"
@@ -689,7 +709,7 @@ class SpatialHarmonizer:
 
     def _extract_era5_temperature(
         self, lat: float, lon: float, era5_data: dict | None
-    ) -> dict[str, float | None]:
+    ) -> ERA5TemperatureData:
         """Extract temperature data from ERA5 for a specific location."""
         if not era5_data or "data" not in era5_data:
             return {"source": None}
@@ -715,7 +735,7 @@ class SpatialHarmonizer:
 
     def _extract_chirps_rainfall(
         self, lat: float, lon: float, chirps_data: dict | None
-    ) -> dict[str, float | None]:
+    ) -> CHIRPSRainfallData:
         """Extract rainfall data from CHIRPS for a specific location."""
         if not chirps_data or "data" not in chirps_data:
             return {"source": None}
@@ -733,7 +753,9 @@ class SpatialHarmonizer:
             logger.debug(f"Failed to extract CHIRPS rainfall: {e}")
             return {"source": None}
 
-    def _calculate_quality_flag(self, temp_data: dict, rainfall_data: dict) -> int:
+    def _calculate_quality_flag(
+        self, temp_data: ERA5TemperatureData, rainfall_data: CHIRPSRainfallData
+    ) -> int:
         """Calculate quality flag based on data availability."""
         if temp_data.get("source") and rainfall_data.get("source"):
             return 0  # Good quality
