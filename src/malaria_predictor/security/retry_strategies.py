@@ -253,7 +253,7 @@ class CircuitBreaker:
 
         logger.info(f"Circuit breaker '{name}' initialized with {config.failure_threshold} failure threshold")
 
-    async def call(self, func: Callable[[], Awaitable[T]], *args, **kwargs) -> T:
+    async def call(self, func: Callable[[], Awaitable[T]], *args: Any, **kwargs: Any) -> T:
         """
         Execute function through circuit breaker.
 
@@ -684,7 +684,7 @@ class RetryExecutor:
 
         return self.circuit_breakers[name]
 
-    async def _update_success_metrics(self, attempts: int, total_time: float, strategy: RetryStrategy):
+    async def _update_success_metrics(self, attempts: int, total_time: float, strategy: RetryStrategy) -> None:
         """Update metrics for successful retry operation."""
         async with self._metrics_lock:
             self.metrics.total_attempts += attempts
@@ -709,7 +709,7 @@ class RetryExecutor:
 
     async def _update_failure_metrics(
         self, attempts: int, total_time: float, strategy: RetryStrategy, error_type: str
-    ):
+    ) -> None:
         """Update metrics for failed retry operation."""
         async with self._metrics_lock:
             self.metrics.total_attempts += attempts
@@ -733,7 +733,7 @@ class RetryExecutor:
         name: str,
         config: CircuitBreakerConfig,
         health_check: Callable[[], Awaitable[bool]] | None = None
-    ):
+    ) -> None:
         """Add custom circuit breaker."""
         self.circuit_breakers[name] = CircuitBreaker(name, config, health_check)
         logger.info(f"Added circuit breaker: {name}")
@@ -762,7 +762,7 @@ class RetryExecutor:
             return True
         return False
 
-    async def reset_all_circuit_breakers(self):
+    async def reset_all_circuit_breakers(self) -> None:
         """Reset all circuit breakers."""
         for breaker in self.circuit_breakers.values():
             await breaker.reset()
