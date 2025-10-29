@@ -258,14 +258,14 @@ class OutbreakTimelineChart:
 
         # Convert to timeline format
         timeline_data = list(daily_data.values())
-        timeline_data.sort(key=lambda x: x["date"])
+        timeline_data.sort(key=lambda x: str(x["date"]))
 
         return {
             "daily_surveillance": timeline_data,
             "summary": {
                 "total_days": len(timeline_data),
                 "peak_cases": max([d["total_cases"] for d in timeline_data], default=0),
-                "peak_date": max(timeline_data, key=lambda x: x["total_cases"], default={}).get("date"),
+                "peak_date": max(timeline_data, key=lambda x: int(x["total_cases"]), default={}).get("date"),
                 "average_cases": sum([d["total_cases"] for d in timeline_data]) / max(len(timeline_data), 1)
             }
         }
@@ -528,7 +528,7 @@ class EpidemicCurveChart:
 
         # Convert to list and sort
         curve_data = list(aggregated_data.values())
-        curve_data.sort(key=lambda x: x["period"])
+        curve_data.sort(key=lambda x: str(x["period"]))
 
         # Calculate additional metrics
         for point in curve_data:
