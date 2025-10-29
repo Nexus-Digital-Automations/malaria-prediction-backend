@@ -22,7 +22,7 @@ def main(
     version: bool = typer.Option(
         False, "--version", callback=version_callback, help="Show version and exit"
     ),
-):
+) -> None:
     """Malaria Prediction Backend CLI."""
     pass
 
@@ -1581,7 +1581,7 @@ def db_init(
 
     from .database.session import init_database
 
-    async def run_init():
+    async def run_init() -> bool:
         try:
             typer.echo("🗄️  Initializing database...")
             if drop_existing:
@@ -1624,7 +1624,7 @@ def db_health(
 
     from .database.session import check_database_health
 
-    async def run_health_check():
+    async def run_health_check() -> None:
         try:
             typer.echo("🏥 Checking database health...")
             health_status = await check_database_health()
@@ -2392,7 +2392,7 @@ def harmonize_data(
     typer.echo(f"   🎯 Target resolution: {resolution}")
     typer.echo(f"   ⏰ Lookback period: {lookback_days} days")
 
-    async def run_harmonization():
+    async def run_harmonization() -> bool:
         try:
             # Initialize settings and harmonizer
             settings = Settings()

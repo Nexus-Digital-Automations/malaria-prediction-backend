@@ -75,7 +75,7 @@ class OperationsDashboardManager:
             "alerts": [],
         }
 
-    async def start_monitoring(self):
+    async def start_monitoring(self) -> None:
         """Start real-time operations monitoring."""
         if self.monitoring_active:
             return
@@ -84,7 +84,7 @@ class OperationsDashboardManager:
         self.monitoring_task = asyncio.create_task(self._monitoring_loop())
         logger.info("Operations dashboard monitoring started")
 
-    async def stop_monitoring(self):
+    async def stop_monitoring(self) -> None:
         """Stop operations monitoring."""
         self.monitoring_active = False
 
@@ -97,7 +97,7 @@ class OperationsDashboardManager:
 
         logger.info("Operations dashboard monitoring stopped")
 
-    async def _monitoring_loop(self):
+    async def _monitoring_loop(self) -> None:
         """Main monitoring loop for operations dashboard."""
         while self.monitoring_active:
             try:
@@ -117,7 +117,7 @@ class OperationsDashboardManager:
                 logger.error(f"Operations monitoring loop error: {e}")
                 await asyncio.sleep(60)  # Longer wait on error
 
-    async def _update_dashboard_state(self):
+    async def _update_dashboard_state(self) -> None:
         """Update the current dashboard state with latest metrics."""
         try:
             # Get health status
@@ -158,7 +158,7 @@ class OperationsDashboardManager:
         except Exception as e:
             logger.error(f"Error updating dashboard state: {e}")
 
-    async def _check_operational_alerts(self):
+    async def _check_operational_alerts(self) -> None:
         """Check and manage operational alerts."""
         config = self.load_operations_config()
         alert_rules = config.get("alerts", [])
@@ -221,7 +221,7 @@ class OperationsDashboardManager:
 
         return False
 
-    async def _fire_operational_alert(self, alert_data: dict[str, Any]):
+    async def _fire_operational_alert(self, alert_data: dict[str, Any]) -> None:
         """Fire an operational alert with proper escalation."""
         rule = alert_data["rule"]
 
@@ -243,7 +243,7 @@ class OperationsDashboardManager:
             }
         )
 
-    async def _clear_operational_alert(self, alert_data: dict[str, Any]):
+    async def _clear_operational_alert(self, alert_data: dict[str, Any]) -> None:
         """Clear an operational alert."""
         rule = alert_data["rule"]
 
@@ -256,7 +256,7 @@ class OperationsDashboardManager:
             if alert["id"] != alert_data["id"]
         ]
 
-    async def _broadcast_dashboard_update(self):
+    async def _broadcast_dashboard_update(self) -> None:
         """Broadcast dashboard updates to connected WebSocket clients."""
         if not self.websocket_connections:
             return

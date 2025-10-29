@@ -138,7 +138,7 @@ class EmergencyAlertSystem:
 
         logger.info("Emergency alert system initialized")
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "EmergencyAlertSystem":
         """Async context manager entry."""
         if self._should_close_session:
             self.db_session = await get_database_session()
@@ -643,7 +643,7 @@ class EmergencyAlertSystem:
             },
         )
 
-    async def _log_emergency_alert(self, alert: EmergencyAlert, delivery_results: dict[str, Any]):
+    async def _log_emergency_alert(self, alert: EmergencyAlert, delivery_results: dict[str, Any]) -> None:
         """Log emergency alert issuance for audit and analysis."""
         try:
             # In a production system, you would log to a dedicated emergency alerts table
@@ -666,7 +666,7 @@ class EmergencyAlertSystem:
         alert_id: str,
         reason: str,
         related_notifications: list[NotificationLog],
-    ):
+    ) -> None:
         """Send cancellation notice to users who received the original alert."""
         try:
             # Get unique devices that received the original alert

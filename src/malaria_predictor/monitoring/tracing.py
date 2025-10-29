@@ -147,7 +147,7 @@ def setup_tracing(config: TracingConfig | None = None) -> TracerProvider:
     return tracer_provider
 
 
-def setup_auto_instrumentation():
+def setup_auto_instrumentation() -> None:
     """
     Setup automatic instrumentation for common libraries.
 
@@ -413,7 +413,7 @@ class MLModelTracer:
         confidence: float,
         prediction_value: float,
         processing_time_ms: float,
-    ):
+    ) -> None:
         """Add prediction-specific metrics to a span."""
         if not span:
             return
@@ -467,7 +467,7 @@ class DatabaseTracer:
         rows_affected: int,
         execution_time_ms: float,
         connection_pool_size: int = None,
-    ):
+    ) -> None:
         """Add query-specific metrics to a span."""
         if not span:
             return
@@ -525,7 +525,7 @@ class APITracer:
         status_code: int,
         response_size: int,
         processing_time_ms: float,
-    ):
+    ) -> None:
         """Add request-specific metrics to a span."""
         if not span:
             return
@@ -574,7 +574,7 @@ def trace_ml_prediction(
     model_name: str,
     model_version: str = "1.0.0",
     record_metrics: bool = True,
-):
+) -> Callable:
     """
     Decorator for tracing ML prediction functions.
 
