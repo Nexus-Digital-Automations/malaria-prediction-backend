@@ -315,8 +315,10 @@ class ModelHealthCheck(BaseHealthCheck):
             model_details["test_inference_time_ms"] = round(inference_time, 2)
 
             # Check if all models are loaded
-            loaded_count = len(model_details["loaded_models"])
-            total_count = len(model_details["available_models"])
+            loaded_models = model_details["loaded_models"]
+            available_models = model_details["available_models"]
+            loaded_count = len(loaded_models) if isinstance(loaded_models, list) else 0
+            total_count = len(available_models) if isinstance(available_models, list) else 0
 
             if loaded_count == total_count:
                 status = HealthStatus.HEALTHY
@@ -386,9 +388,12 @@ class ExternalAPIHealthCheck(BaseHealthCheck):
             for api in apis_to_check:
                 try:
                     start_time = time.time()
+                    url = str(api["url"]) if api.get("url") else ""
+                    timeout_raw = api.get("timeout", 5.0)
+                    timeout_val = float(timeout_raw) if isinstance(timeout_raw, (int, float, str)) else 5.0
                     response = await client.get(
-                        api["url"],
-                        timeout=api["timeout"],
+                        url,
+                        timeout=timeout_val,
                         follow_redirects=True,
                     )
                     response_time = (time.time() - start_time) * 1000
