@@ -303,12 +303,8 @@ def population_analysis(
 
             # Extract population data for region
             for file_path in download_result.file_paths:
-                analysis_bounds = bounds or (
-                    -180,
-                    -90,
-                    180,
-                    90,
-                )  # World bounds if not specified
+                default_bounds = (-180.0, -90.0, 180.0, 90.0)
+                analysis_bounds: tuple[float, float, float, float] = bounds if bounds else default_bounds
 
                 pop_data = client.extract_population_for_region(
                     file_path, analysis_bounds
@@ -487,8 +483,10 @@ def _ingest_era5_data(dry_run: bool) -> None:
             validation = client.validate_downloaded_file(result.file_path)
             if validation["success"]:
                 typer.echo("   ✅ Data validation passed")
+                variables_found = validation.get('variables_found', [])
+                variables_str = [str(v) for v in variables_found] if variables_found else []
                 typer.echo(
-                    f"   🔍 Variables found: {', '.join(validation['variables_found'])}"
+                    f"   🔍 Variables found: {', '.join(variables_str)}"
                 )
                 if validation.get("temporal_range"):
                     temp_range = validation["temporal_range"]
@@ -761,7 +759,8 @@ def era5_validate(
         )
 
         if result["variables_found"]:
-            typer.echo(f"      Variables: {', '.join(result['variables_found'])}")
+            variables_list = [str(v) for v in result['variables_found']]
+            typer.echo(f"      Variables: {', '.join(variables_list)}")
 
         typer.echo(
             f"   📅 Temporal coverage: {'✅' if result['temporal_coverage_valid'] else '❌'}"
