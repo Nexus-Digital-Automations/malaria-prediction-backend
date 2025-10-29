@@ -309,7 +309,7 @@ class MalariaEnsembleModel(pl.LightningModule):
             # Get predictions from component models if they exist
             component_predictions = {}
 
-            if hasattr(self, "models") and self.models:
+            if hasattr(self, "models") and self.models and isinstance(self.models, (list, tuple)):
                 for i, model in enumerate(self.models):
                     model_name = f"model_{i}"
                     if hasattr(model, "predict"):

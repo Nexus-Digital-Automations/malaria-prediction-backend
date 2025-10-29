@@ -562,8 +562,8 @@ class MalariaTransformer(pl.LightningModule):
             if features_tensor.dim() == 2:
                 features_tensor = features_tensor.unsqueeze(0)
 
-            # Forward pass
-            outputs = self.forward(features_tensor)
+            # Forward pass - wrap tensor in dict as forward() expects dict input
+            outputs = self.forward({"features": features_tensor})
 
             # Convert to numpy and extract probabilities
             # Note: forward() returns dict[str, Tensor], extracting risk_mean
