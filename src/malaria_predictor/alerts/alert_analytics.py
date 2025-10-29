@@ -635,8 +635,8 @@ class AlertAnalyticsEngine:
                 seasonal_patterns = {str(int(h.hour)): h.count for h in hourly_counts}
 
                 # Peak hours (top 3 hours with most alerts)
-                peak_hours = sorted(seasonal_patterns.items(), key=lambda x: x[1], reverse=True)[:3]
-                peak_hours = [int(hour) for hour, _ in peak_hours]
+                peak_hours_sorted = sorted(seasonal_patterns.items(), key=lambda x: x[1], reverse=True)[:3]
+                peak_hours: list[int] = [int(hour) for hour, _ in peak_hours_sorted]
 
                 # Peak days (by day of week)
                 daily_counts = db.query(
@@ -649,8 +649,8 @@ class AlertAnalyticsEngine:
                 day_names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
                 daily_patterns = {day_names[int(d.dow)]: d.count for d in daily_counts}
 
-                peak_days = sorted(daily_patterns.items(), key=lambda x: x[1], reverse=True)[:3]
-                peak_days = [day for day, _ in peak_days]
+                peak_days_sorted = sorted(daily_patterns.items(), key=lambda x: x[1], reverse=True)[:3]
+                peak_days: list[str] = [day for day, _ in peak_days_sorted]
 
                 # Simple forecast (based on recent trend)
                 daily_avg = second_half_count / (days // 2)
