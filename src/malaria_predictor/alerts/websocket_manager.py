@@ -209,7 +209,7 @@ class WebSocketAlertManager:
         self.offline_queues: dict[str, list[dict]] = defaultdict(list)
         self.max_offline_queue_size = 100
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         """Initialize the WebSocket manager with Redis and background tasks."""
         try:
             # Initialize Redis client for persistence and scaling
@@ -231,7 +231,7 @@ class WebSocketAlertManager:
             logger.error(f"Failed to initialize WebSocket manager: {e}")
             raise
 
-    async def start_background_tasks(self):
+    async def start_background_tasks(self) -> None:
         """Start enhanced background maintenance tasks."""
         if not self._cleanup_task:
             self._cleanup_task = asyncio.create_task(self._cleanup_connections())

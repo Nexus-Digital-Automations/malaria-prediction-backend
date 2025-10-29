@@ -168,7 +168,7 @@ async def get_risk_assessment_templates(
     language: str = "en",
     category: str | None = None,
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> list[RiskAssessmentQuestionnaireTemplate]:
     """
     Get available risk assessment questionnaire templates.
 
@@ -341,7 +341,7 @@ async def conduct_risk_assessment(
     responses: dict[str, Any],
     include_environmental_data: bool = True,
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> RiskAssessmentResponse:
     """
     Conduct a risk assessment using a questionnaire template.
 
@@ -404,7 +404,7 @@ async def create_patient_case(
     symptoms: list[str] | None = None,
     initial_notes: str | None = None,
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> PatientCase:
     """
     Create a new patient case for tracking and management.
 
@@ -438,7 +438,7 @@ async def create_patient_case(
 async def get_patient_case(
     case_id: str,
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> PatientCase:
     """Get detailed information for a specific patient case."""
     logger.info(f"Retrieving case {case_id} for user {current_user.id}")
 
@@ -462,7 +462,7 @@ async def update_patient_case(
     case_id: str,
     update_data: dict[str, Any],
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> PatientCase:
     """Update patient case information."""
     logger.info(f"Updating case {case_id} by user {current_user.id}")
 
@@ -492,7 +492,7 @@ async def get_treatment_protocols(
     severity_level: str | None = None,
     patient_age_group: str | None = None,
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> list[TreatmentProtocol]:
     """
     Get available treatment protocols based on clinical criteria.
 
@@ -582,7 +582,7 @@ async def recommend_treatment_protocol(
     patient_weight: float | None = None,
     comorbidities: list[str] | None = None,
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> dict[str, Any]:
     """
     Get personalized treatment protocol recommendations for a patient case.
 
@@ -755,7 +755,7 @@ async def create_resource_allocation_request(
     urgency_level: str = "normal",
     justification: str = "",
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> ResourceAllocationRequest:
     """
     Submit a resource allocation planning request.
 
@@ -785,7 +785,7 @@ async def create_resource_allocation_request(
 async def get_resource_allocation_plan(
     request_id: str,
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> ResourceAllocationPlan:
     """
     Get optimized resource allocation plan for a request.
 
@@ -863,7 +863,7 @@ async def get_resource_allocation_plan(
 @router.get("/resource-allocation/optimization-models")
 async def get_optimization_models(
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> dict[str, Any]:
     """
     Get available resource allocation optimization models and their capabilities.
     """
@@ -912,7 +912,7 @@ async def submit_surveillance_report(
     environmental_observations: dict[str, Any] | None = None,
     intervention_activities: list[dict[str, Any]] | None = None,
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> SurveillanceReport:
     """
     Submit surveillance data report.
 
@@ -955,7 +955,7 @@ async def get_surveillance_form_templates(
     report_type: str | None = None,
     language: str = "en",
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> dict[str, Any]:
     """
     Get surveillance reporting form templates.
 
@@ -1050,7 +1050,7 @@ async def get_surveillance_form_templates(
 @router.get("/surveillance/dhis2-integration")
 async def get_dhis2_integration_status(
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> dict[str, Any]:
     """
     Get DHIS2 integration status and configuration.
 
@@ -1104,7 +1104,7 @@ async def get_dhis2_integration_status(
 @router.get("/dashboard/overview")
 async def get_professional_dashboard_overview(
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> dict[str, Any]:
     """
     Get comprehensive dashboard overview for healthcare professionals.
 
@@ -1198,7 +1198,7 @@ async def get_professional_dashboard_overview(
 async def get_case_workload_summary(
     time_period: str = "week",
     current_user: HealthcareProfessional = Depends(get_current_healthcare_professional)
-):
+) -> dict[str, Any]:
     """
     Get detailed case workload summary for specified time period.
     """

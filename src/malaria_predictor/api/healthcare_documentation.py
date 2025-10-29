@@ -206,7 +206,7 @@ async def get_knowledge_resources(
     language: str = "en",
     evidence_level: str | None = None,
     current_user = Depends(get_current_healthcare_professional)
-):
+) -> list[KnowledgeResource]:
     """
     Get knowledge management resources.
 
@@ -374,7 +374,7 @@ async def create_clinical_note(
     structured_data: dict[str, Any] | None = None,
     is_confidential: bool = False,
     current_user = Depends(get_current_healthcare_professional)
-):
+) -> ProfessionalNote:
     """
     Create a professional clinical note.
 
@@ -406,7 +406,7 @@ async def get_case_notes(
     case_id: str,
     note_type: str | None = None,
     current_user = Depends(get_current_healthcare_professional)
-):
+) -> list[ProfessionalNote]:
     """Get all clinical notes for a case."""
     logger.info(f"Retrieving notes for case {case_id}")
 
