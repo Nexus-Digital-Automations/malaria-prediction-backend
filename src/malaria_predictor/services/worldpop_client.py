@@ -360,14 +360,16 @@ class WorldPopClient:
             Tuple of (file_path, file_size, metadata) or (None, 0, {}) if failed
         """
         try:
-            download_url = dataset.get("download_url", "")
-            if not download_url:
+            download_url_raw = dataset.get("download_url", "")
+            if not download_url_raw:
                 # Construct URL from dataset information
                 year = dataset.get("year", 2020)
 
                 # Build URL based on WorldPop naming conventions
                 filename = f"{country_code.lower()}_{data_type}_{year}_{resolution}.tif"
                 download_url = f"{self.REST_BASE_URL}/GIS/Population/Global_2000_2020/{year}/{resolution}/{filename}"
+            else:
+                download_url = str(download_url_raw)
 
             # Extract filename from URL
             parsed_url = urlparse(download_url)
@@ -584,6 +586,8 @@ class WorldPopClient:
 
             # Ensure both datasets have same dimensions and alignment
             population_array = pop_data["data"]
+            if not isinstance(population_array, np.ndarray):
+                raise TypeError("Population data must be a numpy array")
 
             # If dimensions don't match, resample risk data to population grid
             if risk_data.shape != population_array.shape:
