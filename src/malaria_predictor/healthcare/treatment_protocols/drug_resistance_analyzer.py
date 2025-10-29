@@ -498,17 +498,17 @@ class DrugResistanceAnalyzer:
 
         return markers
 
-    def _load_resistance_markers(self):
+    def _load_resistance_markers(self) -> None:
         """Load known resistance markers from database"""
         # This would load from configuration or database
         logger.info("Loading resistance markers database")
 
-    def _load_geographic_patterns(self):
+    def _load_geographic_patterns(self) -> None:
         """Load geographic resistance patterns"""
         # This would load from GIS database
         logger.info("Loading geographic resistance patterns")
 
-    def _load_surveillance_data(self):
+    def _load_surveillance_data(self) -> None:
         """Load surveillance data from external sources"""
         # This would connect to surveillance systems
         logger.info("Loading surveillance data")
