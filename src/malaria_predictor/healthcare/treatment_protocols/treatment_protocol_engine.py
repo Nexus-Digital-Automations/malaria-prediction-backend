@@ -467,7 +467,7 @@ class TreatmentProtocolEngine:
             protocol_scores[protocol.protocol_id] = score
 
         # Select highest scoring protocol
-        best_protocol_id = max(protocol_scores, key=protocol_scores.get)
+        best_protocol_id = max(protocol_scores, key=lambda k: protocol_scores[k])
         return next(p for p in protocols if p.protocol_id == best_protocol_id)
 
     def _calculate_protocol_confidence(
