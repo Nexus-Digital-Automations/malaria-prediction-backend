@@ -267,12 +267,16 @@ class NotificationManager:
                 priority = NotificationPriority.NORMAL
 
             # Create template context
+            env_data = environmental_data or {}
             context = TemplateContext(
                 risk_score=risk_score,
                 risk_level=alert_data.get("risk_level", "medium"),
                 location_name=location_name,
                 coordinates=coordinates,
-                **(environmental_data or {}),
+                temperature=env_data.get("temperature"),
+                humidity=env_data.get("humidity"),
+                precipitation=env_data.get("precipitation"),
+                vegetation_index=env_data.get("vegetation_index"),
             )
 
             # Send to geographic topic if no specific users
@@ -326,7 +330,7 @@ class NotificationManager:
                                 template_name="malaria_risk_alert",
                                 context=context,
                                 target_type="device",
-                                target_value=device.token,
+                                target_value=str(device.token),
                                 priority=priority,
                             )
                         else:
@@ -334,7 +338,7 @@ class NotificationManager:
                                 template_name="malaria_risk_alert",
                                 context=context,
                                 target_type="device",
-                                target_value=device.token,
+                                target_value=str(device.token),
                                 priority=priority,
                             )
                             success = notification_id is not None
@@ -466,7 +470,7 @@ class NotificationManager:
                         template_name="medication_reminder",
                         context=context,
                         target_type="device",
-                        target_value=device.token,
+                        target_value=str(device.token),
                         scheduled_time=schedule_time,
                         priority=NotificationPriority.NORMAL,
                     )
@@ -477,7 +481,7 @@ class NotificationManager:
                         template_name="medication_reminder",
                         context=context,
                         target_type="device",
-                        target_value=device.token,
+                        target_value=str(device.token),
                         priority=NotificationPriority.NORMAL,
                     )
 
@@ -540,7 +544,7 @@ class NotificationManager:
                 topic_results = []
                 for device in user_devices:
                     success, error = await self.topic_manager.subscribe_device_to_topic(
-                        device.token, topic
+                        str(device.token), topic
                     )
                     topic_results.append(success)
 
