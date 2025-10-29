@@ -486,7 +486,7 @@ class ResourceAllocationEngine:
 
         return results
 
-    def _update_facility_inventories(self, allocation_results: list[AllocationResult]):
+    def _update_facility_inventories(self, allocation_results: list[AllocationResult]) -> None:
         """Update facility inventory levels after allocation"""
 
         for result in allocation_results:
@@ -507,7 +507,7 @@ class ResourceAllocationEngine:
         results: list[AllocationResult],
         strategy: AllocationStrategy,
         objectives: OptimizationObjective
-    ):
+    ) -> None:
         """Log allocation decisions for audit and analysis"""
 
         allocation_log = {
