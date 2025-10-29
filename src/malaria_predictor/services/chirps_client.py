@@ -459,11 +459,11 @@ class CHIRPSClient:
         logger.info(f"Cleaned up {deleted_count} old CHIRPS files")
         return deleted_count
 
-    def close(self):
+    def close(self) -> None:
         """Clean up resources."""
         self.session.close()
         self.executor.shutdown(wait=True)
 
-    async def get_precipitation_data(self, *args, **kwargs):
+    async def get_precipitation_data(self, *args: Any, **kwargs: Any) -> CHIRPSDownloadResult:
         """Alias for download_rainfall_data for backward compatibility with tests."""
         return self.download_rainfall_data(*args, **kwargs)
