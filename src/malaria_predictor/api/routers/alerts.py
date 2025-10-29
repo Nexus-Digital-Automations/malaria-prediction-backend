@@ -266,7 +266,7 @@ async def create_alert_configuration(
         from ...alerts.alert_engine import alert_engine
 
         config = await alert_engine.create_alert_configuration(
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             config_data=config_data.dict()
         )
 
@@ -705,7 +705,7 @@ async def register_device_token(
         }
 
         success = await firebase_service.register_device_token(
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             device_token=token_data.device_token,
             device_type=token_data.device_type,
             device_info=device_info
@@ -810,7 +810,7 @@ async def enhanced_websocket_endpoint(
             alert_types_set = set(alert_types.split(","))
 
         # Get user permissions and roles (implement according to your auth system)
-        permissions: list[str] = getattr(current_user, 'permissions', set())
+        permissions: list[str] = getattr(current_user, 'permissions', [])
         user_roles = getattr(current_user, 'roles', [])
 
         # Initialize WebSocket manager if not already done
@@ -820,12 +820,12 @@ async def enhanced_websocket_endpoint(
 
         connection_id = await websocket_manager.connect(
             websocket=websocket,
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             auth_token=auth_token,
             location_filter=location_filter_dict,
             risk_threshold=risk_threshold,
             alert_types_filter=alert_types_set,
-            permissions=permissions,
+            permissions=set(permissions),
             user_roles=user_roles
         )
 
@@ -839,7 +839,7 @@ async def enhanced_websocket_endpoint(
                     message = json.loads(data)
 
                     # Rate limit check
-                    if not await websocket_manager._check_rate_limit(current_user.id, connection_id):
+                    if not await websocket_manager._check_rate_limit(str(current_user.id), connection_id):
                         await websocket.send_text(json.dumps({
                             "type": "rate_limit_warning",
                             "message": "Rate limit exceeded. Please slow down.",
@@ -989,7 +989,7 @@ async def legacy_websocket_endpoint(
 
         connection_id = await websocket_manager.connect(
             websocket=websocket,
-            user_id=current_user.id
+            user_id=str(current_user.id)
         )
 
         try:
@@ -1230,7 +1230,7 @@ async def get_alert_history_detailed(
         location_filters_list = location_filters.split(",") if location_filters else None
 
         query = AlertHistoryQuery(
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             start_date=start_date,
             end_date=end_date,
             alert_levels=alert_levels_list,
@@ -1261,7 +1261,7 @@ async def get_alert_history_summary(
         from ...alerts.alert_history_manager import alert_history_manager
 
         summary = await alert_history_manager.get_alert_history_summary(
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             days=days
         )
         return summary.dict()
@@ -1282,7 +1282,7 @@ async def get_alert_history_trends(
         from ...alerts.alert_history_manager import alert_history_manager
 
         trends = await alert_history_manager.get_alert_trends(
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             period=period,
             days=days
         )
@@ -1305,7 +1305,7 @@ async def export_alert_history(
         from ...alerts.alert_history_manager import alert_history_manager
 
         export_data = await alert_history_manager.export_alert_history(
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             export_format=export_format,
             start_date=start_date,
             end_date=end_date
