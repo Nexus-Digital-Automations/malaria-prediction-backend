@@ -985,11 +985,11 @@ tryCatch({{
         logger.info(f"Cleaned up {deleted_count} old MAP files")
         return deleted_count
 
-    def close(self):
+    def close(self) -> None:
         """Clean up resources."""
         self.session.close()
         self.executor.shutdown(wait=True)
 
-    async def get_malaria_data(self, *args, **kwargs):
+    async def get_malaria_data(self, *args: Any, **kwargs: Any) -> MAPDownloadResult:
         """Alias for download_parasite_rate_surface for backward compatibility with tests."""
         return self.download_parasite_rate_surface(*args, **kwargs)

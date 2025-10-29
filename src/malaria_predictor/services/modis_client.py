@@ -991,12 +991,12 @@ class MODISClient:
         logger.info(f"Cleaned up {deleted_count} old MODIS files")
         return deleted_count
 
-    def close(self):
+    def close(self) -> None:
         """Clean up resources."""
         self.session.close()
         self.executor.shutdown(wait=True)
 
-    async def get_vegetation_indices(self, *args, **kwargs):
+    async def get_vegetation_indices(self, *args: Any, **kwargs: Any) -> MODISDownloadResult:
         """Alias for download_vegetation_indices for backward compatibility with tests."""
         return self.download_vegetation_indices(*args, **kwargs)
 
