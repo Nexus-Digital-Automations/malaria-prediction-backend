@@ -91,13 +91,22 @@ class MetricsCollector:
             return None
 
         labels = labels or []
-        histogram = Histogram(
-            name=name,
-            documentation=description,
-            labelnames=labels,
-            buckets=buckets,
-            registry=self.registry,
-        )
+        # Use default buckets if None
+        if buckets is None:
+            histogram = Histogram(
+                name=name,
+                documentation=description,
+                labelnames=labels,
+                registry=self.registry,
+            )
+        else:
+            histogram = Histogram(
+                name=name,
+                documentation=description,
+                labelnames=labels,
+                buckets=buckets,
+                registry=self.registry,
+            )
         self._metrics[name] = histogram
         return histogram
 
