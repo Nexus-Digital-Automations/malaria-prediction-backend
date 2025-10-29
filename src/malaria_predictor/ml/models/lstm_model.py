@@ -538,7 +538,7 @@ class MalariaLSTM(pl.LightningModule):
         # Mock loading - call torch.load for test compatibility
         import torch
 
-        torch.load(checkpoint_path)
+        torch.load(checkpoint_path, weights_only=True)
         self.is_loaded = True
 
     def load_metadata(self, metadata_path: str) -> dict:

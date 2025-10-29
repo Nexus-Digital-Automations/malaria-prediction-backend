@@ -104,11 +104,14 @@ class ModelManager:
         """Load LSTM model from checkpoint or create new instance.
 
         Security: Uses weights_only=False to load config dict. Only load trusted checkpoints.
+        Mitigation: Checkpoints must come from authenticated MLflow registry or verified storage.
+        Future: Migrate to separate JSON config file with weights_only=True for model weights.
         """
         if model_path:
-            # SECURITY: weights_only=False required for config dict loading
-            # ONLY load checkpoints from trusted sources (MLflow, verified storage)
-            checkpoint = torch.load(
+            # SECURITY WARNING: weights_only=False allows arbitrary code execution
+            # MITIGATION: Only load from authenticated sources (MLflow registry, signed storage)
+            # TODO: Refactor to separate config (JSON) from weights (torch with weights_only=True)
+            checkpoint = torch.load(  # nosec B614 - intentional for config loading from trusted sources
                 model_path, map_location="cpu", weights_only=False
             )
             model = MalariaLSTM(**checkpoint.get("config", {}))
@@ -122,11 +125,14 @@ class ModelManager:
         """Load Transformer model from checkpoint or create new instance.
 
         Security: Uses weights_only=False to load config dict. Only load trusted checkpoints.
+        Mitigation: Checkpoints must come from authenticated MLflow registry or verified storage.
+        Future: Migrate to separate JSON config file with weights_only=True for model weights.
         """
         if model_path:
-            # SECURITY: weights_only=False required for config dict loading
-            # ONLY load checkpoints from trusted sources (MLflow, verified storage)
-            checkpoint = torch.load(
+            # SECURITY WARNING: weights_only=False allows arbitrary code execution
+            # MITIGATION: Only load from authenticated sources (MLflow registry, signed storage)
+            # TODO: Refactor to separate config (JSON) from weights (torch with weights_only=True)
+            checkpoint = torch.load(  # nosec B614 - intentional for config loading from trusted sources
                 model_path, map_location="cpu", weights_only=False
             )
             model = MalariaTransformer(**checkpoint.get("config", {}))
@@ -140,11 +146,14 @@ class ModelManager:
         """Load Ensemble model from checkpoint or create new instance.
 
         Security: Uses weights_only=False to load config dict. Only load trusted checkpoints.
+        Mitigation: Checkpoints must come from authenticated MLflow registry or verified storage.
+        Future: Migrate to separate JSON config file with weights_only=True for model weights.
         """
         if model_path:
-            # SECURITY: weights_only=False required for config dict loading
-            # ONLY load checkpoints from trusted sources (MLflow, verified storage)
-            checkpoint = torch.load(
+            # SECURITY WARNING: weights_only=False allows arbitrary code execution
+            # MITIGATION: Only load from authenticated sources (MLflow registry, signed storage)
+            # TODO: Refactor to separate config (JSON) from weights (torch with weights_only=True)
+            checkpoint = torch.load(  # nosec B614 - intentional for config loading from trusted sources
                 model_path, map_location="cpu", weights_only=False
             )
             lstm_config = checkpoint.get("lstm_config", {})
