@@ -728,7 +728,7 @@ class ReportGenerator:
             # Process template
             template_config = template.layout_configuration if template else self._get_default_template()
             template_content = self.template_processor.process_template(
-                template_config,
+                dict(template_config) if not isinstance(template_config, dict) else template_config,
                 report_data,
                 charts
             )
@@ -786,7 +786,7 @@ class ReportGenerator:
                         continue
 
                     # Save file
-                    file_path = await self._save_export_file(report.id, format_name, content)
+                    file_path = await self._save_export_file(int(report.id), format_name, content)
                     file_paths[format_name] = file_path
                     file_sizes[format_name] = len(content)
                     export_results[format_name] = {
@@ -848,10 +848,12 @@ class ReportGenerator:
             start_date = config.get('start_date')
             end_date = config.get('end_date')
 
-            predictions = self.db.query(MalariaRiskIndex).filter(
-                MalariaRiskIndex.assessment_date >= start_date if start_date else True,
-                MalariaRiskIndex.assessment_date <= end_date if end_date else True
-            ).limit(1000).all()
+            query = self.db.query(MalariaRiskIndex)
+            if start_date:
+                query = query.filter(MalariaRiskIndex.assessment_date >= start_date)
+            if end_date:
+                query = query.filter(MalariaRiskIndex.assessment_date <= end_date)
+            predictions = query.limit(1000).all()
 
             data['predictions'] = [
                 {
