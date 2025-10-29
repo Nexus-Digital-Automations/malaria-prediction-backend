@@ -22,7 +22,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any
+from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
@@ -451,7 +451,7 @@ class ResourceAllocationEngine:
 
         # Implement greedy allocation algorithm as baseline
         solution["allocations"] = self._greedy_allocation_algorithm(problem)
-        solution["objective_value"] = self._evaluate_objective(solution["allocations"], problem)
+        solution["objective_value"] = self._evaluate_objective(cast(dict[Any, Any], solution["allocations"]), problem)
 
         return solution
 
