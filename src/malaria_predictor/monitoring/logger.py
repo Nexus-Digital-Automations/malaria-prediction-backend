@@ -12,7 +12,7 @@ import logging.handlers
 import sys
 import time
 from collections.abc import Callable
-from contextvars import ContextVar
+from contextvars import ContextVar, Token
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -202,7 +202,7 @@ class RequestContextLogger:
         self.user_id = user_id
         self.session_id = session_id
         self.operation = operation
-        self.tokens: list[str] = []
+        self.tokens: list[Token[str | None]] = []
 
     def __enter__(self):
         """Enter request context."""
