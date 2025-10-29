@@ -319,7 +319,7 @@ class CircuitBreaker:
             # Allow limited number of calls in half-open state
             return self.success_count < self.config.half_open_max_calls
 
-    async def _record_success(self, response_time: float):
+    async def _record_success(self, response_time: float) -> None:
         """Record successful request."""
         now = datetime.now(UTC)
         self.request_history.append((now, True, response_time))
@@ -342,7 +342,7 @@ class CircuitBreaker:
         # Clean old history
         await self._cleanup_history()
 
-    async def _record_failure(self, exception: Exception, response_time: float):
+    async def _record_failure(self, exception: Exception, response_time: float) -> None:
         """Record failed request."""
         now = datetime.now(UTC)
         self.request_history.append((now, False, response_time))
@@ -368,7 +368,7 @@ class CircuitBreaker:
         # Clean old history
         await self._cleanup_history()
 
-    async def _open_circuit(self):
+    async def _open_circuit(self) -> None:
         """Transition circuit to open state."""
         self.state = CircuitBreakerState.OPEN
         self.next_attempt_time = datetime.now(UTC) + timedelta(seconds=self.config.timeout)
@@ -384,7 +384,7 @@ class CircuitBreaker:
         if self.health_check:
             asyncio.create_task(self._monitor_health())
 
-    async def _close_circuit(self):
+    async def _close_circuit(self) -> None:
         """Transition circuit to closed state."""
         self.state = CircuitBreakerState.CLOSED
         self.failure_count = 0
@@ -395,7 +395,7 @@ class CircuitBreaker:
 
         logger.info(f"Circuit breaker '{self.name}' CLOSED - service appears healthy")
 
-    async def _monitor_health(self):
+    async def _monitor_health(self) -> None:
         """Monitor service health when circuit is open."""
         if not self.health_check:
             return
@@ -413,7 +413,7 @@ class CircuitBreaker:
             # Wait before next health check
             await asyncio.sleep(self.config.timeout / 4)
 
-    async def _cleanup_history(self):
+    async def _cleanup_history(self) -> None:
         """Clean old request history outside monitoring window."""
         cutoff = datetime.now(UTC) - timedelta(seconds=self.config.monitor_window)
         self.request_history = [
@@ -429,7 +429,7 @@ class CircuitBreaker:
         else:
             self.metrics.failure_rate = 0.0
 
-    def _update_average_response_time(self, response_time: float):
+    def _update_average_response_time(self, response_time: float) -> None:
         """Update average response time metric."""
         total_requests = self.metrics.total_requests
         if total_requests == 1:
@@ -452,7 +452,7 @@ class CircuitBreaker:
             "request_history_count": len(self.request_history),
         }
 
-    async def reset(self):
+    async def reset(self) -> None:
         """Reset circuit breaker to closed state."""
         async with self._lock:
             self.state = CircuitBreakerState.CLOSED
