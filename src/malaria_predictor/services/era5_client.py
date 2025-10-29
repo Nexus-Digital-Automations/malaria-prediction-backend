@@ -197,7 +197,7 @@ class ERA5Client:
         logger.info(f"Authentication method: {auth_method}")
 
     @property
-    def cds_client(self):
+    def cds_client(self) -> Any:
         """Lazy-loaded CDS API client with multiple authentication methods."""
         if self._cds_client is None:
             try:
@@ -419,7 +419,7 @@ class ERA5Client:
         area_bounds: list[float] | None = None,
         variable_preset: str | None = None,
         region_preset: str | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> ERA5RequestConfig:
         """Build comprehensive CDS request configuration from parameters."""
 
@@ -1294,6 +1294,6 @@ class ERA5Client:
             logger.error(f"Statistics computation failed: {e}")
             return None
 
-    async def get_climate_data(self, *args, **kwargs):
+    async def get_climate_data(self, *args: Any, **kwargs: Any) -> ERA5DownloadResult:
         """Alias for download_climate_data for backward compatibility with tests."""
         return self.download_climate_data(*args, **kwargs)
