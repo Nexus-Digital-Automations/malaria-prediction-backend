@@ -1,0 +1,21 @@
+{
+  "authKey": "73f205cd7b3e09f9070e1cf732020bbc",
+  "agentId": "claude-code-agent-1",
+  "startTime": "2025-10-29T00:28:41.047Z",
+  "expiresAt": "2025-10-29T00:58:41.047Z",
+  "currentStep": 1,
+  "completedSteps": [
+    "focused-codebase"
+  ],
+  "requiredSteps": [
+    "focused-codebase",
+    "security-validation",
+    "linter-validation",
+    "type-validation",
+    "build-validation",
+    "start-validation",
+    "test-validation"
+  ],
+  "status": "in_progress",
+  "lastValidation": "2025-10-29T00:28:56.751Z"
+}

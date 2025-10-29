@@ -48,12 +48,12 @@ class DHIS2Client:
         self.session_expires: datetime | None = None
         logger.info(f"DHIS2 client initialized for {self.base_url}")
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "DHIS2Client":
         """Async context manager entry."""
         await self._create_session()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Async context manager exit."""
         await self._close_session()
 

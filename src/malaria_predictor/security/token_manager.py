@@ -71,7 +71,7 @@ class TokenData:
     session_id: str | None = None
     client_id: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Initialize default values."""
         if self.scopes is None:
             self.scopes = set()

@@ -251,7 +251,7 @@ class ErrorClassifier:
         self.patterns: list[ErrorPattern] = []
         self._initialize_default_patterns()
 
-    def _initialize_default_patterns(self):
+    def _initialize_default_patterns(self) -> None:
         """Initialize default error patterns for common scenarios."""
 
         # Network errors
@@ -463,7 +463,7 @@ class ErrorClassifier:
         logger.warning(f"Error classified: {detailed_error}")
         return detailed_error
 
-    def add_pattern(self, pattern: ErrorPattern):
+    def add_pattern(self, pattern: ErrorPattern) -> None:
         """Add custom error pattern."""
         self.patterns.insert(0, pattern)  # Insert at beginning for priority
         logger.info(f"Added custom error pattern: {pattern.name}")
@@ -520,7 +520,7 @@ class ErrorHandler:
 
         logger.info("Error handler initialized with comprehensive error management")
 
-    def _initialize_recovery_strategies(self):
+    def _initialize_recovery_strategies(self) -> None:
         """Initialize default recovery strategies."""
         self.recovery_strategies.update({
             "retry_with_backoff": self._retry_with_exponential_backoff,
@@ -610,7 +610,7 @@ class ErrorHandler:
         recovery_result["recovery_time"] = time.time() - start_time
         return recovery_result
 
-    async def _record_error_metrics(self, error: DetailedError):
+    async def _record_error_metrics(self, error: DetailedError) -> None:
         """Record error metrics for analytics."""
         async with self._metrics_lock:
             error_key = f"{error.category.value}_{error.severity.value}"
@@ -645,7 +645,7 @@ class ErrorHandler:
                     endpoints=endpoints,
                 )
 
-    def _log_error(self, error: DetailedError):
+    def _log_error(self, error: DetailedError) -> None:
         """Log error with appropriate level based on severity."""
         log_level_map = {
             ErrorSeverity.LOW: logging.INFO,
@@ -738,7 +738,7 @@ class ErrorHandler:
             "message": "Input validation guidelines provided",
         }
 
-    def add_recovery_strategy(self, name: str, strategy_func: Callable):
+    def add_recovery_strategy(self, name: str, strategy_func: Callable) -> None:
         """Add custom recovery strategy."""
         self.recovery_strategies[name] = strategy_func
         logger.info(f"Added custom recovery strategy: {name}")

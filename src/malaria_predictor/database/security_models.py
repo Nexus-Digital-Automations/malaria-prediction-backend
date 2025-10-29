@@ -279,28 +279,28 @@ def get_default_security_settings() -> dict:
 class _DefaultSecuritySettingsProxy:
     """Proxy class that always returns a fresh deep copy of settings."""
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         return get_default_security_settings()[key]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:
         raise TypeError("DEFAULT_SECURITY_SETTINGS is read-only")
 
-    def __contains__(self, key):
+    def __contains__(self, key: str) -> bool:
         return key in get_default_security_settings()
 
-    def get(self, key, default=None):
+    def get(self, key: str, default: Any = None) -> Any:
         return get_default_security_settings().get(key, default)
 
-    def keys(self):
+    def keys(self) -> Any:
         return get_default_security_settings().keys()
 
-    def values(self):
+    def values(self) -> Any:
         return get_default_security_settings().values()
 
-    def items(self):
+    def items(self) -> Any:
         return get_default_security_settings().items()
 
-    def copy(self):
+    def copy(self) -> dict[str, Any]:
         return get_default_security_settings()
 
 
