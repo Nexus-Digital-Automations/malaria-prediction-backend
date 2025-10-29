@@ -86,7 +86,7 @@ class NotificationManager:
 
         logger.info("Comprehensive notification manager initialized")
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "NotificationManager":
         """Async context manager entry."""
         if self._should_close_session:
             self.db_session = await get_database_session()

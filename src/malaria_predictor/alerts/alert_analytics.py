@@ -159,14 +159,14 @@ class AlertAnalyticsEngine:
         self._monitoring_task: asyncio.Task[None] | None = None
         self._anomaly_detection_task: asyncio.Task[None] | None = None
 
-    async def start_monitoring(self):
+    async def start_monitoring(self) -> None:
         """Start background monitoring tasks."""
         if not self._monitoring_task:
             self._monitoring_task = asyncio.create_task(self._continuous_monitoring())
         if not self._anomaly_detection_task:
             self._anomaly_detection_task = asyncio.create_task(self._anomaly_detection())
 
-    async def stop_monitoring(self):
+    async def stop_monitoring(self) -> None:
         """Stop background monitoring tasks."""
         if self._monitoring_task:
             self._monitoring_task.cancel()
@@ -763,7 +763,7 @@ class AlertAnalyticsEngine:
             logger.error(f"Anomaly detection failed: {e}")
             return []
 
-    async def _continuous_monitoring(self):
+    async def _continuous_monitoring(self) -> None:
         """Background task for continuous monitoring."""
         while True:
             try:
@@ -781,7 +781,7 @@ class AlertAnalyticsEngine:
             except Exception as e:
                 logger.error(f"Error in continuous monitoring: {e}")
 
-    async def _anomaly_detection(self):
+    async def _anomaly_detection(self) -> None:
         """Background task for anomaly detection."""
         while True:
             try:
@@ -816,7 +816,7 @@ class AlertAnalyticsEngine:
         age_seconds = (datetime.now() - cache_entry["timestamp"]).total_seconds()
         return age_seconds < self.cache_ttl_seconds
 
-    def _cache_data(self, cache_key: str, data: any):
+    def _cache_data(self, cache_key: str, data: Any) -> None:
         """Cache data with timestamp.
 
         Args:
@@ -828,7 +828,7 @@ class AlertAnalyticsEngine:
             "timestamp": datetime.now()
         }
 
-    def _update_calculation_stats(self, calculation_time: float):
+    def _update_calculation_stats(self, calculation_time: float) -> None:
         """Update calculation performance statistics.
 
         Args:

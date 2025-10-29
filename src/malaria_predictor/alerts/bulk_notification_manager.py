@@ -637,7 +637,7 @@ class BulkNotificationManager:
             logger.error(f"Failed to resolve targeting: {e}")
             return []
 
-    async def _execute_campaign(self, campaign_id: str):
+    async def _execute_campaign(self, campaign_id: str) -> None:
         """Execute a campaign by creating and queuing jobs."""
         try:
             campaign = self.campaigns.get(campaign_id)
@@ -820,7 +820,7 @@ class BulkNotificationManager:
             logger.error(f"Failed to estimate completion time: {e}")
             return None
 
-    async def _campaign_scheduler(self):
+    async def _campaign_scheduler(self) -> None:
         """Background task to check for scheduled campaigns."""
         while True:
             try:
@@ -840,7 +840,7 @@ class BulkNotificationManager:
             except Exception as e:
                 logger.error(f"Error in campaign scheduler: {e}")
 
-    async def _job_processor(self):
+    async def _job_processor(self) -> None:
         """Background task to process notification jobs."""
         while True:
             try:
@@ -859,7 +859,7 @@ class BulkNotificationManager:
             except Exception as e:
                 logger.error(f"Error in job processor: {e}")
 
-    async def _process_job(self, job: BulkNotificationJob):
+    async def _process_job(self, job: BulkNotificationJob) -> None:
         """Process a single notification job."""
         try:
             job.status = "running"
@@ -917,7 +917,7 @@ class BulkNotificationManager:
                 job.status = "pending"
                 await self.retry_queue.put(job.job_id)
 
-    async def _retry_processor(self):
+    async def _retry_processor(self) -> None:
         """Background task to process failed job retries."""
         while True:
             try:

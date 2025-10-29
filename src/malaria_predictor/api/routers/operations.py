@@ -23,7 +23,7 @@ router = APIRouter(prefix="/operations", tags=["operations"])
 
 
 @router.get("/dashboard", response_class=HTMLResponse)
-async def get_operations_dashboard_page():
+async def get_operations_dashboard_page() -> HTMLResponse:
     """
     Get the production operations dashboard HTML page.
 
@@ -99,7 +99,7 @@ async def get_detailed_health_status(
 @router.get("/metrics/prometheus")
 async def get_prometheus_metrics(
     # Authentication removed for monitoring endpoints
-):
+) -> JSONResponse:
     """
     Get Prometheus metrics in text format.
 
@@ -133,7 +133,7 @@ async def get_grafana_dashboard_config(
 @router.get("/config/prometheus-alerts")
 async def get_prometheus_alert_rules(
     # Authentication removed for monitoring endpoints
-):
+) -> JSONResponse:
     """
     Get Prometheus alert rules configuration.
 
@@ -149,7 +149,7 @@ async def get_prometheus_alert_rules(
 
 
 @router.websocket("/ws/operations-dashboard")
-async def operations_dashboard_websocket(websocket: WebSocket):
+async def operations_dashboard_websocket(websocket: WebSocket) -> None:
     """
     WebSocket endpoint for real-time operations dashboard updates.
 
@@ -189,7 +189,7 @@ async def operations_dashboard_websocket(websocket: WebSocket):
 @router.post("/monitoring/start")
 async def start_operations_monitoring(
     # Authentication removed for monitoring endpoints
-):
+) -> dict[str, str]:
     """
     Start operations monitoring and alerting.
 
@@ -205,7 +205,7 @@ async def start_operations_monitoring(
 @router.post("/monitoring/stop")
 async def stop_operations_monitoring(
     # Authentication removed for monitoring endpoints
-):
+) -> dict[str, str]:
     """
     Stop operations monitoring and alerting.
 

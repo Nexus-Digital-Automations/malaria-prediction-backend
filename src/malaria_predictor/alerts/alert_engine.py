@@ -773,7 +773,7 @@ class AlertEngine:
 
         return title, message
 
-    async def _send_alert_notifications(self, alert: Alert):
+    async def _send_alert_notifications(self, alert: Alert) -> None:
         """Send notifications for generated alert.
 
         Args:

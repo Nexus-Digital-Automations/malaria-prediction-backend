@@ -259,7 +259,7 @@ async def create_alert_configuration(
     config_data: AlertConfigurationCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database)
-):
+) -> AlertConfigurationResponse:
     """Create a new alert configuration."""
     try:
         from ...alerts.alert_engine import alert_engine
@@ -284,7 +284,7 @@ async def get_alert_configurations(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
     active_only: bool = Query(True, description="Return only active configurations")
-):
+) -> list[AlertConfigurationResponse]:
     """Get user's alert configurations."""
     try:
         query = db.query(AlertConfiguration).filter(
@@ -308,7 +308,7 @@ async def get_alert_configuration(
     config_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database)
-):
+) -> AlertConfigurationResponse:
     """Get a specific alert configuration."""
     try:
         config = db.query(AlertConfiguration).filter(
@@ -334,7 +334,7 @@ async def update_alert_configuration(
     config_data: AlertConfigurationCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database)
-):
+) -> AlertConfigurationResponse:
     """Update an alert configuration."""
     try:
         config = db.query(AlertConfiguration).filter(
@@ -369,7 +369,7 @@ async def delete_alert_configuration(
     config_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database)
-):
+) -> dict[str, str]:
     """Delete an alert configuration."""
     try:
         config = db.query(AlertConfiguration).filter(
@@ -402,7 +402,7 @@ async def create_alert_rule(
     rule_data: AlertRuleCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database)
-):
+) -> AlertRuleResponse:
     """Create a new alert rule."""
     try:
         # Verify user owns the configuration
@@ -442,7 +442,7 @@ async def get_alert_rules(
     db: Session = Depends(get_database),
     configuration_id: int | None = Query(None, description="Filter by configuration ID"),
     active_only: bool = Query(True, description="Return only active rules")
-):
+) -> list[AlertRuleResponse]:
     """Get user's alert rules."""
     try:
         query = db.query(AlertRule).join(AlertConfiguration).filter(
@@ -478,7 +478,7 @@ async def get_alerts(
     start_date: datetime | None = Query(None, description="Filter alerts after this date"),
     end_date: datetime | None = Query(None, description="Filter alerts before this date"),
     unread_only: bool = Query(False, description="Return only unread alerts")
-):
+) -> list[AlertResponse]:
     """Get user's alert history."""
     try:
         query = db.query(Alert).join(AlertConfiguration).filter(
@@ -530,7 +530,7 @@ async def get_alert(
     alert_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database)
-):
+) -> AlertResponse:
     """Get a specific alert."""
     try:
         alert = db.query(Alert).join(AlertConfiguration).filter(
@@ -561,7 +561,7 @@ async def acknowledge_alert(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
     notes: str | None = None
-):
+) -> dict[str, str]:
     """Acknowledge an alert."""
     try:
         alert = db.query(Alert).join(AlertConfiguration).filter(
@@ -606,7 +606,7 @@ async def resolve_alert(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
     notes: str | None = None
-):
+) -> dict[str, str]:
     """Resolve an alert."""
     try:
         alert = db.query(Alert).join(AlertConfiguration).filter(
@@ -652,7 +652,7 @@ async def submit_alert_feedback(
     false_positive: bool | None = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database)
-):
+) -> dict[str, str]:
     """Submit feedback for an alert."""
     try:
         alert = db.query(Alert).join(AlertConfiguration).filter(
@@ -691,7 +691,7 @@ async def submit_alert_feedback(
 async def register_device_token(
     token_data: DeviceTokenRegistration,
     current_user: User = Depends(get_current_user)
-):
+) -> dict[str, str]:
     """Register a device token for push notifications."""
     try:
         from ...alerts.firebase_service import firebase_service
@@ -726,7 +726,7 @@ async def register_device_token(
 async def get_device_tokens(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database)
-):
+) -> list[dict[str, Any]]:
     """Get user's registered device tokens."""
     try:
         tokens = db.query(UserDeviceToken).filter(
@@ -756,7 +756,7 @@ async def deactivate_device_token(
     token_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database)
-):
+) -> dict[str, str]:
     """Deactivate a device token."""
     try:
         token = db.query(UserDeviceToken).filter(
@@ -791,7 +791,7 @@ async def enhanced_websocket_endpoint(
     risk_threshold: float = 0.0,
     alert_types: str = None,
     current_user: User = Depends(get_current_user)
-):
+) -> None:
     """Enhanced WebSocket endpoint for real-time alerts with advanced features."""
     try:
         from ...alerts.websocket_manager import websocket_manager
@@ -981,7 +981,7 @@ async def handle_websocket_message(websocket_manager, connection_id: str, messag
 async def legacy_websocket_endpoint(
     websocket: WebSocket,
     current_user: User = Depends(get_current_user)
-):
+) -> None:
     """Legacy WebSocket endpoint for backward compatibility."""
     try:
         from ...alerts.websocket_manager import websocket_manager
@@ -1027,7 +1027,7 @@ async def legacy_websocket_endpoint(
 @router.get("/stats", response_model=AlertStatsResponse)
 async def get_alert_stats(
     current_user: User = Depends(get_current_user)
-):
+) -> AlertStatsResponse:
     """Get alert system statistics."""
     try:
         from ...alerts.alert_engine import alert_engine
@@ -1053,7 +1053,7 @@ async def get_performance_metrics(
     db: Session = Depends(get_database),
     period: str = Query("daily", description="Aggregation period (hourly, daily, weekly, monthly)"),
     days: int = Query(7, ge=1, le=90, description="Number of days to include")
-):
+) -> list[dict[str, Any]]:
     """Get alert system performance metrics."""
     try:
         start_date = datetime.now() - timedelta(days=days)
@@ -1086,7 +1086,7 @@ async def get_performance_metrics(
 async def get_alert_kpis(
     current_user: User = Depends(get_current_user),
     force_refresh: bool = Query(False, description="Force refresh of cached KPIs")
-):
+) -> dict[str, Any]:
     """Get comprehensive alert system KPIs."""
     try:
         from ...alerts.alert_analytics import alert_analytics_engine
@@ -1102,7 +1102,7 @@ async def get_alert_kpis(
 @router.get("/analytics/channel-performance")
 async def get_channel_performance(
     current_user: User = Depends(get_current_user)
-):
+) -> list[dict[str, Any]]:
     """Get performance metrics for all notification channels."""
     try:
         from ...alerts.alert_analytics import alert_analytics_engine
@@ -1118,7 +1118,7 @@ async def get_channel_performance(
 @router.get("/analytics/user-engagement")
 async def get_user_engagement_metrics(
     current_user: User = Depends(get_current_user)
-):
+) -> dict[str, Any]:
     """Get user engagement metrics for alerts."""
     try:
         from ...alerts.alert_analytics import alert_analytics_engine
@@ -1134,7 +1134,7 @@ async def get_user_engagement_metrics(
 @router.get("/analytics/effectiveness")
 async def get_alert_effectiveness_metrics(
     current_user: User = Depends(get_current_user)
-):
+) -> dict[str, Any]:
     """Get alert effectiveness and accuracy metrics."""
     try:
         from ...alerts.alert_analytics import alert_analytics_engine
@@ -1150,7 +1150,7 @@ async def get_alert_effectiveness_metrics(
 @router.get("/analytics/system-health")
 async def get_system_health_metrics(
     current_user: User = Depends(get_current_user)
-):
+) -> dict[str, Any]:
     """Get overall system health and performance metrics."""
     try:
         from ...alerts.alert_analytics import alert_analytics_engine
@@ -1167,7 +1167,7 @@ async def get_system_health_metrics(
 async def get_alert_trends(
     current_user: User = Depends(get_current_user),
     days: int = Query(30, ge=7, le=90, description="Number of days to analyze")
-):
+) -> dict[str, Any]:
     """Get trend analysis for alerts over time."""
     try:
         from ...alerts.alert_analytics import alert_analytics_engine
@@ -1183,7 +1183,7 @@ async def get_alert_trends(
 @router.get("/analytics/anomalies")
 async def get_alert_anomalies(
     current_user: User = Depends(get_current_user)
-):
+) -> dict[str, Any]:
     """Detect and return alert system anomalies."""
     try:
         from ...alerts.alert_analytics import alert_analytics_engine
@@ -1214,7 +1214,7 @@ async def get_alert_history_detailed(
     offset: int = Query(0, ge=0, description="Results offset"),
     sort_by: str = Query("created_at", description="Sort field"),
     sort_order: str = Query("desc", description="Sort order")
-):
+) -> dict[str, Any]:
     """Get detailed alert history with advanced filtering."""
     try:
         from ...alerts.alert_history_manager import (
@@ -1254,7 +1254,7 @@ async def get_alert_history_detailed(
 async def get_alert_history_summary(
     current_user: User = Depends(get_current_user),
     days: int = Query(30, ge=1, le=365, description="Number of days to analyze")
-):
+) -> dict[str, Any]:
     """Get comprehensive alert history summary."""
     try:
         from ...alerts.alert_history_manager import alert_history_manager
@@ -1275,7 +1275,7 @@ async def get_alert_history_trends(
     current_user: User = Depends(get_current_user),
     period: str = Query("daily", description="Aggregation period"),
     days: int = Query(30, ge=7, le=90, description="Number of days to analyze")
-):
+) -> list[dict[str, Any]]:
     """Get alert trend data over time."""
     try:
         from ...alerts.alert_history_manager import alert_history_manager
@@ -1298,7 +1298,7 @@ async def export_alert_history(
     export_format: str = Query("json", description="Export format (json, csv)"),
     start_date: datetime | None = Query(None, description="Start date for export"),
     end_date: datetime | None = Query(None, description="End date for export")
-):
+) -> dict[str, Any]:
     """Export alert history in various formats."""
     try:
         from ...alerts.alert_history_manager import alert_history_manager
@@ -1321,7 +1321,7 @@ async def export_alert_history(
 async def archive_old_alerts(
     current_user: User = Depends(get_current_user),
     dry_run: bool = Query(True, description="Simulate archiving without changes")
-):
+) -> dict[str, Any]:
     """Archive old alerts based on retention policy."""
     try:
         # Note: In production, add admin role check here
@@ -1339,7 +1339,7 @@ async def archive_old_alerts(
 async def cleanup_old_data(
     current_user: User = Depends(get_current_user),
     dry_run: bool = Query(True, description="Simulate cleanup without changes")
-):
+) -> dict[str, Any]:
     """Clean up old alert data based on retention policy."""
     try:
         # Note: In production, add admin role check here
