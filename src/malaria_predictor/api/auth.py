@@ -291,7 +291,7 @@ async def authenticate_user(
             return None
 
         # Verify password
-        if not verify_password(password, user_data.hashed_password):
+        if not verify_password(password, str(user_data.hashed_password)):
             # Increment failed login attempts
             failed_attempts = user_data.failed_login_attempts + 1
             locked_until = None
@@ -395,7 +395,8 @@ def require_scopes(*required_scopes: str) -> callable:
 
         elif current_api_key:
             # API key authentication - check explicit scopes
-            if not validate_scopes(list(required_scopes), current_api_key.scopes):
+            api_key_scopes = list(current_api_key.scopes) if current_api_key.scopes else []
+            if not validate_scopes(list(required_scopes), api_key_scopes):
                 SecurityAuditor.log_security_event(
                     "insufficient_permissions",
                     api_key_id=str(current_api_key.id),
