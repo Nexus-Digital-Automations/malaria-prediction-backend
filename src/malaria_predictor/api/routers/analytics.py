@@ -111,16 +111,22 @@ async def get_prediction_accuracy_metrics(
 
         # Calculate averages
         for _model_type, data in model_accuracy.items():
-            data["avg_confidence"] = sum(data["predictions"]) / len(data["predictions"])
+            predictions_list = data["predictions"]
+            if isinstance(predictions_list, list):
+                data["avg_confidence"] = sum(predictions_list) / len(predictions_list)
             data["high_confidence_rate"] = data["high_confidence"] / data["total"]
             del data["predictions"]  # Remove raw data to reduce response size
 
         for _risk_level, data in risk_level_accuracy.items():
-            data["avg_confidence"] = sum(data["scores"]) / len(data["scores"])
+            scores_list = data["scores"]
+            if isinstance(scores_list, list):
+                data["avg_confidence"] = sum(scores_list) / len(scores_list)
             del data["scores"]
 
         for _month, data in temporal_accuracy.items():
-            data["avg_confidence"] = sum(data["scores"]) / len(data["scores"])
+            scores_list = data["scores"]
+            if isinstance(scores_list, list):
+                data["avg_confidence"] = sum(scores_list) / len(scores_list)
             del data["scores"]
 
         return {
