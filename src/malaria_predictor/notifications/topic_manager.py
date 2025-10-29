@@ -448,8 +448,8 @@ class TopicManager:
 
             return {
                 "total_subscriptions": total_subscriptions,
-                "topics": dict(topic_stats),
-                "platforms": dict(platform_stats),
+                "topics": dict((row[0], row[1]) for row in topic_stats),
+                "platforms": dict((row[0], row[1]) for row in platform_stats),
                 "topic_categories": self.topic_categories,
             }
 
@@ -482,7 +482,7 @@ class TopicManager:
                 and_(
                     TopicSubscription.is_active,
                     or_(
-                        not DeviceToken.is_active,
+                        ~DeviceToken.is_active,
                         DeviceToken.last_seen < cutoff_date,
                     )
                 )
