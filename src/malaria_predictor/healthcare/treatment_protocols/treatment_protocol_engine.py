@@ -630,7 +630,7 @@ class TreatmentProtocolEngine:
         """Apply protocol updates"""
         return {"success": True, "message": "Updates applied successfully"}
 
-    def _log_protocol_update(self, location: str, updates: dict, evidence_basis: str, updated_by: str):
+    def _log_protocol_update(self, location: str, updates: dict, evidence_basis: str, updated_by: str) -> None:
         """Log protocol update"""
         logger.info(f"Protocol updated for {location} by {updated_by}")
 
