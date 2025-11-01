@@ -5,11 +5,14 @@ This module defines Pydantic models for analytics API requests and responses,
 providing comprehensive data structures for visualization and reporting.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
+
+# Import RiskLevel enum from main models for proper enum usage
+from ..models import RiskLevel as RiskLevelEnum
 
 
 class ModelType(str, Enum):
@@ -18,6 +21,16 @@ class ModelType(str, Enum):
     LSTM = "lstm"
     TRANSFORMER = "transformer"
     ENSEMBLE = "ensemble"
+
+
+class PredictionHorizon(int, Enum):
+    """Prediction time horizon options (in days)."""
+
+    ONE_DAY = 1
+    THREE_DAYS = 3
+    ONE_WEEK = 7
+    TWO_WEEKS = 14
+    ONE_MONTH = 30
 
 
 class AnalyticsRequest(BaseModel):
@@ -317,8 +330,8 @@ class LocationPoint(BaseModel):
     name: str | None = Field(None, description="Location name")
 
 
-class RiskLevel(BaseModel):
-    """Risk level classification."""
+class RiskAssessment(BaseModel):
+    """Detailed risk assessment with scores and factors."""
 
     level: str = Field(..., description="Risk level (low, medium, high, critical)")
     value: float = Field(..., description="Numeric risk value", ge=0, le=1)
@@ -331,7 +344,9 @@ class SinglePredictionRequest(BaseModel):
     """Single location prediction request."""
 
     location: LocationPoint = Field(..., description="Geographic location")
-    time_horizon_days: int = Field(default=30, description="Prediction time horizon in days", ge=1, le=365)
+    target_date: date = Field(..., description="Target date for prediction")
+    model_type: ModelType = Field(default=ModelType.ENSEMBLE, description="ML model to use")
+    prediction_horizon: PredictionHorizon = Field(default=PredictionHorizon.ONE_WEEK, description="Prediction time horizon")
     include_factors: bool = Field(default=True, description="Include risk factor breakdown")
 
 
@@ -339,7 +354,9 @@ class BatchPredictionRequest(BaseModel):
     """Batch prediction request for multiple locations."""
 
     locations: list[LocationPoint] = Field(..., description="List of geographic locations", min_items=1, max_items=100)
-    time_horizon_days: int = Field(default=30, description="Prediction time horizon in days", ge=1, le=365)
+    target_date: date = Field(..., description="Target date for prediction")
+    model_type: ModelType = Field(default=ModelType.ENSEMBLE, description="ML model to use")
+    prediction_horizon: PredictionHorizon = Field(default=PredictionHorizon.ONE_WEEK, description="Prediction time horizon")
     include_factors: bool = Field(default=True, description="Include risk factor breakdown")
 
 
@@ -372,10 +389,13 @@ class PredictionResult(BaseModel):
     """Single prediction result."""
 
     location: LocationPoint = Field(..., description="Prediction location")
-    risk_level: RiskLevel = Field(..., description="Risk assessment")
-    prediction_date: datetime = Field(..., description="Prediction timestamp")
-    time_horizon_days: int = Field(..., description="Prediction time horizon")
-    model_version: str = Field(..., description="ML model version used")
+    target_date: date = Field(..., description="Target prediction date")
+    risk_score: float = Field(..., description="Numeric risk score", ge=0, le=1)
+    risk_level: RiskLevelEnum = Field(..., description="Categorical risk level")
+    uncertainty: float | None = Field(None, description="Prediction uncertainty")
+    confidence_interval: list[float] | None = Field(None, description="95% confidence interval [lower, upper]")
+    model_used: ModelType = Field(..., description="ML model used")
+    prediction_horizon: int = Field(..., description="Prediction time horizon in days")
     factors: dict[str, float] | None = Field(None, description="Contributing factors")
 
 
@@ -383,9 +403,10 @@ class BatchPredictionResult(BaseModel):
     """Batch prediction result."""
 
     predictions: list[PredictionResult] = Field(..., description="Individual prediction results")
-    request_id: str = Field(..., description="Request identifier")
+    total_locations: int = Field(..., description="Total number of locations processed")
+    successful_predictions: int = Field(..., description="Number of successful predictions")
+    failed_predictions: int = Field(..., description="Number of failed predictions")
     processing_time_ms: float = Field(..., description="Processing time in milliseconds")
-    model_version: str = Field(..., description="ML model version used")
 
 
 class TimeSeriesPredictionResult(BaseModel):

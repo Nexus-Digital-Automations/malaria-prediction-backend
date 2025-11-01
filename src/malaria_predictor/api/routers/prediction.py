@@ -14,11 +14,11 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 
 from ..auth import require_scopes
 from ..dependencies import PredictionService, get_prediction_service
+from ...models import RiskLevel
 from ..models import (
     BatchPredictionRequest,
     BatchPredictionResult,
     PredictionResult,
-    RiskLevel,
     SinglePredictionRequest,
     SpatialPredictionRequest,
     TimeSeriesPoint,
