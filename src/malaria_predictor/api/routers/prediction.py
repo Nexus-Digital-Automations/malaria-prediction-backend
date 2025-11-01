@@ -18,6 +18,7 @@ from ...models import RiskLevel
 from ..models import (
     BatchPredictionRequest,
     BatchPredictionResult,
+    LocationPoint,
     PredictionResult,
     SinglePredictionRequest,
     SpatialPredictionRequest,
@@ -332,6 +333,9 @@ async def predict_spatial_grid(
                     logger.warning(f"Prediction failed for {lat}, {lon}: {result}")
                     continue
 
+                # Type narrowing: result is now dict[Any, Any]
+                assert isinstance(result, dict), "Result must be dict after exception check"
+
                 grid_predictions.append(
                     {
                         "latitude": lat,
@@ -351,7 +355,7 @@ async def predict_spatial_grid(
 
         return {
             "grid_info": {
-                "bounds": request.bounds.model_dump(),
+                "bounds": request.bounds,  # bounds is already a dict
                 "resolution": request.resolution,
                 "dimensions": {"lat_points": lat_points, "lon_points": lon_points},
                 "total_points": total_points,

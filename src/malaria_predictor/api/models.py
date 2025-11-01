@@ -373,9 +373,10 @@ class SpatialPredictionRequest(BaseModel):
 class TimeSeriesPoint(BaseModel):
     """Time series data point."""
 
-    timestamp: datetime = Field(..., description="Data point timestamp")
-    value: float = Field(..., description="Risk value", ge=0, le=1)
-    confidence: float = Field(..., description="Confidence score", ge=0, le=1)
+    date: date = Field(..., description="Prediction date")
+    risk_score: float = Field(..., description="Risk score", ge=0, le=1)
+    risk_level: RiskLevelEnum = Field(..., description="Categorical risk level")
+    uncertainty: float | None = Field(None, description="Prediction uncertainty")
 
 
 class TimeSeriesPredictionRequest(BaseModel):
@@ -385,6 +386,7 @@ class TimeSeriesPredictionRequest(BaseModel):
     start_date: datetime = Field(..., description="Start date for time series")
     end_date: datetime = Field(..., description="End date for time series")
     interval_days: int = Field(default=7, description="Interval between predictions in days", ge=1, le=30)
+    model_type: ModelType = Field(default=ModelType.ENSEMBLE, description="ML model to use")
 
 
 class PredictionResult(BaseModel):
@@ -416,8 +418,5 @@ class TimeSeriesPredictionResult(BaseModel):
 
     location: LocationPoint = Field(..., description="Prediction location")
     time_series: list[TimeSeriesPoint] = Field(..., description="Time series predictions")
-    request_id: str = Field(..., description="Request identifier")
-    processing_time_ms: float = Field(..., description="Processing time in milliseconds")
-    model_version: str = Field(..., description="ML model version used")
-    start_date: datetime = Field(..., description="Time series start date")
-    end_date: datetime = Field(..., description="Time series end date")
+    model_used: ModelType = Field(..., description="ML model used")
+    summary_statistics: dict[str, Any] = Field(..., description="Summary statistics for time series")
