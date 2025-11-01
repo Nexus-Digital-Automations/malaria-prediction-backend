@@ -365,7 +365,9 @@ class SpatialPredictionRequest(BaseModel):
 
     bounds: dict[str, float] = Field(..., description="Geographic bounds (north, south, east, west)")
     resolution: float = Field(default=0.1, description="Grid resolution in degrees", gt=0, le=1)
-    time_horizon_days: int = Field(default=30, description="Prediction time horizon in days", ge=1, le=365)
+    target_date: date = Field(..., description="Target date for prediction")
+    model_type: ModelType = Field(default=ModelType.ENSEMBLE, description="ML model to use")
+    prediction_horizon: PredictionHorizon = Field(default=PredictionHorizon.ONE_WEEK, description="Prediction time horizon")
 
 
 class TimeSeriesPoint(BaseModel):

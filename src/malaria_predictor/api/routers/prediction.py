@@ -104,6 +104,7 @@ async def predict_single_location(
             confidence_interval=confidence_interval,
             model_used=request.model_type,
             prediction_horizon=request.prediction_horizon.value,
+            factors=None,  # Optional risk factors
         )
 
         processing_time = (time.time() - start_time) * 1000  # Convert to ms
@@ -174,7 +175,9 @@ async def predict_batch_locations(
         # Use semaphore to limit concurrent predictions
         semaphore = asyncio.Semaphore(10)  # Max 10 concurrent predictions
 
-        async def predict_with_semaphore(location, prediction_task):
+        async def predict_with_semaphore(
+            location: LocationPoint, prediction_task: Any
+        ) -> tuple[PredictionResult | None, bool]:
             async with semaphore:
                 try:
                     prediction = await prediction_task
@@ -198,6 +201,7 @@ async def predict_batch_locations(
                         confidence_interval=confidence_interval,
                         model_used=request.model_type,
                         prediction_horizon=request.prediction_horizon.value,
+                        factors=None,  # Optional risk factors
                     )
                     return result, True
 
@@ -269,8 +273,8 @@ async def predict_spatial_grid(
         start_time = time.time()
 
         # Calculate grid dimensions
-        lat_range = request.bounds.north - request.bounds.south
-        lon_range = request.bounds.east - request.bounds.west
+        lat_range = request.bounds["north"] - request.bounds["south"]
+        lon_range = request.bounds["east"] - request.bounds["west"]
 
         lat_points = int(lat_range / request.resolution) + 1
         lon_points = int(lon_range / request.resolution) + 1
@@ -293,9 +297,9 @@ async def predict_spatial_grid(
         # Generate grid points
         grid_predictions = []
         lats = [
-            request.bounds.south + i * request.resolution for i in range(lat_points)
+            request.bounds["south"] + i * request.resolution for i in range(lat_points)
         ]
-        lons = [request.bounds.west + j * request.resolution for j in range(lon_points)]
+        lons = [request.bounds["west"] + j * request.resolution for j in range(lon_points)]
 
         # Create prediction tasks
         tasks = []
