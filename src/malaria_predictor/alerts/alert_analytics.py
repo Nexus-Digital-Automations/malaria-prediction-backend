@@ -351,10 +351,13 @@ class AlertAnalyticsEngine:
 
                 for channel in channels:
                     # Get delivery data for the channel
-                    deliveries = db.query(NotificationDelivery).filter(
-                        NotificationDelivery.channel == channel,
-                        NotificationDelivery.sent_at >= day_ago
-                    ).all()
+                    deliveries_result = await db.execute(
+                        select(NotificationDelivery).where(
+                            NotificationDelivery.channel == channel,
+                            NotificationDelivery.sent_at >= day_ago
+                        )
+                    )
+                    deliveries = deliveries_result.scalars().all()
 
                     messages_sent = len(deliveries)
                     messages_delivered = sum(1 for d in deliveries if d.status == "delivered")
@@ -406,62 +409,86 @@ class AlertAnalyticsEngine:
                 week_ago = now - timedelta(days=7)
 
                 # Total and active users
-                total_users = db.query(AlertConfiguration.user_id).distinct().count()
+                total_users = await db.scalar(
+                    select(func.count(func.distinct(AlertConfiguration.user_id))).select_from(AlertConfiguration)
+                ) or 0
 
-                active_users_24h = db.query(Alert.configuration_id).join(AlertConfiguration).filter(
-                    Alert.created_at >= day_ago
-                ).distinct().count()
+                active_users_24h = await db.scalar(
+                    select(func.count(func.distinct(Alert.configuration_id)))
+                    .select_from(Alert)
+                    .join(AlertConfiguration)
+                    .where(Alert.created_at >= day_ago)
+                ) or 0
 
-                active_users_7d = db.query(Alert.configuration_id).join(AlertConfiguration).filter(
-                    Alert.created_at >= week_ago
-                ).distinct().count()
+                active_users_7d = await db.scalar(
+                    select(func.count(func.distinct(Alert.configuration_id)))
+                    .select_from(Alert)
+                    .join(AlertConfiguration)
+                    .where(Alert.created_at >= week_ago)
+                ) or 0
 
                 # Alerts per user
-                total_alerts_24h = db.query(Alert).filter(Alert.created_at >= day_ago).count()
+                total_alerts_24h = await db.scalar(
+                    select(func.count()).select_from(Alert).where(Alert.created_at >= day_ago)
+                ) or 0
                 avg_alerts_per_user_24h = total_alerts_24h / max(active_users_24h, 1)
 
                 # Response time analysis
-                response_times = db.query(Alert.response_time_seconds).filter(
-                    Alert.created_at >= week_ago,
-                    Alert.response_time_seconds.isnot(None)
-                ).all()
+                response_times_result = await db.execute(
+                    select(Alert.response_time_seconds).where(
+                        Alert.created_at >= week_ago,
+                        Alert.response_time_seconds.isnot(None)
+                    )
+                )
+                response_times = response_times_result.scalars().all()
 
                 avg_response_time_minutes = None
                 if response_times:
-                    avg_seconds = sum(rt.response_time_seconds for rt in response_times) / len(response_times)
+                    avg_seconds = sum(rt for rt in response_times) / len(response_times)
                     avg_response_time_minutes = avg_seconds / 60
 
                 # Engagement rates
-                total_alerts_7d = db.query(Alert).filter(Alert.created_at >= week_ago).count()
+                total_alerts_7d = await db.scalar(
+                    select(func.count()).select_from(Alert).where(Alert.created_at >= week_ago)
+                ) or 0
 
-                acknowledged_alerts_7d = db.query(Alert).filter(
-                    Alert.created_at >= week_ago,
-                    Alert.acknowledged_at.isnot(None)
-                ).count()
+                acknowledged_alerts_7d = await db.scalar(
+                    select(func.count()).select_from(Alert).where(
+                        Alert.created_at >= week_ago,
+                        Alert.acknowledged_at.isnot(None)
+                    )
+                ) or 0
 
-                resolved_alerts_7d = db.query(Alert).filter(
-                    Alert.created_at >= week_ago,
-                    Alert.resolved_at.isnot(None)
-                ).count()
+                resolved_alerts_7d = await db.scalar(
+                    select(func.count()).select_from(Alert).where(
+                        Alert.created_at >= week_ago,
+                        Alert.resolved_at.isnot(None)
+                    )
+                ) or 0
 
-                feedback_alerts_7d = db.query(Alert).filter(
-                    Alert.created_at >= week_ago,
-                    Alert.feedback_rating.isnot(None)
-                ).count()
+                feedback_alerts_7d = await db.scalar(
+                    select(func.count()).select_from(Alert).where(
+                        Alert.created_at >= week_ago,
+                        Alert.feedback_rating.isnot(None)
+                    )
+                ) or 0
 
                 acknowledgment_rate = (acknowledged_alerts_7d / max(total_alerts_7d, 1)) * 100
                 resolution_rate = (resolved_alerts_7d / max(total_alerts_7d, 1)) * 100
                 feedback_submission_rate = (feedback_alerts_7d / max(total_alerts_7d, 1)) * 100
 
                 # Average user rating
-                ratings = db.query(Alert.feedback_rating).filter(
-                    Alert.created_at >= week_ago,
-                    Alert.feedback_rating.isnot(None)
-                ).all()
+                ratings_result = await db.execute(
+                    select(Alert.feedback_rating).where(
+                        Alert.created_at >= week_ago,
+                        Alert.feedback_rating.isnot(None)
+                    )
+                )
+                ratings = ratings_result.scalars().all()
 
                 avg_user_rating = None
                 if ratings:
-                    avg_user_rating = sum(r.feedback_rating for r in ratings) / len(ratings)
+                    avg_user_rating = sum(r for r in ratings) / len(ratings)
 
                 return UserEngagementMetrics(
                     total_users=total_users,
