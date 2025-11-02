@@ -12,7 +12,7 @@ Provides comprehensive analytics for alert system performance including:
 import asyncio
 import logging
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 from pydantic import BaseModel
 from sqlalchemy import func, or_, select
@@ -141,7 +141,7 @@ class AlertAnalyticsEngine:
             self.config.update(settings.ALERT_ANALYTICS_CONFIG)
 
         # Statistics and caching
-        self.stats = {
+        self.stats: dict[str, int | float | datetime | None] = {
             "analytics_calculations": 0,
             "cache_hits": 0,
             "cache_misses": 0,
@@ -188,8 +188,8 @@ class AlertAnalyticsEngine:
 
         # Check cache first
         if not force_refresh and self._is_cache_valid(cache_key):
-            self.stats["cache_hits"] += 1
-            return self.metrics_cache[cache_key]["data"]
+            self.stats["cache_hits"] = cast(int, self.stats["cache_hits"]) + 1
+            return cast(AlertKPIs, self.metrics_cache[cache_key]["data"])
 
         start_time = datetime.now()
 
@@ -324,7 +324,7 @@ class AlertAnalyticsEngine:
 
                 # Cache the results
                 self._cache_data(cache_key, kpis)
-                self.stats["cache_misses"] += 1
+                self.stats["cache_misses"] = cast(int, self.stats["cache_misses"]) + 1
 
                 # Update stats
                 calculation_time = (datetime.now() - start_time).total_seconds() * 1000
@@ -377,7 +377,7 @@ class AlertAnalyticsEngine:
 
                     error_types: dict[str, int] = {}
                     for delivery in failed_deliveries:
-                        error_code = delivery.error_code or "unknown"
+                        error_code = str(delivery.error_code) if delivery.error_code else "unknown"
                         error_types[error_code] = error_types.get(error_code, 0) + 1
 
                     channel_metrics.append(ChannelPerformanceMetrics(
@@ -517,10 +517,13 @@ class AlertAnalyticsEngine:
                 week_ago = datetime.now() - timedelta(days=7)
 
                 # Get alerts with feedback for the past week
-                alerts_with_feedback = db.query(Alert).filter(
-                    Alert.created_at >= week_ago,
-                    Alert.false_positive.isnot(None)
-                ).all()
+                alerts_result = await db.execute(
+                    select(Alert).where(
+                        Alert.created_at >= week_ago,
+                        Alert.false_positive.isnot(None)
+                    )
+                )
+                alerts_with_feedback = alerts_result.scalars().all()
 
                 if not alerts_with_feedback:
                     # Return default metrics if no feedback data
@@ -557,12 +560,12 @@ class AlertAnalyticsEngine:
 
                 # User satisfaction from ratings
                 satisfaction_scores = [
-                    alert.feedback_rating
+                    float(alert.feedback_rating)
                     for alert in alerts_with_feedback
                     if alert.feedback_rating is not None
                 ]
 
-                user_satisfaction_score = None
+                user_satisfaction_score: float | None = None
                 if satisfaction_scores:
                     user_satisfaction_score = sum(satisfaction_scores) / len(satisfaction_scores)
 
@@ -648,15 +651,19 @@ class AlertAnalyticsEngine:
                 mid_date = start_date + timedelta(days=days//2)
 
                 # Compare first half vs second half
-                first_half_count = db.query(Alert).filter(
-                    Alert.created_at >= start_date,
-                    Alert.created_at < mid_date
-                ).count()
+                first_half_count = await db.scalar(
+                    select(func.count()).select_from(Alert).where(
+                        Alert.created_at >= start_date,
+                        Alert.created_at < mid_date
+                    )
+                ) or 0
 
-                second_half_count = db.query(Alert).filter(
-                    Alert.created_at >= mid_date,
-                    Alert.created_at <= end_date
-                ).count()
+                second_half_count = await db.scalar(
+                    select(func.count()).select_from(Alert).where(
+                        Alert.created_at >= mid_date,
+                        Alert.created_at <= end_date
+                    )
+                ) or 0
 
                 # Calculate growth rate
                 if first_half_count > 0:
@@ -673,29 +680,35 @@ class AlertAnalyticsEngine:
                     trend_direction = "stable"
 
                 # Seasonal patterns (by hour of day)
-                hourly_counts = db.query(
-                    func.extract('hour', Alert.created_at).label('hour'),
-                    func.count(Alert.id).label('count')
-                ).filter(
-                    Alert.created_at >= start_date
-                ).group_by(func.extract('hour', Alert.created_at)).all()
+                hourly_result = await db.execute(
+                    select(
+                        func.extract('hour', Alert.created_at).label('hour'),
+                        func.count(Alert.id).label('count')
+                    ).where(
+                        Alert.created_at >= start_date
+                    ).group_by(func.extract('hour', Alert.created_at))
+                )
+                hourly_counts = hourly_result.all()
 
-                seasonal_patterns = {str(int(h.hour)): h.count for h in hourly_counts}
+                seasonal_patterns = {str(int(h[0])): float(h[1]) for h in hourly_counts}
 
                 # Peak hours (top 3 hours with most alerts)
                 peak_hours_sorted = sorted(seasonal_patterns.items(), key=lambda x: x[1], reverse=True)[:3]
                 peak_hours: list[int] = [int(hour) for hour, _ in peak_hours_sorted]
 
                 # Peak days (by day of week)
-                daily_counts = db.query(
-                    func.extract('dow', Alert.created_at).label('dow'),
-                    func.count(Alert.id).label('count')
-                ).filter(
-                    Alert.created_at >= start_date
-                ).group_by(func.extract('dow', Alert.created_at)).all()
+                daily_result = await db.execute(
+                    select(
+                        func.extract('dow', Alert.created_at).label('dow'),
+                        func.count(Alert.id).label('count')
+                    ).where(
+                        Alert.created_at >= start_date
+                    ).group_by(func.extract('dow', Alert.created_at))
+                )
+                daily_counts = daily_result.all()
 
                 day_names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-                daily_patterns = {day_names[int(d.dow)]: d.count for d in daily_counts}
+                daily_patterns = {day_names[int(d[0])]: int(d[1]) for d in daily_counts}
 
                 peak_days_sorted = sorted(daily_patterns.items(), key=lambda x: x[1], reverse=True)[:3]
                 peak_days: list[str] = [day for day, _ in peak_days_sorted]
@@ -802,7 +815,7 @@ class AlertAnalyticsEngine:
                 })
 
             if anomalies:
-                self.stats["anomalies_detected"] += len(anomalies)
+                self.stats["anomalies_detected"] = cast(int, self.stats["anomalies_detected"]) + len(anomalies)
                 logger.warning(f"Detected {len(anomalies)} alert system anomalies")
 
             return anomalies
@@ -861,8 +874,8 @@ class AlertAnalyticsEngine:
             return False
 
         cache_entry = self.metrics_cache[cache_key]
-        age_seconds = (datetime.now() - cache_entry["timestamp"]).total_seconds()
-        return age_seconds < self.cache_ttl_seconds
+        age_seconds = (datetime.now() - cast(datetime, cache_entry["timestamp"])).total_seconds()
+        return bool(age_seconds < self.cache_ttl_seconds)
 
     def _cache_data(self, cache_key: str, data: Any) -> None:
         """Cache data with timestamp.
@@ -882,11 +895,11 @@ class AlertAnalyticsEngine:
         Args:
             calculation_time: Calculation time in milliseconds
         """
-        self.stats["analytics_calculations"] += 1
+        self.stats["analytics_calculations"] = cast(int, self.stats["analytics_calculations"]) + 1
 
         # Calculate running average
-        current_avg = self.stats["avg_calculation_time_ms"]
-        calculation_count = self.stats["analytics_calculations"]
+        current_avg = cast(float, self.stats["avg_calculation_time_ms"])
+        calculation_count = cast(int, self.stats["analytics_calculations"])
 
         if calculation_count == 1:
             self.stats["avg_calculation_time_ms"] = calculation_time
@@ -901,12 +914,14 @@ class AlertAnalyticsEngine:
         Returns:
             Dictionary with current statistics
         """
+        cache_hits = cast(int, self.stats["cache_hits"])
+        cache_misses = cast(int, self.stats["cache_misses"])
         return {
             **self.stats,
             "config": self.config,
             "cache_size": len(self.metrics_cache),
             "cache_hit_rate": (
-                self.stats["cache_hits"] / max(self.stats["cache_hits"] + self.stats["cache_misses"], 1)
+                cache_hits / max(cache_hits + cache_misses, 1)
             ) * 100
         }
 
