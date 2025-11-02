@@ -8,11 +8,11 @@ outbreak pattern analysis, and interactive data exploration tools.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import and_, desc
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, desc, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...database.models import (
     CHIRPSDataPoint,
@@ -37,7 +37,7 @@ async def get_prediction_accuracy_metrics(
     end_date: str | None = Query(None, description="End date in YYYY-MM-DD format"),
     model_type: str | None = Query(None, description="Model type (lstm, transformer, ensemble)"),
     region: str | None = Query(None, description="Geographic region filter"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     _: Any = Depends(get_current_user_optional),
 ) -> dict[str, Any]:
     """
