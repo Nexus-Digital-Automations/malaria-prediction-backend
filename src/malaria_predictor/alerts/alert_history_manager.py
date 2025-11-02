@@ -10,10 +10,10 @@ Provides comprehensive alert history management including:
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 from pydantic import BaseModel, Field
-from sqlalchemy import desc, func, or_
+from sqlalchemy import desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import settings
@@ -98,14 +98,21 @@ class AlertHistoryManager:
         self.settings = settings
 
         # Default archiving policy
-        self.archive_policy = AlertArchivePolicy()
+        self.archive_policy = AlertArchivePolicy(
+            retention_period_days=365,
+            archive_after_days=90,
+            delete_after_days=1095,
+            compress_archived_data=True,
+            notification_channels_retention_days=180,
+            performance_metrics_retention_days=730
+        )
 
         # Load custom policy from settings if available
         if hasattr(settings, "ALERT_ARCHIVE_POLICY"):
             self.archive_policy = AlertArchivePolicy(**settings.ALERT_ARCHIVE_POLICY)
 
         # Statistics tracking
-        self.stats = {
+        self.stats: dict[str, int | float | datetime | None] = {
             "queries_processed": 0,
             "archives_created": 0,
             "cleanups_performed": 0,
@@ -131,29 +138,29 @@ class AlertHistoryManager:
 
         try:
             async with get_session() as db:
-                # Build base query
-                base_query = db.query(Alert).join(AlertConfiguration).filter(
+                # Build base select statement (SQLAlchemy 2.0 async)
+                stmt = select(Alert).join(AlertConfiguration).where(
                     AlertConfiguration.user_id == query.user_id
                 )
 
                 # Apply date filters
                 if query.start_date:
-                    base_query = base_query.filter(Alert.created_at >= query.start_date)
+                    stmt = stmt.where(Alert.created_at >= query.start_date)
 
                 if query.end_date:
-                    base_query = base_query.filter(Alert.created_at <= query.end_date)
+                    stmt = stmt.where(Alert.created_at <= query.end_date)
 
                 # Apply level filters
                 if query.alert_levels:
-                    base_query = base_query.filter(Alert.alert_level.in_(query.alert_levels))
+                    stmt = stmt.where(Alert.alert_level.in_(query.alert_levels))
 
                 # Apply type filters
                 if query.alert_types:
-                    base_query = base_query.filter(Alert.alert_type.in_(query.alert_types))
+                    stmt = stmt.where(Alert.alert_type.in_(query.alert_types))
 
                 # Apply status filters
                 if query.status_filters:
-                    base_query = base_query.filter(Alert.status.in_(query.status_filters))
+                    stmt = stmt.where(Alert.status.in_(query.status_filters))
 
                 # Apply location filters
                 if query.location_filters:
@@ -164,20 +171,46 @@ class AlertHistoryManager:
                             Alert.admin_region.ilike(f"%{location}%"),
                             Alert.country_code.ilike(f"%{location}%")
                         ])
-                    base_query = base_query.filter(or_(*location_conditions))
+                    stmt = stmt.where(or_(*location_conditions))
 
                 # Get total count before pagination
-                total_count = base_query.count()
+                count_stmt = select(func.count()).select_from(Alert).join(AlertConfiguration).where(
+                    AlertConfiguration.user_id == query.user_id
+                )
+                # Apply same filters to count query
+                if query.start_date:
+                    count_stmt = count_stmt.where(Alert.created_at >= query.start_date)
+                if query.end_date:
+                    count_stmt = count_stmt.where(Alert.created_at <= query.end_date)
+                if query.alert_levels:
+                    count_stmt = count_stmt.where(Alert.alert_level.in_(query.alert_levels))
+                if query.alert_types:
+                    count_stmt = count_stmt.where(Alert.alert_type.in_(query.alert_types))
+                if query.status_filters:
+                    count_stmt = count_stmt.where(Alert.status.in_(query.status_filters))
+                if query.location_filters:
+                    location_conditions = []
+                    for location in query.location_filters:
+                        location_conditions.extend([
+                            Alert.location_name.ilike(f"%{location}%"),
+                            Alert.admin_region.ilike(f"%{location}%"),
+                            Alert.country_code.ilike(f"%{location}%")
+                        ])
+                    count_stmt = count_stmt.where(or_(*location_conditions))
+
+                total_count = await db.scalar(count_stmt) or 0
 
                 # Apply sorting
                 sort_column = getattr(Alert, query.sort_by, Alert.created_at)
                 if query.sort_order.lower() == "desc":
-                    base_query = base_query.order_by(desc(sort_column))
+                    stmt = stmt.order_by(desc(sort_column))
                 else:
-                    base_query = base_query.order_by(sort_column)
+                    stmt = stmt.order_by(sort_column)
 
                 # Apply pagination
-                alerts = base_query.offset(query.offset).limit(query.limit).all()
+                stmt = stmt.offset(query.offset).limit(query.limit)
+                result = await db.execute(stmt)
+                alerts = result.scalars().all()
 
                 # Calculate processing time
                 processing_time = (datetime.now() - start_time).total_seconds() * 1000
@@ -224,49 +257,58 @@ class AlertHistoryManager:
             async with get_session() as db:
                 start_date = datetime.now() - timedelta(days=days)
 
-                # Base query for user's alerts in time period
-                base_query = db.query(Alert).join(AlertConfiguration).filter(
+                # Total alerts (SQLAlchemy 2.0 async)
+                total_alerts_stmt = select(func.count()).select_from(Alert).join(AlertConfiguration).where(
                     AlertConfiguration.user_id == user_id,
                     Alert.created_at >= start_date
                 )
-
-                # Total alerts
-                total_alerts = base_query.count()
+                total_alerts = await db.scalar(total_alerts_stmt) or 0
 
                 # Alerts by level
                 level_stats = {}
                 for level in ["low", "medium", "high", "critical", "emergency"]:
-                    count = base_query.filter(Alert.alert_level == level).count()
+                    level_stmt = select(func.count()).select_from(Alert).join(AlertConfiguration).where(
+                        AlertConfiguration.user_id == user_id,
+                        Alert.created_at >= start_date,
+                        Alert.alert_level == level
+                    )
+                    count = await db.scalar(level_stmt) or 0
                     level_stats[level] = count
 
                 # Alerts by type
-                type_results = db.query(
+                type_stmt = select(
                     Alert.alert_type,
                     func.count(Alert.id).label("count")
-                ).join(AlertConfiguration).filter(
+                ).join(AlertConfiguration).where(
                     AlertConfiguration.user_id == user_id,
                     Alert.created_at >= start_date
-                ).group_by(Alert.alert_type).all()
+                ).group_by(Alert.alert_type)
 
-                type_stats = {result.alert_type: result.count for result in type_results}
+                type_result = await db.execute(type_stmt)
+                type_results = type_result.all()
+                type_stats: dict[str, int] = {str(result.alert_type): int(result.count) for result in type_results}  # type: ignore[call-overload]
 
                 # Alerts by status
-                status_results = db.query(
+                status_stmt = select(
                     Alert.status,
                     func.count(Alert.id).label("count")
-                ).join(AlertConfiguration).filter(
+                ).join(AlertConfiguration).where(
                     AlertConfiguration.user_id == user_id,
                     Alert.created_at >= start_date
-                ).group_by(Alert.status).all()
+                ).group_by(Alert.status)
 
-                status_stats = {result.status: result.count for result in status_results}
+                status_result = await db.execute(status_stmt)
+                status_results = status_result.all()
+                status_stats: dict[str, int] = {str(result.status): int(result.count) for result in status_results}  # type: ignore[call-overload]
 
                 # Response time analysis
-                response_times = db.query(Alert.response_time_seconds).join(AlertConfiguration).filter(
+                response_stmt = select(Alert.response_time_seconds).join(AlertConfiguration).where(
                     AlertConfiguration.user_id == user_id,
                     Alert.created_at >= start_date,
                     Alert.response_time_seconds.isnot(None)
-                ).all()
+                )
+                response_result = await db.execute(response_stmt)
+                response_times = response_result.all()
 
                 avg_response_time_hours = None
                 if response_times:
@@ -274,37 +316,54 @@ class AlertHistoryManager:
                     avg_response_time_hours = avg_seconds / 3600
 
                 # Resolution and false positive rates
-                resolved_count = base_query.filter(Alert.resolved_at.isnot(None)).count()
-                false_positive_count = base_query.filter(Alert.false_positive).count()
+                resolved_stmt = select(func.count()).select_from(Alert).join(AlertConfiguration).where(
+                    AlertConfiguration.user_id == user_id,
+                    Alert.created_at >= start_date,
+                    Alert.resolved_at.isnot(None)
+                )
+                resolved_count = await db.scalar(resolved_stmt) or 0
+
+                false_positive_stmt = select(func.count()).select_from(Alert).join(AlertConfiguration).where(
+                    AlertConfiguration.user_id == user_id,
+                    Alert.created_at >= start_date,
+                    Alert.false_positive
+                )
+                false_positive_count = await db.scalar(false_positive_stmt) or 0
 
                 resolution_rate = (resolved_count / max(total_alerts, 1)) * 100
                 false_positive_rate = (false_positive_count / max(total_alerts, 1)) * 100
 
                 # Delivery success rate
-                delivered_count = base_query.filter(
+                delivered_stmt = select(func.count()).select_from(Alert).join(AlertConfiguration).where(
+                    AlertConfiguration.user_id == user_id,
+                    Alert.created_at >= start_date,
                     or_(
                         Alert.push_notification_delivered,
                         Alert.email_notification_delivered,
                         Alert.sms_notification_delivered,
                         Alert.webhook_notification_delivered
                     )
-                ).count()
+                )
+                delivered_count = await db.scalar(delivered_stmt) or 0
 
                 delivery_success_rate = (delivered_count / max(total_alerts, 1)) * 100
 
                 # Most active locations
-                location_results = db.query(
+                location_stmt = select(
                     Alert.location_name,
                     Alert.country_code,
                     func.count(Alert.id).label("count"),
                     func.avg(Alert.risk_score).label("avg_risk")
-                ).join(AlertConfiguration).filter(
+                ).join(AlertConfiguration).where(
                     AlertConfiguration.user_id == user_id,
                     Alert.created_at >= start_date,
                     Alert.location_name.isnot(None)
                 ).group_by(
                     Alert.location_name, Alert.country_code
-                ).order_by(desc("count")).limit(10).all()
+                ).order_by(desc("count")).limit(10)
+
+                location_result = await db.execute(location_stmt)
+                location_results = location_result.all()
 
                 most_active_locations = [
                     {
@@ -364,8 +423,8 @@ class AlertHistoryManager:
                 else:  # daily
                     time_trunc = func.date_trunc('day', Alert.created_at)
 
-                # Query trend data
-                trends = db.query(
+                # Query trend data (SQLAlchemy 2.0 async)
+                trends_stmt = select(
                     time_trunc.label("period_date"),
                     func.count(Alert.id).label("alert_count"),
                     func.avg(Alert.risk_score).label("avg_risk_score"),
@@ -390,10 +449,13 @@ class AlertHistoryManager:
                             else_=0
                         )
                     ).label("escalation_count")
-                ).join(AlertConfiguration).filter(
+                ).join(AlertConfiguration).where(
                     AlertConfiguration.user_id == user_id,
                     Alert.created_at >= start_date
-                ).group_by(time_trunc).order_by(time_trunc).all()
+                ).group_by(time_trunc).order_by(time_trunc)
+
+                trends_result = await db.execute(trends_stmt)
+                trends = trends_result.all()
 
                 # Convert to trend data objects
                 trend_data = []
@@ -433,39 +495,41 @@ class AlertHistoryManager:
             async with get_session() as db:
                 archive_cutoff = datetime.now() - timedelta(days=self.archive_policy.archive_after_days)
 
-                # Find alerts to archive
-                alerts_to_archive = db.query(Alert).filter(
+                # Find alerts to archive (SQLAlchemy 2.0 async)
+                archive_stmt = select(Alert).where(
                     Alert.created_at <= archive_cutoff,
                     Alert.status.in_(["resolved", "dismissed"])
-                ).all()
+                )
+                archive_result = await db.execute(archive_stmt)
+                alerts_to_archive = archive_result.scalars().all()
 
                 archived_count = 0
                 archived_by_level: dict[str, int] = {}
-                storage_saved_mb = 0
+                storage_saved_mb: float = 0.0
 
                 if not dry_run:
                     for alert in alerts_to_archive:
                         # Calculate storage estimation
-                        alert_size = len(str(alert.alert_data or "")) + len(alert.alert_message or "")
+                        alert_size = len(str(alert.alert_data or "")) + len(str(alert.alert_message) if alert.alert_message else "")
                         storage_saved_mb += alert_size / (1024 * 1024)
 
                         # Track by level
-                        level = alert.alert_level
+                        level = str(alert.alert_level)
                         archived_by_level[level] = archived_by_level.get(level, 0) + 1
 
                         # Mark as archived (you might want to move to separate table)
-                        alert.status = "archived"
+                        alert.status = "archived"  # type: ignore[assignment]
                         archived_count += 1
 
-                    db.commit()
-                    self.stats["archives_created"] += archived_count
+                    await db.commit()
+                    self.stats["archives_created"] = cast(int, self.stats["archives_created"]) + archived_count
                     self.stats["last_archive"] = datetime.now()
 
                 else:
                     # Dry run - just count
                     archived_count = len(alerts_to_archive)
                     for alert in alerts_to_archive:
-                        level = alert.alert_level
+                        level = str(alert.alert_level)
                         archived_by_level[level] = archived_by_level.get(level, 0) + 1
 
                 logger.info(
@@ -510,7 +574,7 @@ class AlertHistoryManager:
                     days=self.archive_policy.performance_metrics_retention_days
                 )
 
-                cleanup_summary = {
+                cleanup_summary: dict[str, Any] = {
                     "operation": "cleanup",
                     "dry_run": dry_run,
                     "deleted_counts": {},
@@ -522,41 +586,57 @@ class AlertHistoryManager:
                     }
                 }
 
-                # Clean up old alerts
-                old_alerts = db.query(Alert).filter(Alert.created_at <= alert_cutoff)
-                alert_count = old_alerts.count()
+                # Clean up old alerts (SQLAlchemy 2.0 async)
+                alert_count_stmt = select(func.count()).select_from(Alert).where(Alert.created_at <= alert_cutoff)
+                alert_count = await db.scalar(alert_count_stmt) or 0
 
                 if not dry_run and alert_count > 0:
-                    old_alerts.delete()
+                    delete_alerts_stmt = select(Alert).where(Alert.created_at <= alert_cutoff)
+                    delete_alerts_result = await db.execute(delete_alerts_stmt)
+                    old_alerts = delete_alerts_result.scalars().all()
+                    for alert in old_alerts:
+                        await db.delete(alert)
 
                 cleanup_summary["deleted_counts"]["alerts"] = alert_count
 
                 # Clean up old notification deliveries
-                old_notifications = db.query(NotificationDelivery).filter(
+                notification_count_stmt = select(func.count()).select_from(NotificationDelivery).where(
                     NotificationDelivery.sent_at <= notification_cutoff
                 )
-                notification_count = old_notifications.count()
+                notification_count = await db.scalar(notification_count_stmt) or 0
 
                 if not dry_run and notification_count > 0:
-                    old_notifications.delete()
+                    delete_notif_stmt = select(NotificationDelivery).where(
+                        NotificationDelivery.sent_at <= notification_cutoff
+                    )
+                    delete_notif_result = await db.execute(delete_notif_stmt)
+                    old_notifications = delete_notif_result.scalars().all()
+                    for notif in old_notifications:
+                        await db.delete(notif)
 
                 cleanup_summary["deleted_counts"]["notifications"] = notification_count
 
                 # Clean up old performance metrics
-                old_metrics = db.query(AlertPerformanceMetrics).filter(
+                metrics_count_stmt = select(func.count()).select_from(AlertPerformanceMetrics).where(
                     AlertPerformanceMetrics.metric_date <= metrics_cutoff
                 )
-                metrics_count = old_metrics.count()
+                metrics_count = await db.scalar(metrics_count_stmt) or 0
 
                 if not dry_run and metrics_count > 0:
-                    old_metrics.delete()
+                    delete_metrics_stmt = select(AlertPerformanceMetrics).where(
+                        AlertPerformanceMetrics.metric_date <= metrics_cutoff
+                    )
+                    delete_metrics_result = await db.execute(delete_metrics_stmt)
+                    old_metrics = delete_metrics_result.scalars().all()
+                    for metric in old_metrics:
+                        await db.delete(metric)
 
                 cleanup_summary["deleted_counts"]["metrics"] = metrics_count
 
                 if not dry_run:
-                    db.commit()
-                    self.stats["cleanups_performed"] += 1
-                    self.stats["data_purged_count"] += alert_count + notification_count + metrics_count
+                    await db.commit()
+                    self.stats["cleanups_performed"] = cast(int, self.stats["cleanups_performed"]) + 1
+                    self.stats["data_purged_count"] = cast(int, self.stats["data_purged_count"]) + alert_count + notification_count + metrics_count
                     self.stats["last_cleanup"] = datetime.now()
 
                 total_deleted = alert_count + notification_count + metrics_count
@@ -596,7 +676,10 @@ class AlertHistoryManager:
                 user_id=user_id,
                 start_date=start_date,
                 end_date=end_date,
-                limit=10000  # Large limit for export
+                limit=10000,  # Large limit for export
+                offset=0,
+                sort_by="created_at",
+                sort_order="desc"
             )
 
             history_data = await self.get_alert_history(query)
@@ -702,18 +785,20 @@ class AlertHistoryManager:
             current_start = datetime.now() - timedelta(days=days)
             previous_start = current_start - timedelta(days=days)
 
-            # Current period stats
-            current_alerts = db.query(Alert).join(AlertConfiguration).filter(
+            # Current period stats (SQLAlchemy 2.0 async)
+            current_stmt = select(func.count()).select_from(Alert).join(AlertConfiguration).where(
                 AlertConfiguration.user_id == user_id,
                 Alert.created_at >= current_start
-            ).count()
+            )
+            current_alerts = await db.scalar(current_stmt) or 0
 
-            # Previous period stats
-            previous_alerts = db.query(Alert).join(AlertConfiguration).filter(
+            # Previous period stats (SQLAlchemy 2.0 async)
+            previous_stmt = select(func.count()).select_from(Alert).join(AlertConfiguration).where(
                 AlertConfiguration.user_id == user_id,
                 Alert.created_at >= previous_start,
                 Alert.created_at < current_start
-            ).count()
+            )
+            previous_alerts = await db.scalar(previous_stmt) or 0
 
             # Calculate percentage change
             if previous_alerts > 0:
@@ -739,11 +824,11 @@ class AlertHistoryManager:
         Args:
             processing_time: Query processing time in milliseconds
         """
-        self.stats["queries_processed"] += 1
+        self.stats["queries_processed"] = cast(int, self.stats["queries_processed"]) + 1
 
         # Calculate running average
-        current_avg = self.stats["avg_query_time_ms"]
-        query_count = self.stats["queries_processed"]
+        current_avg = cast(float, self.stats["avg_query_time_ms"])
+        query_count = cast(int, self.stats["queries_processed"])
 
         if query_count == 1:
             self.stats["avg_query_time_ms"] = processing_time
