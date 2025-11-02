@@ -7,11 +7,11 @@ push notifications to mobile devices and web browsers.
 import json
 import logging
 from datetime import datetime
-from typing import cast
+from typing import Any, cast
 
 try:
     import firebase_admin  # type: ignore[import-not-found]
-    from firebase_admin import credentials, messaging  # type: ignore[import-not-found]
+    from firebase_admin import credentials, messaging
     FIREBASE_AVAILABLE = True
 except ImportError:
     firebase_admin = None
@@ -520,7 +520,7 @@ class FirebaseNotificationService:
             ) * 100
         }
 
-    def _load_firebase_credentials(self) -> dict | None:
+    def _load_firebase_credentials(self) -> dict[str, Any] | None:
         """Load Firebase service account credentials.
 
         Returns:
@@ -529,12 +529,14 @@ class FirebaseNotificationService:
         try:
             # Try to load from environment variable (JSON string)
             if hasattr(self.settings, "FIREBASE_CREDENTIALS_JSON"):
-                return json.loads(self.settings.FIREBASE_CREDENTIALS_JSON)
+                result = json.loads(self.settings.FIREBASE_CREDENTIALS_JSON)
+                return cast(dict[str, Any], result)
 
             # Try to load from file path
             if hasattr(self.settings, "FIREBASE_CREDENTIALS_PATH"):
                 with open(self.settings.FIREBASE_CREDENTIALS_PATH) as f:
-                    return json.load(f)
+                    result = json.load(f)
+                    return cast(dict[str, Any], result)
 
             return None
 
@@ -660,25 +662,30 @@ class FirebaseNotificationService:
         Returns:
             List of device tokens
         """
-        # Get alert configuration
+        # Get alert configuration (SQLAlchemy 2.0 async)
+        from sqlalchemy import select
         from ..database.models import AlertConfiguration
 
-        config = db.query(AlertConfiguration).filter(
-            AlertConfiguration.id == alert.configuration_id
-        ).first()
+        config_result = await db.execute(
+            select(AlertConfiguration).where(
+                AlertConfiguration.id == alert.configuration_id
+            )
+        )
+        config = config_result.scalar_one_or_none()
 
         if not config or not config.enable_push_notifications:
             return []
 
-        # Get user device tokens
-        query = db.query(UserDeviceToken).filter(
-            UserDeviceToken.user_id == config.user_id,
-            UserDeviceToken.is_active,
-            UserDeviceToken.is_valid
+        # Get user device tokens (SQLAlchemy 2.0 async)
+        tokens_result = await db.execute(
+            select(UserDeviceToken).where(
+                UserDeviceToken.user_id == config.user_id,
+                UserDeviceToken.is_active,
+                UserDeviceToken.is_valid
+            )
         )
-
-        device_tokens = query.all()
-        return [token.device_token for token in device_tokens]
+        device_tokens = tokens_result.scalars().all()
+        return [str(token.device_token) for token in device_tokens]
 
     async def _track_delivery(
         self,
@@ -701,42 +708,38 @@ class FirebaseNotificationService:
             error_code: Error code if failed
             error_message: Error message if failed
         """
-        db = next(get_database())
+        async with get_database() as db:
+            try:
+                delivery = NotificationDelivery(
+                    alert_id=alert_id,
+                    channel="push",
+                    recipient=device_token,
+                    recipient_type="user",
+                    subject=payload.title,
+                    message_body=payload.body,
+                    message_format="json",
+                    status="delivered" if success else "failed",
+                    delivery_provider="firebase",
+                    provider_message_id=message_id,
+                    provider_response={
+                        "success": success,
+                        "error_code": error_code,
+                        "error_message": error_message
+                    } if not success else {"success": True, "message_id": message_id},
+                    scheduled_at=datetime.now(),
+                    sent_at=datetime.now(),
+                    delivered_at=datetime.now() if success else None,
+                    failed_at=datetime.now() if not success else None,
+                    error_code=error_code,
+                    error_message=error_message
+                )
 
-        try:
-            delivery = NotificationDelivery(
-                alert_id=alert_id,
-                channel="push",
-                recipient=device_token,
-                recipient_type="user",
-                subject=payload.title,
-                message_body=payload.body,
-                message_format="json",
-                status="delivered" if success else "failed",
-                delivery_provider="firebase",
-                provider_message_id=message_id,
-                provider_response={
-                    "success": success,
-                    "error_code": error_code,
-                    "error_message": error_message
-                } if not success else {"success": True, "message_id": message_id},
-                scheduled_at=datetime.now(),
-                sent_at=datetime.now(),
-                delivered_at=datetime.now() if success else None,
-                failed_at=datetime.now() if not success else None,
-                error_code=error_code,
-                error_message=error_message
-            )
+                db.add(delivery)
+                await db.commit()
 
-            db.add(delivery)
-            db.commit()
-
-        except Exception as e:
-            db.rollback()
-            logger.error(f"Failed to track notification delivery: {e}")
-
-        finally:
-            db.close()
+            except Exception as e:
+                await db.rollback()
+                logger.error(f"Failed to track notification delivery: {e}")
 
     async def _invalidate_token(self, device_token: str) -> None:
         """Mark a device token as invalid.
