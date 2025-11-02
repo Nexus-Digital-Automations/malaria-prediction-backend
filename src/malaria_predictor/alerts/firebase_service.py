@@ -7,10 +7,11 @@ push notifications to mobile devices and web browsers.
 import json
 import logging
 from datetime import datetime
+from typing import cast
 
 try:
-    import firebase_admin
-    from firebase_admin import credentials, messaging
+    import firebase_admin  # type: ignore[import-not-found]
+    from firebase_admin import credentials, messaging  # type: ignore[import-not-found]
     FIREBASE_AVAILABLE = True
 except ImportError:
     firebase_admin = None
@@ -20,7 +21,7 @@ except ImportError:
 
 # Type aliases for optional Firebase types
 if FIREBASE_AVAILABLE:
-    from firebase_admin.messaging import Message
+    from firebase_admin.messaging import Message  # type: ignore[import-not-found]
 else:
     Message = object  # Placeholder for type annotations
 from pydantic import BaseModel
@@ -115,7 +116,7 @@ class FirebaseNotificationService:
         self.initialized = False
 
         # Statistics tracking
-        self.stats = {
+        self.stats: dict[str, int | datetime] = {
             "notifications_sent": 0,
             "notifications_delivered": 0,
             "notifications_failed": 0,
@@ -186,7 +187,7 @@ class FirebaseNotificationService:
             # Send notification
             response = messaging.send(message)
 
-            self.stats["notifications_sent"] += 1
+            self.stats["notifications_sent"] = cast(int, self.stats["notifications_sent"]) + 1
 
             # Track delivery if alert_id provided
             if alert_id:
@@ -198,7 +199,7 @@ class FirebaseNotificationService:
                     message_id=response
                 )
 
-            self.stats["notifications_delivered"] += 1
+            self.stats["notifications_delivered"] = cast(int, self.stats["notifications_delivered"]) + 1
 
             logger.info(f"Push notification sent successfully: {response}")
 
@@ -209,7 +210,7 @@ class FirebaseNotificationService:
 
         except messaging.UnregisteredError:
             # Token is invalid
-            self.stats["notifications_failed"] += 1
+            self.stats["notifications_failed"] = cast(int, self.stats["notifications_failed"]) + 1
             await self._invalidate_token(device_token)
 
             if alert_id:
@@ -230,7 +231,7 @@ class FirebaseNotificationService:
             )
 
         except messaging.SenderIdMismatchError:
-            self.stats["notifications_failed"] += 1
+            self.stats["notifications_failed"] = cast(int, self.stats["notifications_failed"]) + 1
 
             return FirebaseNotificationResult(
                 success=False,
@@ -239,7 +240,7 @@ class FirebaseNotificationService:
             )
 
         except messaging.QuotaExceededError:
-            self.stats["notifications_failed"] += 1
+            self.stats["notifications_failed"] = cast(int, self.stats["notifications_failed"]) + 1
 
             return FirebaseNotificationResult(
                 success=False,
@@ -249,7 +250,7 @@ class FirebaseNotificationService:
             )
 
         except Exception as e:
-            self.stats["notifications_failed"] += 1
+            self.stats["notifications_failed"] = cast(int, self.stats["notifications_failed"]) + 1
 
             if alert_id:
                 await self._track_delivery(
@@ -313,7 +314,7 @@ class FirebaseNotificationService:
                     individual_response = response.responses[j]
 
                     if individual_response.success:
-                        self.stats["notifications_delivered"] += 1
+                        self.stats["notifications_delivered"] = cast(int, self.stats["notifications_delivered"]) + 1
 
                         results[token] = FirebaseNotificationResult(
                             success=True,
@@ -329,7 +330,7 @@ class FirebaseNotificationService:
                                 message_id=individual_response.message_id
                             )
                     else:
-                        self.stats["notifications_failed"] += 1
+                        self.stats["notifications_failed"] = cast(int, self.stats["notifications_failed"]) + 1
                         error = individual_response.exception
 
                         # Handle different error types
@@ -358,14 +359,14 @@ class FirebaseNotificationService:
                                 error_message=str(error)
                             )
 
-                self.stats["notifications_sent"] += len(batch)
+                self.stats["notifications_sent"] = cast(int, self.stats["notifications_sent"]) + len(batch)
 
             except Exception as e:
                 logger.error(f"Failed to send batch notifications: {e}")
 
                 # Mark all tokens in batch as failed
                 for token, _payload in batch:
-                    self.stats["notifications_failed"] += 1
+                    self.stats["notifications_failed"] = cast(int, self.stats["notifications_failed"]) + 1
                     results[token] = FirebaseNotificationResult(
                         success=False,
                         error_code="BATCH_FAILED",
@@ -383,10 +384,7 @@ class FirebaseNotificationService:
         Returns:
             Dictionary mapping device tokens to delivery results
         """
-        # Get alert configuration
-        db = next(get_database())
-
-        try:
+        async with get_database() as db:
             # Get target device tokens based on alert configuration
             device_tokens = await self._get_target_device_tokens(db, alert)
 
@@ -411,9 +409,6 @@ class FirebaseNotificationService:
 
             return results
 
-        finally:
-            db.close()
-
     async def validate_token(self, device_token: str) -> bool:
         """Validate a device token with FCM.
 
@@ -431,7 +426,7 @@ class FirebaseNotificationService:
             )
 
             messaging.send(test_message, dry_run=True)
-            self.stats["tokens_validated"] += 1
+            self.stats["tokens_validated"] = cast(int, self.stats["tokens_validated"]) + 1
             return True
 
         except messaging.UnregisteredError:
@@ -460,54 +455,54 @@ class FirebaseNotificationService:
         Returns:
             True if registration successful, False otherwise
         """
-        db = next(get_database())
+        async with get_database() as db:
+            try:
+                # Validate token first
+                if not await self.validate_token(device_token):
+                    return False
 
-        try:
-            # Validate token first
-            if not await self.validate_token(device_token):
-                return False
-
-            # Check if token already exists
-            existing_token = db.query(UserDeviceToken).filter(
-                UserDeviceToken.device_token == device_token
-            ).first()
-
-            if existing_token:
-                # Update existing token
-                existing_token.user_id = user_id
-                existing_token.device_type = device_type
-                existing_token.is_active = True
-                existing_token.is_valid = True
-                existing_token.refreshed_at = datetime.now()
-
-                if device_info:
-                    existing_token.device_name = device_info.get("device_name")
-                    existing_token.platform_version = device_info.get("platform_version")
-                    existing_token.app_version = device_info.get("app_version")
-            else:
-                # Create new token
-                new_token = UserDeviceToken(
-                    user_id=user_id,
-                    device_token=device_token,
-                    device_type=device_type,
-                    device_id=device_info.get("device_id") if device_info else None,
-                    device_name=device_info.get("device_name") if device_info else None,
-                    platform_version=device_info.get("platform_version") if device_info else None,
-                    app_version=device_info.get("app_version") if device_info else None
+                # Check if token already exists (SQLAlchemy 2.0 async)
+                from sqlalchemy import select
+                result = await db.execute(
+                    select(UserDeviceToken).where(
+                        UserDeviceToken.device_token == device_token
+                    )
                 )
-                db.add(new_token)
+                existing_token = result.scalar_one_or_none()
 
-            db.commit()
-            logger.info(f"Registered device token for user {user_id}")
-            return True
+                if existing_token:
+                    # Update existing token
+                    existing_token.user_id = user_id
+                    existing_token.device_type = device_type
+                    existing_token.is_active = True
+                    existing_token.is_valid = True
+                    existing_token.refreshed_at = datetime.now()
 
-        except Exception as e:
-            db.rollback()
-            logger.error(f"Failed to register device token: {e}")
-            return False
+                    if device_info:
+                        existing_token.device_name = device_info.get("device_name")
+                        existing_token.platform_version = device_info.get("platform_version")
+                        existing_token.app_version = device_info.get("app_version")
+                else:
+                    # Create new token
+                    new_token = UserDeviceToken(
+                        user_id=user_id,
+                        device_token=device_token,
+                        device_type=device_type,
+                        device_id=device_info.get("device_id") if device_info else None,
+                        device_name=device_info.get("device_name") if device_info else None,
+                        platform_version=device_info.get("platform_version") if device_info else None,
+                        app_version=device_info.get("app_version") if device_info else None
+                    )
+                    db.add(new_token)
 
-        finally:
-            db.close()
+                await db.commit()
+                logger.info(f"Registered device token for user {user_id}")
+                return True
+
+            except Exception as e:
+                await db.rollback()
+                logger.error(f"Failed to register device token: {e}")
+                return False
 
     def get_stats(self) -> dict:
         """Get Firebase service statistics.
@@ -515,11 +510,13 @@ class FirebaseNotificationService:
         Returns:
             Dictionary with current statistics
         """
+        notifications_delivered = cast(int, self.stats["notifications_delivered"])
+        notifications_sent = cast(int, self.stats["notifications_sent"])
         return {
             **self.stats,
             "initialized": self.initialized,
             "success_rate": (
-                self.stats["notifications_delivered"] / max(self.stats["notifications_sent"], 1)
+                notifications_delivered / max(notifications_sent, 1)
             ) * 100
         }
 
@@ -747,29 +744,30 @@ class FirebaseNotificationService:
         Args:
             device_token: Device token to invalidate
         """
-        db = next(get_database())
+        async with get_database() as db:
+            try:
+                # SQLAlchemy 2.0 async query
+                from sqlalchemy import select
+                result = await db.execute(
+                    select(UserDeviceToken).where(
+                        UserDeviceToken.device_token == device_token
+                    )
+                )
+                token = result.scalar_one_or_none()
 
-        try:
-            token = db.query(UserDeviceToken).filter(
-                UserDeviceToken.device_token == device_token
-            ).first()
+                if token:
+                    token.is_valid = False
+                    token.is_active = False
+                    token.deactivated_at = datetime.now()
+                    token.validation_failures += 1
+                    await db.commit()
 
-            if token:
-                token.is_valid = False
-                token.is_active = False
-                token.deactivated_at = datetime.now()
-                token.validation_failures += 1
-                db.commit()
+                    self.stats["tokens_invalidated"] = cast(int, self.stats["tokens_invalidated"]) + 1
+                    logger.info(f"Invalidated device token: {device_token[:20]}...")
 
-                self.stats["tokens_invalidated"] += 1
-                logger.info(f"Invalidated device token: {device_token[:20]}...")
-
-        except Exception as e:
-            db.rollback()
-            logger.error(f"Failed to invalidate device token: {e}")
-
-        finally:
-            db.close()
+            except Exception as e:
+                await db.rollback()
+                logger.error(f"Failed to invalidate device token: {e}")
 
 
 # Global Firebase service instance
