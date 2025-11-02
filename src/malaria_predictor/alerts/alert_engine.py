@@ -6,7 +6,7 @@ generates alerts, and manages alert lifecycle.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Union
+from typing import Any, Union, cast
 
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import or_, select
@@ -89,7 +89,7 @@ class AlertEngine:
     def __init__(self) -> None:
         """Initialize the alert engine."""
         self.settings = settings
-        self.stats = {
+        self.stats: dict[str, int | float | datetime | None] = {
             "evaluations_performed": 0,
             "alerts_generated": 0,
             "alerts_suppressed": 0,
@@ -140,10 +140,13 @@ class AlertEngine:
 
                 # Update statistics
                 evaluation_time = (datetime.now() - start_time).total_seconds() * 1000
-                self.stats["evaluations_performed"] += 1
+                self.stats["evaluations_performed"] = cast(int, self.stats["evaluations_performed"]) + 1
+
+                # Calculate running average
+                evaluations_performed = cast(int, self.stats["evaluations_performed"])
+                avg_time = cast(float, self.stats["avg_evaluation_time_ms"])
                 self.stats["avg_evaluation_time_ms"] = (
-                    (self.stats["avg_evaluation_time_ms"] * (self.stats["evaluations_performed"] - 1) +
-                     evaluation_time) / self.stats["evaluations_performed"]
+                    (avg_time * (evaluations_performed - 1) + evaluation_time) / evaluations_performed
                 )
                 self.stats["last_evaluation"] = datetime.now()
 
@@ -401,9 +404,9 @@ class AlertEngine:
 
             if triggered:
                 rule.triggered_count += 1
-                self.stats["rules_triggered"] += 1
+                self.stats["rules_triggered"] = cast(int, self.stats["rules_triggered"]) + 1
 
-            db.commit()
+            await db.commit()
 
             evaluation_time = (datetime.now() - start_time).total_seconds() * 1000
 
@@ -609,12 +612,15 @@ class AlertEngine:
             if now < cooldown_end:
                 return True, "cooldown_period"
 
-        # Check daily alert limit
+        # Check daily alert limit (SQLAlchemy 2.0 async)
+        from sqlalchemy import func
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        today_alerts = db.query(Alert).filter(
-            Alert.alert_rule_id == rule.id,
-            Alert.created_at >= today_start
-        ).count()
+        today_alerts = await db.scalar(
+            select(func.count()).select_from(Alert).where(
+                Alert.alert_rule_id == rule.id,
+                Alert.created_at >= today_start
+            )
+        ) or 0
 
         if today_alerts >= rule.max_alerts_per_day:
             return True, "daily_limit_exceeded"
@@ -685,14 +691,14 @@ class AlertEngine:
             )
 
             db.add(alert)
-            db.commit()
-            db.refresh(alert)
+            await db.commit()
+            await db.refresh(alert)
 
             # Update suppression cache
-            self.suppression_cache[rule.id] = datetime.now()
+            self.suppression_cache[str(rule.id)] = datetime.now()
 
             # Update statistics
-            self.stats["alerts_generated"] += 1
+            self.stats["alerts_generated"] = cast(int, self.stats["alerts_generated"]) + 1
 
             # Send real-time notifications
             await self._send_alert_notifications(alert)
@@ -701,7 +707,7 @@ class AlertEngine:
             return alert
 
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             logger.error(f"Failed to generate alert for rule {rule.id}: {e}")
             return None
 
@@ -723,12 +729,15 @@ class AlertEngine:
         Returns:
             Tuple of (title, message)
         """
-        # Get appropriate template
-        template = db.query(AlertTemplate).filter(
-            AlertTemplate.template_type == rule.alert_category,
-            AlertTemplate.channel == "general",
-            AlertTemplate.is_active
-        ).first()
+        # Get appropriate template (SQLAlchemy 2.0 async)
+        template_result = await db.execute(
+            select(AlertTemplate).where(
+                AlertTemplate.template_type == rule.alert_category,
+                AlertTemplate.channel == "general",
+                AlertTemplate.is_active
+            )
+        )
+        template = template_result.scalar_one_or_none()
 
         if not template:
             # Fallback to default message
