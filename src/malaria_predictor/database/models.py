@@ -21,7 +21,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import DeclarativeBase, relationship
 
 
 class AlertType(str, Enum):
@@ -57,7 +57,9 @@ class AlertChannel(str, Enum):
     WEBHOOK = "webhook"
 
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    """SQLAlchemy declarative base for all models."""
+    pass
 
 
 class ERA5DataPoint(Base):
@@ -1076,8 +1078,8 @@ class ReportSchedule(Base):
     # Performance tracking
     execution_count = Column(Integer, default=0)
     success_count = Column(Integer, default=0)
-    average_execution_time: float | None = Column(Float, nullable=True)
-    last_execution_time: float | None = Column(Float, nullable=True)
+    average_execution_time = Column(Float, nullable=True)
+    last_execution_time = Column(Float, nullable=True)
 
     # Relationships
     template = relationship("ReportTemplate", back_populates="schedules")
