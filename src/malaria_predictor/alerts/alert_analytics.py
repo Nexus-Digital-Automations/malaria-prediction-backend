@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, select
 
 from ..config import settings
 from ..database.models import (
@@ -200,90 +200,111 @@ class AlertAnalyticsEngine:
                 week_ago = now - timedelta(days=7)
                 month_ago = now - timedelta(days=30)
 
-                # Total alerts by time period
-                total_24h = db.query(Alert).filter(Alert.created_at >= day_ago).count()
-                total_7d = db.query(Alert).filter(Alert.created_at >= week_ago).count()
-                total_30d = db.query(Alert).filter(Alert.created_at >= month_ago).count()
+                # Total alerts by time period (SQLAlchemy 2.0 async style)
+                total_24h = await db.scalar(select(func.count()).select_from(Alert).where(Alert.created_at >= day_ago)) or 0
+                total_7d = await db.scalar(select(func.count()).select_from(Alert).where(Alert.created_at >= week_ago)) or 0
+                total_30d = await db.scalar(select(func.count()).select_from(Alert).where(Alert.created_at >= month_ago)) or 0
 
                 # Delivery rates
-                delivered_24h = db.query(Alert).filter(
-                    Alert.created_at >= day_ago,
-                    or_(
-                        Alert.push_notification_delivered,
-                        Alert.email_notification_delivered,
-                        Alert.sms_notification_delivered,
-                        Alert.webhook_notification_delivered
+                delivered_24h = await db.scalar(
+                    select(func.count()).select_from(Alert).where(
+                        Alert.created_at >= day_ago,
+                        or_(
+                            Alert.push_notification_delivered,
+                            Alert.email_notification_delivered,
+                            Alert.sms_notification_delivered,
+                            Alert.webhook_notification_delivered
+                        )
                     )
-                ).count()
+                ) or 0
 
-                delivered_7d = db.query(Alert).filter(
-                    Alert.created_at >= week_ago,
-                    or_(
-                        Alert.push_notification_delivered,
-                        Alert.email_notification_delivered,
-                        Alert.sms_notification_delivered,
-                        Alert.webhook_notification_delivered
+                delivered_7d = await db.scalar(
+                    select(func.count()).select_from(Alert).where(
+                        Alert.created_at >= week_ago,
+                        or_(
+                            Alert.push_notification_delivered,
+                            Alert.email_notification_delivered,
+                            Alert.sms_notification_delivered,
+                            Alert.webhook_notification_delivered
+                        )
                     )
-                ).count()
+                ) or 0
 
                 avg_delivery_rate_24h = (delivered_24h / max(total_24h, 1)) * 100
                 avg_delivery_rate_7d = (delivered_7d / max(total_7d, 1)) * 100
 
                 # Response rates
-                responded_24h = db.query(Alert).filter(
-                    Alert.created_at >= day_ago,
-                    Alert.acknowledged_at.isnot(None)
-                ).count()
+                responded_24h = await db.scalar(
+                    select(func.count()).select_from(Alert).where(
+                        Alert.created_at >= day_ago,
+                        Alert.acknowledged_at.isnot(None)
+                    )
+                ) or 0
 
-                responded_7d = db.query(Alert).filter(
-                    Alert.created_at >= week_ago,
-                    Alert.acknowledged_at.isnot(None)
-                ).count()
+                responded_7d = await db.scalar(
+                    select(func.count()).select_from(Alert).where(
+                        Alert.created_at >= week_ago,
+                        Alert.acknowledged_at.isnot(None)
+                    )
+                ) or 0
 
                 avg_response_rate_24h = (responded_24h / max(total_24h, 1)) * 100
                 avg_response_rate_7d = (responded_7d / max(total_7d, 1)) * 100
 
                 # False positive rate
-                false_positives_7d = db.query(Alert).filter(
-                    Alert.created_at >= week_ago,
-                    Alert.false_positive
-                ).count()
+                false_positives_7d = await db.scalar(
+                    select(func.count()).select_from(Alert).where(
+                        Alert.created_at >= week_ago,
+                        Alert.false_positive
+                    )
+                ) or 0
 
                 false_positive_rate_7d = (false_positives_7d / max(total_7d, 1)) * 100
 
                 # Escalation rate
-                escalated_24h = db.query(Alert).filter(
-                    Alert.created_at >= day_ago,
-                    Alert.escalated_at.isnot(None)
-                ).count()
+                escalated_24h = await db.scalar(
+                    select(func.count()).select_from(Alert).where(
+                        Alert.created_at >= day_ago,
+                        Alert.escalated_at.isnot(None)
+                    )
+                ) or 0
 
                 escalation_rate_24h = (escalated_24h / max(total_24h, 1)) * 100
 
                 # Average resolution time
-                resolution_times = db.query(Alert.response_time_seconds).filter(
-                    Alert.created_at >= week_ago,
-                    Alert.response_time_seconds.isnot(None)
-                ).all()
+                resolution_times_result = await db.execute(
+                    select(Alert.response_time_seconds).where(
+                        Alert.created_at >= week_ago,
+                        Alert.response_time_seconds.isnot(None)
+                    )
+                )
+                resolution_times = resolution_times_result.scalars().all()
 
                 avg_resolution_time_hours = None
                 if resolution_times:
-                    avg_seconds = sum(rt.response_time_seconds for rt in resolution_times) / len(resolution_times)
+                    avg_seconds = sum(rt for rt in resolution_times) / len(resolution_times)
                     avg_resolution_time_hours = avg_seconds / 3600
 
                 # Active configurations and users
-                active_configurations = db.query(AlertConfiguration).filter(
-                    AlertConfiguration.is_active
-                ).count()
+                active_configurations = await db.scalar(
+                    select(func.count()).select_from(AlertConfiguration).where(
+                        AlertConfiguration.is_active
+                    )
+                ) or 0
 
-                active_users_24h = db.query(Alert.configuration_id).join(AlertConfiguration).filter(
-                    Alert.created_at >= day_ago
-                ).distinct().count()
+                active_users_24h = await db.scalar(
+                    select(func.count(func.distinct(Alert.configuration_id))).select_from(Alert)
+                    .join(AlertConfiguration)
+                    .where(Alert.created_at >= day_ago)
+                ) or 0
 
                 # Critical alerts pending
-                critical_alerts_pending = db.query(Alert).filter(
-                    Alert.alert_level.in_(["critical", "emergency"]),
-                    Alert.status.in_(["generated", "sent", "delivered"])
-                ).count()
+                critical_alerts_pending = await db.scalar(
+                    select(func.count()).select_from(Alert).where(
+                        Alert.alert_level.in_(["critical", "emergency"]),
+                        Alert.status.in_(["generated", "sent", "delivered"])
+                    )
+                ) or 0
 
                 kpis = AlertKPIs(
                     total_alerts_24h=total_24h,
