@@ -50,21 +50,23 @@ async def get_prediction_accuracy_metrics(
     - Error analysis and trends
     """
     try:
-        # Build base query
-        query = db.query(MalariaRiskIndex)
+        # Build base query (SQLAlchemy 2.0 async)
+        stmt = select(MalariaRiskIndex)
 
         # Apply filters
         if start_date:
-            query = query.filter(MalariaRiskIndex.assessment_date >= datetime.fromisoformat(start_date))
+            stmt = stmt.where(MalariaRiskIndex.assessment_date >= datetime.fromisoformat(start_date))
         if end_date:
-            query = query.filter(MalariaRiskIndex.assessment_date <= datetime.fromisoformat(end_date))
+            stmt = stmt.where(MalariaRiskIndex.assessment_date <= datetime.fromisoformat(end_date))
         if model_type:
-            query = query.filter(MalariaRiskIndex.model_type == model_type)
+            stmt = stmt.where(MalariaRiskIndex.model_type == model_type)
         if region:
-            query = query.filter(MalariaRiskIndex.location_name.ilike(f"%{region}%"))
+            stmt = stmt.where(MalariaRiskIndex.location_name.ilike(f"%{region}%"))
 
         # Get prediction accuracy data
-        predictions = query.order_by(desc(MalariaRiskIndex.assessment_date)).limit(1000).all()
+        stmt = stmt.order_by(desc(MalariaRiskIndex.assessment_date)).limit(1000)
+        result = await db.execute(stmt)
+        predictions = result.scalars().all()
 
         # Calculate accuracy metrics
         total_predictions = len(predictions)
@@ -72,34 +74,36 @@ async def get_prediction_accuracy_metrics(
             return {"error": "No prediction data found for the specified criteria"}
 
         # Model performance metrics
-        model_accuracy = {}
+        model_accuracy: dict[str, dict[str, Any]] = {}
         confidence_distribution: dict[str, int] = {}
-        risk_level_accuracy = {}
-        temporal_accuracy = {}
+        risk_level_accuracy: dict[str, dict[str, Any]] = {}
+        temporal_accuracy: dict[str, dict[str, Any]] = {}
 
         for prediction in predictions:
             # Model type accuracy
-            if prediction.model_type not in model_accuracy:
-                model_accuracy[prediction.model_type] = {
+            model_type_str = str(prediction.model_type)
+            if model_type_str not in model_accuracy:
+                model_accuracy[model_type_str] = {
                     "total": 0, "high_confidence": 0, "avg_confidence": 0, "predictions": []
                 }
 
-            model_accuracy[prediction.model_type]["total"] += 1
-            model_accuracy[prediction.model_type]["predictions"].append(prediction.confidence_score)
+            model_accuracy[model_type_str]["total"] += 1
+            model_accuracy[model_type_str]["predictions"].append(prediction.confidence_score)
 
             if prediction.confidence_score >= 0.8:
-                model_accuracy[prediction.model_type]["high_confidence"] += 1
+                model_accuracy[model_type_str]["high_confidence"] += 1
 
             # Confidence distribution
             conf_bucket = round(prediction.confidence_score, 1)
-            confidence_distribution[conf_bucket] = confidence_distribution.get(conf_bucket, 0) + 1
+            confidence_distribution[str(conf_bucket)] = confidence_distribution.get(str(conf_bucket), 0) + 1
 
             # Risk level accuracy
-            if prediction.risk_level not in risk_level_accuracy:
-                risk_level_accuracy[prediction.risk_level] = {"count": 0, "avg_confidence": 0, "scores": []}
+            risk_level_str = str(prediction.risk_level)
+            if risk_level_str not in risk_level_accuracy:
+                risk_level_accuracy[risk_level_str] = {"count": 0, "avg_confidence": 0, "scores": []}
 
-            risk_level_accuracy[prediction.risk_level]["count"] += 1
-            risk_level_accuracy[prediction.risk_level]["scores"].append(prediction.confidence_score)
+            risk_level_accuracy[risk_level_str]["count"] += 1
+            risk_level_accuracy[risk_level_str]["scores"].append(prediction.confidence_score)
 
             # Temporal accuracy (monthly)
             month_key = prediction.assessment_date.strftime("%Y-%m")
@@ -166,7 +170,7 @@ async def get_environmental_trend_analysis(
     days_back: int = Query(365, description="Number of days to look back"),
     data_sources: str | None = Query(None, description="Comma-separated data sources (era5,chirps,modis)"),
     aggregation: str = Query("daily", description="Aggregation level (daily, weekly, monthly)"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     _: Any = Depends(get_current_user_optional),
 ) -> dict[str, Any]:
     """
@@ -362,7 +366,7 @@ async def get_outbreak_pattern_recognition(
     risk_threshold: float = Query(0.7, description="Risk score threshold for outbreak classification"),
     years_back: int = Query(5, description="Number of years to analyze"),
     include_seasonality: bool = Query(True, description="Include seasonal pattern analysis"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     _: Any = Depends(get_current_user_optional),
 ) -> dict[str, Any]:
     """
@@ -441,7 +445,7 @@ async def get_outbreak_pattern_recognition(
 
         # Seasonal pattern analysis
         if include_seasonality:
-            monthly_outbreaks: dict[str, int] = {}
+            monthly_outbreaks: dict[int, int] = {}
             for event in outbreak_events:
                 month = datetime.fromisoformat(event["date"]).month
                 monthly_outbreaks[month] = monthly_outbreaks.get(month, 0) + 1
@@ -552,7 +556,7 @@ async def get_interactive_data_exploration(
     aggregation_method: str = Query("mean", description="Aggregation method (mean, sum, max, min)"),
     group_by: str = Query("month", description="Grouping method (day, week, month, year)"),
     limit: int = Query(1000, description="Maximum number of data points to return"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     _: Any = Depends(get_current_user_optional),
 ) -> dict[str, Any]:
     """
@@ -805,7 +809,7 @@ async def get_interactive_data_exploration(
 @router.post("/custom-report")
 async def generate_custom_report(
     report_config: dict[str, Any],
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     _: Any = Depends(get_current_user_optional),
 ) -> dict[str, Any]:
     """
@@ -827,7 +831,7 @@ async def generate_custom_report(
         export_format = report_config.get("export_format", "json")
 
         # Initialize report structure
-        custom_report = {
+        custom_report: dict[str, Any] = {
             "report_metadata": {
                 "type": report_type,
                 "generated_at": datetime.now().isoformat(),
@@ -1261,7 +1265,7 @@ async def export_prediction_accuracy_data(
     end_date: str | None = Query(None, description="End date in YYYY-MM-DD format"),
     model_type: str | None = Query(None, description="Model type filter"),
     include_metadata: bool = Query(True, description="Include metadata in export"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     _: Any = Depends(get_current_user_optional),
 ) -> dict[str, Any]:
     """
@@ -1313,7 +1317,7 @@ async def export_prediction_accuracy_data(
 
 @router.get("/export/statistics")
 async def get_export_statistics(
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     _: Any = Depends(get_current_user_optional),
 ) -> dict[str, Any]:
     """
