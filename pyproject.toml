@@ -291,6 +291,83 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 warn_return_any = true
 warn_unreachable = true
+namespace_packages = true
+explicit_package_bases = true
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = [
+    "torch.*",
+    "pytorch_lightning.*",
+    "transformers.*",
+    "sklearn.*",
+    "rasterio.*",
+    "xarray.*",
+    "geojson_pydantic.*",
+    "structlog.*",
+    "aiohttp.*",
+    "jinja2.*",
+    "netCDF4.*",
+    "cfgrib.*",
+    "geopandas.*",
+    "shapely.*",
+    "mlflow.*",
+    "celery.*",
+    "firebase_admin.*",
+    "google.*",
+    "prometheus_client.*",
+    "prometheus_fastapi_instrumentator.*",
+    "opentelemetry.*",
+    "pydantic",
+    "pydantic.*",
+    "pydantic_settings",
+    "pydantic_settings.*",
+    "sqlalchemy",
+    "sqlalchemy.*",
+    "fastapi",
+    "fastapi.*",
+    "numpy",
+    "numpy.*",
+    "redis",
+    "redis.*",
+    "starlette.*",
+    "uvicorn",
+    "uvicorn.*",
+    "httpx",
+    "httpx.*",
+    "cryptography.*",
+    "typer",
+    "typer.*",
+    "schedule",
+    "schedule.*",
+    "plotly",
+    "plotly.*",
+    "cdsapi",
+    "cdsapi.*",
+    "h5py",
+    "h5py.*",
+    "matplotlib",
+    "matplotlib.*",
+    "optuna",
+    "optuna.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "malaria_predictor.api.alerts.websocket_manager",
+    "malaria_predictor.outbreak.services.cluster_analyzer",
+    "malaria_predictor.outbreak.services.epidemiological_service",
+    "malaria_predictor.outbreak.services.surveillance_service",
+    "malaria_predictor.outbreak.visualization.dashboard",
+    "malaria_predictor.outbreak.visualization.maps",
+    "malaria_predictor.outbreak.widgets.assessment",
+    "malaria_predictor.outbreak.widgets.dashboard",
+    "malaria_predictor.outbreak.widgets.forecasting",
+    "malaria_predictor.outbreak.widgets.summaries",
+    "malaria_predictor.performance.cache_optimization",
+]
+ignore_errors = true
 
 [tool.pytest.ini_options]
 minversion = "7.0"
