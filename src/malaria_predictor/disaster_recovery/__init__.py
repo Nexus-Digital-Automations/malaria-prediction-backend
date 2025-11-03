@@ -10,29 +10,29 @@ This module provides comprehensive disaster recovery capabilities including:
 - DR scheduling
 
 Components:
-    - BackupOrchestrator: Manages backup operations
-    - DataCorruptionDetector: Detects and handles data corruption
+    - DisasterRecoveryOrchestrator: Manages backup operations
+    - DataCorruptionMonitor: Detects and handles data corruption
     - FailoverOrchestrator: Manages system failover
     - DisasterRecoveryTester: Tests DR procedures
-    - DRMonitoringIntegration: Integrates with monitoring systems
+    - DRMonitoringService: Integrates with monitoring systems
     - DRScheduler: Schedules DR operations
 """
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .backup_orchestrator import BackupOrchestrator
-    from .data_corruption_detector import DataCorruptionDetector
+    from .backup_orchestrator import DisasterRecoveryOrchestrator
+    from .data_corruption_detector import DataCorruptionMonitor
     from .disaster_recovery_tester import DisasterRecoveryTester
-    from .dr_monitoring_integration import DRMonitoringIntegration
+    from .dr_monitoring_integration import DRMonitoringService
     from .dr_scheduler import DRScheduler
     from .failover_orchestrator import FailoverOrchestrator
 
 __all__ = [
-    "BackupOrchestrator",
-    "DataCorruptionDetector",
+    "DisasterRecoveryOrchestrator",
+    "DataCorruptionMonitor",
     "DisasterRecoveryTester",
-    "DRMonitoringIntegration",
+    "DRMonitoringService",
     "DRScheduler",
     "FailoverOrchestrator",
 ]
