@@ -141,7 +141,7 @@ class ConfigValidator:
         except Exception as e:
             logger.error(f"Configuration validation failed: {e}")
             results["configuration_validation"] = {"error": str(e)}
-            results["validation_summary"]["failed"] += 1
+            results["validation_summary"]["failed"] += 1 # type: ignore[index]
 
         # Secrets validation
         try:
@@ -151,7 +151,7 @@ class ConfigValidator:
         except Exception as e:
             logger.error(f"Secrets validation failed: {e}")
             results["secrets_validation"] = {"error": str(e)}
-            results["validation_summary"]["failed"] += 1
+            results["validation_summary"]["failed"] += 1 # type: ignore[index]
 
         # Health checks
         if include_health_checks:
@@ -162,7 +162,7 @@ class ConfigValidator:
             except Exception as e:
                 logger.error(f"Health checks failed: {e}")
                 results["health_checks"] = {"error": str(e)}
-                results["validation_summary"]["failed"] += 1
+                results["validation_summary"]["failed"] += 1 # type: ignore[index]
 
         return results
 
@@ -420,7 +420,7 @@ class ConfigValidator:
         if self.settings.is_production():
             results["debug_disabled"] = {
                 "status": "pass" if not self.settings.debug else "fail",
-                "value": self.settings.debug,
+                "value": self.settings.debug, # type: ignore[dict-item]
                 "message": (
                     "Debug disabled in production"
                     if not self.settings.debug
@@ -432,7 +432,7 @@ class ConfigValidator:
                 "status": (
                     "pass" if "*" not in self.settings.security.cors_origins else "fail"
                 ),
-                "value": self.settings.security.cors_origins,
+                "value": self.settings.security.cors_origins, # type: ignore[dict-item]
                 "message": (
                     "CORS properly restricted"
                     if "*" not in self.settings.security.cors_origins
@@ -611,8 +611,8 @@ class ConfigValidator:
                 results["database_url"] = {
                     "status": "pass" if db_url.hostname and db_url.path else "fail",
                     "scheme": db_url.scheme,
-                    "hostname": db_url.hostname,
-                    "database": db_url.path.lstrip("/") if db_url.path else None,
+                    "hostname": db_url.hostname, # type: ignore[dict-item]
+                    "database": db_url.path.lstrip("/") if db_url.path else None, # type: ignore[dict-item]
                     "message": (
                         "Valid database URL"
                         if db_url.hostname and db_url.path
@@ -641,8 +641,8 @@ class ConfigValidator:
                 results["redis_url"] = {
                     "status": "pass" if parsed_redis_url.hostname else "fail",
                     "scheme": parsed_redis_url.scheme,
-                    "hostname": parsed_redis_url.hostname,
-                    "port": parsed_redis_url.port,
+                    "hostname": parsed_redis_url.hostname, # type: ignore[dict-item]
+                    "port": parsed_redis_url.port, # type: ignore[dict-item]
                     "message": (
                         "Valid Redis URL"
                         if parsed_redis_url.hostname
