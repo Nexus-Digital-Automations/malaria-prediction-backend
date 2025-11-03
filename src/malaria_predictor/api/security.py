@@ -141,22 +141,22 @@ class SecurityConfig:
 
 def hash_password(password: str) -> str:
     """Hash a password using bcrypt."""
-    return pwd_context.hash(password)
+    return str(pwd_context.hash(password))
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    return bool(pwd_context.verify(plain_password, hashed_password))
 
 
 def encrypt_sensitive_data(data: str) -> str:
     """Encrypt sensitive data for storage."""
-    return cipher_suite.encrypt(data.encode()).decode()
+    return str(cipher_suite.encrypt(data.encode()).decode())
 
 
 def decrypt_sensitive_data(encrypted_data: str) -> str:
     """Decrypt sensitive data."""
-    return cipher_suite.decrypt(encrypted_data.encode()).decode()
+    return str(cipher_suite.decrypt(encrypted_data.encode()).decode())
 
 
 def create_access_token(
@@ -172,7 +172,7 @@ def create_access_token(
 
     to_encode.update({"exp": expire, "iat": datetime.now(UTC), "type": "access"})
 
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return str(jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM))
 
 
 def create_refresh_token(user_id: str) -> str:
@@ -186,7 +186,7 @@ def create_refresh_token(user_id: str) -> str:
         "type": "refresh",
     }
 
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return str(jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM))
 
 
 def create_api_key_token(
@@ -207,7 +207,7 @@ def create_api_key_token(
         # Default API key tokens expire in 1 year
         to_encode["exp"] = datetime.now(UTC) + timedelta(days=365)
 
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return str(jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM))
 
 
 def verify_token(token: str) -> TokenData | None:
