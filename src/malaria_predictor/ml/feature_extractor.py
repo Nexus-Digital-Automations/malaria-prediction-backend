@@ -8,7 +8,7 @@ environmental drivers of malaria transmission.
 
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from scipy import ndimage, stats
@@ -336,9 +336,9 @@ class EnvironmentalFeatureExtractor:
         # Temperature-precipitation interactions
         if "temp_mean" in features and "precip_mean" in features:
             # Combined suitability for mosquito breeding
-            interaction_features["breeding_suitability"] = features.get(
-                "temp_suitability", 0
-            ) * features.get("breeding_habitat_index", 0)
+            temp_suit = features.get("temp_suitability", np.array(0.0))
+            breed_habit = features.get("breeding_habitat_index", np.array(0.0))
+            interaction_features["breeding_suitability"] = temp_suit * breed_habit
 
             # Climate stress index
             interaction_features["climate_stress"] = self._calculate_climate_stress(
@@ -355,18 +355,19 @@ class EnvironmentalFeatureExtractor:
         # Vegetation-climate interactions
         if "ndvi_current" in features and "temp_mean" in features:
             # Vector activity potential
+            temp_suit_vec = features.get("temp_suitability", np.array(0.0))
             interaction_features["vector_activity_potential"] = features[
                 "ndvi_current"
-            ] * features.get("temp_suitability", 0)
+            ] * temp_suit_vec
 
         return interaction_features
 
     def extract_temporal_features(
         self, harmonized_data: dict[str, dict[str, Any]], target_date: datetime
-    ) -> dict[str, np.ndarray]:
+    ) -> dict[str, Any]:
         """Extract temporal pattern features."""
 
-        features = {}
+        features: dict[str, Any] = {}
 
         # Seasonal indicators
         day_of_year = target_date.timetuple().tm_yday
@@ -525,7 +526,7 @@ class EnvironmentalFeatureExtractor:
         stress[valid_mask] = 1 - (current_ndvi[valid_mask] / max_ndvi[valid_mask])
         stress = np.clip(stress, 0, 1)
 
-        return stress
+        return cast(np.ndarray, stress)
 
     def _calculate_vector_habitat_score(
         self, vegetation_data: np.ndarray
@@ -542,7 +543,7 @@ class EnvironmentalFeatureExtractor:
         habitat_score = 4 * ndvi * (1 - ndvi)  # Quadratic with peak at NDVI=0.5
         habitat_score = np.clip(habitat_score, 0, 1)
 
-        return habitat_score
+        return cast(np.ndarray, habitat_score)
 
     def _calculate_climate_stress(
         self, temperature: np.ndarray | None, precipitation: np.ndarray | None
@@ -641,7 +642,7 @@ class EnvironmentalFeatureExtractor:
         else:
             gdd = np.maximum(temperature_data - base_temp, 0)
 
-        return gdd
+        return cast(np.ndarray, gdd)
 
     def _calculate_wet_days(self, precipitation_data: np.ndarray) -> np.ndarray:
         """Calculate number of wet days (precipitation > threshold)."""
@@ -652,7 +653,7 @@ class EnvironmentalFeatureExtractor:
         else:
             wet_days = (precipitation_data > wet_threshold).astype(np.float32)
 
-        return wet_days.astype(np.float32)
+        return cast(np.ndarray, wet_days.astype(np.float32))
 
     def _calculate_seasonal_malaria_index(self, day_of_year: int) -> float:
         """Calculate seasonal malaria transmission index."""
@@ -688,7 +689,7 @@ class EnvironmentalFeatureExtractor:
         else:
             flood_risk = (precipitation_data > flood_threshold).astype(np.float32)
 
-        return flood_risk.astype(np.float32)
+        return cast(np.ndarray, flood_risk.astype(np.float32))
 
     def _calculate_greenness_anomaly(self, vegetation_data: np.ndarray) -> np.ndarray:
         """Calculate vegetation greenness anomaly."""
@@ -701,7 +702,7 @@ class EnvironmentalFeatureExtractor:
 
         anomaly = current_ndvi - mean_ndvi
 
-        return anomaly.astype(np.float32)
+        return cast(np.ndarray, anomaly.astype(np.float32))
 
     def _calculate_vegetation_seasonality(
         self, vegetation_data: np.ndarray
@@ -716,7 +717,7 @@ class EnvironmentalFeatureExtractor:
 
         seasonality = max_ndvi - min_ndvi
 
-        return seasonality.astype(np.float32)
+        return cast(np.ndarray, seasonality.astype(np.float32))
 
     def _calculate_population_clustering(
         self, population_data: np.ndarray
@@ -733,7 +734,7 @@ class EnvironmentalFeatureExtractor:
         global_variance = np.var(population_data)
         clustering = local_variance / (global_variance + 1e-8)
 
-        return clustering.astype(np.float32)
+        return cast(np.ndarray, clustering.astype(np.float32))
 
     def _calculate_accessibility_proxy(self, population_data: np.ndarray) -> np.ndarray:
         """Calculate accessibility proxy based on population density gradients."""
@@ -748,7 +749,7 @@ class EnvironmentalFeatureExtractor:
         max_gradient = np.max(gradient_magnitude)
         accessibility = 1.0 - (gradient_magnitude / (max_gradient + 1e-8))
 
-        return accessibility.astype(np.float32)
+        return cast(np.ndarray, accessibility.astype(np.float32))
 
     def _classify_risk_intensity(self, risk_data: np.ndarray) -> np.ndarray:
         """Classify risk intensity into categories."""
@@ -785,7 +786,7 @@ class EnvironmentalFeatureExtractor:
             return np.random.rand(sequence_length, feature_count).astype(np.float32)
 
     async def extract_spatial_features(
-        self, location, environmental_data: dict
+        self, location: Any, environmental_data: dict
     ) -> dict:
         """Extract spatial features for testing compatibility."""
         return {
