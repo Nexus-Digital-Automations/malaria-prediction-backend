@@ -16,7 +16,7 @@ from src.malaria_predictor.alerts.alert_history_manager import (
     AlertHistoryQuery,
     AlertHistorySummary,
 )
-from src.malaria_predictor.database.models import Alert, AlertConfiguration, User
+from src.malaria_predictor.database.models import Alert, AlertConfiguration
 
 
 class MockRedisClient:
@@ -85,31 +85,19 @@ async def mock_redis():
 
 
 @pytest.fixture
-async def test_user(db_session: AsyncSession) -> User:
-    """Create test user."""
-    user = User(
-        id=1,
-        email="test@example.com",
-        username="testuser",
-        full_name="Test User",
-        hashed_password="hashed_password",
-        is_active=True,
-        is_superuser=False,
-        created_at=datetime.now(),
-        updated_at=datetime.now()
-    )
-    db_session.add(user)
-    await db_session.commit()
-    await db_session.refresh(user)
-    return user
+def test_user_id() -> str:
+    """Provide test user ID for alert queries."""
+    return "test-user-123"
 
 
 @pytest.fixture
-async def sample_alerts(db_session: AsyncSession, test_user: User) -> list[Alert]:
+async def sample_alerts(db_session: AsyncSession, test_user_id: str) -> list[Alert]:
     """Create sample alerts for testing."""
     # First create an alert configuration
     config = AlertConfiguration(
         id=1,
+        user_id=test_user_id,
+        configuration_name="Test Configuration",
         alert_type="high_risk",
         threshold_value=0.8,
         is_enabled=True,
@@ -157,12 +145,12 @@ class TestAlertHistoryManager:
     async def test_get_alert_history_basic(
         self,
         history_manager: AlertHistoryManager,
-        test_user: User,
+        test_user_id: str,
         sample_alerts: list[Alert]
     ):
         """Test basic alert history retrieval."""
         query = AlertHistoryQuery(
-            user_id=test_user.id,
+            user_id=test_user_id,
             start_date=datetime.now() - timedelta(days=1),
             end_date=datetime.now() + timedelta(hours=1)
         )
@@ -178,12 +166,12 @@ class TestAlertHistoryManager:
     async def test_get_alert_history_filtered(
         self,
         history_manager: AlertHistoryManager,
-        test_user: User,
+        test_user_id: str,
         sample_alerts: list[Alert]
     ):
         """Test filtered alert history retrieval."""
         query = AlertHistoryQuery(
-            user_id=test_user.id,
+            user_id=test_user_id,
             alert_types=["high_risk"],
             start_date=datetime.now() - timedelta(days=1),
             end_date=datetime.now() + timedelta(hours=1)
@@ -200,12 +188,12 @@ class TestAlertHistoryManager:
     async def test_get_alert_summary(
         self,
         history_manager: AlertHistoryManager,
-        test_user: User,
+        test_user_id: str,
         sample_alerts: list[Alert]
     ):
         """Test alert summary generation."""
         summary = await history_manager.get_alert_summary(
-            user_id=test_user.id,
+            user_id=test_user_id,
             period_days=7
         )
 
@@ -217,13 +205,15 @@ class TestAlertHistoryManager:
     async def test_archive_old_alerts(
         self,
         history_manager: AlertHistoryManager,
-        test_user: User,
+        test_user_id: str,
         db_session: AsyncSession
     ):
         """Test archiving of old alerts."""
         # Create alert configuration first
         config = AlertConfiguration(
             id=2,
+            user_id=test_user_id,
+            configuration_name="Archive Test Configuration",
             alert_type="low_risk",
             threshold_value=0.3,
             is_enabled=True,
@@ -260,12 +250,12 @@ class TestAlertHistoryManager:
     async def test_export_alert_history(
         self,
         history_manager: AlertHistoryManager,
-        test_user: User,
+        test_user_id: str,
         sample_alerts: list[Alert]
     ):
         """Test alert history export functionality."""
         export_data = await history_manager.export_alert_history(
-            user_id=test_user.id,
+            user_id=test_user_id,
             start_date=datetime.now() - timedelta(days=1),
             end_date=datetime.now() + timedelta(hours=1),
             format="json"
