@@ -472,16 +472,16 @@ class FirebaseNotificationService:
 
                 if existing_token:
                     # Update existing token
-                    existing_token.user_id = user_id
-                    existing_token.device_type = device_type
-                    existing_token.is_active = True
-                    existing_token.is_valid = True
-                    existing_token.refreshed_at = datetime.now()
+                    existing_token.user_id = user_id # type: ignore[assignment]
+                    existing_token.device_type = device_type # type: ignore[assignment]
+                    existing_token.is_active = True # type: ignore[assignment]
+                    existing_token.is_valid = True # type: ignore[assignment]
+                    existing_token.refreshed_at = datetime.now() # type: ignore[assignment]
 
                     if device_info:
-                        existing_token.device_name = device_info.get("device_name")
-                        existing_token.platform_version = device_info.get("platform_version")
-                        existing_token.app_version = device_info.get("app_version")
+                        existing_token.device_name = device_info.get("device_name") # type: ignore[assignment]
+                        existing_token.platform_version = device_info.get("platform_version") # type: ignore[assignment]
+                        existing_token.app_version = device_info.get("app_version") # type: ignore[assignment]
                 else:
                     # Create new token
                     new_token = UserDeviceToken(
@@ -621,11 +621,11 @@ class FirebaseNotificationService:
         # Build location string
         location_str = ""
         if alert.location_name:
-            location_str = alert.location_name
+            location_str = alert.location_name # type: ignore[assignment]
         elif alert.admin_region:
-            location_str = alert.admin_region
+            location_str = alert.admin_region # type: ignore[assignment]
         elif alert.country_code:
-            location_str = alert.country_code
+            location_str = alert.country_code # type: ignore[assignment]
 
         # Build data payload
         data = {
@@ -760,10 +760,10 @@ class FirebaseNotificationService:
                 token = result.scalar_one_or_none()
 
                 if token:
-                    token.is_valid = False
-                    token.is_active = False
-                    token.deactivated_at = datetime.now()
-                    token.validation_failures += 1
+                    token.is_valid = False # type: ignore[assignment]
+                    token.is_active = False # type: ignore[assignment]
+                    token.deactivated_at = datetime.now() # type: ignore[assignment]
+                    token.validation_failures += 1 # type: ignore[assignment]
                     await db.commit()
 
                     self.stats["tokens_invalidated"] = cast(int, self.stats["tokens_invalidated"]) + 1
