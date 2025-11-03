@@ -355,6 +355,30 @@ async def authenticate_user(
         return None
 
 
+async def get_current_user_optional(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    session: Annotated[AsyncSession, Depends(get_session)],
+    request: Request,
+) -> User | None:
+    """Get current user, returning None if authentication fails."""
+    try:
+        return await get_current_user(token, session, request)
+    except HTTPException:
+        return None
+
+
+async def get_current_api_key_optional(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(api_key_scheme)],
+    session: Annotated[AsyncSession, Depends(get_session)],
+    request: Request,
+) -> APIKey | None:
+    """Get current API key, returning None if authentication fails."""
+    try:
+        return await get_current_api_key(credentials, session, request)
+    except HTTPException:
+        return None
+
+
 def require_scopes(*required_scopes: str) -> Callable:
     """
     Dependency factory for requiring specific scopes.
@@ -366,9 +390,9 @@ def require_scopes(*required_scopes: str) -> Callable:
         Dependency function that validates scopes
     """
 
-    def scope_dependency(
-        current_user: Annotated[User, Depends(get_current_user)] | None = None,
-        current_api_key: Annotated[APIKey, Depends(get_current_api_key)] | None = None,
+    async def scope_dependency(
+        current_user: Annotated[User | None, Depends(get_current_user_optional)],
+        current_api_key: Annotated[APIKey | None, Depends(get_current_api_key_optional)],
     ) -> User | APIKey:
         """Validate that the authenticated entity has required scopes."""
 

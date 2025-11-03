@@ -14,6 +14,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from pydantic import BaseModel, Field, validator
 
 from ...config import get_settings
+from ...database.security_models import APIKey, User
 from ...notifications import NotificationManager
 from ...notifications.emergency_alerts import EmergencyLevel
 from ...notifications.models import DevicePlatform
@@ -129,7 +130,7 @@ async def get_notification_manager() -> NotificationManager:
 async def register_device(
     request: DeviceRegistrationRequest,
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ) -> dict[str, Any]:
     """
     Register a device for push notifications.
@@ -141,7 +142,7 @@ async def register_device(
         success, error = await notification_manager.register_device(
             token=request.token,
             platform=request.platform,
-            user_id=request.user_id or current_user.get("user_id"),
+            user_id=request.user_id or str(current_user.id),
             device_info=request.device_info,
             auto_subscribe=request.auto_subscribe,
             user_preferences=request.user_preferences,
@@ -173,7 +174,7 @@ async def register_device(
 async def unregister_device(
     token: str = Path(..., description="FCM device token"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ) -> dict[str, Any]:
     """
     Unregister a device from push notifications.
@@ -210,7 +211,7 @@ async def unregister_device(
 async def send_malaria_alert(
     request: MalariaAlertRequest,
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_scopes("send_notifications")),
+    current_user: User | APIKey = Depends(require_scopes("send_notifications")),
 ) -> dict[str, Any]:
     """
     Send malaria risk alert notification.
@@ -259,7 +260,7 @@ async def send_malaria_alert(
 async def send_outbreak_alert(
     request: OutbreakAlertRequest,
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_scopes("send_emergency_alerts")),
+    current_user: User | APIKey = Depends(require_scopes("send_emergency_alerts")),
 ) -> dict[str, Any]:
     """
     Send emergency outbreak alert.
@@ -308,7 +309,7 @@ async def send_outbreak_alert(
 async def send_medication_reminder(
     request: MedicationReminderRequest,
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ) -> dict[str, Any]:
     """
     Send medication reminder notification.
@@ -317,7 +318,7 @@ async def send_medication_reminder(
     """
     try:
         # Check if user can send to the specified user_id
-        if request.user_id != current_user.get("user_id") and not current_user.get("is_healthcare_provider"):
+        if request.user_id != str(current_user.id) and not (isinstance(current_user, User) and current_user.role == "healthcare_provider"):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Insufficient permissions to send reminder to specified user"
@@ -363,7 +364,7 @@ async def send_medication_reminder(
 async def subscribe_to_topics(
     request: TopicSubscriptionRequest,
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ) -> dict[str, Any]:
     """
     Subscribe user to notification topics.
@@ -372,7 +373,7 @@ async def subscribe_to_topics(
     """
     try:
         # Check if user can manage subscriptions for the specified user_id
-        if request.user_id != current_user.get("user_id") and not current_user.get("is_admin"):
+        if request.user_id != str(current_user.id) and not (isinstance(current_user, User) and current_user.role == "admin"):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Insufficient permissions to manage subscriptions for specified user"
@@ -408,7 +409,7 @@ async def subscribe_to_topics(
 @router.get("/topics/statistics")
 async def get_topic_statistics(
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_scopes("view_analytics")),
+    current_user: User | APIKey = Depends(require_scopes("view_analytics")),
 ) -> dict[str, Any]:
     """
     Get topic subscription statistics.
@@ -438,7 +439,7 @@ async def get_topic_statistics(
 async def get_notification_dashboard(
     days: int = Query(7, ge=1, le=365, description="Number of days for analysis"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_scopes("view_analytics")),
+    current_user: User | APIKey = Depends(require_scopes("view_analytics")),
 ) -> dict[str, Any]:
     """
     Get comprehensive notification analytics dashboard.
@@ -468,7 +469,7 @@ async def get_delivery_summary(
     days: int = Query(7, ge=1, le=365, description="Number of days for analysis"),
     group_by: str = Query("day", description="Grouping period (hour, day, week, month)"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_scopes("view_analytics")),
+    current_user: User | APIKey = Depends(require_scopes("view_analytics")),
 ) -> dict[str, Any]:
     """
     Get notification delivery summary with trends.
@@ -503,7 +504,7 @@ async def get_delivery_summary(
 async def get_engagement_metrics(
     days: int = Query(30, ge=1, le=365, description="Number of days for analysis"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_scopes("view_analytics")),
+    current_user: User | APIKey = Depends(require_scopes("view_analytics")),
 ) -> dict[str, Any]:
     """
     Get user engagement metrics for notifications.
@@ -538,7 +539,7 @@ async def get_error_analysis(
     days: int = Query(7, ge=1, le=365, description="Number of days for analysis"),
     limit: int = Query(50, ge=1, le=200, description="Maximum error details to return"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_scopes("view_analytics")),
+    current_user: User | APIKey = Depends(require_scopes("view_analytics")),
 ) -> dict[str, Any]:
     """
     Get notification error analysis.
@@ -574,7 +575,7 @@ async def get_error_analysis(
 @router.get("/system/status")
 async def get_system_status(
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_scopes("view_system_status")),
+    current_user: User | APIKey = Depends(require_scopes("view_system_status")),
 ) -> dict[str, Any]:
     """
     Get notification system status and health metrics.
@@ -603,7 +604,7 @@ async def cleanup_old_data(
     notification_retention_days: int = Query(90, ge=1, le=365, description="Days to retain notifications"),
     inactive_device_days: int = Query(30, ge=1, le=365, description="Days to consider device inactive"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_scopes("system_admin")),
+    current_user: User | APIKey = Depends(require_scopes("system_admin")),
 ) -> dict[str, Any]:
     """
     Clean up old notification data and inactive devices.
@@ -637,7 +638,7 @@ async def cleanup_old_data(
 @router.get("/emergency/active-alerts")
 async def get_active_emergency_alerts(
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_scopes("view_emergency_alerts")),
+    current_user: User | APIKey = Depends(require_scopes("view_emergency_alerts")),
 ) -> dict[str, Any]:
     """
     Get all currently active emergency alerts.
@@ -668,7 +669,7 @@ async def cancel_emergency_alert(
     reason: str = Body(..., description="Reason for cancellation"),
     send_notice: bool = Body(True, description="Send cancellation notice to users"),
     notification_manager: NotificationManager = Depends(get_notification_manager),
-    current_user: dict[str, Any] = Depends(require_scopes("cancel_emergency_alerts")),
+    current_user: User | APIKey = Depends(require_scopes("cancel_emergency_alerts")),
 ) -> dict[str, Any]:
     """
     Cancel an active emergency alert.
@@ -687,7 +688,7 @@ async def cancel_emergency_alert(
                 "success": True,
                 "message": f"Emergency alert {alert_id} cancelled successfully",
                 "cancellation_details": result,
-                "cancelled_by": current_user.get("user_id"),
+                "cancelled_by": str(current_user.id),
                 "cancelled_at": result.get("cancelled_at"),
             }
         else:
