@@ -61,7 +61,7 @@ async def health_check(
         system_metrics = _get_system_metrics()
 
         return HealthResponse(
-            status=status,
+            status=status.value,
             timestamp=datetime.now(),
             version="1.0.0",
             uptime_seconds=uptime_seconds,
@@ -73,7 +73,7 @@ async def health_check(
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         return HealthResponse(
-            status=HealthStatus.UNHEALTHY,
+            status=HealthStatus.UNHEALTHY.value,
             timestamp=datetime.now(),
             version="1.0.0",
             uptime_seconds=0,
