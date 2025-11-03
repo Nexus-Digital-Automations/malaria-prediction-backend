@@ -246,7 +246,7 @@ class FCMService:
 
         # Limit batch size to FCM maximum (500 tokens)
         batch_size = 500
-        results = {}
+        results: dict[str, tuple[bool, str | None, str | None]] = {}
 
         for i in range(0, len(tokens), batch_size):
             batch_tokens = tokens[i:i + batch_size]
