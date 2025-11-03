@@ -303,23 +303,24 @@ class AnalyticsHealthCheck(BaseModel):
     performance_metrics: dict[str, float] = Field(..., description="Performance metrics")
 
 
-class HealthStatus(BaseModel):
+class HealthStatus(str, Enum):
     """Health status enumeration."""
 
-    status: str = Field(..., description="Health status (healthy, degraded, unhealthy)")
-    checks: dict[str, str] = Field(..., description="Individual health check results")
-    timestamp: datetime = Field(..., description="Health check timestamp")
+    HEALTHY = "healthy"
+    DEGRADED = "degraded"
+    UNHEALTHY = "unhealthy"
 
 
 class HealthResponse(BaseModel):
     """Health check response model."""
 
     status: str = Field(..., description="Overall health status")
-    version: str = Field(..., description="Application version")
-    uptime: float = Field(..., description="Uptime in seconds")
-    checks: dict[str, HealthStatus] = Field(..., description="Detailed health checks")
-    environment: str = Field(..., description="Environment name")
     timestamp: datetime = Field(..., description="Response timestamp")
+    version: str = Field(..., description="Application version")
+    uptime_seconds: float = Field(..., description="Uptime in seconds")
+    models_loaded: list[str] = Field(default_factory=list, description="List of loaded model names")
+    data_sources: dict[str, Any] = Field(default_factory=dict, description="Data source health status")
+    system_metrics: dict[str, Any] = Field(default_factory=dict, description="System performance metrics")
 
 
 class LocationPoint(BaseModel):
