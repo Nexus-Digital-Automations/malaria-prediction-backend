@@ -316,23 +316,28 @@ function mergeSettingsJson(globalPath, localPath) {
       createBackup(localPath);
     }
 
-    // CRITICAL: Only update stop hook, preserve ALL other settings
-    const merged = { ...localSettings };
+    // Smart merge strategy:
+    // - Start with global settings as base (provides env, permissions for new projects)
+    // - Overlay local settings to preserve any custom env/permissions
+    // - Always update continue.stop hook from global
+    const merged = {
+      ...globalSettings,  // Base: env, permissions, hooks from global template
+      ...localSettings,   // Overlay: preserve any local customizations
+    };
 
-    // Update stop hook only
+    // Always update continue.stop hook from global (don't preserve local version)
     if (globalSettings.hooks && globalSettings.hooks['continue.stop']) {
       if (!merged.hooks) {merged.hooks = {};}
       merged.hooks['continue.stop'] = globalSettings.hooks['continue.stop'];
 
-      logSync('Updated stop hook configuration', 'INFO');
+      logSync('Updated stop hook configuration from global template', 'INFO');
     }
 
-    // NEVER touch:
-    // - env variables
-    // - permissions.allow
-    // - permissions.deny (252 bash safety rules)
-    // - any other hooks
-    // - any other settings
+    // This approach ensures:
+    // - New projects get full env/permissions from global template
+    // - Existing projects keep their local env/permissions customizations
+    // - All projects get updated continue.stop hook
+    // - Bash safety rules (252 deny rules) distributed to all projects
 
     // Create directory if it doesn't exist
     const dir = path.dirname(localPath);

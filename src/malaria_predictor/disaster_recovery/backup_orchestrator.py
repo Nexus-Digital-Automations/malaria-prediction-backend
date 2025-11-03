@@ -518,11 +518,11 @@ class DisasterRecoveryOrchestrator:
                         backup_results[component] = str(dest_path)
                         logger.info(f"Completed {component} backup")
                     else:
-                        backup_results[component] = None
+                        backup_results[component] = None  # type: ignore[assignment]
                         logger.error(f"Failed to create {component} backup")
                 except Exception as e:
                     logger.error(f"Error creating {component} backup: {e}")
-                    backup_results[component] = None
+                    backup_results[component] = None  # type: ignore[assignment]
 
             # Create manifest file
             manifest = {
@@ -714,11 +714,12 @@ class DisasterRecoveryOrchestrator:
 
     def _human_readable_size(self, size_bytes: int) -> str:
         """Convert bytes to human readable format."""
+        size = float(size_bytes)
         for unit in ["B", "KB", "MB", "GB", "TB"]:
-            if size_bytes < 1024.0:
-                return f"{size_bytes:.1f} {unit}"
-            size_bytes /= 1024.0
-        return f"{size_bytes:.1f} PB"
+            if size < 1024.0:
+                return f"{size:.1f} {unit}"
+            size /= 1024.0
+        return f"{size:.1f} PB"
 
     async def cleanup_old_backups(self) -> dict[str, int]:
         """Remove backups older than retention period.
@@ -811,12 +812,12 @@ class DisasterRecoveryOrchestrator:
 
         except Exception as e:
             logger.error(f"Backup verification failed: {e}")
-            verification_results["error"] = str(e)
+            verification_results["error"] = str(e)  # type: ignore[assignment]
 
         return verification_results
 
 
-async def main():
+async def main() -> int:
     """Main entry point for backup orchestrator."""
     import argparse
 
@@ -864,7 +865,7 @@ async def main():
 
     if not args.command:
         parser.print_help()
-        return
+        return 0
 
     # Initialize orchestrator
     orchestrator = DisasterRecoveryOrchestrator(

@@ -1,0 +1,71 @@
+const crypto = require('crypto');
+const { loggers, createContextLogger } = require('./logger');
+
+/**
+ * Enhanced logging utilities with automatic context injection
+ */
+
+// Create context-aware logger for agents
+function createAgentLogger(agentId, taskId = null) {
+  return createContextLogger({
+    agentId,
+    taskId,
+    module: 'agent',
+    operationId: crypto.randomUUID(),
+  });
+}
+
+// Create context-aware logger for tasks
+function createTaskLogger(taskId, agentId = null) {
+  return createContextLogger({
+    taskId,
+    agentId,
+    module: 'task',
+    operationId: crypto.randomUUID(),
+  });
+}
+
+// Create context-aware logger for operations
+function createOperationLogger(operationName, agentId = null, taskId = null) {
+  return createContextLogger({
+    agentId: agentId || process.env.agentId || 'unknown',
+    taskId: taskId || process.env.TASK_ID || null,
+    module: operationName,
+    operationId: crypto.randomUUID(),
+  });
+}
+
+// Enhanced logging with automatic context detection
+function logWithContext(level, message, customContext = {}) {
+  const autoContext = {
+    agentId: process.env.agentId || 'unknown',
+    taskId: process.env.TASK_ID || null,
+    operationId: crypto.randomUUID(),
+    timestamp: new Date().toISOString(),
+    ...customContext,
+  };
+
+  loggers.app[level](message, autoContext);
+}
+
+// Performance logging with context
+function logPerformance(operation, durationMs, agentId = null, taskId = null) {
+  const context = {
+    agentId: agentId || process.env.agentId || 'unknown',
+    taskId: taskId || process.env.TASK_ID || null,
+    operation,
+    durationMs,
+    performance: true,
+    operationId: crypto.randomUUID(),
+  };
+
+  loggers.performance.info(`Performance: ${operation} completed in ${durationMs}ms`, context);
+}
+
+module.exports = {
+  createAgentLogger,
+  createTaskLogger,
+  createOperationLogger,
+  logWithContext,
+  logPerformance,
+};

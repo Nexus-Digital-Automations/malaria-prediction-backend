@@ -1,0 +1,1106 @@
+
+const { loggers } = require('../../logger');
+/**
+ * Lesson Quality Scoring System
+ * Implements comprehensive quality scoring for lessons based on effectiveness tracking,
+ * success rate analysis, user feedback, And outcome correlation
+ */
+
+class LessonQualityScoring {
+  constructor(ragDatabase) {
+    this.ragDB = ragDatabase;
+    this.initialized = false;
+
+    // Quality scoring weights for different factors
+    this.qualityWeights = {
+      usageFrequency: 0.25,    // How often the lesson is accessed
+      successRate: 0.35,       // Success rate of implementations using this lesson
+      userFeedback: 0.20,      // User ratings And feedback
+      recency: 0.10,           // How recent the lesson is (newer = higher score)
+      completeness: 0.10,       // Content completeness And metadata quality
+    };
+
+    // Quality score thresholds
+    this.qualityThresholds = {
+      excellent: 0.85,
+      good: 0.70,
+      fair: 0.55,
+      poor: 0.40 };
+  }
+
+  /**
+   * Initialize quality scoring system with additional tables
+   */
+  async initialize() {
+    if (this.initialized) {return { success: true };}
+
+    try {
+      await this.createQualityTables();
+      await this.migrateExistingLessons();
+      this.initialized = true;
+      return { success: true, message: 'Lesson quality scoring system initialized' };
+    } catch (_) {
+      return { success: false, error: _.message };
+    }
+  }
+
+  /**
+   * Create quality scoring database tables
+   */
+  createQualityTables() {
+    return new Promise((resolve, reject) => {
+
+
+      const sql = `
+        -- Lesson quality scores table
+        CREATE TABLE IF NOT EXISTS lesson_quality_scores (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          lesson_id INTEGER NOT NULL,
+          overall_score REAL NOT NULL DEFAULT 0.0,
+          usage_score REAL DEFAULT 0.0,
+          success_score REAL DEFAULT 0.0,
+          feedback_score REAL DEFAULT 0.0,
+          recency_score REAL DEFAULT 0.0,
+          completeness_score REAL DEFAULT 0.0,
+          quality_rating TEXT DEFAULT 'unrated', -- 'excellent', 'good', 'fair', 'poor', 'unrated'
+          total_usage_count INTEGER DEFAULT 0,
+          successful_usage_count INTEGER DEFAULT 0,
+          total_feedback_count INTEGER DEFAULT 0,
+          average_rating REAL DEFAULT 0.0,
+          last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (lesson_id) REFERENCES lessons (id)
+        );
+
+        -- User feedback table
+        CREATE TABLE IF NOT EXISTS lesson_feedback (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          lesson_id INTEGER NOT NULL,
+          user_id TEXT DEFAULT 'anonymous',
+          rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+          feedback_text TEXT,
+          feedback_type TEXT DEFAULT 'general', -- 'general', 'accuracy', 'clarity', 'usefulness'
+          implementation_success BOOLEAN,
+          time_to_implement INTEGER, -- in minutes
+          difficulty_rating INTEGER CHECK (difficulty_rating >= 1 AND difficulty_rating <= 5),
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (lesson_id) REFERENCES lessons (id)
+        );
+
+        -- Lesson usage tracking table
+        CREATE TABLE IF NOT EXISTS lesson_usage (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          lesson_id INTEGER NOT NULL,
+          usage_type TEXT NOT NULL, -- 'view', 'apply', 'reference', 'copy'
+          user_id TEXT DEFAULT 'anonymous',
+          context TEXT, -- What task/project was this used for
+          success BOOLEAN,
+          outcome_description TEXT,
+          usage_duration INTEGER, -- in seconds
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (lesson_id) REFERENCES lessons (id)
+        );
+
+        -- Lesson outcome correlation table
+        CREATE TABLE IF NOT EXISTS lesson_outcomes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          lesson_id INTEGER NOT NULL,
+          outcome_type TEXT NOT NULL, -- 'task_completion', 'problem_solved', 'error_fixed', 'feature_implemented'
+          outcome_success BOOLEAN NOT NULL,
+          correlation_strength REAL DEFAULT 0.0, -- 0.0 to 1.0
+          context_data TEXT, -- JSON data about the context
+          measured_impact REAL, -- Quantified impact (time saved, errors reduced, etc.)
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (lesson_id) REFERENCES lessons (id)
+        );
+
+        -- Quality improvement suggestions table
+        CREATE TABLE IF NOT EXISTS quality_suggestions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          lesson_id INTEGER NOT NULL,
+          suggestion_type TEXT NOT NULL, -- 'content_improvement', 'metadata_enhancement', 'example_addition'
+          suggestion_text TEXT NOT NULL,
+          priority INTEGER DEFAULT 3, -- 1=high, 2=medium, 3=low
+          auto_generated BOOLEAN DEFAULT 1,
+          status TEXT DEFAULT 'pending', -- 'pending', 'implemented', 'rejected'
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (lesson_id) REFERENCES lessons (id)
+        );
+
+        -- Quality metrics history for tracking improvements over time
+        CREATE TABLE IF NOT EXISTS quality_metrics_history (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          lesson_id INTEGER NOT NULL,
+          metric_type TEXT NOT NULL, -- 'overall_score', 'usage_count', 'success_rate', 'feedback_average'
+          metric_value REAL NOT NULL,
+          recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (lesson_id) REFERENCES lessons (id)
+        );
+
+        -- Create indexes for performance
+        CREATE INDEX IF NOT EXISTS idx_quality_scores_lesson_id ON lesson_quality_scores(lesson_id);
+        CREATE INDEX IF NOT EXISTS idx_quality_scores_overall_score ON lesson_quality_scores(overall_score);
+        CREATE INDEX IF NOT EXISTS idx_quality_scores_rating ON lesson_quality_scores(quality_rating);
+        CREATE INDEX IF NOT EXISTS idx_feedback_lesson_id ON lesson_feedback(lesson_id);
+        CREATE INDEX IF NOT EXISTS idx_feedback_rating ON lesson_feedback(rating);
+        CREATE INDEX IF NOT EXISTS idx_usage_lesson_id ON lesson_usage(lesson_id);
+        CREATE INDEX IF NOT EXISTS idx_usage_type ON lesson_usage(usage_type);
+        CREATE INDEX IF NOT EXISTS idx_outcomes_lesson_id ON lesson_outcomes(lesson_id);
+        CREATE INDEX IF NOT EXISTS idx_outcomes_success ON lesson_outcomes(outcome_success);
+        CREATE INDEX IF NOT EXISTS idx_suggestions_lesson_id ON quality_suggestions(lesson_id);
+        CREATE INDEX IF NOT EXISTS idx_suggestions_status ON quality_suggestions(status);
+        CREATE INDEX IF NOT EXISTS idx_metrics_history_lesson_id ON quality_metrics_history(lesson_id);
+      `;
+
+      this.ragDB.db.exec(sql, (error) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Migrate existing lessons to quality scoring system
+   */
+  migrateExistingLessons() {
+    return new Promise((resolve, reject) => {
+
+
+      // Get all existing lessons without quality scores
+      this.ragDB.db.all(`
+        SELECT l.* FROM lessons l
+        LEFT JOIN lesson_quality_scores lqs ON l.id = lqs.lesson_id
+        WHERE lqs.lesson_id IS NULL
+      `, [], async (error, lessons) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        // Initialize quality scores for all lessons concurrently;
+        const migrationPromises = lessons.map(lesson => {
+          try {
+            // Initialize quality score for existing lesson;
+            const _initialScore = this.calculateInitialQualityScore(lesson);
+          } catch (error) {
+            loggers.app.warn(`[QUALITY] Migration warning for lesson ${lesson.id}:`, error.message);
+          }
+        });
+
+        await Promise.all(migrationPromises);
+
+        resolve();
+      });
+    });
+  }
+
+  /**
+   * Calculate initial quality score for a lesson
+   */
+  calculateInitialQualityScore(lesson) {
+    // Calculate completeness score based on available data;
+    const completenessScore = this.calculateCompletenessScore(lesson);
+
+    // for existing lessons, start with completeness as base score;
+    const recencyScore = this.calculateRecencyScore(lesson.created_at);
+    return {
+      overall_score: (completenessScore * 0.6) + (recencyScore * 0.4),
+      usage_score: 0.0,
+      success_score: 0.0,
+      feedback_score: 0.0,
+      recency_score: recencyScore,
+      completeness_score: completenessScore };
+  }
+
+  /**
+   * Calculate completeness score based on lesson metadata
+   */
+  calculateCompletenessScore(lesson) {
+    let score = 0.0;
+    let maxScore = 0.0;
+
+    // Title (required)
+    maxScore += 0.2;
+    if (lesson.title && lesson.title.length > 5) {score += 0.2;}
+
+    // Content (required)
+    maxScore += 0.3;
+    if (lesson.content && lesson.content.length > 20) {
+      const contentQuality = Math.min(lesson.content.length / 200, 1.0);
+      score += 0.3 * contentQuality;
+    }
+
+    // Category (required)
+    maxScore += 0.1;
+    if (lesson.category) {score += 0.1;}
+
+    // Subcategory (optional)
+    maxScore += 0.1;
+    if (lesson.subcategory) {score += 0.1;}
+
+    // Tags (optional)
+    maxScore += 0.1;
+    if (lesson.tags) {
+      try {
+        const tags = typeof lesson.tags === 'string' ? JSON.parse(lesson.tags) : lesson.tags;
+        if (Array.isArray(tags) && tags.length > 0) {score += 0.1;}
+      } catch {
+        // Invalid tags format
+      }
+    }
+
+    // Project/file path (optional)
+    maxScore += 0.2;
+    if (lesson.project_path || lesson.file_path) {score += 0.2;}
+
+    return maxScore > 0 ? score / maxScore : 0.0;
+  }
+
+  /**
+   * Calculate recency score (newer lessons get higher scores)
+   */
+  calculateRecencyScore(createdAt) {
+    const now = new Date();
+    const created = new Date(createdAt);
+    const daysDiff = (now - created) / (1000 * 60 * 60 * 24);
+
+    // Lessons lose recency score over time
+    if (daysDiff <= 7) {return 1.0;}        // Perfect score for first week
+    if (daysDiff <= 30) {return 0.8;}       // Good score for first month
+    if (daysDiff <= 90) {return 0.6;}       // Fair score for first quarter
+    if (daysDiff <= 365) {return 0.4;}      // Lower score for first year
+    return 0.2;                           // Minimum score for older lessons
+  }
+
+  /**
+   * Create initial quality record for a lesson
+   */
+  createInitialQualityRecord(lessonId, scores) {
+    return new Promise((resolve, reject) => {
+      const qualityRating = this.determineQualityRating(scores.overall_score);
+
+      const sql = `
+        INSERT INTO lesson_quality_scores (
+          lesson_id, overall_score, usage_score, success_score,
+          feedback_score, recency_score, completeness_score, quality_rating
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      this.ragDB.db.run(sql, [
+        lessonId,
+        scores.overall_score,
+        scores.usage_score,
+        scores.success_score,
+        scores.feedback_score,
+        scores.recency_score,
+        scores.completeness_score,
+        qualityRating], function (error) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(this.lastID);
+        }
+      });
+    });
+  }
+
+  /**
+   * Determine quality rating based on overall score
+   */
+  determineQualityRating(score) {
+    if (score >= this.qualityThresholds.excellent) {return 'excellent';}
+    if (score >= this.qualityThresholds.good) {return 'good';}
+    if (score >= this.qualityThresholds.fair) {return 'fair';}
+    if (score >= this.qualityThresholds.poor) {return 'poor';}
+    return 'unrated';
+  }
+
+  /**
+   * Record lesson usage And update quality metrics
+   */
+  async recordLessonUsage(lessonId, usageData) {
+    try {
+      const {
+        usageType = 'view',
+        userId = 'anonymous',
+        context = '',
+        success = null,
+        outcomeDescription = '',
+        usageDuration = 0 } = usageData;
+
+      // Record usage
+      await this.insertUsageRecord(lessonId, {
+        usageType,
+        userId,
+        context,
+        success,
+        outcomeDescription,
+        usageDuration });
+
+      // Update quality metrics
+      await this.updateQualityMetrics(lessonId);
+
+      return {
+        success: true,
+        message: 'Lesson usage recorded successfully' };
+
+    } catch (_error) {
+      return {
+        success: false,
+        _error: _error.message };
+    }
+  }
+
+  /**
+   * Insert usage record
+   */
+  insertUsageRecord(lessonId, usageData) {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        INSERT INTO lesson_usage (
+          lesson_id, usage_type, user_id, context, success, outcome_description, usage_duration
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      this.ragDB.db.run(sql, [
+        lessonId,
+        usageData.usageType,
+        usageData.userId,
+        usageData.context,
+        usageData.success,
+        usageData.outcomeDescription,
+        usageData.usageDuration], function (error) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(this.lastID);
+        }
+      });
+    });
+  }
+
+  /**
+   * Record user feedback for a lesson
+   */
+  async recordUserFeedback(lessonId, feedbackData) {
+    try {
+      const {
+        userId = 'anonymous',
+        rating,
+        feedbackText = '',
+        feedbackType = 'general',
+        implementationSuccess = null,
+        timeToImplement = null,
+        difficultyRating = null } = feedbackData;
+
+      if (!rating || rating < 1 || rating > 5) {
+        throw new Error('Rating must be between 1 And 5');
+      }
+
+      // Record feedback
+      await this.insertFeedbackRecord(lessonId, {
+        userId,
+        rating,
+        feedbackText,
+        feedbackType,
+        implementationSuccess,
+        timeToImplement,
+        difficultyRating,
+      });
+
+      // Update quality metrics
+      await this.updateQualityMetrics(lessonId);
+
+      return {
+        success: true,
+        message: 'User feedback recorded successfully' };
+
+    } catch (_error) {
+      return {
+        success: false,
+        _error: _error.message };
+    }
+  }
+
+  /**
+   * Insert feedback record
+   */
+  insertFeedbackRecord(lessonId, feedbackData) {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        INSERT INTO lesson_feedback (
+          lesson_id, user_id, rating, feedback_text, feedback_type,
+          implementation_success, time_to_implement, difficulty_rating
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      this.ragDB.db.run(sql, [
+        lessonId,
+        feedbackData.userId,
+        feedbackData.rating,
+        feedbackData.feedbackText,
+        feedbackData.feedbackType,
+        feedbackData.implementationSuccess,
+        feedbackData.timeToImplement,
+        feedbackData.difficultyRating], function (error) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(this.lastID);
+        }
+      });
+    });
+  }
+
+  /**
+   * Record lesson outcome correlation
+   */
+  async recordLessonOutcome(lessonId, outcomeData) {
+    try {
+      const {
+        outcomeType,
+        outcomeSuccess,
+        correlationStrength = 0.5,
+        contextData = '',
+        measuredImpact = 0 } = outcomeData;
+
+      // Record outcome
+      await this.insertOutcomeRecord(lessonId, {
+        outcomeType,
+        outcomeSuccess,
+        correlationStrength,
+        contextData,
+        measuredImpact,
+      });
+
+      // Update quality metrics
+      await this.updateQualityMetrics(lessonId);
+
+      return {
+        success: true,
+        message: 'Lesson outcome recorded successfully' };
+
+    } catch (_error) {
+      return {
+        success: false,
+        _error: _error.message };
+    }
+  }
+
+  /**
+   * Insert outcome record
+   */
+  insertOutcomeRecord(lessonId, outcomeData) {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        INSERT INTO lesson_outcomes (
+          lesson_id, outcome_type, outcome_success, correlation_strength, context_data, measured_impact
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `;
+
+      this.ragDB.db.run(sql, [
+        lessonId,
+        outcomeData.outcomeType,
+        outcomeData.outcomeSuccess,
+        outcomeData.correlationStrength,
+        outcomeData.contextData,
+        outcomeData.measuredImpact], function (error) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(this.lastID);
+        }
+      });
+    });
+  }
+
+  /**
+   * Update quality metrics for a lesson
+   */
+  async updateQualityMetrics(lessonId) {
+    try {
+      // Get current metrics data;
+      const metricsData = await this.gatherMetricsData(lessonId);
+
+      // Calculate new scores;
+      const newScores = this.calculateQualityScores(metricsData);
+
+      // Update quality scores record
+      await this.updateQualityScores(lessonId, newScores, metricsData);
+
+      // Record metrics history
+      await this.recordMetricsHistory(lessonId, newScores);
+
+      return newScores;
+    } catch (_error) {
+      throw new Error(`Failed to update quality metrics: ${_error.message}`);
+    }
+  }
+
+  /**
+   * Gather metrics data for a lesson
+   */
+  gatherMetricsData(lessonId) {
+    return new Promise((resolve, reject) => {
+      const queries = {
+        usage: `
+          SELECT
+            COUNT(*) as total_usage,
+            COUNT(CASE WHEN success = 1 THEN 1 END) as successful_usage,
+            AVG(usage_duration) as avg_duration
+          FROM lesson_usage WHERE lesson_id = ?
+        `,
+        feedback: `
+          SELECT
+            COUNT(*) as total_feedback,
+            AVG(rating) as avg_rating,
+            COUNT(CASE WHEN implementation_success = 1 THEN 1 END) as implementation_success_count
+          FROM lesson_feedback WHERE lesson_id = ?
+        `,
+        outcomes: `
+          SELECT
+            COUNT(*) as total_outcomes,
+            COUNT(CASE WHEN outcome_success = 1 THEN 1 END) as successful_outcomes,
+            AVG(correlation_strength) as avg_correlation,
+            SUM(measured_impact) as total_impact
+          FROM lesson_outcomes WHERE lesson_id = ?
+        `,
+        lesson: `
+          SELECT * FROM lessons WHERE id = ?
+        ` };
+
+      const results = {};
+      let completedQueries = 0;
+
+      Object.keys(queries).forEach(key => {
+
+
+        // eslint-disable-next-line security/detect-object-injection -- Property access validated through input validation
+        this.ragDB.db.get(queries[key], [lessonId], (error, row) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+
+          // eslint-disable-next-line security/detect-object-injection -- Property access validated through input validation
+          results[key] = row || {};
+          completedQueries++;
+
+          if (completedQueries === Object.keys(queries).length) {
+            resolve(results);
+          }
+        });
+      });
+    });
+  }
+
+  /**
+   * Calculate quality scores based on metrics data
+   */
+  calculateQualityScores(metricsData) {
+    const { usage, feedback, outcomes, lesson } = metricsData;
+
+    // Usage score (based on frequency And success rate)
+    const usageScore = this.calculateUsageScore(usage);
+
+    // Success score (based on implementation success And outcomes)
+    const successScore = this.calculateSuccessScore(usage, feedback, outcomes);
+
+    // Feedback score (based on user ratings)
+    const feedbackScore = this.calculateFeedbackScore(feedback);
+
+    // Recency score (based on lesson age)
+    const recencyScore = this.calculateRecencyScore(lesson.created_at);
+
+    // Completeness score (based on lesson metadata)
+    const completenessScore = this.calculateCompletenessScore(lesson);
+
+    // Overall weighted score;
+    const overallScore = (
+      usageScore * this.qualityWeights.usageFrequency +
+      successScore * this.qualityWeights.successRate +
+      feedbackScore * this.qualityWeights.userFeedback +
+      recencyScore * this.qualityWeights.recency +
+      completenessScore * this.qualityWeights.completeness
+    );
+
+    return {
+      overall_score: Math.round(overallScore * 1000) / 1000, // Round to 3 decimal places
+      usage_score: Math.round(usageScore * 1000) / 1000,
+      success_score: Math.round(successScore * 1000) / 1000,
+      feedback_score: Math.round(feedbackScore * 1000) / 1000,
+      recency_score: Math.round(recencyScore * 1000) / 1000,
+      completeness_score: Math.round(completenessScore * 1000) / 1000 };
+  }
+
+  /**
+   * Calculate usage-based quality score
+   */
+  calculateUsageScore(usageData) {
+    const totalUsage = usageData.total_usage || 0;
+    const successfulUsage = usageData.successful_usage || 0;
+
+    if (totalUsage === 0) {return 0.0;}
+
+    // Combine usage frequency And success rate;
+    const frequencyScore = Math.min(totalUsage / 10, 1.0); // Normalize to 10 uses;
+    const successRate = successfulUsage / totalUsage;
+
+    return (frequencyScore * 0.4) + (successRate * 0.6);
+  }
+
+  /**
+   * Calculate success-based quality score
+   */
+  calculateSuccessScore(usageData, feedbackData, outcomeData) {
+    let totalWeight = 0;
+    let weightedScore = 0;
+
+    // Usage success rate
+    if (usageData.total_usage > 0) {
+      const usageSuccessRate = (usageData.successful_usage || 0) / usageData.total_usage;
+      weightedScore += usageSuccessRate * 0.4;
+      totalWeight += 0.4;
+    }
+
+    // Feedback implementation success rate
+    if (feedbackData.total_feedback > 0) {
+      const implementationSuccessRate = (feedbackData.implementation_success_count || 0) / feedbackData.total_feedback;
+      weightedScore += implementationSuccessRate * 0.3;
+      totalWeight += 0.3;
+    }
+
+    // Outcome success rate
+    if (outcomeData.total_outcomes > 0) {
+      const outcomeSuccessRate = (outcomeData.successful_outcomes || 0) / outcomeData.total_outcomes;
+      weightedScore += outcomeSuccessRate * 0.3;
+      totalWeight += 0.3;
+    }
+
+    return totalWeight > 0 ? weightedScore / totalWeight : 0.0;
+  }
+
+  /**
+   * Calculate feedback-based quality score
+   */
+  calculateFeedbackScore(feedbackData) {
+    const totalFeedback = feedbackData.total_feedback || 0;
+    const avgRating = feedbackData.avg_rating || 0;
+
+    if (totalFeedback === 0) {return 0.0;}
+
+    // Normalize 1-5 rating to 0-1 scale;
+    const normalizedRating = (avgRating - 1) / 4;
+
+    // Weight by feedback volume (more feedback = more reliable)
+    const volumeWeight = Math.min(totalFeedback / 5, 1.0); // Normalize to 5 feedback items
+
+    return normalizedRating * (0.7 + (volumeWeight * 0.3));
+  }
+
+  /**
+   * Update quality scores record
+   */
+  updateQualityScores(lessonId, scores, metricsData) {
+    return new Promise((resolve, reject) => {
+      const qualityRating = this.determineQualityRating(scores.overall_score);
+
+      const sql = `
+        UPDATE lesson_quality_scores
+        SET overall_score = ?, usage_score = ?, success_score = ?, feedback_score = ?,
+            recency_score = ?, completeness_score = ?, quality_rating = ?,
+            total_usage_count = ?, successful_usage_count = ?, total_feedback_count = ?,
+            average_rating = ?, last_updated = CURRENT_TIMESTAMP
+        WHERE lesson_id = ?
+      `;
+
+      this.ragDB.db.run(sql, [
+        scores.overall_score,
+        scores.usage_score,
+        scores.success_score,
+        scores.feedback_score,
+        scores.recency_score,
+        scores.completeness_score,
+        qualityRating,
+        metricsData.usage.total_usage || 0,
+        metricsData.usage.successful_usage || 0,
+        metricsData.feedback.total_feedback || 0,
+        metricsData.feedback.avg_rating || 0,
+        lessonId], function (error) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Record metrics history for trend analysis
+   */
+  recordMetricsHistory(lessonId, scores) {
+    return new Promise((resolve, reject) => {
+      const metrics = [
+        { type: 'overall_score', value: scores.overall_score },
+        { type: 'usage_score', value: scores.usage_score },
+        { type: 'success_score', value: scores.success_score },
+        { type: 'feedback_score', value: scores.feedback_score }];
+
+      let completed = 0;
+      const total = metrics.length;
+
+      metrics.forEach(metric => {
+        const sql = `
+          INSERT INTO quality_metrics_history (lesson_id, metric_type, metric_value)
+          VALUES (?, ?, ?)
+        `;
+
+        this.ragDB.db.run(sql, [lessonId, metric.type, metric.value], function (error) {
+          if (error) {
+            reject(error);
+            return;
+          }
+
+          completed++;
+          if (completed === total) {
+            resolve();
+          }
+        });
+      });
+    });
+  }
+
+  /**
+   * Get quality score for a lesson
+   */
+  getLessonQualityScore(lessonId) {
+    return new Promise((resolve, reject) => {
+
+
+      const sql = `
+        SELECT lqs.*, l.title, l.category
+        FROM lesson_quality_scores lqs
+        JOIN lessons l ON lqs.lesson_id = l.id
+        WHERE lqs.lesson_id = ?
+      `;
+
+      this.ragDB.db.get(sql, [lessonId], (error, row) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(row || null);
+        }
+      });
+    });
+  }
+
+  /**
+   * Get top quality lessons
+   */
+  getTopQualityLessons(limit = 10, qualityRating = null) {
+    return new Promise((resolve, reject) => {
+      let sql = `
+        SELECT lqs.*, l.title, l.content, l.category, l.subcategory
+        FROM lesson_quality_scores lqs
+        JOIN lessons l ON lqs.lesson_id = l.id
+      `;
+
+      const params = [];
+
+      if (qualityRating) {
+        sql += ` WHERE lqs.quality_rating = ?`;
+        params.push(qualityRating);
+      }
+
+      sql += ` ORDER BY lqs.overall_score DESC LIMIT ?`;
+      params.push(limit);
+
+      this.ragDB.db.all(sql, params, (error, rows) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(rows || []);
+        }
+      });
+    });
+  }
+
+  /**
+   * Get quality analytics for all lessons
+   */
+  getQualityAnalytics() {
+    return new Promise((resolve, reject) => {
+      const analyticsQueries = {
+        overall: `
+          SELECT
+            COUNT(*) as total_lessons,
+            AVG(overall_score) as avg_overall_score,
+            COUNT(CASE WHEN quality_rating = 'excellent' THEN 1 END) as excellent_count,
+            COUNT(CASE WHEN quality_rating = 'good' THEN 1 END) as good_count,
+            COUNT(CASE WHEN quality_rating = 'fair' THEN 1 END) as fair_count,
+            COUNT(CASE WHEN quality_rating = 'poor' THEN 1 END) as poor_count,
+            COUNT(CASE WHEN quality_rating = 'unrated' THEN 1 END) as unrated_count
+          FROM lesson_quality_scores
+        `,
+        topLessons: `
+          SELECT lqs.lesson_id, l.title, lqs.overall_score, lqs.quality_rating
+          FROM lesson_quality_scores lqs
+          JOIN lessons l ON lqs.lesson_id = l.id
+          ORDER BY lqs.overall_score DESC
+          LIMIT 5
+        `,
+        bottomLessons: `
+          SELECT lqs.lesson_id, l.title, lqs.overall_score, lqs.quality_rating
+          FROM lesson_quality_scores lqs
+          JOIN lessons l ON lqs.lesson_id = l.id
+          WHERE lqs.overall_score > 0
+          ORDER BY lqs.overall_score ASC
+          LIMIT 5
+        `,
+        categoryStats: `
+          SELECT
+            l.category,
+            COUNT(*) as lesson_count,
+            AVG(lqs.overall_score) as avg_score,
+            MAX(lqs.overall_score) as max_score
+          FROM lesson_quality_scores lqs
+          JOIN lessons l ON lqs.lesson_id = l.id
+          GROUP BY l.category
+          ORDER BY avg_score DESC
+        ` };
+
+      const results = {};
+      let completedQueries = 0;
+
+      Object.keys(analyticsQueries).forEach(key => {
+
+
+        // eslint-disable-next-line security/detect-object-injection -- Property access validated through input validation
+        this.ragDB.db.all(analyticsQueries[key], [], (error, rows) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+
+          // eslint-disable-next-line security/detect-object-injection -- Property access validated through input validation
+          results[key] = key === 'overall' ? rows[0] : rows;
+          completedQueries++;
+
+          if (completedQueries === Object.keys(analyticsQueries).length) {
+            resolve(results);
+          }
+        });
+      });
+    });
+  }
+
+  /**
+   * Generate quality improvement suggestions for a lesson
+   */
+  async generateQualityImprovementSuggestions(lessonId) {
+    try {
+      const qualityScore = await this.getLessonQualityScore(lessonId);
+      if (!qualityScore) {
+        throw new Error('Lesson quality score not found');
+      }
+
+      const suggestions = [];
+
+      // Analyze each score component And generate suggestions
+      if (qualityScore.usage_score < 0.5) {
+        suggestions.push({
+          type: 'content_improvement',
+          text: 'Low usage score suggests content may not be easily discoverable or relevant. Consider improving title, adding more descriptive tags, or enhancing content clarity.',
+          priority: 2 });
+      }
+
+      if (qualityScore.success_score < 0.6) {
+        suggestions.push({
+          type: 'content_improvement',
+          text: 'Low success score indicates implementation challenges. Consider adding more detailed examples, step-by-step instructions, or troubleshooting guides.',
+          priority: 1 });
+      }
+
+      if (qualityScore.feedback_score < 0.7) {
+        suggestions.push({
+          type: 'example_addition',
+          text: 'Low feedback score suggests user satisfaction issues. Gather more specific feedback And consider adding real-world examples or use cases.',
+          priority: 2 });
+      }
+
+      if (qualityScore.completeness_score < 0.8) {
+        suggestions.push({
+          type: 'metadata_enhancement',
+          text: 'Completeness score can be improved by adding missing metadata such as subcategory, tags, project context, or file path references.',
+          priority: 3 });
+      }
+
+      // Store suggestions in database concurrently;
+      const storagePromises = suggestions.map(suggestion =>
+        this.storeSuggestion(lessonId, suggestion),
+      );
+      await Promise.all(storagePromises);
+
+      return {
+        success: true,
+        lessonId,
+        currentScore: qualityScore.overall_score,
+        suggestions };
+
+    } catch (_error) {
+      return {
+        success: false,
+        _error: _error.message };
+    }
+  }
+
+  /**
+   * Store quality improvement suggestion
+   */
+  storeSuggestion(lessonId, suggestion) {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        INSERT INTO quality_suggestions (lesson_id, suggestion_type, suggestion_text, priority)
+        VALUES (?, ?, ?, ?)
+      `;
+
+      this.ragDB.db.run(sql, [
+        lessonId,
+        suggestion.type,
+        suggestion.text,
+        suggestion.priority], function (error) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(this.lastID);
+        }
+      });
+    });
+  }
+
+  /**
+   * Get comprehensive quality report for a lesson
+   */
+  async getLessonQualityReport(lessonId) {
+    try {
+      const [qualityScore, feedback, usage, outcomes, suggestions] = await Promise.all([
+        this.getLessonQualityScore(lessonId),
+        this.getLessonFeedback(lessonId),
+        this.getLessonUsage(lessonId),
+        this.getLessonOutcomes(lessonId),
+        this.getLessonSuggestions(lessonId)]);
+      return {
+        success: true,
+        lessonId,
+        qualityScore,
+        feedback,
+        usage,
+        outcomes,
+        suggestions,
+        generatedAt: new Date().toISOString() };
+
+    } catch (_error) {
+      return {
+        success: false,
+        _error: _error.message };
+    }
+  }
+
+  /**
+   * Get lesson feedback
+   */
+  getLessonFeedback(lessonId) {
+    return new Promise((resolve, reject) => {
+
+
+      const sql = `
+        SELECT * FROM lesson_feedback
+        WHERE lesson_id = ?
+        ORDER BY created_at DESC
+      `;
+
+      this.ragDB.db.all(sql, [lessonId], (error, rows) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(rows || []);
+        }
+      });
+    });
+  }
+
+  /**
+   * Get lesson usage data
+   */
+  getLessonUsage(lessonId) {
+    return new Promise((resolve, reject) => {
+
+
+      const sql = `
+        SELECT * FROM lesson_usage
+        WHERE lesson_id = ?
+        ORDER BY created_at DESC
+      `;
+
+      this.ragDB.db.all(sql, [lessonId], (error, rows) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(rows || []);
+        }
+      });
+    });
+  }
+
+  /**
+   * Get lesson outcomes
+   */
+  getLessonOutcomes(lessonId) {
+    return new Promise((resolve, reject) => {
+
+
+      const sql = `
+        SELECT * FROM lesson_outcomes
+        WHERE lesson_id = ?
+        ORDER BY created_at DESC
+      `;
+
+      this.ragDB.db.all(sql, [lessonId], (error, rows) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(rows || []);
+        }
+      });
+    });
+  }
+
+  /**
+   * Get lesson suggestions
+   */
+  getLessonSuggestions(lessonId) {
+    return new Promise((resolve, reject) => {
+
+
+      const sql = `
+        SELECT * FROM quality_suggestions
+        WHERE lesson_id = ?
+        ORDER BY priority ASC, created_at DESC
+      `;
+
+      this.ragDB.db.all(sql, [lessonId], (error, rows) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(rows || []);
+        }
+      });
+    });
+  }
+}
+
+module.exports = LessonQualityScoring;

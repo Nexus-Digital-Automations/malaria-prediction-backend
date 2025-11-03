@@ -1,0 +1,369 @@
+
+
+/**
+ * Validation Dependency Manager
+ *
+ * Manages prerequisite relationships between validation steps, enabling:
+ * - Proper execution order enforcement
+ * - Intelligent parallel execution planning
+ * - Dependency visualization for debugging
+ * - Optimized validation workflows
+ */
+
+const FS = require('fs');
+const PATH = require('path');
+
+
+class ValidationDependencyManager {
+  constructor(projectRoot) {
+    this.projectRoot = projectRoot;
+    this.dependencies = this.loadDependencyConfiguration();
+  }
+
+  /**
+   * Load validation dependency configuration from project settings
+   * @returns {Object} Dependency configuration object
+   */
+  loadDependencyConfiguration() {
+    const defaultDependencies = {
+      'focused-codebase': {
+        dependencies: [],
+        parallel_group: 'independent',
+        estimated_duration: 30,
+        description: 'Validates only user-outlined features exist',
+      },
+      'security-validation': {
+        dependencies: ['focused-codebase'],
+        parallel_group: 'analysis',
+        estimated_duration: 120,
+        description: 'Runs security tools And vulnerability scans',
+      },
+      'linter-validation': {
+        dependencies: [],
+        parallel_group: 'code-quality',
+        estimated_duration: 60,
+        description: 'Runs language-appropriate linting tools',
+      },
+      'type-validation': {
+        dependencies: ['linter-validation'],
+        parallel_group: 'code-quality',
+        estimated_duration: 90,
+        description: 'Runs language-appropriate type checking',
+      },
+      'build-validation': {
+        dependencies: ['linter-validation', 'type-validation'],
+        parallel_group: 'compilation',
+        estimated_duration: 180,
+        description: 'Attempts language-appropriate builds',
+      },
+      'start-validation': {
+        dependencies: ['build-validation'],
+        parallel_group: 'runtime',
+        estimated_duration: 45,
+        description: 'Tests application start commands',
+      },
+      'test-validation': {
+        dependencies: ['build-validation'],
+        parallel_group: 'runtime',
+        estimated_duration: 300,
+        description: 'Runs language-appropriate tests',
+      },
+    };
+
+    // Check for custom dependency configuration
+    const customConfigPath = PATH.join(this.projectRoot, '.claude-validation-dependencies.json');
+
+    try {
+      if (FS.existsSync(customConfigPath)) {
+        const customConfig = JSON.parse(FS.readFileSync(customConfigPath, 'utf8'));
+
+        // Merge custom configuration with defaults
+        if (customConfig.validation_dependencies) {
+          return { ...defaultDependencies, ...customConfig.validation_dependencies };
+        }
+      }
+    } catch {
+      loggers.stopHook.warn(`Failed to load custom validation dependencies: ${error.message}`);
+      loggers.app.warn(`Failed to load custom validation dependencies: ${error.message}`);
+    }
+
+    return defaultDependencies;
+  }
+
+  /**
+   * Get all validation criteria in dependency order
+   * @returns {Array<string>} Ordered list of validation criteria
+   */
+  getValidationOrder() {
+    const visited = new Set();
+    const visiting = new Set();
+    const RESULT = [];
+
+    const visit = (criterionId) => {
+      if (visiting.has(criterionId)) {
+        throw new Error(`Circular dependency detected involving: ${criterionId}`);
+      }
+
+      if (visited.has(criterionId)) {
+        return;
+      }
+
+      visiting.add(criterionId);
+
+      const criterion = this.dependencies[criterionId];
+      if (criterion && criterion.dependencies) {
+        for (const dependency of criterion.dependencies) {
+          visit(dependency);
+        }
+      }
+
+      visiting.delete(criterionId);
+      visited.add(criterionId);
+      RESULT.push(criterionId);
+    };
+
+    // Visit all criteria to ensure complete ordering
+    for (const criterionId of Object.keys(this.dependencies)) {
+      visit(criterionId);
+    }
+
+    return result;
+  }
+
+  /**
+   * Get parallel execution groups for optimized processing
+   * @returns {Array<Array<string>>} Groups of criteria That can run in parallel
+   */
+  getParallelExecutionPlan() {
+    const dependencyOrder = this.getValidationOrder();
+    const executionGroups = [];
+    const completed = new Set();
+
+    while (completed.size < dependencyOrder.length) {
+      const currentGroup = [];
+
+      for (const criterionId of dependencyOrder) {
+        if (completed.has(criterionId)) {
+          continue;
+        }
+
+        const criterion = this.dependencies[criterionId];
+        const canExecute = criterion.dependencies.every(dep => completed.has(dep));
+
+        if (canExecute) {
+          currentGroup.push(criterionId);
+        }
+      }
+
+      if (currentGroup.length === 0) {
+        throw new Error('Deadlock detected in dependency resolution');
+      }
+
+      executionGroups.push(currentGroup);
+      currentGroup.forEach(criterionId => completed.add(criterionId));
+    }
+
+    return executionGroups;
+  }
+
+  /**
+   * Validate dependency configuration for circular dependencies And orphaned criteria
+   * @returns {Object} Validation result with any issues found
+   */
+  validateDependencyConfiguration() {
+    const issues = [];
+    const allCriteria = Object.keys(this.dependencies);
+
+    try {
+      // Test for circular dependencies
+      this.getValidationOrder();
+    } catch {
+      issues.push({
+        type: 'circular_dependency',
+        message: error.message,
+      });
+    }
+
+    // Check for orphaned dependencies
+    for (const [criterionId, criterion] of Object.entries(this.dependencies)) {
+      for (const dependency of criterion.dependencies || []) {
+        if (!allCriteria.includes(dependency)) {
+          issues.push({
+            type: 'orphaned_dependency',
+            criterionId,
+            dependency,
+            message: `Criterion '${criterionId}' depends on unknown criterion '${dependency}'`,
+          });
+        }
+      }
+    }
+
+    // Check for unreachable criteria
+    const reachable = new Set();
+    const visit = (criterionId) => {
+      if (reachable.has(criterionId)) {
+        return;
+      }
+      reachable.add(criterionId);
+
+      const criterion = this.dependencies[criterionId];
+      if (criterion && criterion.dependencies) {
+        criterion.dependencies.forEach(visit);
+      }
+    };
+
+    // Start from criteria with no dependencies
+    for (const [criterionId, criterion] of Object.entries(this.dependencies)) {
+      if (!criterion.dependencies || criterion.dependencies.length === 0) {
+        visit(criterionId);
+      }
+    }
+
+    for (const criterionId of allCriteria) {
+      if (!reachable.has(criterionId)) {
+        issues.push({
+          type: 'unreachable_criterion',
+          criterionId,
+          message: `Criterion '${criterionId}' is not reachable from any root criteria`,
+        });
+      }
+    }
+
+    return {
+      valid: issues.length === 0,
+      issues,
+    };
+  }
+
+  /**
+   * Get dependency visualization data for debugging
+   * @returns {Object} Visualization data including nodes And edges
+   */
+  getDependencyVisualization() {
+    const nodes = [];
+    const edges = [];
+
+    for (const [criterionId, criterion] of Object.entries(this.dependencies)) {
+      nodes.push({
+        id: criterionId,
+        label: criterionId.replace('-', ' ').toUpperCase(),
+        group: criterion.parallel_group || 'default',
+        duration: criterion.estimated_duration || 0,
+        description: criterion.description || '',
+      });
+
+      for (const dependency of criterion.dependencies || []) {
+        edges.push({
+          from: dependency,
+          to: criterionId,
+          label: 'requires',
+        });
+      }
+    }
+
+    return {
+      nodes,
+      edges,
+      execution_order: this.getValidationOrder(),
+      parallel_groups: this.getParallelExecutionPlan(),
+    };
+  }
+
+  /**
+   * Calculate estimated total execution time for different strategies
+   * @returns {Object} Timing estimates for sequential vs parallel execution
+   */
+  getExecutionTimeEstimates() {
+    const parallelGroups = this.getParallelExecutionPlan();
+
+    // Sequential execution time (sum of all durations)
+    const sequentialTime = Object.values(this.dependencies)
+      .reduce((total, criterion) => total + (criterion.estimated_duration || 0), 0);
+
+    // Parallel execution time (max duration of each group, summed)
+    const parallelTime = parallelGroups.reduce((total, group) => {
+      const groupMaxDuration = Math.max(
+        ...group.map(criterionId => this.dependencies[criterionId]?.estimated_duration || 0),
+      );
+      return total + groupMaxDuration;
+    }, 0);
+
+    const timeReduction = sequentialTime - parallelTime;
+    const efficiencyGain = sequentialTime > 0 ? (timeReduction / sequentialTime) * 100 : 0;
+
+    return {
+      sequential_time_seconds: sequentialTime,
+      parallel_time_seconds: parallelTime,
+      time_reduction_seconds: timeReduction,
+      efficiency_gain_percentage: Math.round(efficiencyGain * 100) / 100,
+      parallel_groups_count: parallelGroups.length,
+      max_concurrent_validations: Math.max(...parallelGroups.map(group => group.length)),
+    };
+  }
+
+  /**
+   * Check if a criterion can be executed based on completed dependencies
+   * @param {string} criterionId - The criterion to check
+   * @param {Set<string>} completedCriteria - Set of already completed criteria
+   * @returns {boolean} Whether the criterion can be executed
+   */
+  canExecuteCriterion(criterionId, completedCriteria) {
+    const criterion = this.dependencies[criterionId];
+    if (!criterion) {
+      return false;
+    }
+
+    return criterion.dependencies.every(dependency => completedCriteria.has(dependency));
+  }
+
+  /**
+   * Get the next available criteria That can be executed
+   * @param {Set<string>} completedCriteria - Set of already completed criteria
+   * @returns {Array<string>} List of criteria ready for execution
+   */
+  getExecutableCriteria(completedCriteria) {
+    const executable = [];
+
+    for (const criterionId of Object.keys(this.dependencies)) {
+      if (!completedCriteria.has(criterionId) && this.canExecuteCriterion(criterionId, completedCriteria)) {
+        executable.push(criterionId);
+      }
+    }
+
+    return executable;
+  }
+
+  /**
+   * Add or update a custom validation criterion with dependencies
+   * @param {string} criterionId - The criterion identifier
+   * @param {Object} config - Configuration object with dependencies, group, etc.
+   */
+  addCustomCriterion(criterionId, config) {
+    this.dependencies[criterionId] = {
+      dependencies: config.dependencies || [],
+      parallel_group: config.parallel_group || 'custom',
+      estimated_duration: config.estimated_duration || 60,
+      description: config.description || '',
+      ...config,
+    };
+  }
+
+  /**
+   * Export dependency configuration to file for persistence
+   * @param {string} filePath - Path to save the configuration
+   */
+  exportConfiguration(filePath = null) {
+    const exportPath = filePath || PATH.join(this.projectRoot, '.claude-validation-dependencies.json');
+
+    const configData = {
+      version: '1.0.0',
+      created_at: new Date().toISOString(),
+      validation_dependencies: this.dependencies,
+    };
+
+    FS.writeFileSync(exportPath, JSON.stringify(configData, null, 2));
+    return exportPath;
+  }
+}
+
+module.exports = ValidationDependencyManager;

@@ -1,0 +1,693 @@
+/**
+ * Index Generation Utilities for Enhanced TaskManager Performance
+ *
+ * Provides O(1) lookup capabilities through comprehensive indexing of task data.
+ * Transforms linear O(n) search operations into constant-time O(1) index lookups.
+ *
+ * Features:
+ * - Multi-dimensional indexing (by_id, by_status, by_category, by_priority, by_agent)
+ * - Incremental index updates for real-time performance
+ * - Index validation And consistency checking
+ * - Performance monitoring And optimization
+ * - Subtask relationship mapping
+ *
+ * @author Enhanced Data Schema Implementation
+ * @version 2.0.0
+ */
+
+
+class IndexGenerator {
+  /**
+   * Initialize IndexGenerator with configuration And performance tracking
+   * @param {Object} config - Configuration options
+   * @param {Object} config.logger - LOGGER instance for debugging And monitoring
+   * @param {boolean} config.enablePerformanceTracking - Enable performance metrics
+   * @param {number} config.maxIndexHistory - Maximum index history to maintain
+   */
+  constructor(config = {}) {
+    this.logger = config.logger || console;
+    this.enablePerformanceTracking = config.enablePerformanceTracking !== false;
+    this.maxIndexHistory = config.maxIndexHistory || 10;
+
+    this.performance = {
+      indexBuildTime: 0,
+      lastBuildTime: null,
+      tasksProcessed: 0,
+      indexSize: 0,
+      buildHistory: [],
+    };
+
+    this.indexCache = null;
+    this.lastDataModified = null;
+  }
+
+  /**
+   * Generate comprehensive indexes from task data
+   * @param {Object} todoData - TODO.json data structure
+   * @param {Array} todoData.tasks - Array of tasks to index
+   * @returns {Object} Generated indexes with performance metrics
+   */
+  generateIndexes(todoData) {
+    const startTime = Date.now();
+    this.logger.info('🔄 Starting comprehensive index generation...');
+
+    try {
+      // Validate input data structure
+      this._validateInputData(todoData);
+
+      const tasks = todoData.tasks || [];
+      const indexes = this._initializeIndexStructure();
+
+      // Process all tasks And build indexes
+      const processingResults = this._processTasks(tasks, indexes);
+
+      // Validate index consistency
+      const unused = this._validateIndexConsistency(indexes, tasks);
+
+      const endTime = Date.now();
+      const buildTime = endTime - startTime;
+
+      // Update performance tracking
+      this._updatePerformanceMetrics(buildTime, tasks.length, indexes);
+
+      this.logger.info(`✅ Index generation completed in ${buildTime}ms`);
+      this.logger.info(`📊 Processed ${tasks.length} tasks with ${processingResults.errorsFound} errors`);
+
+      return {
+        indexes,
+        performance: {
+          buildTime,
+          tasksProcessed: tasks.length,
+          errorsFound: processingResults.errorsFound,
+          indexSize: this._calculateIndexSize(indexes),
+        },
+        validation: validationResults,
+        metadata: {
+          generatedAt: new Date().toISOString(),
+          taskCount: tasks.length,
+          indexTypes: Object.keys(indexes).length,
+        },
+      };
+
+    } catch {
+      this.logger.error('❌ Index generation failed:', error);
+      throw new Error(`Index generation failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update indexes incrementally when tasks change
+   * @param {Object} existingIndexes - Current index structure
+   * @param {Object} taskChange - Task change information
+   * @param {string} taskChange.OPERATION- 'add', 'update', 'delete'
+   * @param {Object} taskChange.task - Task data
+   * @param {Object} taskChange.oldTask - Previous task data (for updates)
+   * @returns {Object} Updated indexes
+   */
+  updateIndexesIncremental(existingIndexes, taskChange) {
+    const { operation, task, oldTask } = taskChange;
+    const updatedIndexes = JSON.parse(JSON.stringify(existingIndexes));
+
+    try {
+      switch (OPERATION {
+        case 'add':
+          this._addTaskToIndexes(updatedIndexes, task);
+          break;
+        case 'update':
+          this._updateTaskInIndexes(updatedIndexes, task, oldTask);
+          break;
+        case 'delete':
+          this._removeTaskFromIndexes(updatedIndexes, task);
+          break;
+        default:
+          throw new Error(`Unknown operation ${operation`);
+      }
+
+      return updatedIndexes;
+
+    } catch {
+      this.logger.error(`❌ Incremental index update failed for OPERATION${operation:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Initialize empty index structure with all required categories
+   * @returns {Object} Empty index structure
+   * @private
+   */
+  _initializeIndexStructure() {
+    return {
+      by_id: {},
+      by_status: {
+        pending: [],
+        in_progress: [],
+        completed: [],
+        archived: [],
+        blocked: [],
+      },
+      by_category: {
+        feature: [],
+        error: [],
+        test: [],
+        subtask: [],
+        research: [],
+        audit: [],
+      },
+      by_priority: {
+        critical: [],
+        high: [],
+        medium: [],
+        low: [],
+      },
+      subtasks_by_parent: {},
+      by_agent: {},
+    };
+  }
+
+  /**
+   * Process all tasks And populate indexes
+   * @param {Array} tasks - Array of tasks to process
+   * @param {Object} indexes - Index structure to populate
+   * @returns {Object} Processing results with error count
+   * @private
+   */
+  _processTasks(tasks, indexes) {
+    let errorsFound = 0;
+    let tasksProcessed = 0;
+
+    for (let taskIndex = 0; taskIndex < tasks.length; taskIndex++) {
+      const task = tasks[taskIndex];
+
+      try {
+        // Validate basic task structure
+        if (!this._validateTaskStructure(task)) {
+          this.logger.warn(`⚠️  Invalid task structure at index ${taskIndex}:`, {
+            id: task?.id,
+            title: task?.title?.substring(0, 50),
+          });
+          errorsFound++;
+          continue;
+        }
+
+        // Add task to all relevant indexes
+        this._addTaskToIndexes(indexes, task, taskIndex);
+        tasksProcessed++;
+
+        // Process embedded subtasks
+        if (task.subtasks && Array.isArray(task.subtasks)) {
+          this._processSubtasks(task, indexes);
+        }
+
+      } catch {
+        this.logger.error(`❌ Error processing task at index ${taskIndex}:`, error);
+        errorsFound++;
+      }
+    }
+
+    return { errorsFound, tasksProcessed };
+  }
+
+  /**
+   * Add a single task to all relevant indexes
+   * @param {Object} indexes - Index structure
+   * @param {Object} task - Task to add
+   * @param {number} arrayIndex - Position in tasks array
+   * @private
+   */
+  _addTaskToIndexes(indexes, task, arrayIndex = null) {
+    // ID Index - O(1) lookup by task ID
+    if (arrayIndex !== null) {
+      indexes.by_id[task.id] = arrayIndex;
+    }
+
+    // Status Index - Group tasks by status
+    const status = task.status || 'pending';
+    if (indexes.by_status[status]) {
+      if (!indexes.by_status[status].includes(task.id)) {
+        indexes.by_status[status].push(task.id);
+      }
+    } else {
+      this.logger.warn(`⚠️  Unknown status '${status}' for task ${task.id}`);
+    }
+
+    // Category Index - Group tasks by category
+    const category = task.category;
+    if (indexes.by_category[category]) {
+      if (!indexes.by_category[category].includes(task.id)) {
+        indexes.by_category[category].push(task.id);
+      }
+    } else {
+      this.logger.warn(`⚠️  Unknown category '${category}' for task ${task.id}`);
+    }
+
+    // Priority Index - Group tasks by priority
+    const priority = task.priority || 'medium';
+    if (indexes.by_priority[priority]) {
+      if (!indexes.by_priority[priority].includes(task.id)) {
+        indexes.by_priority[priority].push(task.id);
+      }
+    }
+
+    // Agent Index - Group tasks by assigned agent
+    const agent = this._extractCurrentAgent(task);
+    if (agent) {
+      if (!indexes.by_agent[agent]) {
+        indexes.by_agent[agent] = [];
+      }
+      if (!indexes.by_agent[agent].includes(task.id)) {
+        indexes.by_agent[agent].push(task.id);
+      }
+    }
+  }
+
+  /**
+   * Process embedded subtasks for parent-child relationship mapping
+   * @param {Object} parentTask - Parent task containing subtasks
+   * @param {Object} indexes - Index structure
+   * @private
+   */
+  _processSubtasks(parentTask, indexes) {
+    const subtaskIds = [];
+
+    parentTask.subtasks.forEach(subtask => {
+      if (subtask.id) {
+        subtaskIds.push(subtask.id);
+      } else {
+        this.logger.warn(`⚠️  Subtask missing ID in task ${parentTask.id}:`, {
+          type: subtask.type,
+          title: subtask.title?.substring(0, 30),
+        });
+      }
+    });
+
+    if (subtaskIds.length > 0) {
+      indexes.subtasks_by_parent[parentTask.id] = subtaskIds;
+    }
+  }
+
+  /**
+   * Update task in indexes (remove old, add new)
+   * @param {Object} indexes - Index structure
+   * @param {Object} newTask - Updated task data
+   * @param {Object} oldTask - Previous task data
+   * @private
+   */
+  _updateTaskInIndexes(indexes, newTask, oldTask) {
+    // Remove old task from indexes
+    this._removeTaskFromIndexes(indexes, oldTask);
+
+    // Add updated task to indexes (preserve array index)
+    const arrayIndex = indexes.by_id[newTask.id];
+    this._addTaskToIndexes(indexes, newTask, arrayIndex);
+  }
+
+  /**
+   * Remove task from all indexes
+   * @param {Object} indexes - Index structure
+   * @param {Object} task - Task to remove
+   * @private
+   */
+  _removeTaskFromIndexes(indexes, task) {
+    // Remove from ID index
+    delete indexes.by_id[task.id];
+
+    // Remove from status index
+    const status = task.status || 'pending';
+    if (indexes.by_status[status]) {
+      const statusIndex = indexes.by_status[status].indexOf(task.id);
+      if (statusIndex > -1) {
+        indexes.by_status[status].splice(statusIndex, 1);
+      }
+    }
+
+    // Remove from category index
+    if (indexes.by_category[task.category]) {
+      const categoryIndex = indexes.by_category[task.category].indexOf(task.id);
+      if (categoryIndex > -1) {
+        indexes.by_category[task.category].splice(categoryIndex, 1);
+      }
+    }
+
+    // Remove from priority index
+    const priority = task.priority || 'medium';
+    if (indexes.by_priority[priority]) {
+      const priorityIndex = indexes.by_priority[priority].indexOf(task.id);
+      if (priorityIndex > -1) {
+        indexes.by_priority[priority].splice(priorityIndex, 1);
+      }
+    }
+
+    // Remove from agent index
+    const agent = this._extractCurrentAgent(task);
+    if (agent && indexes.by_agent[agent]) {
+      const agentIndex = indexes.by_agent[agent].indexOf(task.id);
+      if (agentIndex > -1) {
+        indexes.by_agent[agent].splice(agentIndex, 1);
+      }
+      // Clean up empty agent arrays
+      if (indexes.by_agent[agent].length === 0) {
+        delete indexes.by_agent[agent];
+      }
+    }
+
+    // Remove from subtasks index
+    delete indexes.subtasks_by_parent[task.id];
+  }
+
+  /**
+   * Extract current agent from task assignment data
+   * @param {Object} task - Task object
+   * @returns {string|null} Current agent ID or null
+   * @private
+   */
+  _extractCurrentAgent(task) {
+    // Check various possible agent assignment fields
+    if (task.agent_assignment?.current_agent) {
+      return task.agent_assignment.current_agent;
+    }
+
+    if (task.assigned_agent) {
+      return task.assigned_agent;
+    }
+
+    if (task.claimed_by) {
+      return task.claimed_by;
+    }
+
+    // Check assignment history for most recent agent
+    if (task.agent_assignment_history && Array.isArray(task.agent_assignment_history)) {
+      const recentAssignment = task.agent_assignment_history[task.agent_assignment_history.length - 1];
+      if (recentAssignment?.agentId) {
+        return recentAssignment.agentId;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Validate input data structure
+   * @param {Object} todoData - Input data to validate
+   * @throws {Error} If data structure is invalid
+   * @private
+   */
+  _validateInputData(todoData) {
+    if (!todoData || typeof todoData !== 'object') {
+      throw new Error('Invalid input data: must be an object');
+    }
+
+    if (!Array.isArray(todoData.tasks)) {
+      throw new Error('Invalid input data: tasks must be an array');
+    }
+  }
+
+  /**
+   * Validate basic task structure
+   * @param {Object} task - Task to validate
+   * @returns {boolean} True if task structure is valid
+   * @private
+   */
+  _validateTaskStructure(task) {
+    return task &&
+           typeof task === 'object' &&
+           typeof task.id === 'string' &&
+           task.id.length > 0 &&
+           typeof task.status === 'string' &&
+           typeof task.category === 'string';
+  }
+
+  /**
+   * Validate index consistency And integrity
+   * @param {Object} indexes - Index structure to validate
+   * @param {Array} tasks - Original tasks array
+   * @returns {Object} Validation results
+   * @private
+   */
+  _validateIndexConsistency(indexes, tasks) {
+    const validation = {
+      valid: true,
+      errors: [],
+      warnings: [],
+      statistics: {},
+    };
+
+    try {
+      // Check ID index completeness
+      const taskIds = new Set(tasks.map(t => t.id).filter(id => id));
+      const indexedIds = new Set(Object.keys(indexes.by_id));
+
+      const missingFromIndex = [...taskIds].filter(id => !indexedIds.has(id));
+      const extraInIndex = [...indexedIds].filter(id => !taskIds.has(id));
+
+      if (missingFromIndex.length > 0) {
+        validation.errors.push(`Missing from ID index: ${missingFromIndex.join(', ')}`);
+        validation.valid = false;
+      }
+
+      if (extraInIndex.length > 0) {
+        validation.warnings.push(`Extra in ID index: ${extraInIndex.join(', ')}`);
+      }
+
+      // Validate status index consistency
+      this._validateStatusIndexConsistency(indexes, tasks, validation);
+
+      // Validate category index consistency
+      this._validateCategoryIndexConsistency(indexes, tasks, validation);
+
+      // Generate statistics
+      validation.statistics = this._generateIndexStatistics(indexes, tasks);
+
+    } catch {
+      validation.errors.push(`Validation error: ${error.message}`);
+      validation.valid = false;
+    }
+
+    return validation;
+  }
+
+  /**
+   * Validate status index consistency
+   * @param {Object} indexes - Index structure
+   * @param {Array} tasks - Original tasks array
+   * @param {Object} validation - Validation results object
+   * @private
+   */
+  _validateStatusIndexConsistency(indexes, tasks, validation) {
+    Object.entries(indexes.by_status).forEach(([status, taskIds]) => {
+      taskIds.forEach(taskId => {
+        const taskIndex = indexes.by_id[taskId];
+        if (taskIndex === undefined || !tasks[taskIndex] ||
+            (tasks[taskIndex].status || 'pending') !== status) {
+          validation.errors.push(
+            `Status index inconsistent for ${taskId}: expected ${status}, found ${tasks[taskIndex]?.status || 'undefined'}`,
+          );
+          validation.valid = false;
+        }
+      });
+    });
+  }
+
+  /**
+   * Validate category index consistency
+   * @param {Object} indexes - Index structure
+   * @param {Array} tasks - Original tasks array
+   * @param {Object} validation - Validation results object
+   * @private
+   */
+  _validateCategoryIndexConsistency(indexes, tasks, validation) {
+    Object.entries(indexes.by_category).forEach(([category, taskIds]) => {
+      taskIds.forEach(taskId => {
+        const taskIndex = indexes.by_id[taskId];
+        if (taskIndex === undefined || !tasks[taskIndex] ||
+            tasks[taskIndex].category !== category) {
+          validation.errors.push(
+            `Category index inconsistent for ${taskId}: expected ${category}, found ${tasks[taskIndex]?.category || 'undefined'}`,
+          );
+          validation.valid = false;
+        }
+      });
+    });
+  }
+
+  /**
+   * Generate comprehensive index statistics
+   * @param {Object} indexes - Index structure
+   * @param {Array} tasks - Original tasks array
+   * @returns {Object} Index statistics
+   * @private
+   */
+  _generateIndexStatistics(indexes, tasks) {
+    return {
+      totalTasks: tasks.length,
+      indexedTasks: Object.keys(indexes.by_id).length,
+      statusDistribution: Object.fromEntries(
+        Object.entries(indexes.by_status).map(([status, tasks]) => [status, tasks.length]),
+      ),
+      categoryDistribution: Object.fromEntries(
+        Object.entries(indexes.by_category).map(([category, tasks]) => [category, tasks.length]),
+      ),
+      priorityDistribution: Object.fromEntries(
+        Object.entries(indexes.by_priority).map(([priority, tasks]) => [priority, tasks.length]),
+      ),
+      agentCount: Object.keys(indexes.by_agent).length,
+      tasksWithSubtasks: Object.keys(indexes.subtasks_by_parent).length,
+      indexMemoryUsage: this._calculateIndexSize(indexes),
+    };
+  }
+
+  /**
+   * Calculate approximate memory usage of indexes
+   * @param {Object} indexes - Index structure
+   * @returns {number} Approximate size in bytes
+   * @private
+   */
+  _calculateIndexSize(indexes) {
+    try {
+      return JSON.stringify(indexes).length * 2; // Rough estimate (UTF-16)
+    } catch {
+      this.logger.warn('Could not calculate index size:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Update performance tracking metrics
+   * @param {number} buildTime - Time taken to build indexes
+   * @param {number} taskCount - Number of tasks processed
+   * @param {Object} indexes - Generated indexes
+   * @private
+   */
+  _updatePerformanceMetrics(buildTime, taskCount, indexes) {
+    this.performance = {
+      indexBuildTime: buildTime,
+      lastBuildTime: new Date().toISOString(),
+      tasksProcessed: taskCount,
+      indexSize: this._calculateIndexSize(indexes),
+      buildHistory: [
+        ...this.performance.buildHistory.slice(-(this.maxIndexHistory - 1)),
+        {
+          timestamp: new Date().toISOString(),
+          buildTime,
+          taskCount,
+          tasksPerMs: taskCount / buildTime,
+        },
+      ],
+    };
+  }
+
+  /**
+   * Performance benchmark for index operations
+   * @param {Object} indexes - Index structure to benchmark
+   * @param {Array} tasks - Tasks array for comparison
+   * @param {number} iterations - Number of test iterations
+   * @returns {Object} Benchmark results
+   */
+  performanceBenchmark(indexes, tasks, iterations = 1000) {
+    const benchmarks = {};
+
+    // Benchmark ID lookups
+    benchmarks.idLookup = this._benchmarkOperation(
+      'ID Lookup (O(1))',
+      () => {
+        const randomTask = tasks[Math.floor(Math.random() * tasks.length)];
+        const index = indexes.by_id[randomTask.id];
+        return tasks[index];
+      },
+      iterations,
+    );
+
+    // Benchmark status filtering
+    benchmarks.statusFilter = this._benchmarkOperation(
+      'Status Filter (O(1))',
+      () => {
+        const statuses = Object.keys(indexes.by_status);
+        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+        return indexes.by_status[randomStatus].map(id => tasks[indexes.by_id[id]]);
+      },
+      iterations,
+    );
+
+    // Benchmark category filtering
+    benchmarks.categoryFilter = this._benchmarkOperation(
+      'Category Filter (O(1))',
+      () => {
+        const categories = Object.keys(indexes.by_category);
+        const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+        return indexes.by_category[randomCategory].map(id => tasks[indexes.by_id[id]]);
+      },
+      iterations,
+    );
+
+    // Benchmark subtask lookup
+    benchmarks.subtaskLookup = this._benchmarkOperation(
+      'Subtask Lookup (O(1))',
+      () => {
+        const parentIds = Object.keys(indexes.subtasks_by_parent);
+        if (parentIds.length === 0) {return [];}
+        const randomParentId = parentIds[Math.floor(Math.random() * parentIds.length)];
+        return indexes.subtasks_by_parent[randomParentId] || [];
+      },
+      iterations,
+    );
+
+    return {
+      summary: {
+        totalOperations: iterations * Object.keys(benchmarks).length,
+        averageOperationTime: Object.values(benchmarks).reduce((sum, b) => sum + b.averageTime, 0) / Object.keys(benchmarks).length,
+        operationsPerSecond: Object.values(benchmarks).reduce((sum, b) => sum + b.operationsPerSecond, 0),
+      },
+      details: benchmarks,
+    };
+  }
+
+  /**
+   * Benchmark a specific operation
+   * @param {string} operationName - Name of the operation
+   * @param {Function} OPERATION- Operation to benchmark
+   * @param {number} iterations - Number of iterations
+   * @returns {Object} Benchmark results
+   * @private
+   */
+  _benchmarkOperation(operationName, operation iterations) {
+    const startTime = Date.now();
+
+    for (let i = 0; i < iterations; i++) {
+      OPERATION);
+    }
+
+    const endTime = Date.now();
+    const totalTime = endTime - startTime;
+
+    return {
+      operationName,
+      iterations,
+      totalTime,
+      averageTime: totalTime / iterations,
+      operationsPerSecond: (iterations / totalTime) * 1000,
+    };
+  }
+
+  /**
+   * Get current performance metrics
+   * @returns {Object} Performance metrics
+   */
+  getPerformanceMetrics() {
+    return { ...this.performance };
+  }
+
+  /**
+   * Reset performance tracking
+   */
+  resetPerformanceMetrics() {
+    this.performance = {
+      indexBuildTime: 0,
+      lastBuildTime: null,
+      tasksProcessed: 0,
+      indexSize: 0,
+      buildHistory: [],
+    };
+  }
+}
+
+module.exports = IndexGenerator;
