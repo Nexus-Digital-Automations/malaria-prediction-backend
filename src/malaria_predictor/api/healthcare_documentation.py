@@ -8,7 +8,7 @@ malaria prediction system.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, cast
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field

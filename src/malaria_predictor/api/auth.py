@@ -7,8 +7,9 @@ and role-based access control.
 """
 
 import logging
+from collections.abc import Callable
 from datetime import datetime, timedelta
-from typing import Annotated, Callable
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import (

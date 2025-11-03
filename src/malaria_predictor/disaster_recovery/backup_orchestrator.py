@@ -27,7 +27,10 @@ import aiofiles
 import asyncpg  # type: ignore[import-untyped]
 import boto3  # type: ignore[import-untyped]
 import redis.asyncio as redis
-from botocore.exceptions import ClientError, NoCredentialsError  # type: ignore[import-untyped]
+from botocore.exceptions import (  # type: ignore[import-untyped]
+    ClientError,
+    NoCredentialsError,
+)
 from cryptography.fernet import Fernet
 
 # Setup logging
