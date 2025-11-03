@@ -3,7 +3,7 @@
 <law>
 **CORE OPERATION PRINCIPLES (Display at start of every response):**
 
-1.  **🔥 AUTOMATED QUALITY FRAMEWORK SUPREMACY**: All code MUST pass the two-stage quality gauntlet: first the local pre-commit hooks, then the full CI/CD pipeline. There are no exceptions.
+1.  **🔥 AUTOMATED QUALITY & SECURITY FRAMEWORK SUPREMACY**: All code MUST pass the two-stage quality and security gauntlet: first the local pre-commit hooks (including secret scanning), then the full CI/CD pipeline (including security validation). There are no exceptions.
 2.  **ABSOLUTE HONESTY**: Never skip, ignore, or hide any issues, errors, or failures. Report the state of the codebase with complete transparency.
 3.  **ROOT PROBLEM SOLVING**: Fix underlying causes, not symptoms.
 4.  **IMMEDIATE TASK EXECUTION**: Plan → Execute → Document. No delays.
@@ -12,7 +12,60 @@
 7.  **🔄 STOP HOOK CONTINUATION**: When stop hook triggers, you ARE THE SAME AGENT. Finish current work OR check TASKS.json for new work. NEVER sit idle.
 8.  **🔒 CLAUDE.md PROTECTION**: NEVER edit CLAUDE.md without EXPLICIT user permission.
 9.  **📚 DOCUMENTATION-FIRST WORKFLOW**: Review docs/ folder BEFORE implementing features. Mark features "IN PROGRESS" in docs, research when uncertain (safe over sorry), write unit tests BEFORE next feature. Use TodoWrite to track: docs review → research → implementation → testing → docs update.
+10. **🔴 TASKMANAGER-FIRST MANDATE**: ALWAYS use TaskManager API (`/Users/jeremyparker/infinite-continue-stop-hook/taskmanager-api.js`) for ALL task operations. Query task status BEFORE starting work, update progress DURING work, store lessons AFTER completion. TaskManager is the SINGLE SOURCE OF TRUTH for all project tasks.
+11. **🔴 ABSOLUTE SECURITY MANDATE**: NEVER commit credentials, secrets, API keys, or sensitive data to git. ALL sensitive files MUST be in .gitignore BEFORE any work begins. Pre-commit hooks MUST catch secrets. Treat security violations as CRITICAL errors. Security is non-negotiable and has ZERO tolerance.
 </law>
+
+## 🔴 TASKMANAGER-FIRST MANDATE
+
+**ABSOLUTE REQUIREMENT - TASKMANAGER API MUST BE USED FOR ALL TASK OPERATIONS**
+
+**UNIVERSAL TASKMANAGER PATH:**
+```
+/Users/jeremyparker/infinite-continue-stop-hook/taskmanager-api.js
+```
+
+**MANDATORY TASKMANAGER USAGE POINTS:**
+
+1. **🔴 BEFORE STARTING ANY WORK**:
+   - Query `get-task-stats` to understand current workload
+   - Query `get-available-tasks [AGENT_ID]` to see claimable tasks
+   - Query `get-tasks-by-status approved` to find approved work
+   - **NEVER START WORK WITHOUT QUERYING TASKMANAGER FIRST**
+
+2. **🔴 DURING ALL WORK**:
+   - Update task status with `update-task <taskId>` at major milestones
+   - Use `get-task <taskId>` to verify requirements and acceptance criteria
+   - Query `get-verification-requirements <taskId>` before marking complete
+   - **KEEP TASKMANAGER UPDATED WITH REAL-TIME PROGRESS**
+
+3. **🔴 AFTER COMPLETING WORK**:
+   - Store lessons learned with `store-lesson` command
+   - Store error resolutions with `store-error` command
+   - Mark task complete with `update-task <taskId> '{"status":"completed"}'`
+   - **NEVER FINISH WORK WITHOUT UPDATING TASKMANAGER**
+
+4. **🔴 WHEN STOP HOOK TRIGGERS**:
+   - IMMEDIATELY query TaskManager for current state
+   - Check for in-progress tasks with `get-agent-tasks [AGENT_ID]`
+   - Find new work with `get-tasks-by-status approved`
+   - **TASKMANAGER TELLS YOU WHAT TO DO NEXT**
+
+**FORBIDDEN ACTIONS:**
+- ❌ NEVER start work without consulting TaskManager
+- ❌ NEVER complete work without updating TaskManager
+- ❌ NEVER make task decisions without querying TaskManager
+- ❌ NEVER skip lesson storage after task completion
+- ❌ NEVER ignore TaskManager when stop hook triggers
+
+**REQUIRED ACTIONS:**
+- ✅ ALWAYS query TaskManager before starting new work
+- ✅ ALWAYS update TaskManager during work progress
+- ✅ ALWAYS store lessons and errors in TaskManager
+- ✅ ALWAYS use 10-second timeout for ALL TaskManager API calls
+- ✅ ALWAYS treat TaskManager as the single source of truth
+
+**TASKMANAGER IS MANDATORY - NOT OPTIONAL**
 
 ## 🔍 TASKMANAGER API SELF-DISCOVERY
 
@@ -59,6 +112,14 @@ timeout 10s node "/Users/jeremyparker/infinite-continue-stop-hook/taskmanager-ap
 
 **WHEN STOP HOOK TRIGGERS - YOU MUST TAKE ACTION:**
 
+**🔴 MANDATORY FIRST STEP: QUERY TASKMANAGER IMMEDIATELY**
+```bash
+# REQUIRED: Check TaskManager status BEFORE deciding what to do
+timeout 10s node "/Users/jeremyparker/infinite-continue-stop-hook/taskmanager-api.js" --project-root "$(pwd)" get-task-stats
+timeout 10s node "/Users/jeremyparker/infinite-continue-stop-hook/taskmanager-api.js" --project-root "$(pwd)" get-agent-tasks [AGENT_ID]
+timeout 10s node "/Users/jeremyparker/infinite-continue-stop-hook/taskmanager-api.js" --project-root "$(pwd)" get-tasks-by-status approved
+```
+
 ### Immediate Actions (Choose One):
 
 **OPTION 1: Continue Current Work**
@@ -67,11 +128,13 @@ timeout 10s node "/Users/jeremyparker/infinite-continue-stop-hook/taskmanager-ap
 - ✅ If you were in the middle of something → Complete it
 
 **OPTION 2: Start New Work**
-- **FIRST**: Query TaskManager for current state
+- **🔴 MANDATORY FIRST**: Query TaskManager for current state (DO NOT SKIP)
   - Check `get-task-stats` to understand workload
   - Check `get-available-tasks [AGENT_ID]` or `get-tasks-by-status approved` for ready work
-- **THEN**: Claim and work on highest priority task
-- **UPDATE**: Update task status as you progress
+  - **TaskManager is the ONLY source for determining what work to do**
+- **THEN**: Claim and work on highest priority task from TaskManager
+- **🔴 MANDATORY UPDATE**: Update task status in TaskManager as you progress
+- **🔴 MANDATORY COMPLETION**: Store lessons and mark complete in TaskManager when done
 
 **OPTION 3: When Nothing Approved**
 - Review codebase for improvements
@@ -132,7 +195,7 @@ Quality is not a phase; it is the foundation of our work. We enforce this throug
 
 Before any code is committed, it **MUST** pass all local pre-commit hooks. These hooks are your personal, instantaneous quality assistant.
 
-  * **Purpose**: To catch and fix all linting, formatting, and stylistic errors *before* they enter the codebase history.
+  * **Purpose**: To catch and fix all linting, formatting, and stylistic errors *before* they enter the codebase history. CRITICAL: Pre-commit hooks MUST also scan for and block any secrets, credentials, API keys, or sensitive data from being committed.
   * **Mandate**: You are forbidden from committing code that fails these checks. Use the autofix capabilities of the linters to resolve issues immediately.
   * **Workflow**:
     1.  Write code to implement a feature.
@@ -149,8 +212,195 @@ Once your clean code is pushed, it **MUST** pass the full CI/CD pipeline. This i
   * **Key Stages**:
       * **Validate**: Comprehensive linting and type checking.
       * **Test**: Full suite of unit, integration, and end-to-end tests.
-      * **Security**: In-depth security and vulnerability scanning.
+      * **Security**: In-depth security and vulnerability scanning (dependency audits, OWASP checks, secret detection, vulnerability databases). Zero tolerance for exposed credentials or high/critical vulnerabilities.
       * **Build**: Compilation and packaging of the application.
+
+-----
+
+## 🔴 ABSOLUTE SECURITY MANDATE - ZERO TOLERANCE
+
+Security is not optional. It is a fundamental, non-negotiable requirement that sits alongside quality as a core pillar of professional software engineering. Every line of code, every commit, every deployment must adhere to uncompromising security standards.
+
+### **🚨 NEVER COMMIT CREDENTIALS - ABSOLUTE PROHIBITION**
+
+**CRITICAL VIOLATION**: Committing credentials, secrets, API keys, or sensitive data to git is a **CRITICAL SECURITY BREACH** that must be treated with the same severity as a production outage.
+
+**FORBIDDEN - NEVER COMMIT:**
+- ❌ API keys (OpenAI, AWS, GitHub, Stripe, any third-party service)
+- ❌ Database credentials (passwords, connection strings, URIs)
+- ❌ Authentication tokens (JWT secrets, session keys, OAuth tokens)
+- ❌ Private encryption keys (.pem, .key, .p12, private keys)
+- ❌ Environment files containing secrets (.env, .env.local, .env.production)
+- ❌ Configuration files with embedded secrets (config.json, credentials.json)
+- ❌ SSH keys or certificates
+- ❌ Webhook secrets or signing keys
+- ❌ Any hardcoded passwords or tokens in source code
+
+**MANDATORY BEFORE ANY WORK**: Verify `.gitignore` includes ALL sensitive file patterns before writing any code.
+
+### **Secrets & Credentials Management**
+
+**ONLY ACCEPTABLE METHODS:**
+- ✅ Environment variables loaded at runtime (via `.env` files that are gitignored)
+- ✅ Secret management services (AWS Secrets Manager, HashiCorp Vault, Azure Key Vault)
+- ✅ Encrypted configuration stores with keys stored separately
+- ✅ CI/CD secret injection (GitHub Secrets, GitLab CI/CD Variables)
+
+**IMPLEMENTATION PROTOCOL:**
+1. **FIRST**: Add sensitive file patterns to `.gitignore`
+2. **THEN**: Create `.env.example` with placeholder values (never real secrets)
+3. **THEN**: Document required environment variables in README
+4. **ALWAYS**: Use process.env or equivalent for runtime secret access
+5. **NEVER**: Hardcode secrets in source code or config files
+
+### **Mandatory .gitignore Requirements**
+
+**PRINCIPLES** (not exhaustive - use judgment):
+
+**Always Gitignore:**
+- All files containing credentials, secrets, or API keys
+- Environment configuration files (.env, .env.*)
+- Private keys and certificates (*.pem, *.key, *.p12, *.crt for private certs)
+- Credentials files (credentials.json, secrets.json, aws-credentials, .aws/)
+- SSH keys (.ssh/, id_rsa, id_ed25519)
+- Database files containing real data (*.db, *.sqlite if not test fixtures)
+- Log files that may contain sensitive data (*.log if they contain auth attempts)
+- Backup files if they may contain credentials (/backups with sensitive content)
+- IDE settings if they contain file paths or credentials (.vscode/settings.json with secrets)
+- Build artifacts that may embed secrets (dist/, build/ if they contain config)
+
+**Verification Protocol:**
+```bash
+# BEFORE starting work, verify .gitignore exists and covers sensitive patterns
+cat .gitignore | grep -E "\\.env|\\.pem|\\.key|credentials|secrets"
+
+# BEFORE committing, verify no secrets are staged
+git diff --cached | grep -i "api[_-]key\|password\|secret\|token"
+```
+
+### **Pre-Commit Security Validation**
+
+**MANDATORY LOCAL CHECKS BEFORE EVERY COMMIT:**
+
+Pre-commit hooks MUST scan for:
+- Patterns matching API keys (AKIA for AWS, sk- for OpenAI, ghp_ for GitHub)
+- Common secret patterns in diff (password=, api_key=, secret=, token=)
+- Files that should be gitignored but are being committed
+- Hardcoded URLs containing credentials (postgres://user:pass@host)
+- Base64-encoded secrets in code (common obfuscation attempt)
+
+**If pre-commit hook is not configured**, manually check before every commit:
+```bash
+# Search for potential secrets in staged files
+git diff --cached | grep -iE "password|api[_-]key|secret|token|credentials"
+
+# Check for sensitive file types being committed
+git status | grep -E "\\.env|\\.pem|\\.key|credentials\\.json"
+```
+
+### **Sensitive Data Categories**
+
+**WHAT CONSTITUTES "SENSITIVE":**
+
+**Credentials & Access:**
+- API keys for any external service
+- Database passwords and connection strings
+- OAuth client secrets
+- Authentication tokens (JWT, session, bearer tokens)
+- Service account credentials
+- Webhook verification secrets
+
+**Cryptographic Material:**
+- Private encryption keys
+- Certificate private keys
+- Signing keys
+- Encryption salts or initialization vectors (if secret)
+
+**Personal & Confidential:**
+- Personally Identifiable Information (PII) in configuration
+- Internal IP addresses or network topology
+- Business-sensitive configuration values
+- Customer data in examples or fixtures
+
+**Infrastructure:**
+- Cloud provider credentials (AWS, Azure, GCP)
+- Deployment keys
+- SSH private keys
+- Kubernetes secrets (unless encrypted)
+
+### **Secure Logging Practices**
+
+**NEVER LOG:** (Cross-reference: [Maximum Logging Mandate](#-maximum-logging-mandate---non-negotiable))
+- Passwords or password hashes
+- API keys or tokens
+- Session identifiers
+- Credit card numbers or PII
+- Encryption keys
+- Authentication credentials
+
+**ALWAYS SANITIZE**: Before logging request/response bodies, user input, or error details.
+
+### **Dependency & Vulnerability Management**
+
+**PROACTIVE SECURITY SCANNING:**
+
+**Before Installing Dependencies:**
+```bash
+# Check for known vulnerabilities
+npm audit
+# or for other languages: pip-audit, bundle audit, etc.
+```
+
+**Regular Audits:**
+- Run `npm audit` (or language-equivalent) weekly minimum
+- Update dependencies with security patches immediately
+- Use tools like Dependabot, Snyk, or Renovate for automated scanning
+- Never ignore security warnings without documented risk assessment
+
+**Vulnerability Response Protocol:**
+1. **Critical/High**: Fix immediately (within 24 hours)
+2. **Medium**: Fix within 1 week
+3. **Low**: Address in regular maintenance cycle
+4. Document any vulnerabilities that cannot be immediately patched
+
+### **OWASP Security Best Practices**
+
+**Core Principles to Follow:**
+- **Input Validation**: Never trust user input - validate, sanitize, escape
+- **Output Encoding**: Properly encode output to prevent XSS
+- **Authentication**: Use established libraries, never roll your own crypto
+- **Authorization**: Implement principle of least privilege
+- **Session Management**: Use secure, httpOnly, sameSite cookies
+- **Cryptography**: Use modern, vetted algorithms (never MD5/SHA1 for passwords)
+- **Error Handling**: Don't expose sensitive details in error messages
+- **Logging**: Log security events, but never log secrets
+
+**Reference**: https://owasp.org/www-project-top-ten/
+
+### **Security Violation Response**
+
+**If you discover a security violation** (committed secrets, exposed credentials):
+
+1. **IMMEDIATE**: Treat as CRITICAL priority - stop all other work
+2. **ROTATE**: Assume compromised - rotate/revoke the exposed credentials immediately
+3. **REMEDIATE**: Remove secret from git history (git filter-branch or BFG Repo-Cleaner)
+4. **DOCUMENT**: Log the incident, what was exposed, and remediation steps taken
+5. **PREVENT**: Update .gitignore and pre-commit hooks to prevent recurrence
+
+**Never "fix forward"**: Simply removing a secret in a new commit doesn't remove it from git history. It remains accessible.
+
+### **Security Event Audit Trail**
+
+**Log all security-relevant events:**
+- Authentication attempts (success and failure)
+- Authorization failures (access denied)
+- Privilege escalations
+- Configuration changes affecting security
+- Secret rotation events
+- Vulnerability scan results
+- Security violation discoveries and remediations
+
+Use structured logging with clear security markers for easy filtering and alerting.
 
 -----
 
@@ -159,12 +409,16 @@ Once your clean code is pushed, it **MUST** pass the full CI/CD pipeline. This i
 All work must be committed and pushed before a task is marked as complete.
 
   * **ATOMIC COMMITS**: Each commit must represent a single, logical, self-contained change.
+  * **SECURITY PRE-CHECK**: BEFORE staging any files, verify no secrets will be committed. Check .gitignore includes all sensitive patterns.
   * **PIPELINE VERIFICATION**: It is your responsibility to confirm that your pushed commits pass the CI/CD pipeline. A broken build must be treated as an urgent priority.
   * **Commit Sequence**:
     ```bash
+    # SECURITY: Check for secrets before staging
+    git diff | grep -iE "password|api[_-]key|secret|token|credentials" || echo "No obvious secrets detected"
+
     git add .
-    git commit -m "[type]: [description]" # This will trigger pre-commit hooks
-    git push # This will trigger the CI/CD pipeline
+    git commit -m "[type]: [description]" # This will trigger pre-commit hooks (including secret scanning)
+    git push # This will trigger the CI/CD pipeline (including security validation)
     ```
 
 ## 🚨 COMMAND TIMEOUT MANDATE
@@ -369,10 +623,10 @@ function processData(id, data) {
 **ABSOLUTE COMPLIANCE - ZERO TOLERANCE:**
 - **❌ NEVER SUBMIT**: Code without MAXIMUM comprehensive logging - AUTOMATIC REJECTION
 - **❌ NEVER SKIP**: Logging in any function, method, or code block - FORBIDDEN
-- **❌ NEVER LOG**: Sensitive information (passwords, tokens, PII) - SECURITY VIOLATION
+- **❌ NEVER LOG**: Sensitive information (passwords, tokens, API keys, PII, credentials) - SECURITY VIOLATION (See [Absolute Security Mandate](#-absolute-security-mandate---zero-tolerance) for complete security requirements)
 - **✅ ALWAYS**: JSON structured logging with timestamps, function names, parameters, error context - MANDATORY
 - **✅ QUALITY GATES**: Logging verified in pre-commit hooks and CI/CD pipeline - ENFORCED
-- **✅ MAXIMUM DETAIL**: When in doubt, log MORE not less - REQUIRED MINDSET
+- **✅ MAXIMUM DETAIL**: When in doubt, log MORE not less - REQUIRED MINDSET (but ALWAYS sanitize sensitive data first)
 
 ## 🧠 INTELLIGENT SELF-LEARNING SYSTEM
 
@@ -463,14 +717,14 @@ timeout 10s node "/Users/jeremyparker/infinite-continue-stop-hook/taskmanager-ap
 - **Pass Criteria**: No unauthorized features or scope creep detected
 
 ### 2. security-validation
-- **Purpose**: Comprehensive security vulnerability scanning
+- **Purpose**: Comprehensive security vulnerability scanning (See [Absolute Security Mandate](#-absolute-security-mandate---zero-tolerance) for complete security requirements)
 - **Tools by Language**:
   - **JavaScript/Node**: `npm audit`, `semgrep`
   - **Python**: `bandit`, `safety`, `semgrep`
   - **Go**: `gosec`, `trivy`
   - **Ruby**: `brakeman`, `bundler-audit`
   - **Multi-language**: `trivy`, `snyk`
-- **Pass Criteria**: Zero high/critical vulnerabilities, no exposed secrets
+- **Pass Criteria**: Zero high/critical vulnerabilities, no exposed secrets in code or git history, all .gitignore requirements met
 
 ### 3. linter-validation
 - **Purpose**: Code style and quality enforcement
@@ -516,15 +770,15 @@ timeout 10s node "/Users/jeremyparker/infinite-continue-stop-hook/taskmanager-ap
 
 ## 🚨 MANDATORY TASKMANAGER TASK CREATION
 
-**ALWAYS CREATE TASKS VIA TASKMANAGER FOR USER REQUESTS**
+**🔴 ALWAYS CREATE TASKS VIA TASKMANAGER FOR USER REQUESTS - NO EXCEPTIONS**
 
 ### Core Principle
 For ALL user requests, create tasks in TASKS.json via taskmanager-api.js to ensure proper tracking, progress monitoring, and work continuity across sessions.
 
-### Query First, Then Create
-- **BEFORE CREATING TASKS**: Use `get-task-stats` to see current task landscape
-- **CHECK FOR DUPLICATES**: Use `get-tasks-by-status` to avoid creating duplicate tasks
-- **UNDERSTAND WORKLOAD**: TaskManager tracks everything - query it to stay coordinated
+### 🔴 Query First, Then Create (MANDATORY)
+- **🔴 BEFORE CREATING TASKS**: Use `get-task-stats` to see current task landscape (REQUIRED)
+- **🔴 CHECK FOR DUPLICATES**: Use `get-tasks-by-status` to avoid creating duplicate tasks (REQUIRED)
+- **🔴 UNDERSTAND WORKLOAD**: TaskManager tracks everything - query it to stay coordinated (REQUIRED)
 
 ### When to Create Tasks
 - ✅ **ALWAYS**: Complex requests requiring multiple steps
@@ -534,11 +788,12 @@ For ALL user requests, create tasks in TASKS.json via taskmanager-api.js to ensu
 - ✅ **ALWAYS**: Test creation or modification
 - ❌ **EXCEPTION**: Trivially simple requests (1-2 minute completion time)
 
-### Why TaskManager for Everything
-- **CONTINUITY**: Tasks persist across stop hook sessions
-- **COORDINATION**: Multiple agents can see and coordinate work
-- **TRACKING**: Complete visibility into what's done, in-progress, and pending
-- **ACCOUNTABILITY**: Full audit trail of all work performed
+### 🔴 Why TaskManager for Everything (CRITICAL UNDERSTANDING)
+- **🔴 CONTINUITY**: Tasks persist across stop hook sessions - YOU ARE THE SAME AGENT
+- **🔴 COORDINATION**: Multiple agents can see and coordinate work - PREVENTS CONFLICTS
+- **🔴 TRACKING**: Complete visibility into what's done, in-progress, and pending - SINGLE SOURCE OF TRUTH
+- **🔴 ACCOUNTABILITY**: Full audit trail of all work performed - NOTHING GETS LOST
+- **🔴 MANDATORY**: Not using TaskManager means WORK IS INVISIBLE and will be LOST
 
 ### Task Creation Command
 ```bash
@@ -565,9 +820,14 @@ timeout 10s node "/Users/jeremyparker/infinite-continue-stop-hook/taskmanager-ap
 4. **Track Progress** → Update task status as work progresses
 5. **Mark Complete** → Update task status when finished
 
-## TASKMANAGER API REFERENCE
+## 🔴 TASKMANAGER API REFERENCE - MANDATORY USAGE
 
-**ALL COMMANDS USE 10-SECOND TIMEOUT** - Path: `/Users/jeremyparker/infinite-continue-stop-hook/taskmanager-api.js`
+**🔴 ALL COMMANDS USE 10-SECOND TIMEOUT - NO EXCEPTIONS**
+
+**UNIVERSAL TASKMANAGER PATH (USE THIS ALWAYS):**
+```
+/Users/jeremyparker/infinite-continue-stop-hook/taskmanager-api.js
+```
 
 ### Agent Lifecycle Commands
 ```bash

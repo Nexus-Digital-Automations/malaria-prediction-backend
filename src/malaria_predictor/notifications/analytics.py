@@ -8,9 +8,10 @@ optimizing notification strategies and system performance.
 
 import logging
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import and_, case, desc, extract, func
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from ..database.session import get_database_session
@@ -33,14 +34,14 @@ class NotificationAnalytics:
     user engagement, and system optimization opportunities.
     """
 
-    def __init__(self, db_session: Session | None = None) -> None:
+    def __init__(self, db_session: Session | AsyncSession | None = None) -> None:
         """
         Initialize notification analytics.
 
         Args:
             db_session: Database session (will create if not provided)
         """
-        self.db_session = db_session
+        self.db_session: Session | AsyncSession | None = db_session
         self._should_close_session = db_session is None
 
         logger.info("Notification analytics system initialized")
@@ -51,10 +52,10 @@ class NotificationAnalytics:
             self.db_session = await get_database_session()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Async context manager exit."""
         if self._should_close_session and self.db_session:
-            await self.db_session.close()
+            self.db_session.close()
 
     async def get_delivery_summary(
         self,
@@ -74,7 +75,7 @@ class NotificationAnalytics:
             Dictionary with delivery summary and trends
         """
         try:
-            session = self.db_session or await get_database_session()
+            session = cast(Session, self.db_session or await get_database_session())
 
             # Default date range
             if not start_date:
@@ -167,7 +168,7 @@ class NotificationAnalytics:
             Dictionary with engagement metrics
         """
         try:
-            session = self.db_session or await get_database_session()
+            session = cast(Session, self.db_session or await get_database_session())
 
             # Default date range
             if not start_date:
@@ -291,7 +292,7 @@ class NotificationAnalytics:
             Dictionary with error analysis
         """
         try:
-            session = self.db_session or await get_database_session()
+            session = cast(Session, self.db_session or await get_database_session())
 
             # Default date range
             if not start_date:
@@ -416,7 +417,7 @@ class NotificationAnalytics:
             Dictionary with device analytics
         """
         try:
-            session = self.db_session or await get_database_session()
+            session = cast(Session, self.db_session or await get_database_session())
 
             # Default date range
             if not start_date:
@@ -508,7 +509,7 @@ class NotificationAnalytics:
             Dictionary with performance insights and recommendations
         """
         try:
-            session = self.db_session or await get_database_session()
+            session = cast(Session, self.db_session or await get_database_session())
 
             # Default date range
             if not start_date:
@@ -669,7 +670,7 @@ class NotificationAnalytics:
     ) -> list[dict[str, Any]]:
         """Get notification trends grouped by time period."""
         try:
-            session = self.db_session or await get_database_session()
+            session = cast(Session, self.db_session or await get_database_session())
 
             # Determine SQL date grouping based on group_by parameter
             if group_by == "hour":
@@ -720,7 +721,7 @@ class NotificationAnalytics:
     ) -> list[dict[str, Any]]:
         """Get notification statistics by platform."""
         try:
-            session = self.db_session or await get_database_session()
+            session = cast(Session, self.db_session or await get_database_session())
 
             platform_stats = session.query(
                 DeviceToken.platform,
@@ -756,7 +757,7 @@ class NotificationAnalytics:
     ) -> list[dict[str, Any]]:
         """Get notification statistics by priority."""
         try:
-            session = self.db_session or await get_database_session()
+            session = cast(Session, self.db_session or await get_database_session())
 
             priority_stats = session.query(
                 NotificationLog.priority,
