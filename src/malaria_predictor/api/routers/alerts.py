@@ -350,7 +350,7 @@ async def update_alert_configuration(
         for field, value in config_data.dict(exclude_unset=True).items():
             setattr(config, field, value)
 
-        config.updated_at = datetime.now()
+        config.updated_at = datetime.now()  # type: ignore[assignment]
 
         db.commit()
         db.refresh(config)
@@ -382,8 +382,8 @@ async def delete_alert_configuration(
             raise HTTPException(status_code=404, detail="Alert configuration not found")
 
         # Deactivate instead of deleting to preserve history
-        config.is_active = False
-        config.updated_at = datetime.now()
+        config.is_active = False  # type: ignore[assignment]
+        config.updated_at = datetime.now()  # type: ignore[assignment]
 
         db.commit()
 
@@ -544,7 +544,7 @@ async def get_alert(
 
         # Mark as viewed if not already
         if not alert.viewed_at:
-            alert.viewed_at = datetime.now()
+            alert.viewed_at = datetime.now()  # type: ignore[assignment]
             db.commit()
 
         return AlertResponse.from_orm(alert)
@@ -577,17 +577,17 @@ async def acknowledge_alert(
             raise HTTPException(status_code=400, detail="Alert already acknowledged")
 
         # Update alert
-        alert.acknowledged_at = datetime.now()
-        alert.acknowledged_by = current_user.id
-        alert.status = "acknowledged"
+        alert.acknowledged_at = datetime.now()  # type: ignore[assignment]
+        alert.acknowledged_by = current_user.id  # type: ignore[assignment]
+        alert.status = "acknowledged"  # type: ignore[assignment]
 
         if notes:
-            alert.resolution_notes = notes
+            alert.resolution_notes = notes  # type: ignore[assignment]
 
         # Calculate response time
         if alert.created_at:
             response_time = (datetime.now() - alert.created_at).total_seconds()
-            alert.response_time_seconds = int(response_time)
+            alert.response_time_seconds = int(response_time)  # type: ignore[assignment]
 
         db.commit()
 
@@ -622,16 +622,16 @@ async def resolve_alert(
             raise HTTPException(status_code=400, detail="Alert already resolved")
 
         # Update alert
-        alert.resolved_at = datetime.now()
-        alert.status = "resolved"
+        alert.resolved_at = datetime.now()  # type: ignore[assignment]
+        alert.status = "resolved"  # type: ignore[assignment]
 
         if notes:
-            alert.resolution_notes = notes
+            alert.resolution_notes = notes  # type: ignore[assignment]
 
         # Auto-acknowledge if not already
         if not alert.acknowledged_at:
-            alert.acknowledged_at = datetime.now()
-            alert.acknowledged_by = current_user.id
+            alert.acknowledged_at = datetime.now()  # type: ignore[assignment]
+            alert.acknowledged_by = current_user.id  # type: ignore[assignment]
 
         db.commit()
 
@@ -665,15 +665,15 @@ async def submit_alert_feedback(
             raise HTTPException(status_code=404, detail="Alert not found")
 
         # Update feedback
-        alert.feedback_rating = rating
-        alert.feedback_comments = comments
-        alert.false_positive = false_positive
+        alert.feedback_rating = rating  # type: ignore[assignment]
+        alert.feedback_comments = comments  # type: ignore[assignment]
+        alert.false_positive = false_positive  # type: ignore[assignment]
 
         # Update rule statistics if marked as false positive
         if false_positive and alert.alert_rule_id:
             rule = db.query(AlertRule).filter(AlertRule.id == alert.alert_rule_id).first()
             if rule:
-                rule.false_positive_count += 1
+                rule.false_positive_count += 1  # type: ignore[assignment]
 
         db.commit()
 
@@ -768,8 +768,8 @@ async def deactivate_device_token(
         if not token:
             raise HTTPException(status_code=404, detail="Device token not found")
 
-        token.is_active = False
-        token.deactivated_at = datetime.now()
+        token.is_active = False  # type: ignore[assignment]
+        token.deactivated_at = datetime.now()  # type: ignore[assignment]
 
         db.commit()
 
@@ -816,7 +816,7 @@ async def enhanced_websocket_endpoint(
         # Initialize WebSocket manager if not already done
         if not hasattr(websocket_manager, '_initialized'):
             await websocket_manager.initialize()
-            websocket_manager._initialized = True
+            websocket_manager._initialized = True  # type: ignore[attr-defined]
 
         connection_id = await websocket_manager.connect(
             websocket=websocket,
@@ -872,7 +872,7 @@ async def enhanced_websocket_endpoint(
             pass
 
 
-async def handle_websocket_message(websocket_manager, connection_id: str, message: dict) -> None:
+async def handle_websocket_message(websocket_manager: Any, connection_id: str, message: dict) -> None:
     """Handle incoming WebSocket messages with enhanced functionality."""
     try:
         message_type = message.get("type")
