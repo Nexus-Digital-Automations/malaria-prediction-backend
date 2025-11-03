@@ -165,10 +165,10 @@ class NotificationTemplateEngine:
             return {
                 "title": rendered_title.strip(),
                 "body": rendered_body.strip(),
-                "deep_link": rendered_deep_link,
-                "image_url": template.image_url,
-                "category": template.category,
-                "priority": template.priority,
+                "deep_link": rendered_deep_link,  # type: ignore[dict-item]
+                "image_url": template.image_url,  # type: ignore[dict-item]
+                "category": template.category,  # type: ignore[dict-item]
+                "priority": template.priority,  # type: ignore[dict-item]
             }
 
         except TemplateError as e:
@@ -482,6 +482,7 @@ class MessageComposer:
             humidity=env_data.get("humidity"),
             precipitation=env_data.get("precipitation"),
             vegetation_index=env_data.get("vegetation_index"),
+            outbreak_probability=None,
         )
 
         # Get template and render
@@ -511,6 +512,7 @@ class MessageComposer:
             alert_type="outbreak",
             severity="critical",
             custom_data=additional_context or {},
+            risk_score=None,
         )
 
         template = self.template_engine.create_outbreak_warning_template()
@@ -539,6 +541,8 @@ class MessageComposer:
                 "medication_name": medication_name,
                 "dosage": dosage,
             },
+            risk_score=None,
+            outbreak_probability=None,
         )
 
         template = self.template_engine.create_medication_reminder_template()
