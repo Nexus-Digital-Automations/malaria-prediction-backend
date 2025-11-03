@@ -10,8 +10,8 @@ import functools
 import inspect
 import time
 from collections.abc import Callable, Generator, Sequence
-from contextlib import contextmanager
-from typing import Any, ContextManager
+from contextlib import AbstractContextManager, contextmanager
+from typing import Any
 
 from opentelemetry import trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
@@ -350,7 +350,7 @@ class MLModelTracer:
         model_name: str,
         model_version: str,
         model_type: str,
-    ) -> ContextManager[trace.Span | None]:
+    ) -> AbstractContextManager[trace.Span | None]:
         """Trace model loading operations."""
         attributes = {
             "ml.model.name": model_name,
@@ -371,7 +371,7 @@ class MLModelTracer:
         model_version: str,
         input_features: int,
         batch_size: int = 1,
-    ) -> ContextManager[trace.Span | None]:
+    ) -> AbstractContextManager[trace.Span | None]:
         """Trace model prediction operations."""
         attributes = {
             "ml.model.name": model_name,
@@ -392,7 +392,7 @@ class MLModelTracer:
         data_source: str,
         feature_count: int,
         processing_type: str,
-    ) -> ContextManager[trace.Span | None]:
+    ) -> AbstractContextManager[trace.Span | None]:
         """Trace feature extraction operations."""
         attributes = {
             "ml.feature_extraction.data_source": data_source,
@@ -443,7 +443,7 @@ class DatabaseTracer:
         query_type: str,
         table_name: str | None = None,
         query_hash: str | None = None,
-    ) -> ContextManager[trace.Span | None]:
+    ) -> AbstractContextManager[trace.Span | None]:
         """Trace database query operations."""
         attributes = {
             "db.operation": query_type,
@@ -503,7 +503,7 @@ class APITracer:
         endpoint: str,
         user_id: str | None = None,
         request_id: str | None = None,
-    ) -> ContextManager[trace.Span | None]:
+    ) -> AbstractContextManager[trace.Span | None]:
         """Trace API request operations."""
         attributes = {
             "http.method": method,
