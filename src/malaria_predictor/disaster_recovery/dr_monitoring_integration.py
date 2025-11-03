@@ -511,10 +511,10 @@ class DRMonitoringService:
     def __init__(
         self,
         metrics_port: int = 9091,
-        webhook_urls: list[str] = None,
-        slack_webhook: str = None,
-        dashboard_api_url: str = None,
-        dashboard_api_key: str = None,
+        webhook_urls: list[str] | None = None,
+        slack_webhook: str | None = None,
+        dashboard_api_url: str | None = None,
+        dashboard_api_key: str | None = None,
     ):
         """Initialize DR monitoring service.
 

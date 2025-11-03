@@ -19,10 +19,10 @@ try:
     from google.cloud.firestore_v1.client import Client as FirestoreClient
     FIREBASE_AVAILABLE = True
 except ImportError:
-    firebase_admin = None  # type: ignore
-    credentials = None  # type: ignore
-    messaging = None  # type: ignore
-    FirestoreClient = None  # type: ignore
+    firebase_admin = None
+    credentials = None
+    messaging = None
+    FirestoreClient = None
     FIREBASE_AVAILABLE = False
 
 from pydantic import BaseModel, Field, field_validator

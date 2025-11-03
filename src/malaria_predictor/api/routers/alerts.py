@@ -787,10 +787,10 @@ async def deactivate_device_token(
 @router.websocket("/ws")
 async def enhanced_websocket_endpoint(
     websocket: WebSocket,
-    auth_token: str = None,
-    location_filter: str = None,
+    auth_token: str | None = None,
+    location_filter: str | None = None,
     risk_threshold: float = 0.0,
-    alert_types: str = None,
+    alert_types: str | None = None,
     current_user: User = Depends(get_current_user)
 ) -> None:
     """Enhanced WebSocket endpoint for real-time alerts with advanced features."""

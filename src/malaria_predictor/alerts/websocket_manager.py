@@ -1019,36 +1019,6 @@ class WebSocketAlertManager:
 
         return target_connections
 
-    async def _cleanup_connections(self) -> None:
-        """Background task to clean up stale connections."""
-        while True:
-            try:
-                await asyncio.sleep(300)  # Run every 5 minutes
-
-                current_time = datetime.now()
-                stale_connections = []
-
-                for connection_id, connection in self.connections.items():
-                    # Mark connections as stale if no ping in 10 minutes
-                    time_since_ping = (current_time - connection.last_ping).total_seconds()
-                    if time_since_ping > 600:
-                        stale_connections.append(connection_id)
-
-                # Clean up stale connections
-                for connection_id in stale_connections:
-                    await self.disconnect(connection_id)
-
-                self.stats["last_cleanup"] = current_time
-
-                if stale_connections:
-                    logger.info(f"Cleaned up {len(stale_connections)} stale WebSocket connections")
-
-            except asyncio.CancelledError:
-                logger.info("WebSocket cleanup task cancelled")
-                break
-            except Exception as e:
-                logger.error(f"Error in WebSocket cleanup task: {e}")
-
     async def _heartbeat_monitor(self) -> None:
         """Enhanced background task to monitor connection health."""
         while True:
