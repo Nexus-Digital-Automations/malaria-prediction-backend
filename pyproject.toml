@@ -324,6 +324,10 @@ module = [
     "pydantic_settings.*",
     "sqlalchemy",
     "sqlalchemy.*",
+    "alembic",
+    "alembic.*",
+    "apscheduler",
+    "apscheduler.*",
     "fastapi",
     "fastapi.*",
     "numpy",
@@ -370,6 +374,14 @@ module = [
     "requests.*",
     "scipy",
     "scipy.*",
+    "kubernetes",
+    "kubernetes.*",
+    "asyncpg",
+    "asyncpg.*",
+    "boto3",
+    "boto3.*",
+    "botocore",
+    "botocore.*",
 ]
 ignore_missing_imports = true
 
@@ -386,6 +398,8 @@ module = [
     "malaria_predictor.outbreak.widgets.forecasting",
     "malaria_predictor.outbreak.widgets.summaries",
     "malaria_predictor.performance.cache_optimization",
+    "malaria_predictor.disaster_recovery",
+    "malaria_predictor.disaster_recovery.*",
 ]
 ignore_errors = true
 

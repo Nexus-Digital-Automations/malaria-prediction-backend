@@ -83,7 +83,7 @@ class ERA5Repository:
         await self.session.commit()
 
         logger.info(f"Bulk inserted/updated {result.rowcount} ERA5 data points")
-        return cast(int, result.rowcount) # type: ignore[redundant-cast]
+        return cast(int, result.rowcount)
 
     async def get_data_range(
         self,
@@ -178,7 +178,7 @@ class ERA5Repository:
             )
 
         result = await self.session.execute(query)
-        return cast(datetime | None, result.scalar()) # type: ignore[redundant-cast]
+        return cast(datetime | None, result.scalar())
 
     async def delete_old_data(self, days_to_keep: int = 365) -> int:
         """Delete data older than specified days.
@@ -192,14 +192,14 @@ class ERA5Repository:
         cutoff_date = datetime.utcnow() - timedelta(days=days_to_keep)
 
         result = await self.session.execute(
-            ERA5DataPoint.__table__.delete().where( # type: ignore[attr-defined]
+            ERA5DataPoint.__table__.delete().where(
                 ERA5DataPoint.timestamp < cutoff_date
             )
         )
         await self.session.commit()
 
-        logger.info(f"Deleted {result.rowcount} old ERA5 data points") # type: ignore[attr-defined]
-        return cast(int, result.rowcount) # type: ignore[attr-defined]
+        logger.info(f"Deleted {result.rowcount} old ERA5 data points")
+        return cast(int, result.rowcount)
 
 
 class ProcessedClimateRepository:
@@ -273,11 +273,11 @@ class ProcessedClimateRepository:
                 },
             )
 
-        result = await self.session.execute(stmt) # type: ignore[assignment]
+        result = await self.session.execute(stmt)
         await self.session.commit()
 
-        logger.info(f"Saved {result.rowcount} processed climate records") # type: ignore[attr-defined]
-        return cast(int, result.rowcount) # type: ignore[attr-defined]
+        logger.info(f"Saved {result.rowcount} processed climate records")
+        return cast(int, result.rowcount)
 
     async def get_location_data(
         self,
@@ -445,7 +445,7 @@ class MalariaRiskRepository:
         )
 
         result = await self.session.execute(query)
-        return cast(MalariaRiskIndex | None, result.scalar_one_or_none()) # type: ignore[redundant-cast]
+        return cast(MalariaRiskIndex | None, result.scalar_one_or_none())
 
     async def get_risk_history(
         self,
@@ -594,7 +594,7 @@ class MalariaRiskRepository:
         result = await self.session.execute(stmt)
         await self.session.commit()
 
-        return cast(int, result.rowcount) # type: ignore[redundant-cast]
+        return cast(int, result.rowcount)
 
 
 class EnvironmentalDataRepository:
@@ -700,7 +700,7 @@ class EnvironmentalDataRepository:
 
         elif data_type == "worldpop":
             query = (
-                select(WorldPopDataPoint) # type: ignore[assignment]
+                select(WorldPopDataPoint)
                 .where(
                     and_(
                         WorldPopDataPoint.latitude >= latitude - buffer_degrees,
@@ -985,7 +985,7 @@ class UserRepository:
         result = await self.session.execute(stmt)
         await self.session.commit()
 
-        return cast(int, result.rowcount) > 0 # type: ignore[redundant-cast]
+        return cast(int, result.rowcount) > 0
 
     async def delete_user(self, user_id: str) -> bool:
         """Delete user by ID.

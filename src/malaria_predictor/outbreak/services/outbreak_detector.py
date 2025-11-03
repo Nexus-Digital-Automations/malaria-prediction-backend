@@ -434,7 +434,7 @@ class OutbreakDetector:
             cases = group['confirmed_cases'].values
 
             # Simple seasonal decomposition
-            seasonal_mean = self._calculate_seasonal_baseline(cases)  # type: ignore[arg-type]
+            seasonal_mean = self._calculate_seasonal_baseline(cases)
             current_cases = cases[-1]
 
             # Check for anomaly
@@ -561,7 +561,7 @@ class OutbreakDetector:
                 total_cases = sum(data.confirmed_cases for data in related_data)
                 total_population = sum(data.population_monitored for data in related_data)
 
-                outbreak_event = OutbreakEvent(  # type: ignore[call-arg]
+                outbreak_event = OutbreakEvent(
                     outbreak_id=outbreak_id,
                     event_name=f"Detected Outbreak {idx + 1}",
                     location=location,
@@ -657,7 +657,7 @@ class OutbreakDetector:
 
             severity_index = sum(severity_components.values()) / len(severity_components)
 
-            metrics = OutbreakMetrics(  # type: ignore[call-arg]
+            metrics = OutbreakMetrics(
                 metrics_id=metrics_id,
                 outbreak_id=outbreak.outbreak_id,
                 attack_rate=attack_rate,

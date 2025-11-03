@@ -523,7 +523,7 @@ class WebSocketAlertManager:
             location={
                 "latitude": float(alert.latitude),
                 "longitude": float(alert.longitude),
-                "name": str(alert.location_name)  # type: ignore[dict-item]
+                "name": str(alert.location_name)
             } if alert.latitude and alert.longitude else None,
             risk_score=float(alert.risk_score) if alert.risk_score is not None else None,
             priority=getattr(alert, 'priority', 'normal'),
@@ -789,7 +789,7 @@ class WebSocketAlertManager:
                 "user_roles": connection.user_roles
             }
 
-            await self.redis_client.hset(  # type: ignore[misc]
+            await self.redis_client.hset(
                 f"websocket_connection:{connection.connection_id}",
                 mapping=connection_data
             )
@@ -1110,11 +1110,11 @@ class WebSocketAlertManager:
                         "rate_limit_violations": self.stats["rate_limit_violations"]
                     }
 
-                    await self.redis_client.lpush(  # type: ignore[misc]
+                    await self.redis_client.lpush(
                         "websocket_metrics_history",
                         json.dumps(metrics_data)
                     )
-                    await self.redis_client.ltrim("websocket_metrics_history", 0, 1000)  # type: ignore[misc]  # Keep last 1000 entries
+                    await self.redis_client.ltrim("websocket_metrics_history", 0, 1000)  # Keep last 1000 entries
 
                 # Reset counters for next period
                 self.stats["messages_sent"] = 0

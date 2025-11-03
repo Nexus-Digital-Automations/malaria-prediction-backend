@@ -89,13 +89,13 @@ class NotificationManager:
     async def __aenter__(self) -> "NotificationManager":
         """Async context manager entry."""
         if self._should_close_session:
-            self.db_session = await get_database_session()  # type: ignore[assignment]
+            self.db_session = await get_database_session()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore[no-untyped-def]
         """Async context manager exit."""
         if self._should_close_session and self.db_session:
-            await self.db_session.close()  # type: ignore[func-returns-value]
+            await self.db_session.close()
 
     # Device Management
     async def register_device(
@@ -130,7 +130,7 @@ class NotificationManager:
                 return False, "Invalid FCM token"
 
             # Check if device already exists
-            existing_device = session.query(DeviceToken).filter(  # type: ignore[union-attr]
+            existing_device = session.query(DeviceToken).filter(
                 DeviceToken.token == token
             ).first()
 
@@ -192,7 +192,7 @@ class NotificationManager:
         try:
             session = self.db_session or await get_database_session()
 
-            device = session.query(  # type: ignore[union-attr]
+            device = session.query(
             DeviceToken).filter(
                 DeviceToken.token == token
             ).first()
@@ -204,7 +204,7 @@ class NotificationManager:
             device.is_active = False
 
             # Deactivate all subscriptions
-            session.query(  # type: ignore[union-attr]
+            session.query(
             TopicSubscription).filter(
                 TopicSubscription.device_id == device.id
             ).update({"is_active": False})
@@ -322,7 +322,7 @@ class NotificationManager:
                 for user_id in target_users:
                     # Find user's devices
                     session = self.db_session or await get_database_session()
-                    user_devices = session.query(  # type: ignore[union-attr]
+                    user_devices = session.query(
             DeviceToken).filter(
                         DeviceToken.user_id == user_id,
                         DeviceToken.is_active,
@@ -446,7 +446,7 @@ class NotificationManager:
                 dosage=dosage,
             )
 
-            context = TemplateContext(  # type: ignore[call-arg]
+            context = TemplateContext(
                 user_id=user_id,
                 custom_data={
                     "medication_name": medication_name,
@@ -456,7 +456,7 @@ class NotificationManager:
 
             # Find user's devices
             session = self.db_session or await get_database_session()
-            user_devices = session.query(  # type: ignore[union-attr]
+            user_devices = session.query(
             DeviceToken).filter(
                 DeviceToken.user_id == user_id,
                 DeviceToken.is_active,
@@ -536,7 +536,7 @@ class NotificationManager:
             session = self.db_session or await get_database_session()
 
             # Get user's active devices
-            user_devices = session.query(  # type: ignore[union-attr]
+            user_devices = session.query(
             DeviceToken).filter(
                 DeviceToken.user_id == user_id,
                 DeviceToken.is_active,
@@ -649,7 +649,7 @@ class NotificationManager:
 
             # Clean up old notification logs
             cutoff_date = datetime.now(UTC) - timedelta(days=notification_retention_days)
-            old_notifications = session.query(  # type: ignore[union-attr]
+            old_notifications = session.query(
             NotificationLog).filter(
                 NotificationLog.created_at < cutoff_date
             )
@@ -658,7 +658,7 @@ class NotificationManager:
 
             # Deactivate inactive devices
             inactive_cutoff = datetime.now(UTC) - timedelta(days=inactive_device_days)
-            inactive_devices = session.query(  # type: ignore[union-attr]
+            inactive_devices = session.query(
             DeviceToken).filter(
                 DeviceToken.last_seen < inactive_cutoff,
                 DeviceToken.is_active,
@@ -698,22 +698,22 @@ class NotificationManager:
             session = self.db_session or await get_database_session()
 
             # Get basic counts
-            total_devices = session.query(  # type: ignore[union-attr]
+            total_devices = session.query(
             DeviceToken).filter(DeviceToken.is_active).count()
-            total_subscriptions = session.query(  # type: ignore[union-attr]
+            total_subscriptions = session.query(
             TopicSubscription).filter(
                 TopicSubscription.is_active
             ).count()
 
             # Get recent activity
             last_hour = datetime.now(UTC) - timedelta(hours=1)
-            recent_notifications = session.query(  # type: ignore[union-attr]
+            recent_notifications = session.query(
             NotificationLog).filter(
                 NotificationLog.created_at >= last_hour
             ).count()
 
             # Get pending notifications
-            pending_notifications = session.query(  # type: ignore[union-attr]
+            pending_notifications = session.query(
             NotificationLog).filter(
                 NotificationLog.status == "pending"
             ).count()

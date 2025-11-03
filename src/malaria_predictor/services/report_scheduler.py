@@ -208,10 +208,10 @@ class ReportScheduler:
                 except Exception as e:
                     logger.error(f"Error executing schedule {schedule.id}: {str(e)}")
                     # Update schedule with error
-                    schedule.error_count += 1  # type: ignore[assignment]
-                    schedule.last_error_message = str(e)  # type: ignore[assignment]
+                    schedule.error_count += 1
+                    schedule.last_error_message = str(e)
                     if schedule.error_count >= 5:  # Max retries
-                        schedule.status = "failed"  # type: ignore[assignment]
+                        schedule.status = "failed"
                         logger.error(f"Schedule {schedule.id} disabled after 5 failures")
 
             self.db.commit()
@@ -243,40 +243,40 @@ class ReportScheduler:
                 await self._deliver_report(schedule, report_result)
 
                 # Update schedule success metrics
-                schedule.success_count += 1  # type: ignore[assignment]
-                schedule.last_status = "success"  # type: ignore[assignment]
-                schedule.last_error_message = None  # type: ignore[assignment]
+                schedule.success_count += 1
+                schedule.last_status = "success"
+                schedule.last_error_message = None
 
             else:
                 raise Exception(f"Report generation failed: {report_result.get('error', 'Unknown error')}")
 
             # Calculate next execution time
-            schedule.next_execution = self._calculate_next_execution(schedule)  # type: ignore[assignment]
-            schedule.last_execution = execution_start  # type: ignore[assignment]
-            schedule.execution_count += 1  # type: ignore[assignment]
+            schedule.next_execution = self._calculate_next_execution(schedule)
+            schedule.last_execution = execution_start
+            schedule.execution_count += 1
 
             # Update performance metrics
             execution_time = (datetime.utcnow() - execution_start).total_seconds()
-            schedule.last_execution_time = execution_time  # type: ignore[assignment]
+            schedule.last_execution_time = execution_time
 
             if schedule.average_execution_time is None:
-                schedule.average_execution_time = execution_time  # type: ignore[unreachable]
+                schedule.average_execution_time = execution_time
             else:
                 # Exponential moving average
                 schedule.average_execution_time = (
-                    0.8 * schedule.average_execution_time + 0.2 * execution_time  # type: ignore[assignment]
+                    0.8 * schedule.average_execution_time + 0.2 * execution_time
                 )
 
             logger.info(f"Schedule {schedule.id} executed successfully in {execution_time:.2f}s")
 
         except Exception as e:
             logger.error(f"Error executing schedule {schedule.id}: {str(e)}")
-            schedule.error_count += 1  # type: ignore[assignment]
-            schedule.last_status = "failed"  # type: ignore[assignment]
-            schedule.last_error_message = str(e)  # type: ignore[assignment]
+            schedule.error_count += 1
+            schedule.last_status = "failed"
+            schedule.last_error_message = str(e)
 
             # Still calculate next execution for retry
-            schedule.next_execution = self._calculate_next_execution(schedule)  # type: ignore[assignment]
+            schedule.next_execution = self._calculate_next_execution(schedule)
             raise
 
     async def _deliver_report(
@@ -421,7 +421,7 @@ class ReportScheduler:
     ) -> None:
         """Deliver report to configured storage locations."""
         try:
-            for storage_config in schedule.storage_locations:  # type: ignore[attr-defined]
+            for storage_config in schedule.storage_locations:
                 storage_type = storage_config.get('type', 'local')
                 storage_path = storage_config.get('path')
 
@@ -465,8 +465,8 @@ class ReportScheduler:
 
             # Respect end date
             if schedule.end_date and next_time > schedule.end_date:
-                schedule.status = "completed"  # type: ignore[assignment]
-                return schedule.end_date  # type: ignore[return-value]
+                schedule.status = "completed"
+                return schedule.end_date
 
             return next_time  # type: ignore[no-any-return]
 
@@ -478,14 +478,14 @@ class ReportScheduler:
 
             # Respect end date
             if schedule.end_date and next_time > schedule.end_date:
-                schedule.status = "completed"  # type: ignore[assignment]
-                return schedule.end_date  # type: ignore[return-value]
+                schedule.status = "completed"
+                return schedule.end_date
 
             return next_time
 
         elif schedule.schedule_type == "one_time":
             # One-time schedules are marked as completed after execution
-            schedule.status = "completed"  # type: ignore[assignment]
+            schedule.status = "completed"
             return current_time
 
         else:
@@ -541,7 +541,7 @@ class ReportScheduler:
             )
 
             # Calculate next execution
-            schedule.next_execution = self._calculate_next_execution(schedule)  # type: ignore[assignment]
+            schedule.next_execution = self._calculate_next_execution(schedule)
 
             self.db.add(schedule)
             self.db.commit()
@@ -608,9 +608,9 @@ class ReportScheduler:
 
             # Recalculate next execution if timing changed
             if any(field in updates for field in ['cron_expression', 'interval_minutes', 'start_date']):
-                schedule.next_execution = self._calculate_next_execution(schedule)  # type: ignore[assignment]
+                schedule.next_execution = self._calculate_next_execution(schedule)
 
-            schedule.last_modified_at = datetime.utcnow()  # type: ignore[assignment]
+            schedule.last_modified_at = datetime.utcnow()
             self.db.commit()
 
             logger.info(f"Updated schedule {schedule_id}")

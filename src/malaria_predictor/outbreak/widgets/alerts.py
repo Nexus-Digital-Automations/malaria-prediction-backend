@@ -89,7 +89,7 @@ class OutbreakAlert:
     def __init__(self, config: AlertConfiguration | None = None) -> None:
         """Initialize outbreak alert widget."""
         self.logger = logger.bind(service="outbreak_alert")
-        self.config = config or AlertConfiguration()  # type: ignore[call-arg]
+        self.config = config or AlertConfiguration()
 
         # Alert state management
         self.active_alerts: dict[str, AlertItem] = {}
@@ -182,7 +182,7 @@ class OutbreakAlert:
                 "Outbreak alert widget generated successfully",
                 widget_id=widget_id,
                 active_alerts=len(alert_data["active"]),
-                critical_alerts=widget_config["metadata"]["critical_alerts"]  # type: ignore[index]
+                critical_alerts=widget_config["metadata"]["critical_alerts"]
             )
 
             return widget_config
@@ -212,7 +212,7 @@ class OutbreakAlert:
                 continue
 
             # Create outbreak detection alert
-            alert = AlertItem(  # type: ignore[call-arg]
+            alert = AlertItem(
                 alert_id=alert_id,
                 alert_type="outbreak_detection",
                 severity=alert_severity,
@@ -314,7 +314,7 @@ class OutbreakAlert:
             alert_id = f"surveillance_{location_key}_{alert_config['type']}_{data['latest_date'].strftime('%Y%m%d')}"
 
             if alert_id not in self.active_alerts:
-                alert = AlertItem(  # type: ignore[call-arg]  # type: ignore[call-arg]
+                alert = AlertItem(  # type: ignore[call-arg]
                     alert_id=alert_id,
                     alert_type=alert_config["type"],
                     severity=alert_config["severity"],
@@ -340,7 +340,7 @@ class OutbreakAlert:
         """Create escalation alert for critical outbreaks."""
         escalation_id = f"escalation_{outbreak.outbreak_id}"
 
-        escalation_alert = AlertItem(  # type: ignore[call-arg]
+        escalation_alert = AlertItem(
             alert_id=escalation_id,
             alert_type="severity_escalation",
             severity="critical",

@@ -187,7 +187,7 @@ class DetailedError(Exception):
         self.category = category
         self.severity = severity
         self.error_code = error_code or self._generate_error_code()
-        self.context = context or ErrorContext()  # type: ignore[call-arg]
+        self.context = context or ErrorContext()
         self.original_exception = original_exception
         self.retry_eligible = retry_eligible
         self.user_message = user_message or self._get_default_user_message()

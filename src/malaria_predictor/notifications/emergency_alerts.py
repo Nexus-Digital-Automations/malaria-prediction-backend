@@ -183,9 +183,6 @@ class EmergencyAlertSystem:
                     "alert_id": alert.alert_id,
                 }
 
-            # Create template context
-            context = self._create_emergency_context(alert)
-
             # Prepare notification data
             message_data = FCMMessageData(
                 title=alert.title,
@@ -444,7 +441,7 @@ class EmergencyAlertSystem:
             cancelled_count = 0
             for notification in related_notifications:
                 if notification.status == NotificationStatus.PENDING:
-                    notification.status = NotificationStatus.CANCELED  # type: ignore[assignment]
+                    notification.status = NotificationStatus.CANCELED
                     cancelled_count += 1
 
             session.commit()

@@ -755,7 +755,7 @@ class ERA5Client:
         schedule.every().day.at("06:00").do(self._daily_update_job)
 
         # Schedule monthly updates for complete monthly data
-        schedule.every().month.do(self._monthly_update_job) # type: ignore[attr-defined]
+        schedule.every().month.do(self._monthly_update_job)
 
         logger.info("Automated update schedule configured")
 
@@ -996,12 +996,12 @@ class ERA5Client:
                 if aggregation_method == "daily":
                     # Daily aggregation with multiple statistics
                     for var in ds.data_vars:
-                        if "precipitation" in var or "tp" in var: # type: ignore[operator]
+                        if "precipitation" in var or "tp" in var:
                             # Sum precipitation
                             aggregated_data[f"{var}_total"] = (
                                 ds[var].resample(time="1D").sum()
                             )
-                        elif "temperature" in var or "t2m" in var or "d2m" in var: # type: ignore[operator]
+                        elif "temperature" in var or "t2m" in var or "d2m" in var:
                             # Mean temperature
                             aggregated_data[f"{var}_mean"] = (
                                 ds[var].resample(time="1D").mean()
@@ -1012,7 +1012,7 @@ class ERA5Client:
                             aggregated_data[f"{var}_min"] = (
                                 ds[var].resample(time="1D").min()
                             )
-                        elif "humidity" in var or "r2" in var: # type: ignore[operator]
+                        elif "humidity" in var or "r2" in var:
                             # Mean humidity
                             aggregated_data[f"{var}_mean"] = (
                                 ds[var].resample(time="1D").mean()
@@ -1039,7 +1039,7 @@ class ERA5Client:
                             ds[var].resample(time="1M").std()
                         )
 
-                        if "precipitation" in var or "tp" in var: # type: ignore[operator]
+                        if "precipitation" in var or "tp" in var:
                             aggregated_data[f"{var}_total"] = (
                                 ds[var].resample(time="1M").sum()
                             )
