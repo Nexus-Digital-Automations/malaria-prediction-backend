@@ -413,7 +413,7 @@ class MODISClient:
             logger.error(f"MODIS download failed: {e}")
             return self._create_failed_result(str(e))
 
-    def _download_single_modis_file(
+    def _download_single_modis_file(  # type: ignore[return]
         self, product: str, period_start: date, tile: MODISTileInfo
     ) -> dict[str, Any]:
         """Download a single MODIS file.
@@ -666,7 +666,7 @@ class MODISClient:
 
             except Exception as e:
                 logger.warning(f"Failed to apply quality filtering: {e}")
-                quality_flags = {"error": "Quality filtering failed"}
+                quality_flags = {"error": "Quality filtering failed"}  # type: ignore[dict-item]
 
         # Calculate statistics
         valid_data = vi_data[~np.isnan(vi_data)]
