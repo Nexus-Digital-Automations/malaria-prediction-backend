@@ -275,7 +275,9 @@ class PatternAnalyzer:
 
         # Find peaks and troughs
         peaks, _ = signal.find_peaks(weekly_incidence.values, height=weekly_incidence.mean())
-        troughs, _ = signal.find_peaks(-weekly_incidence.values, height=-weekly_incidence.mean())
+        # Use explicit numpy array cast to handle pandas/numpy type compatibility
+        values_array = np.array(weekly_incidence.values)
+        troughs, _ = signal.find_peaks(-values_array, height=-weekly_incidence.mean())
 
         # Calculate seasonal amplitude
         amplitude = (weekly_incidence.max() - weekly_incidence.min()) / weekly_incidence.mean()
@@ -522,11 +524,13 @@ class PatternAnalyzer:
         # Identify spread vectors (simplified)
         vectors = []
         if len(df) > 1:
+            # Calculate spread strength as normalized mean of cases along the vector
+            strength = float(df['confirmed_cases'].mean() / (df['confirmed_cases'].max() + 1))
             vectors = [
                 {
                     "from": [df.iloc[0]['longitude'], df.iloc[0]['latitude']],
                     "to": [df.iloc[-1]['longitude'], df.iloc[-1]['latitude']],
-                    "strength": float(df['confirmed_cases'].corr(df.index))
+                    "strength": strength
                 }
             ]
 
