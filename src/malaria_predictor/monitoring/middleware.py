@@ -15,6 +15,7 @@ from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from opentelemetry import trace
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.types import ASGIApp
 
 from .health import get_health_checker
 from .logger import RequestContextLogger, get_logger
@@ -32,10 +33,10 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
 
     def __init__(
         self,
-        app,
+        app: ASGIApp,
         include_paths: list[str] | None = None,
         exclude_paths: list[str] | None = None,
-    ):
+    ) -> None:
         super().__init__(app)
         self.metrics = get_metrics()
         self.include_paths = include_paths or []
@@ -150,7 +151,7 @@ class TracingMiddleware(BaseHTTPMiddleware):
     attributes and context propagation.
     """
 
-    def __init__(self, app) -> None:
+    def __init__(self, app: ASGIApp) -> None:
         super().__init__(app)
         self.tracer = get_api_tracer()
         self.logger = get_logger(__name__)
@@ -217,7 +218,7 @@ class HealthCheckMiddleware(BaseHTTPMiddleware):
     component status and metrics.
     """
 
-    def __init__(self, app, health_endpoint: str = "/health") -> None:
+    def __init__(self, app: ASGIApp, health_endpoint: str = "/health") -> None:
         super().__init__(app)
         self.health_endpoint = health_endpoint
         self.health_checker = get_health_checker()
@@ -340,11 +341,11 @@ class PerformanceMonitoringMiddleware(BaseHTTPMiddleware):
 
     def __init__(
         self,
-        app,
+        app: ASGIApp,
         slow_request_threshold: float = 1.0,  # seconds
         log_slow_requests: bool = True,
         track_request_sizes: bool = True,
-    ):
+    ) -> None:
         super().__init__(app)
         self.slow_request_threshold = slow_request_threshold
         self.log_slow_requests = log_slow_requests
@@ -480,7 +481,7 @@ class MonitoringMiddleware(BaseHTTPMiddleware):
 
     def __init__(
         self,
-        app,
+        app: ASGIApp,
         enable_metrics: bool = True,
         enable_tracing: bool = True,
         enable_health_checks: bool = True,
