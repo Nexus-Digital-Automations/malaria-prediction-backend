@@ -204,7 +204,7 @@ class RequestContextLogger:
         self.operation = operation
         self.tokens: list[Token[str | None]] = []
 
-    def __enter__(self):
+    def __enter__(self) -> "RequestContextLogger":
         """Enter request context."""
         if self.request_id:
             self.tokens.append(request_id_var.set(self.request_id))
@@ -217,7 +217,7 @@ class RequestContextLogger:
 
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Exit request context."""
         # Reset context variables
         for token in reversed(self.tokens):
@@ -226,8 +226,8 @@ class RequestContextLogger:
 
 
 def setup_logging(
-    log_level: str = None,
-    log_format: str = None,
+    log_level: str | None = None,
+    log_format: str | None = None,
     log_file: str | Path | None = None,
     enable_console: bool = True,
     enable_file_rotation: bool = True,
@@ -266,6 +266,7 @@ def setup_logging(
     correlation_filter = CorrelationIdFilter()
 
     # Configure formatters based on format type
+    formatter: logging.Formatter
     if log_format == "json":
         formatter = JSONFormatter(
             include_extra=True, include_stack_info=settings.environment != "production"
@@ -293,6 +294,7 @@ def setup_logging(
         log_file = Path(log_file)
         log_file.parent.mkdir(parents=True, exist_ok=True)
 
+        file_handler: logging.Handler
         if enable_file_rotation:
             file_handler = logging.handlers.RotatingFileHandler(
                 filename=log_file,
@@ -358,9 +360,9 @@ class PerformanceLogger:
     def __init__(self, logger: logging.Logger, operation: str) -> None:
         self.logger = logger
         self.operation = operation
-        self.start_time = None
+        self.start_time: float | None = None
 
-    def __enter__(self):
+    def __enter__(self) -> "PerformanceLogger":
         """Start performance timing."""
         self.start_time = time.time()
         self.logger.info(
@@ -369,8 +371,10 @@ class PerformanceLogger:
         )
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Log performance results."""
+        if self.start_time is None:
+            return
         duration = time.time() - self.start_time
 
         if exc_type is None:
