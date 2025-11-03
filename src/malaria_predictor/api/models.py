@@ -5,11 +5,12 @@ This module defines Pydantic models for analytics API requests and responses,
 providing comprehensive data structures for visualization and reporting.
 """
 
-from datetime import date as DateType, datetime
+from datetime import date as DateType
+from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 # Import RiskLevel enum from main models for proper enum usage
 from ..models import RiskLevel as RiskLevelEnum
@@ -373,6 +374,8 @@ class SpatialPredictionRequest(BaseModel):
 
 class TimeSeriesPoint(BaseModel):
     """Time series data point."""
+
+    model_config = ConfigDict(populate_by_name=True)
 
     prediction_date: DateType = Field(..., alias="date", description="Prediction date")
     risk_score: float = Field(..., description="Risk score", ge=0, le=1)

@@ -438,7 +438,7 @@ async def predict_time_series(
                 )
 
                 time_series.append(
-                    TimeSeriesPoint(
+                    TimeSeriesPoint(  # type: ignore[call-arg]  # Pydantic Field alias - mypy limitation
                         prediction_date=current_date,
                         risk_score=prediction["risk_score"],
                         risk_level=_calculate_risk_level(prediction["risk_score"]),

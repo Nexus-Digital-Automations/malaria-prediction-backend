@@ -312,7 +312,9 @@ async def get_cache_status(
     and connection health.
     """
     try:
-        from ...performance.cache_optimization import get_cache_optimizer  # type: ignore[import-untyped]  # fmt: skip
+        from ...performance.cache_optimization import (  # type: ignore[import-untyped]
+            get_cache_optimizer,  # fmt: skip
+        )
 
         cache_optimizer = await get_cache_optimizer()
         cache_stats = await cache_optimizer.get_cache_statistics()
