@@ -141,12 +141,12 @@ class SecurityConfig:
 
 def hash_password(password: str) -> str:
     """Hash a password using bcrypt."""
-    return pwd_context.hash(password)
+    return pwd_context.hash(password)  # type: ignore[no-any-return]
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    return pwd_context.verify(plain_password, hashed_password)  # type: ignore[no-any-return]
 
 
 def encrypt_sensitive_data(data: str) -> str:
@@ -172,7 +172,7 @@ def create_access_token(
 
     to_encode.update({"exp": expire, "iat": datetime.now(UTC), "type": "access"})
 
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)  # type: ignore[no-any-return]
 
 
 def create_refresh_token(user_id: str) -> str:
@@ -186,7 +186,7 @@ def create_refresh_token(user_id: str) -> str:
         "type": "refresh",
     }
 
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)  # type: ignore[no-any-return]
 
 
 def create_api_key_token(
@@ -207,7 +207,7 @@ def create_api_key_token(
         # Default API key tokens expire in 1 year
         to_encode["exp"] = datetime.now(UTC) + timedelta(days=365)
 
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)  # type: ignore[no-any-return]
 
 
 def verify_token(token: str) -> TokenData | None:
