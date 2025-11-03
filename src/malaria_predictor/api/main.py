@@ -59,7 +59,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         prediction_service = await get_prediction_service()
 
         # Initialize enhanced WebSocket alert system
-        from ..alerts.websocket_manager import websocket_manager  # type: ignore[import-not-found]
+        from ..alerts.websocket_manager import websocket_manager
 
         logger.info("🔌 Initializing enhanced WebSocket alert system...")
         await websocket_manager.initialize()
