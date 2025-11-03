@@ -5,7 +5,7 @@ This module defines Pydantic models for analytics API requests and responses,
 providing comprehensive data structures for visualization and reporting.
 """
 
-from datetime import date, datetime
+from datetime import date as DateType, datetime
 from enum import Enum
 from typing import Any
 
@@ -345,7 +345,7 @@ class SinglePredictionRequest(BaseModel):
     """Single location prediction request."""
 
     location: LocationPoint = Field(..., description="Geographic location")
-    target_date: date = Field(..., description="Target date for prediction")
+    target_date: DateType = Field(..., description="Target date for prediction")
     model_type: ModelType = Field(default=ModelType.ENSEMBLE, description="ML model to use")
     prediction_horizon: PredictionHorizon = Field(default=PredictionHorizon.ONE_WEEK, description="Prediction time horizon")
     include_factors: bool = Field(default=True, description="Include risk factor breakdown")
@@ -355,7 +355,7 @@ class BatchPredictionRequest(BaseModel):
     """Batch prediction request for multiple locations."""
 
     locations: list[LocationPoint] = Field(..., description="List of geographic locations", min_length=1, max_length=100)
-    target_date: date = Field(..., description="Target date for prediction")
+    target_date: DateType = Field(..., description="Target date for prediction")
     model_type: ModelType = Field(default=ModelType.ENSEMBLE, description="ML model to use")
     prediction_horizon: PredictionHorizon = Field(default=PredictionHorizon.ONE_WEEK, description="Prediction time horizon")
     include_factors: bool = Field(default=True, description="Include risk factor breakdown")
@@ -366,7 +366,7 @@ class SpatialPredictionRequest(BaseModel):
 
     bounds: dict[str, float] = Field(..., description="Geographic bounds (north, south, east, west)")
     resolution: float = Field(default=0.1, description="Grid resolution in degrees", gt=0, le=1)
-    target_date: date = Field(..., description="Target date for prediction")
+    target_date: DateType = Field(..., description="Target date for prediction")
     model_type: ModelType = Field(default=ModelType.ENSEMBLE, description="ML model to use")
     prediction_horizon: PredictionHorizon = Field(default=PredictionHorizon.ONE_WEEK, description="Prediction time horizon")
 
@@ -374,7 +374,7 @@ class SpatialPredictionRequest(BaseModel):
 class TimeSeriesPoint(BaseModel):
     """Time series data point."""
 
-    date: date = Field(..., description="Prediction date")
+    date: DateType = Field(..., description="Prediction date")
     risk_score: float = Field(..., description="Risk score", ge=0, le=1)
     risk_level: RiskLevelEnum = Field(..., description="Categorical risk level")
     uncertainty: float | None = Field(None, description="Prediction uncertainty")
@@ -394,7 +394,7 @@ class PredictionResult(BaseModel):
     """Single prediction result."""
 
     location: LocationPoint = Field(..., description="Prediction location")
-    target_date: date = Field(..., description="Target prediction date")
+    target_date: DateType = Field(..., description="Target prediction date")
     risk_score: float = Field(..., description="Numeric risk score", ge=0, le=1)
     risk_level: RiskLevelEnum = Field(..., description="Categorical risk level")
     uncertainty: float | None = Field(None, description="Prediction uncertainty")
