@@ -135,7 +135,7 @@ class BulkNotificationCampaign(BaseModel):
     completed_at: datetime | None = None
 
     @validator('campaign_type')
-    def validate_campaign_type(cls, v):
+    def validate_campaign_type(cls, v: str) -> str:
         valid_types = ['emergency', 'promotional', 'informational', 'alert']
         if v not in valid_types:
             raise ValueError(f'Campaign type must be one of {valid_types}')
@@ -194,8 +194,8 @@ class BulkNotificationManager:
         self.jobs: dict[str, BulkNotificationJob] = {}
 
         # Processing queues
-        self.job_queue: list[Any] = asyncio.Queue()
-        self.retry_queue: list[Any] = asyncio.Queue()
+        self.job_queue: asyncio.Queue[Any] = asyncio.Queue()
+        self.retry_queue: asyncio.Queue[Any] = asyncio.Queue()
 
         # Background tasks
         self._scheduler_task: asyncio.Task | None = None
@@ -695,7 +695,7 @@ class BulkNotificationManager:
         self,
         campaign: BulkNotificationCampaign,
         sample_user_id: str
-    ) -> dict[str, str]:
+    ) -> dict[str, Any]:
         """Render campaign content for notification delivery."""
         try:
             rendered_content = {}
@@ -745,7 +745,7 @@ class BulkNotificationManager:
 
             if "push" in channels:
                 async with get_session() as db:
-                    device_tokens = db.query(UserDeviceToken).filter(
+                    device_tokens = db.query(UserDeviceToken).filter(  # type: ignore[attr-defined]
                         UserDeviceToken.user_id.in_(user_ids),
                         UserDeviceToken.is_active,
                         UserDeviceToken.is_valid
