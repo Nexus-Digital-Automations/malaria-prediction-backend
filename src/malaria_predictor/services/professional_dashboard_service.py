@@ -22,11 +22,11 @@ class DashboardMetrics(BaseModel):
     metric_id: str = Field(default_factory=lambda: str(uuid4()))
     metric_name: str = Field(..., description="Metric name")
     current_value: float = Field(..., description="Current metric value")
-    previous_value: float | None = Field(None, description="Previous period value")
+    previous_value: float | None = Field(default=None, description="Previous period value")
     trend: str = Field(..., description="Trend direction (increasing, decreasing, stable)")
-    percentage_change: float | None = Field(None, description="Percentage change from previous period")
-    target_value: float | None = Field(None, description="Target or goal value")
-    unit: str = Field("count", description="Metric unit")
+    percentage_change: float | None = Field(default=None, description="Percentage change from previous period")
+    target_value: float | None = Field(default=None, description="Target or goal value")
+    unit: str = Field(default="count", description="Metric unit")
     category: str = Field(..., description="Metric category")
     updated_at: datetime = Field(default_factory=datetime.now)
 
@@ -40,10 +40,10 @@ class AlertSummary(BaseModel):
     title: str = Field(..., description="Alert title")
     message: str = Field(..., description="Alert message")
     action_required: str = Field(..., description="Required action")
-    location: dict[str, Any] | None = Field(None, description="Alert location")
+    location: dict[str, Any] | None = Field(default=None, description="Alert location")
     created_at: datetime = Field(default_factory=datetime.now)
-    acknowledged: bool = Field(False, description="Alert acknowledgment status")
-    resolved: bool = Field(False, description="Alert resolution status")
+    acknowledged: bool = Field(default=False, description="Alert acknowledgment status")
+    resolved: bool = Field(default=False, description="Alert resolution status")
 
 
 class PerformanceInsight(BaseModel):
