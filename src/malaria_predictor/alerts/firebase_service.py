@@ -664,6 +664,7 @@ class FirebaseNotificationService:
         """
         # Get alert configuration (SQLAlchemy 2.0 async)
         from sqlalchemy import select
+
         from ..database.models import AlertConfiguration
 
         config_result = await db.execute(
