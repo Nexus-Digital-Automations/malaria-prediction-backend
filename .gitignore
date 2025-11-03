@@ -350,3 +350,13 @@ TASKS.json
 
 # Security scan reports
 bandit-report.json
+
+# Claude Code development artifacts
+.auth-state.json
+.claude-continue-counter
+.validation-performance.json
+
+# Temporary directories that should not be in root (root-level only)
+/MagicMock/
+/disaster_recovery/
+/performance/
