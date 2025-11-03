@@ -635,9 +635,9 @@ cat("DOWNLOADED:", output_file, "\\n")
             params = {"species": species_complex, "format": "csv"}
 
             if start_year:
-                params["year_start"] = start_year
+                params["year_start"] = start_year  # type: ignore[assignment]
             if end_year:
-                params["year_end"] = end_year
+                params["year_end"] = end_year  # type: ignore[assignment]
 
             # Add bounds
             params["bbox"] = (
