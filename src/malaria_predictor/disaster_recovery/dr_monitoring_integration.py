@@ -428,7 +428,7 @@ class AlertManager:
         }
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(self.slack_webhook, json=slack_payload)
+            response = await client.post(self.slack_webhook, json=slack_payload)  # type: ignore[arg-type]
             response.raise_for_status()
 
     async def _send_email_alert(self, alert_payload: dict) -> None:
@@ -498,7 +498,7 @@ class OperationsDashboardIntegration:
                 response.raise_for_status()
 
                 result = response.json()
-                return result.get("incident_id")
+                return result.get("incident_id")  # type: ignore[no-any-return]
 
         except Exception as e:
             logger.error(f"Failed to create dashboard incident: {e}")
@@ -547,11 +547,11 @@ class DRMonitoringService:
         from http.server import BaseHTTPRequestHandler, HTTPServer
 
         class MetricsHandler(BaseHTTPRequestHandler):
-            def __init__(self, metrics_collector, *args, **kwargs):
+            def __init__(self, metrics_collector: Any, *args: Any, **kwargs: Any) -> None:
                 self.metrics_collector = metrics_collector
                 super().__init__(*args, **kwargs)
 
-            def do_GET(self):
+            def do_GET(self) -> None:
                 if self.path == "/metrics":
                     metrics_data = generate_latest(self.metrics_collector.registry)
                     self.send_response(200)
@@ -562,13 +562,13 @@ class DRMonitoringService:
                     self.send_response(404)
                     self.end_headers()
 
-            def log_message(self, format, *args):
+            def log_message(self, format: str, *args: Any) -> None:
                 pass  # Suppress HTTP server logs
 
-        def handler_wrapper(*args, **kwargs):
+        def handler_wrapper(*args: Any, **kwargs: Any) -> MetricsHandler:
             return MetricsHandler(self.metrics_collector, *args, **kwargs)
 
-        def run_server():
+        def run_server() -> None:
             server = HTTPServer(("", self.metrics_port), handler_wrapper)
             server.serve_forever()
 
@@ -755,7 +755,7 @@ class DRMonitoringService:
         logger.info("DR monitoring service started successfully")
 
 
-async def main():
+async def main() -> int:
     """Main entry point for DR monitoring service."""
     import argparse
 
