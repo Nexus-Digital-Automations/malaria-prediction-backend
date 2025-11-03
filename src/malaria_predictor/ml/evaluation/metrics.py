@@ -214,7 +214,7 @@ class ModelEvaluationMetrics:
         # Population-weighted metrics (assuming uniform population for now)
         epi_metrics["population_weighted_mae"] = mean_absolute_error(y_true, y_pred)
 
-        return epi_metrics
+        return epi_metrics  # type: ignore[return-value]
 
     def _calculate_uncertainty_metrics(
         self, y_true: np.ndarray, y_pred: np.ndarray, y_uncertainty: np.ndarray
@@ -258,7 +258,7 @@ class ModelEvaluationMetrics:
 
         # Convert timestamps to pandas datetime if needed
         if not isinstance(timestamps[0], pd.Timestamp):
-            timestamps = pd.to_datetime(timestamps)
+            timestamps = pd.to_datetime(timestamps)  # type: ignore[assignment]
 
         # Sort by timestamp
         sort_idx = np.argsort(timestamps)
@@ -366,7 +366,7 @@ class ModelEvaluationMetrics:
                 hits + misses + false_alarms
             )
 
-        return warning_metrics
+        return warning_metrics  # type: ignore[return-value]
 
     def _mean_absolute_percentage_error(
         self, y_true: np.ndarray, y_pred: np.ndarray
@@ -375,7 +375,7 @@ class ModelEvaluationMetrics:
         # Avoid division by zero
         mask = y_true != 0
         if np.any(mask):
-            return np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100
+            return np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100  # type: ignore[no-any-return]
         else:
             return 0.0
 
@@ -399,8 +399,8 @@ class ModelEvaluationMetrics:
         bin_lowers = bin_boundaries[:-1]
         bin_uppers = bin_boundaries[1:]
 
-        ece = 0  # Expected Calibration Error
-        mce = 0  # Maximum Calibration Error
+        ece = 0.0  # Expected Calibration Error
+        mce = 0.0  # Maximum Calibration Error
 
         for bin_lower, bin_upper in zip(bin_lowers, bin_uppers, strict=False):
             # Predictions in this confidence bin
@@ -431,13 +431,13 @@ class ModelEvaluationMetrics:
         autocorr = np.correlate(data_centered, data_centered, mode="full")
         autocorr = autocorr[n - 1 :]
         autocorr = autocorr / autocorr[0]  # Normalize
-        return autocorr[: min(max_lag, len(autocorr))]
+        return autocorr[: min(max_lag, len(autocorr))]  # type: ignore[no-any-return]
 
     def _calculate_trend(self, data: np.ndarray) -> float:
         """Calculate linear trend slope."""
         x = np.arange(len(data))
         slope, _, _, _, _ = stats.linregress(x, data)
-        return slope
+        return slope  # type: ignore[no-any-return]
 
     def _calculate_seasonal_consistency(
         self, y_true: np.ndarray, y_pred: np.ndarray, timestamps: np.ndarray
@@ -707,11 +707,11 @@ class ModelEvaluationMetrics:
 
     async def cross_validate(
         self,
-        model,
+        model: Any,
         X: np.ndarray,
         y: np.ndarray,
         cv_folds: int = 3,
-        train_eval_func=None,
+        train_eval_func: Any = None,
     ) -> dict:
         """Cross-validation for testing compatibility."""
         fold_results = []
