@@ -10,7 +10,7 @@ import json
 import logging
 from datetime import datetime
 from io import BytesIO, StringIO
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 from sqlalchemy import and_, desc, func, select
@@ -227,28 +227,28 @@ class DataExportService:
                 result = await self.db.execute(stmt)
                 climate_data = result.scalars().all()
 
-                for record in climate_data:
+                for climate_record in climate_data:
                     row = {
-                        "date": record.date.isoformat(),
-                        "latitude": record.latitude,
-                        "longitude": record.longitude,
-                        "mean_temperature": record.mean_temperature,
-                        "max_temperature": record.max_temperature,
-                        "min_temperature": record.min_temperature,
-                        "diurnal_temperature_range": record.diurnal_temperature_range,
-                        "daily_precipitation_mm": record.daily_precipitation_mm,
-                        "monthly_precipitation_mm": record.monthly_precipitation_mm,
-                        "mean_relative_humidity": record.mean_relative_humidity,
-                        "temperature_suitability": record.temperature_suitability,
-                        "precipitation_risk_factor": record.precipitation_risk_factor,
-                        "humidity_risk_factor": record.humidity_risk_factor,
-                        "mosquito_growing_degree_days": record.mosquito_growing_degree_days,
+                        "date": climate_record.date.isoformat(),
+                        "latitude": climate_record.latitude,
+                        "longitude": climate_record.longitude,
+                        "mean_temperature": climate_record.mean_temperature,
+                        "max_temperature": climate_record.max_temperature,
+                        "min_temperature": climate_record.min_temperature,
+                        "diurnal_temperature_range": climate_record.diurnal_temperature_range,
+                        "daily_precipitation_mm": climate_record.daily_precipitation_mm,
+                        "monthly_precipitation_mm": climate_record.monthly_precipitation_mm,
+                        "mean_relative_humidity": climate_record.mean_relative_humidity,
+                        "temperature_suitability": climate_record.temperature_suitability,
+                        "precipitation_risk_factor": climate_record.precipitation_risk_factor,
+                        "humidity_risk_factor": climate_record.humidity_risk_factor,
+                        "mosquito_growing_degree_days": climate_record.mosquito_growing_degree_days,
                     }
 
                     if include_quality_flags:
                         row.update({
-                            "processing_version": record.processing_version,
-                            "processing_timestamp": record.processing_timestamp.isoformat(),
+                            "processing_version": climate_record.processing_version,
+                            "processing_timestamp": climate_record.processing_timestamp.isoformat(),
                         })
 
                     export_data.append(row)
@@ -274,27 +274,27 @@ class DataExportService:
 
                 stmt = stmt.limit(50000)
                 result = await self.db.execute(stmt)
-                era5_data = result.scalars().all()
+                era5_data = cast(list[ERA5DataPoint], list(result.scalars().all()))
 
-                for record in era5_data:
+                for era5_record in era5_data:
                     row = {
-                        "timestamp": record.timestamp.isoformat(),
-                        "latitude": record.latitude,
-                        "longitude": record.longitude,
-                        "temperature_2m": record.temperature_2m,
-                        "temperature_2m_max": record.temperature_2m_max,
-                        "temperature_2m_min": record.temperature_2m_min,
-                        "dewpoint_2m": record.dewpoint_2m,
-                        "total_precipitation": record.total_precipitation,
-                        "wind_speed_10m": record.wind_speed_10m,
-                        "wind_direction_10m": record.wind_direction_10m,
-                        "surface_pressure": record.surface_pressure,
+                        "timestamp": era5_record.timestamp.isoformat(),
+                        "latitude": era5_record.latitude,
+                        "longitude": era5_record.longitude,
+                        "temperature_2m": era5_record.temperature_2m,
+                        "temperature_2m_max": era5_record.temperature_2m_max,
+                        "temperature_2m_min": era5_record.temperature_2m_min,
+                        "dewpoint_2m": era5_record.dewpoint_2m,
+                        "total_precipitation": era5_record.total_precipitation,
+                        "wind_speed_10m": era5_record.wind_speed_10m,
+                        "wind_direction_10m": era5_record.wind_direction_10m,
+                        "surface_pressure": era5_record.surface_pressure,
                     }
 
                     if include_quality_flags:
                         row.update({
-                            "data_source": record.data_source,
-                            "ingestion_timestamp": record.ingestion_timestamp.isoformat(),
+                            "data_source": era5_record.data_source,
+                            "ingestion_timestamp": era5_record.ingestion_timestamp.isoformat(),
                         })
 
                     export_data.append(row)
@@ -320,28 +320,28 @@ class DataExportService:
 
                 stmt = stmt.limit(50000)
                 result = await self.db.execute(stmt)
-                modis_data = result.scalars().all()
+                modis_data = cast(list[MODISDataPoint], list(result.scalars().all()))
 
-                for record in modis_data:
+                for modis_record in modis_data:
                     row = {
-                        "date": record.date.isoformat(),
-                        "latitude": record.latitude,
-                        "longitude": record.longitude,
-                        "ndvi": record.ndvi,
-                        "evi": record.evi,
-                        "lai": record.lai,
-                        "fpar": record.fpar,
-                        "lst_day_celsius": record.lst_day - 273.15 if record.lst_day else None,
-                        "lst_night_celsius": record.lst_night - 273.15 if record.lst_night else None,
-                        "composite_day_of_year": record.composite_day_of_year,
+                        "date": modis_record.date.isoformat(),
+                        "latitude": modis_record.latitude,
+                        "longitude": modis_record.longitude,
+                        "ndvi": modis_record.ndvi,
+                        "evi": modis_record.evi,
+                        "lai": modis_record.lai,
+                        "fpar": modis_record.fpar,
+                        "lst_day_celsius": modis_record.lst_day - 273.15 if modis_record.lst_day else None,
+                        "lst_night_celsius": modis_record.lst_night - 273.15 if modis_record.lst_night else None,
+                        "composite_day_of_year": modis_record.composite_day_of_year,
                     }
 
                     if include_quality_flags:
                         row.update({
-                            "ndvi_quality": record.ndvi_quality,
-                            "evi_quality": record.evi_quality,
-                            "pixel_reliability": record.pixel_reliability,
-                            "product_type": record.product_type,
+                            "ndvi_quality": modis_record.ndvi_quality,
+                            "evi_quality": modis_record.evi_quality,
+                            "pixel_reliability": modis_record.pixel_reliability,
+                            "product_type": modis_record.product_type,
                         })
 
                     export_data.append(row)
