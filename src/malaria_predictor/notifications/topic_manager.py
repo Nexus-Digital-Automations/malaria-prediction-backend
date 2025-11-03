@@ -73,13 +73,13 @@ class TopicManager:
     async def __aenter__(self) -> "TopicManager":
         """Async context manager entry."""
         if self._should_close_session:
-            self.db_session = await get_database_session()
+            self.db_session = await get_database_session()  # type: ignore[assignment]
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type, exc_val, exc_tb):  # type: ignore[no-untyped-def]
         """Async context manager exit."""
         if self._should_close_session and self.db_session:
-            await self.db_session.close()
+            await self.db_session.close()  # type: ignore[func-returns-value]
 
     async def subscribe_device_to_topic(
         self,
@@ -102,7 +102,7 @@ class TopicManager:
             session = self.db_session or await get_database_session()
 
             # Find or create device record
-            device = session.query(DeviceToken).filter(
+            device = session.query(DeviceToken).filter(  # type: ignore[union-attr]
                 DeviceToken.token == device_token
             ).first()
 
@@ -120,7 +120,7 @@ class TopicManager:
                 return False, "Device not found and auto_create_device is False"
 
             # Check if already subscribed
-            existing_subscription = session.query(TopicSubscription).filter(
+            existing_subscription = session.query(TopicSubscription).filter( # type: ignore[union-attr]
                 and_(
                     TopicSubscription.device_id == device.id,
                     TopicSubscription.topic == topic,
@@ -179,7 +179,7 @@ class TopicManager:
             session = self.db_session or await get_database_session()
 
             # Find device
-            device = session.query(DeviceToken).filter(
+            device = session.query(DeviceToken).filter( # type: ignore[union-attr]
                 DeviceToken.token == device_token
             ).first()
 
@@ -187,7 +187,7 @@ class TopicManager:
                 return False, "Device not found"
 
             # Find subscription
-            subscription = session.query(TopicSubscription).filter(
+            subscription = session.query(TopicSubscription).filter( # type: ignore[union-attr]
                 and_(
                     TopicSubscription.device_id == device.id,
                     TopicSubscription.topic == topic,
@@ -236,7 +236,7 @@ class TopicManager:
             session = self.db_session or await get_database_session()
 
             # Find device and subscriptions
-            result = session.query(TopicSubscription.topic).join(DeviceToken).filter(
+            result = session.query(TopicSubscription.topic).join(DeviceToken).filter( # type: ignore[union-attr]
                 and_(
                     DeviceToken.token == device_token,
                     TopicSubscription.is_active,
@@ -267,7 +267,7 @@ class TopicManager:
             session = self.db_session or await get_database_session()
 
             # Get subscribers
-            result = session.query(
+            result = session.query( # type: ignore[union-attr]
                 DeviceToken.token,
                 DeviceToken.platform,
                 DeviceToken.user_id,
@@ -423,12 +423,12 @@ class TopicManager:
             session = self.db_session or await get_database_session()
 
             # Get total active subscriptions
-            total_subscriptions = session.query(TopicSubscription).filter(
+            total_subscriptions = session.query(TopicSubscription).filter( # type: ignore[union-attr]
                 TopicSubscription.is_active
             ).count()
 
             # Get subscriptions by topic
-            topic_stats = session.query(
+            topic_stats = session.query( # type: ignore[union-attr]
                 TopicSubscription.topic,
                 func.count(TopicSubscription.id).label('subscriber_count')
             ).filter(
@@ -436,7 +436,7 @@ class TopicManager:
             ).group_by(TopicSubscription.topic).all()
 
             # Get subscriptions by platform
-            platform_stats = session.query(
+            platform_stats = session.query( # type: ignore[union-attr]
                 DeviceToken.platform,
                 func.count(TopicSubscription.id).label('subscription_count')
             ).join(TopicSubscription).filter(
@@ -478,7 +478,7 @@ class TopicManager:
             from datetime import datetime, timedelta
             cutoff_date = datetime.now() - timedelta(days=days_inactive)
 
-            inactive_subscriptions = session.query(TopicSubscription).join(DeviceToken).filter(
+            inactive_subscriptions = session.query(TopicSubscription).join(DeviceToken).filter( # type: ignore[union-attr]
                 and_(
                     TopicSubscription.is_active,
                     or_(
