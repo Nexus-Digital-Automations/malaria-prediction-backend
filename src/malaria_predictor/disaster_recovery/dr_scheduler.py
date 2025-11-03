@@ -18,9 +18,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler  # type: ignore[import-not-found]
+from apscheduler.schedulers.asyncio import (
+    AsyncIOScheduler,  # type: ignore[import-not-found]
+)
 from apscheduler.triggers.cron import CronTrigger  # type: ignore[import-not-found]
-from apscheduler.triggers.interval import IntervalTrigger  # type: ignore[import-not-found]
+from apscheduler.triggers.interval import (
+    IntervalTrigger,  # type: ignore[import-not-found]
+)
 
 # Setup logging
 logging.basicConfig(
