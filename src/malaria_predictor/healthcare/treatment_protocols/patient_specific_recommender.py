@@ -264,46 +264,46 @@ class PatientSpecificRecommender:
 
         # Age-based risk assessment
         if patient_profile.age < 5:
-            risk_factors["pediatric_high_risk"] = True  # type: ignore[assignment]
-            risk_factors["risk_score"] = 0.8  # type: ignore[assignment]
+            risk_factors["pediatric_high_risk"] = True
+            risk_factors["risk_score"] = 0.8
         elif patient_profile.age > 65:
-            risk_factors["elderly_high_risk"] = True  # type: ignore[assignment]
-            risk_factors["risk_score"] = 0.7  # type: ignore[assignment]
+            risk_factors["elderly_high_risk"] = True
+            risk_factors["risk_score"] = 0.7
         else:
-            risk_factors["risk_score"] = 0.3  # type: ignore[assignment]
+            risk_factors["risk_score"] = 0.3
 
         # Pregnancy risk
         if patient_profile.is_pregnant:
-            risk_factors["pregnancy_risk"] = True  # type: ignore[assignment]
-            risk_factors["pregnancy_trimester"] = patient_profile.pregnancy_trimester  # type: ignore[assignment]
-            risk_factors["risk_score"] += 0.4  # type: ignore[assignment]
+            risk_factors["pregnancy_risk"] = True
+            risk_factors["pregnancy_trimester"] = patient_profile.pregnancy_trimester
+            risk_factors["risk_score"] += 0.4
 
         # Comorbidity risk
         if patient_profile.has_comorbidities:
-            risk_factors["comorbidity_risk"] = True  # type: ignore[assignment]
-            risk_factors["comorbidities"] = patient_profile.comorbidities  # type: ignore[assignment]
-            risk_factors["risk_score"] += len(patient_profile.comorbidities) * 0.1  # type: ignore[assignment]
+            risk_factors["comorbidity_risk"] = True
+            risk_factors["comorbidities"] = patient_profile.comorbidities
+            risk_factors["risk_score"] += len(patient_profile.comorbidities) * 0.1
 
         # Clinical severity risk
         if clinical_presentation.parasitemia_percent > 5.0:
-            risk_factors["high_parasitemia"] = True  # type: ignore[assignment]
-            risk_factors["risk_score"] += 0.3  # type: ignore[assignment]
+            risk_factors["high_parasitemia"] = True
+            risk_factors["risk_score"] += 0.3
 
         # Previous malaria episodes
         if patient_profile.previous_malaria_episodes > 3:
-            risk_factors["recurrent_malaria"] = True  # type: ignore[assignment]
-            risk_factors["risk_score"] += 0.2  # type: ignore[assignment]
+            risk_factors["recurrent_malaria"] = True
+            risk_factors["risk_score"] += 0.2
 
         # Categorize overall risk
-        total_risk = min(risk_factors["risk_score"], 1.0)  # type: ignore[arg-type]
+        total_risk = min(risk_factors["risk_score"], 1.0)
         if total_risk < 0.3:
-            risk_factors["category"] = RiskCategory.LOW_RISK  # type: ignore[assignment]
+            risk_factors["category"] = RiskCategory.LOW_RISK
         elif total_risk < 0.6:
-            risk_factors["category"] = RiskCategory.MODERATE_RISK  # type: ignore[assignment]
+            risk_factors["category"] = RiskCategory.MODERATE_RISK
         elif total_risk < 0.8:
-            risk_factors["category"] = RiskCategory.HIGH_RISK  # type: ignore[assignment]
+            risk_factors["category"] = RiskCategory.HIGH_RISK
         else:
-            risk_factors["category"] = RiskCategory.CRITICAL_RISK  # type: ignore[assignment]
+            risk_factors["category"] = RiskCategory.CRITICAL_RISK
 
         return risk_factors
 
@@ -521,7 +521,7 @@ class PatientSpecificRecommender:
             ]
 
         # Filter out contraindicated drugs and primary treatment
-        primary_drug = str(primary_treatment.drug_regimen[0]["drug_name"]).lower()  # type: ignore[union-attr]
+        primary_drug = str(primary_treatment.drug_regimen[0]["drug_name"]).lower()
         safe_alternatives = [
             drug for drug in alternative_drugs
             if drug not in contraindicated_drugs and drug != primary_drug
@@ -568,22 +568,22 @@ class PatientSpecificRecommender:
 
         # Add risk-based monitoring
         if risk_assessment["category"] == RiskCategory.HIGH_RISK:
-            monitoring_plan["routine_monitoring"].extend([  # type: ignore[union-attr]
+            monitoring_plan["routine_monitoring"].extend([
                 "Vital signs every 4 hours",
                 "Daily laboratory monitoring"
             ])
 
         # Add drug-specific monitoring
         for drug in treatment.drug_regimen:
-            if "artesunate" in str(drug["drug_name"]).lower():  # type: ignore[union-attr]
-                monitoring_plan["safety_monitoring"].append(  # type: ignore[union-attr]
+            if "artesunate" in str(drug["drug_name"]).lower():
+                monitoring_plan["safety_monitoring"].append(
                     "Monitor for post-artesunate delayed hemolysis (weekly CBC for 4 weeks)"
                 )
 
         # Add contraindication-specific monitoring
         for contraindication in contraindications:
             if contraindication.severity == ContraindicationSeverity.MONITORING:
-                monitoring_plan["safety_monitoring"].extend(  # type: ignore[union-attr]
+                monitoring_plan["safety_monitoring"].extend(
                     contraindication.monitoring_requirements
                 )
 
