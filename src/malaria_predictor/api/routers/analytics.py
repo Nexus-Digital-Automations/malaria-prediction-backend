@@ -8,7 +8,7 @@ outbreak pattern analysis, and interactive data exploration tools.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, cast
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, desc, select
