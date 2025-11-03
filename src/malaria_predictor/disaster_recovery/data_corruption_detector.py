@@ -18,7 +18,7 @@ import statistics
 from datetime import datetime
 from typing import Any
 
-import asyncpg
+import asyncpg  # type: ignore[import-untyped]
 from pydantic import BaseModel
 
 # Setup logging
