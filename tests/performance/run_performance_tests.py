@@ -13,14 +13,14 @@ import sys
 import time
 from pathlib import Path
 
-# Add parent directory to path to import from src
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add parent directory to path to import from src and tests
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from performance.cache_optimization import CacheConfig, CacheOptimizer
-from performance.database_optimization import DatabaseOptimizer
-from performance.locust_config import LoadTestSettings
-from performance.monitoring_dashboard import get_monitoring_dashboard
-from performance.test_scenarios import PerformanceTestRunner
+from tests.performance.cache_optimization import CacheConfig, CacheOptimizer
+from tests.performance.database_optimization import DatabaseOptimizer
+from tests.performance.locust_config import LoadTestSettings
+from tests.performance.monitoring_dashboard import get_monitoring_dashboard
+from tests.performance.test_scenarios import PerformanceTestRunner
 
 # Configure logging
 logging.basicConfig(

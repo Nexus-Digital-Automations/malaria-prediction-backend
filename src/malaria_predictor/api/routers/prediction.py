@@ -12,9 +12,9 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 
+from ...models import RiskLevel
 from ..auth import require_scopes
 from ..dependencies import PredictionService, get_prediction_service
-from ...models import RiskLevel
 from ..models import (
     BatchPredictionRequest,
     BatchPredictionResult,
