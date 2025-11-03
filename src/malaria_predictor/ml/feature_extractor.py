@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import Any, cast
 
 import numpy as np
-from scipy import ndimage, stats  # type: ignore[import-untyped]
+from scipy import ndimage, stats
 
 logger = logging.getLogger(__name__)
 
@@ -133,7 +133,7 @@ class EnvironmentalFeatureExtractor:
         # Validate and clean features
         features = self._validate_and_clean_features(features)
 
-        return features  # type: ignore[return-value]
+        return features
 
     def extract_climate_features(
         self,
@@ -216,7 +216,7 @@ class EnvironmentalFeatureExtractor:
             else:  # Single time slice
                 features["precip_mean"] = precip_data
 
-        return features  # type: ignore[return-value]
+        return features
 
     def extract_vegetation_features(
         self, modis_data: dict[str, Any], target_date: datetime
@@ -263,7 +263,7 @@ class EnvironmentalFeatureExtractor:
                     veg_data[np.newaxis, ...]
                 )
 
-        return features  # type: ignore[return-value]
+        return features
 
     def extract_population_features(
         self, worldpop_data: dict[str, Any]
@@ -297,7 +297,7 @@ class EnvironmentalFeatureExtractor:
                 pop_data
             )
 
-        return features  # type: ignore[return-value]
+        return features
 
     def extract_historical_risk_features(
         self, map_data: dict[str, Any]
@@ -324,7 +324,7 @@ class EnvironmentalFeatureExtractor:
             # Risk intensity classification
             features["risk_intensity"] = self._classify_risk_intensity(risk_data)
 
-        return features  # type: ignore[return-value]
+        return features
 
     def extract_interaction_features(
         self, features: dict[str, np.ndarray]
@@ -360,7 +360,7 @@ class EnvironmentalFeatureExtractor:
                 "ndvi_current"
             ] * temp_suit_vec
 
-        return interaction_features  # type: ignore[return-value]
+        return interaction_features
 
     def extract_temporal_features(
         self, harmonized_data: dict[str, dict[str, Any]], target_date: datetime
@@ -387,7 +387,7 @@ class EnvironmentalFeatureExtractor:
                         lag_mean = np.mean(data[-lag_days:], axis=0)
                         features[f"{source_name}_lag_{lag_days}d"] = lag_mean
 
-        return features  # type: ignore[return-value]
+        return features
 
     def _calculate_temperature_suitability(self, temperature: np.ndarray) -> np.ndarray:
         """Calculate temperature suitability for malaria transmission."""
@@ -781,7 +781,7 @@ class EnvironmentalFeatureExtractor:
                         np.array(temp_data[:sequence_length]) / 50.0
                     )  # Normalize to 0-1
 
-            return features  # type: ignore[return-value]
+            return features
         else:
             return np.random.rand(sequence_length, feature_count).astype(np.float32)
 

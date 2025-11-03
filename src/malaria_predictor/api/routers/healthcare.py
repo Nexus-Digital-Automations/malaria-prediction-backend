@@ -15,7 +15,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from ..healthcare_security import get_current_healthcare_professional
-from ..models import LocationPoint, RiskLevel
+from ..models import LocationPoint
+from ..models import RiskLevel as RiskLevelEnum
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,7 @@ class RiskAssessmentResponse(BaseModel):
     healthcare_professional_id: str = Field(..., description="Conducting professional")
     responses: dict[str, Any] = Field(..., description="Question responses")
     calculated_risk_score: float = Field(..., ge=0, le=1, description="Calculated risk score")
-    risk_level: RiskLevel = Field(..., description="Risk level classification")
+    risk_level: RiskLevelEnum = Field(..., description="Risk level classification")
     recommendations: list[str] = Field(default_factory=list, description="Clinical recommendations")
     environmental_risk: float | None = Field(None, description="Environmental risk component")
     clinical_risk: float | None = Field(None, description="Clinical risk component")
@@ -684,41 +685,41 @@ def _combine_risk_scores(clinical_risk: float, environmental_risk: float | None)
     return (0.6 * clinical_risk) + (0.4 * environmental_risk)
 
 
-def _determine_risk_level(risk_score: float) -> RiskLevel:
+def _determine_risk_level(risk_score: float) -> RiskLevelEnum:
     """Determine risk level category from numeric score."""
     if risk_score < 0.3:
-        return RiskLevel.LOW
+        return RiskLevelEnum.LOW
     elif risk_score < 0.6:
-        return RiskLevel.MEDIUM
+        return RiskLevelEnum.MEDIUM
     elif risk_score < 0.8:
-        return RiskLevel.HIGH
+        return RiskLevelEnum.HIGH
     else:
-        return RiskLevel.VERY_HIGH
+        return RiskLevelEnum.VERY_HIGH
 
 
 def _generate_risk_recommendations(
     risk_score: float,
-    risk_level: RiskLevel,
+    risk_level: RiskLevelEnum,
     responses: dict[str, Any]
 ) -> list[str]:
     """Generate clinical recommendations based on risk assessment."""
     recommendations = []
 
-    if risk_level == RiskLevel.VERY_HIGH:
+    if risk_level == RiskLevelEnum.VERY_HIGH:
         recommendations.extend([
             "Immediate laboratory confirmation required (RDT + microscopy)",
             "Consider hospitalization for monitoring",
             "Initiate antimalarial treatment promptly if confirmed",
             "Monitor for signs of severe malaria"
         ])
-    elif risk_level == RiskLevel.HIGH:
+    elif risk_level == RiskLevelEnum.HIGH:
         recommendations.extend([
             "Laboratory confirmation required within 24 hours",
             "Start appropriate antimalarial if positive",
             "Close follow-up within 48 hours",
             "Patient education on danger signs"
         ])
-    elif risk_level == RiskLevel.MEDIUM:
+    elif risk_level == RiskLevelEnum.MEDIUM:
         recommendations.extend([
             "Laboratory testing recommended",
             "Symptomatic treatment while awaiting results",

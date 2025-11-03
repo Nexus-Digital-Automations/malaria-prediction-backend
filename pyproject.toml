@@ -324,6 +324,18 @@ module = [
     "pydantic_settings.*",
     "sqlalchemy",
     "sqlalchemy.*",
+    "alembic",
+    "alembic.*",
+    "asyncpg",
+    "asyncpg.*",
+    "kubernetes",
+    "kubernetes.*",
+    "apscheduler",
+    "apscheduler.*",
+    "boto3",
+    "boto3.*",
+    "botocore",
+    "botocore.*",
     "fastapi",
     "fastapi.*",
     "numpy",
@@ -388,6 +400,7 @@ module = [
     "malaria_predictor.performance.cache_optimization",
 ]
 ignore_errors = true
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "7.0"
