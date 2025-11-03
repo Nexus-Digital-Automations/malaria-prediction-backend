@@ -13,7 +13,7 @@ from io import BytesIO, StringIO
 from typing import Any
 
 import pandas as pd
-from sqlalchemy import and_
+from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
@@ -63,17 +63,18 @@ class DataExportService:
         """
         try:
             # Build query
-            query = self.db.query(MalariaRiskIndex)
+            stmt = select(MalariaRiskIndex)
 
             if start_date:
-                query = query.filter(MalariaRiskIndex.assessment_date >= start_date)
+                stmt = stmt.where(MalariaRiskIndex.assessment_date >= start_date)
             if end_date:
-                query = query.filter(MalariaRiskIndex.assessment_date <= end_date)
+                stmt = stmt.where(MalariaRiskIndex.assessment_date <= end_date)
             if model_type:
-                query = query.filter(MalariaRiskIndex.model_type == model_type)
+                stmt = stmt.where(MalariaRiskIndex.model_type == model_type)
 
             # Get data
-            risk_data = query.all()
+            result = await self.db.execute(stmt)
+            risk_data = result.scalars().all()
 
             # Prepare data for export
             export_data = []
@@ -133,8 +134,8 @@ class DataExportService:
                 df = pd.DataFrame(export_data)
                 excel_output = BytesIO()
 
-                with pd.ExcelWriter(excel_output, engine='openpyxl') as writer:
-                    df.to_excel(writer, sheet_name='Prediction_Accuracy', index=False)
+                with pd.ExcelWriter(excel_output, engine='openpyxl') as excel_writer:
+                    df.to_excel(excel_writer, sheet_name='Prediction_Accuracy', index=False)
 
                     # Add metadata sheet if requested
                     if include_metadata:
@@ -145,7 +146,7 @@ class DataExportService:
                             "date_range_end": end_date.isoformat() if end_date else "All",
                             "model_filter": model_type or "All",
                         }])
-                        metadata_df.to_excel(writer, sheet_name='Metadata', index=False)
+                        metadata_df.to_excel(excel_writer, sheet_name='Metadata', index=False)
 
                 excel_data = excel_output.getvalue()
                 return {
@@ -204,14 +205,14 @@ class DataExportService:
             export_data = []
 
             if data_source == "processed_climate":
-                query = self.db.query(ProcessedClimateData)
+                stmt = select(ProcessedClimateData)
 
                 if start_date:
-                    query = query.filter(ProcessedClimateData.date >= start_date)
+                    stmt = stmt.where(ProcessedClimateData.date >= start_date)
                 if end_date:
-                    query = query.filter(ProcessedClimateData.date <= end_date)
+                    stmt = stmt.where(ProcessedClimateData.date <= end_date)
                 if location_bounds:
-                    query = query.filter(
+                    stmt = stmt.where(
                         and_(
                             ProcessedClimateData.latitude.between(
                                 location_bounds["lat_min"], location_bounds["lat_max"]
@@ -222,7 +223,9 @@ class DataExportService:
                         )
                     )
 
-                climate_data = query.limit(50000).all()  # Limit for performance
+                stmt = stmt.limit(50000)  # Limit for performance
+                result = await self.db.execute(stmt)
+                climate_data = result.scalars().all()
 
                 for record in climate_data:
                     row = {
@@ -251,14 +254,14 @@ class DataExportService:
                     export_data.append(row)
 
             elif data_source == "era5":
-                query = self.db.query(ERA5DataPoint)
+                stmt = select(ERA5DataPoint)
 
                 if start_date:
-                    query = query.filter(ERA5DataPoint.timestamp >= start_date)
+                    stmt = stmt.where(ERA5DataPoint.timestamp >= start_date)
                 if end_date:
-                    query = query.filter(ERA5DataPoint.timestamp <= end_date)
+                    stmt = stmt.where(ERA5DataPoint.timestamp <= end_date)
                 if location_bounds:
-                    query = query.filter(
+                    stmt = stmt.where(
                         and_(
                             ERA5DataPoint.latitude.between(
                                 location_bounds["lat_min"], location_bounds["lat_max"]
@@ -269,7 +272,9 @@ class DataExportService:
                         )
                     )
 
-                era5_data = query.limit(50000).all()
+                stmt = stmt.limit(50000)
+                result = await self.db.execute(stmt)
+                era5_data = result.scalars().all()
 
                 for record in era5_data:
                     row = {
@@ -295,14 +300,14 @@ class DataExportService:
                     export_data.append(row)
 
             elif data_source == "modis":
-                query = self.db.query(MODISDataPoint)
+                stmt = select(MODISDataPoint)
 
                 if start_date:
-                    query = query.filter(MODISDataPoint.date >= start_date)
+                    stmt = stmt.where(MODISDataPoint.date >= start_date)
                 if end_date:
-                    query = query.filter(MODISDataPoint.date <= end_date)
+                    stmt = stmt.where(MODISDataPoint.date <= end_date)
                 if location_bounds:
-                    query = query.filter(
+                    stmt = stmt.where(
                         and_(
                             MODISDataPoint.latitude.between(
                                 location_bounds["lat_min"], location_bounds["lat_max"]
@@ -313,7 +318,9 @@ class DataExportService:
                         )
                     )
 
-                modis_data = query.limit(50000).all()
+                stmt = stmt.limit(50000)
+                result = await self.db.execute(stmt)
+                modis_data = result.scalars().all()
 
                 for record in modis_data:
                     row = {
@@ -383,18 +390,20 @@ class DataExportService:
 
             for source in data_sources:
                 if source == "risk_assessment":
-                    risk_query = self.db.query(MalariaRiskIndex)
+                    risk_stmt = select(MalariaRiskIndex)
 
                     if time_range.get("start"):
-                        risk_query = risk_query.filter(
+                        risk_stmt = risk_stmt.where(
                             MalariaRiskIndex.assessment_date >= datetime.fromisoformat(time_range["start"])
                         )
                     if time_range.get("end"):
-                        risk_query = risk_query.filter(
+                        risk_stmt = risk_stmt.where(
                             MalariaRiskIndex.assessment_date <= datetime.fromisoformat(time_range["end"])
                         )
 
-                    risk_data = risk_query.limit(10000).all()
+                    risk_stmt = risk_stmt.limit(10000)
+                    risk_result = await self.db.execute(risk_stmt)
+                    risk_data = risk_result.scalars().all()
 
                     section_data = {
                         "section_name": "risk_assessments",
@@ -500,8 +509,8 @@ class DataExportService:
             df = pd.DataFrame(data)
             excel_output = BytesIO()
 
-            with pd.ExcelWriter(excel_output, engine='openpyxl') as writer:
-                df.to_excel(writer, sheet_name='Data', index=False)
+            with pd.ExcelWriter(excel_output, engine='openpyxl') as excel_writer:
+                df.to_excel(excel_writer, sheet_name='Data', index=False)
 
                 if include_metadata:
                     metadata_df = pd.DataFrame([{
@@ -510,7 +519,7 @@ class DataExportService:
                         "export_format": export_format,
                         "filename_prefix": filename_prefix,
                     }])
-                    metadata_df.to_excel(writer, sheet_name='Export_Metadata', index=False)
+                    metadata_df.to_excel(excel_writer, sheet_name='Export_Metadata', index=False)
 
             excel_data = excel_output.getvalue()
             return {
@@ -544,13 +553,17 @@ class DataExportService:
             }
 
             # Risk assessment data stats
-            risk_count = self.db.query(MalariaRiskIndex).count()
-            risk_latest = self.db.query(MalariaRiskIndex).order_by(
-                MalariaRiskIndex.assessment_date.desc()
-            ).first()
-            risk_earliest = self.db.query(MalariaRiskIndex).order_by(
-                MalariaRiskIndex.assessment_date.asc()
-            ).first()
+            risk_count_stmt = select(func.count()).select_from(MalariaRiskIndex)
+            risk_count_result = await self.db.execute(risk_count_stmt)
+            risk_count = risk_count_result.scalar() or 0
+
+            risk_latest_stmt = select(MalariaRiskIndex).order_by(desc(MalariaRiskIndex.assessment_date)).limit(1)
+            risk_latest_result = await self.db.execute(risk_latest_stmt)
+            risk_latest = risk_latest_result.scalar()
+
+            risk_earliest_stmt = select(MalariaRiskIndex).order_by(MalariaRiskIndex.assessment_date.asc()).limit(1)
+            risk_earliest_result = await self.db.execute(risk_earliest_stmt)
+            risk_earliest = risk_earliest_result.scalar()
 
             stats["data_sources"]["risk_assessments"] = {
                 "available": risk_count > 0,
@@ -562,10 +575,13 @@ class DataExportService:
             }
 
             # Environmental data stats
-            climate_count = self.db.query(ProcessedClimateData).count()
-            climate_latest = self.db.query(ProcessedClimateData).order_by(
-                ProcessedClimateData.date.desc()
-            ).first()
+            climate_count_stmt = select(func.count()).select_from(ProcessedClimateData)
+            climate_count_result = await self.db.execute(climate_count_stmt)
+            climate_count = climate_count_result.scalar() or 0
+
+            climate_latest_stmt = select(ProcessedClimateData).order_by(desc(ProcessedClimateData.date)).limit(1)
+            climate_latest_result = await self.db.execute(climate_latest_stmt)
+            climate_latest = climate_latest_result.scalar()
 
             stats["data_sources"]["climate_data"] = {
                 "available": climate_count > 0,
@@ -574,14 +590,18 @@ class DataExportService:
             }
 
             # ERA5 data stats
-            era5_count = self.db.query(ERA5DataPoint).count()
+            era5_count_stmt = select(func.count()).select_from(ERA5DataPoint)
+            era5_count_result = await self.db.execute(era5_count_stmt)
+            era5_count = era5_count_result.scalar() or 0
             stats["data_sources"]["era5_data"] = {
                 "available": era5_count > 0,
                 "record_count": era5_count,
             }
 
             # MODIS data stats
-            modis_count = self.db.query(MODISDataPoint).count()
+            modis_count_stmt = select(func.count()).select_from(MODISDataPoint)
+            modis_count_result = await self.db.execute(modis_count_stmt)
+            modis_count = modis_count_result.scalar() or 0
             stats["data_sources"]["modis_data"] = {
                 "available": modis_count > 0,
                 "record_count": modis_count,
