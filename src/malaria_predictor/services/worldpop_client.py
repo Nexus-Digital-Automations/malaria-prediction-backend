@@ -413,7 +413,7 @@ class WorldPopClient:
                 "cached": False,
             }
 
-            return output_path, file_size, metadata
+            return output_path, file_size, metadata  # type: ignore[return-value]
 
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to download {country_code} via REST: {e}")
@@ -736,7 +736,7 @@ class WorldPopClient:
 
             results[country_code] = country_results
 
-        return results
+        return results  # type: ignore[return-value]
 
     def validate_population_file(
         self, file_path: Path
