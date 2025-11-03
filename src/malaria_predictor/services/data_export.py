@@ -115,13 +115,13 @@ class DataExportService:
                 }
 
             elif export_format == "csv":
-                output = StringIO()
+                csv_output = StringIO()
                 if export_data:
-                    writer = csv.DictWriter(output, fieldnames=export_data[0].keys())
+                    writer = csv.DictWriter(csv_output, fieldnames=export_data[0].keys())
                     writer.writeheader()
                     writer.writerows(export_data)
 
-                csv_data = output.getvalue()
+                csv_data = csv_output.getvalue()
                 return {
                     "data": csv_data,
                     "content_type": "text/csv",
@@ -131,9 +131,9 @@ class DataExportService:
 
             elif export_format == "excel":
                 df = pd.DataFrame(export_data)
-                output = BytesIO()
+                excel_output = BytesIO()
 
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                with pd.ExcelWriter(excel_output, engine='openpyxl') as writer:
                     df.to_excel(writer, sheet_name='Prediction_Accuracy', index=False)
 
                     # Add metadata sheet if requested
@@ -147,7 +147,7 @@ class DataExportService:
                         }])
                         metadata_df.to_excel(writer, sheet_name='Metadata', index=False)
 
-                excel_data = output.getvalue()
+                excel_data = excel_output.getvalue()
                 return {
                     "data": excel_data,
                     "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -157,10 +157,10 @@ class DataExportService:
 
             elif export_format == "parquet":
                 df = pd.DataFrame(export_data)
-                output = BytesIO()
-                df.to_parquet(output, index=False)
+                parquet_output = BytesIO()
+                df.to_parquet(parquet_output, index=False)
 
-                parquet_data = output.getvalue()
+                parquet_data = parquet_output.getvalue()
                 return {
                     "data": parquet_data,
                     "content_type": "application/octet-stream",
@@ -482,12 +482,12 @@ class DataExportService:
                     "record_count": 0,
                 }
 
-            output = StringIO()
-            writer = csv.DictWriter(output, fieldnames=data[0].keys())
+            csv_output = StringIO()
+            writer = csv.DictWriter(csv_output, fieldnames=data[0].keys())
             writer.writeheader()
             writer.writerows(data)
 
-            csv_data = output.getvalue()
+            csv_data = csv_output.getvalue()
             return {
                 "data": csv_data,
                 "content_type": "text/csv",
@@ -498,9 +498,9 @@ class DataExportService:
 
         elif export_format == "excel":
             df = pd.DataFrame(data)
-            output = BytesIO()
+            excel_output = BytesIO()
 
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            with pd.ExcelWriter(excel_output, engine='openpyxl') as writer:
                 df.to_excel(writer, sheet_name='Data', index=False)
 
                 if include_metadata:
@@ -512,7 +512,7 @@ class DataExportService:
                     }])
                     metadata_df.to_excel(writer, sheet_name='Export_Metadata', index=False)
 
-            excel_data = output.getvalue()
+            excel_data = excel_output.getvalue()
             return {
                 "data": excel_data,
                 "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
