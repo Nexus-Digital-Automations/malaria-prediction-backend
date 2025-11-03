@@ -211,7 +211,7 @@ class EnhancedFirebaseService:
         }
 
         # Rate limiting and queuing
-        self.send_queue: list[Any] = asyncio.Queue()
+        self.send_queue: asyncio.Queue[Any] = asyncio.Queue()
         self.rate_limit_per_second = 100  # FCM rate limit
         self.batch_size = 500  # Maximum batch size for FCM
 
@@ -587,7 +587,7 @@ class EnhancedFirebaseService:
 
             # Find hour with highest engagement rate
             best_hour = None
-            best_rate = 0
+            best_rate = 0.0
 
             for hour, stats in hourly_engagement.items():
                 if stats["sent"] >= 3:  # Minimum sample size
@@ -615,9 +615,9 @@ class EnhancedFirebaseService:
         try:
             if hasattr(self.settings, "FIREBASE_CREDENTIALS_PATH"):
                 with open(self.settings.FIREBASE_CREDENTIALS_PATH) as f:
-                    return json.load(f)
+                    return json.load(f)  # type: ignore[no-any-return]
             elif hasattr(self.settings, "FIREBASE_CREDENTIALS_JSON"):
-                return json.loads(self.settings.FIREBASE_CREDENTIALS_JSON)
+                return json.loads(self.settings.FIREBASE_CREDENTIALS_JSON)  # type: ignore[no-any-return]
             else:
                 logger.error("Firebase credentials not configured")
                 return None
@@ -789,7 +789,7 @@ class EnhancedFirebaseService:
         """Get active device tokens for a user."""
         try:
             async with get_session() as db:
-                tokens = db.query(UserDeviceToken).filter(
+                tokens = db.query(UserDeviceToken).filter(  # type: ignore[attr-defined]
                     UserDeviceToken.user_id == user_id,
                     UserDeviceToken.is_active,
                     UserDeviceToken.is_valid
