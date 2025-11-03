@@ -47,7 +47,7 @@ class DataExportService:
         end_date: datetime | None = None,
         model_type: str | None = None,
         include_metadata: bool = True,
-    ) -> dict[str, str | bytes]:
+    ) -> dict[str, str | bytes | int]:
         """
         Export prediction accuracy data in specified format.
 
@@ -184,7 +184,7 @@ class DataExportService:
         location_bounds: dict[str, float] | None = None,
         aggregation_level: str = "daily",
         include_quality_flags: bool = True,
-    ) -> dict[str, str | bytes]:
+    ) -> dict[str, str | bytes | int]:
         """
         Export environmental data in specified format.
 
@@ -355,7 +355,7 @@ class DataExportService:
         self,
         report_config: dict[str, Any],
         export_format: str = "json",
-    ) -> dict[str, str | bytes]:
+    ) -> dict[str, str | bytes | int]:
         """
         Generate and export custom report based on configuration.
 
@@ -367,7 +367,7 @@ class DataExportService:
             Dictionary containing exported report and metadata
         """
         try:
-            report_data = {
+            report_data: dict[str, Any] = {
                 "report_metadata": {
                     "type": report_config.get("type", "custom"),
                     "generated_at": datetime.now().isoformat(),
@@ -447,7 +447,7 @@ class DataExportService:
         export_format: str,
         filename_prefix: str,
         include_metadata: bool = True,
-    ) -> dict[str, str | bytes]:
+    ) -> dict[str, str | bytes | int]:
         """
         Format data for export in specified format.
 
@@ -536,7 +536,7 @@ class DataExportService:
             Statistics about data availability
         """
         try:
-            stats = {
+            stats: dict[str, Any] = {
                 "data_sources": {},
                 "date_ranges": {},
                 "record_counts": {},
