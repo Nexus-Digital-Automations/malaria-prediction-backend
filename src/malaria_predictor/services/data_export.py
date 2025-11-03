@@ -14,6 +14,7 @@ from typing import Any
 
 import pandas as pd
 from sqlalchemy import and_
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from ..database.models import (
@@ -29,7 +30,7 @@ logger = logging.getLogger(__name__)
 class DataExportService:
     """Comprehensive data export service for analytics dashboards."""
 
-    def __init__(self, db_session: Session) -> None:
+    def __init__(self, db_session: AsyncSession) -> None:
         """
         Initialize the data export service.
 
@@ -601,6 +602,6 @@ class DataExportService:
             return {"error": str(e)}
 
 
-async def get_data_export_service(db: Session) -> DataExportService:
+async def get_data_export_service(db: AsyncSession) -> DataExportService:
     """Get configured data export service instance."""
     return DataExportService(db)

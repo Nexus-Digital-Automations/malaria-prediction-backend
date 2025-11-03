@@ -201,7 +201,7 @@ async def get_environmental_trend_analysis(
 
         # ERA5 Climate Data Trends
         if 'era5' in sources:
-            era5_query = db.query(ERA5DataPoint).filter(
+            era5_stmt = select(ERA5DataPoint).where(
                 and_(
                     ERA5DataPoint.latitude.between(lat_min, lat_max),
                     ERA5DataPoint.longitude.between(lon_min, lon_max),
@@ -210,7 +210,8 @@ async def get_environmental_trend_analysis(
                 )
             )
 
-            era5_data = era5_query.all()
+            era5_result = await db.execute(era5_stmt)
+            era5_data = era5_result.scalars().all()
 
             # Process ERA5 trends
             temperature_trends = []
@@ -242,7 +243,7 @@ async def get_environmental_trend_analysis(
 
         # CHIRPS Precipitation Data
         if 'chirps' in sources:
-            chirps_query = db.query(CHIRPSDataPoint).filter(
+            chirps_stmt = select(CHIRPSDataPoint).where(
                 and_(
                     CHIRPSDataPoint.latitude.between(lat_min, lat_max),
                     CHIRPSDataPoint.longitude.between(lon_min, lon_max),
@@ -251,25 +252,26 @@ async def get_environmental_trend_analysis(
                 )
             )
 
-            chirps_data = chirps_query.all()
+            chirps_result = await db.execute(chirps_stmt)
+            chirps_data = chirps_result.scalars().all()
 
             # Process CHIRPS precipitation trends
             precipitation_detailed = []
             anomaly_trends = []
 
-            for point in chirps_data:
+            for chirps_point in chirps_data:
                 precipitation_detailed.append({
-                    "date": point.date.isoformat(),
-                    "precipitation": point.precipitation,
-                    "precipitation_5d": point.precipitation_accumulated_5d,
-                    "precipitation_30d": point.precipitation_accumulated_30d,
+                    "date": chirps_point.date.isoformat(),
+                    "precipitation": chirps_point.precipitation,
+                    "precipitation_5d": chirps_point.precipitation_accumulated_5d,
+                    "precipitation_30d": chirps_point.precipitation_accumulated_30d,
                 })
 
-                if point.precipitation_anomaly is not None:
+                if chirps_point.precipitation_anomaly is not None:
                     anomaly_trends.append({
-                        "date": point.date.isoformat(),
-                        "anomaly": point.precipitation_anomaly,
-                        "percentile": point.precipitation_percentile,
+                        "date": chirps_point.date.isoformat(),
+                        "anomaly": chirps_point.precipitation_anomaly,
+                        "percentile": chirps_point.precipitation_percentile,
                     })
 
             trends_data["precipitation_detailed"] = {
@@ -281,7 +283,7 @@ async def get_environmental_trend_analysis(
 
         # MODIS Vegetation Data
         if 'modis' in sources:
-            modis_query = db.query(MODISDataPoint).filter(
+            modis_stmt = select(MODISDataPoint).where(
                 and_(
                     MODISDataPoint.latitude.between(lat_min, lat_max),
                     MODISDataPoint.longitude.between(lon_min, lon_max),
@@ -290,26 +292,27 @@ async def get_environmental_trend_analysis(
                 )
             )
 
-            modis_data = modis_query.all()
+            modis_result = await db.execute(modis_stmt)
+            modis_data = modis_result.scalars().all()
 
             # Process MODIS vegetation trends
             vegetation_trends = []
             temperature_surface = []
 
-            for point in modis_data:
-                if point.ndvi is not None:
+            for modis_point in modis_data:
+                if modis_point.ndvi is not None:
                     vegetation_trends.append({
-                        "date": point.date.isoformat(),
-                        "ndvi": point.ndvi,
-                        "evi": point.evi,
-                        "lai": point.lai,
+                        "date": modis_point.date.isoformat(),
+                        "ndvi": modis_point.ndvi,
+                        "evi": modis_point.evi,
+                        "lai": modis_point.lai,
                     })
 
-                if point.lst_day is not None:
+                if modis_point.lst_day is not None:
                     temperature_surface.append({
-                        "date": point.date.isoformat(),
-                        "lst_day": point.lst_day - 273.15,  # Convert Kelvin to Celsius
-                        "lst_night": point.lst_night - 273.15 if point.lst_night else None,
+                        "date": modis_point.date.isoformat(),
+                        "lst_day": modis_point.lst_day - 273.15,  # Convert Kelvin to Celsius
+                        "lst_night": modis_point.lst_night - 273.15 if modis_point.lst_night else None,
                     })
 
             trends_data["vegetation"] = {
@@ -384,7 +387,7 @@ async def get_outbreak_pattern_recognition(
         start_date = end_date - timedelta(days=years_back * 365)
 
         # Build base query for risk indices
-        query = db.query(MalariaRiskIndex).filter(
+        stmt = select(MalariaRiskIndex).where(
             and_(
                 MalariaRiskIndex.assessment_date >= start_date,
                 MalariaRiskIndex.assessment_date <= end_date,
@@ -393,10 +396,12 @@ async def get_outbreak_pattern_recognition(
 
         # Apply region filter
         if region:
-            query = query.filter(MalariaRiskIndex.location_name.ilike(f"%{region}%"))
+            stmt = stmt.where(MalariaRiskIndex.location_name.ilike(f"%{region}%"))
 
         # Get risk data
-        risk_data = query.order_by(MalariaRiskIndex.assessment_date).all()
+        stmt = stmt.order_by(MalariaRiskIndex.assessment_date)
+        result = await db.execute(stmt)
+        risk_data = result.scalars().all()
 
         if not risk_data:
             return {"error": "No risk data found for the specified criteria"}
@@ -588,21 +593,23 @@ async def get_interactive_data_exploration(
 
         if data_type == "climate":
             # ERA5 and processed climate data exploration
-            query = db.query(ProcessedClimateData)
+            stmt = select(ProcessedClimateData)
 
             # Apply filters
             if date_filters.get("start"):
-                query = query.filter(ProcessedClimateData.date >= date_filters["start"])
+                stmt = stmt.where(ProcessedClimateData.date >= date_filters["start"])
             if date_filters.get("end"):
-                query = query.filter(ProcessedClimateData.date <= date_filters["end"])
+                stmt = stmt.where(ProcessedClimateData.date <= date_filters["end"])
             if location_filters.get("lat_range"):
                 lat_min, lat_max = location_filters["lat_range"]
-                query = query.filter(ProcessedClimateData.latitude.between(lat_min, lat_max))
+                stmt = stmt.where(ProcessedClimateData.latitude.between(lat_min, lat_max))
             if location_filters.get("lon_range"):
                 lon_min, lon_max = location_filters["lon_range"]
-                query = query.filter(ProcessedClimateData.longitude.between(lon_min, lon_max))
+                stmt = stmt.where(ProcessedClimateData.longitude.between(lon_min, lon_max))
 
-            climate_data = query.limit(limit).all()
+            stmt = stmt.limit(limit)
+            result = await db.execute(stmt)
+            climate_data = result.scalars().all()
 
             # Process and aggregate data
             processed_data = []
@@ -644,33 +651,35 @@ async def get_interactive_data_exploration(
 
         elif data_type == "vegetation":
             # MODIS vegetation data exploration
-            query = db.query(MODISDataPoint)
+            stmt = select(MODISDataPoint)
 
             # Apply filters
             if date_filters.get("start"):
-                query = query.filter(MODISDataPoint.date >= date_filters["start"])
+                stmt = stmt.where(MODISDataPoint.date >= date_filters["start"])
             if date_filters.get("end"):
-                query = query.filter(MODISDataPoint.date <= date_filters["end"])
+                stmt = stmt.where(MODISDataPoint.date <= date_filters["end"])
             if location_filters.get("lat_range"):
                 lat_min, lat_max = location_filters["lat_range"]
-                query = query.filter(MODISDataPoint.latitude.between(lat_min, lat_max))
+                stmt = stmt.where(MODISDataPoint.latitude.between(lat_min, lat_max))
             if location_filters.get("lon_range"):
                 lon_min, lon_max = location_filters["lon_range"]
-                query = query.filter(MODISDataPoint.longitude.between(lon_min, lon_max))
+                stmt = stmt.where(MODISDataPoint.longitude.between(lon_min, lon_max))
 
-            vegetation_data = query.limit(limit).all()
+            stmt = stmt.limit(limit)
+            result = await db.execute(stmt)
+            vegetation_data = cast(list[MODISDataPoint], result.scalars().all())
 
             processed_data = []
-            for record in vegetation_data:
+            for veg_record in vegetation_data:
                 processed_data.append({
-                    "date": record.date.isoformat(),
-                    "latitude": record.latitude,
-                    "longitude": record.longitude,
-                    "ndvi": record.ndvi,
-                    "evi": record.evi,
-                    "lai": record.lai,
-                    "lst_day_celsius": record.lst_day - 273.15 if record.lst_day else None,
-                    "lst_night_celsius": record.lst_night - 273.15 if record.lst_night else None,
+                    "date": veg_record.date.isoformat(),
+                    "latitude": veg_record.latitude,
+                    "longitude": veg_record.longitude,
+                    "ndvi": veg_record.ndvi,
+                    "evi": veg_record.evi,
+                    "lai": veg_record.lai,
+                    "lst_day_celsius": veg_record.lst_day - 273.15 if veg_record.lst_day else None,
+                    "lst_night_celsius": veg_record.lst_night - 273.15 if veg_record.lst_night else None,
                 })
 
             # Calculate vegetation statistics
@@ -697,29 +706,31 @@ async def get_interactive_data_exploration(
 
         elif data_type == "population":
             # WorldPop population data exploration
-            query = db.query(WorldPopDataPoint)
+            stmt = select(WorldPopDataPoint)
 
             # Apply filters
             if location_filters.get("lat_range"):
                 lat_min, lat_max = location_filters["lat_range"]
-                query = query.filter(WorldPopDataPoint.latitude.between(lat_min, lat_max))
+                stmt = stmt.where(WorldPopDataPoint.latitude.between(lat_min, lat_max))
             if location_filters.get("lon_range"):
                 lon_min, lon_max = location_filters["lon_range"]
-                query = query.filter(WorldPopDataPoint.longitude.between(lon_min, lon_max))
+                stmt = stmt.where(WorldPopDataPoint.longitude.between(lon_min, lon_max))
 
-            population_data = query.limit(limit).all()
+            stmt = stmt.limit(limit)
+            result = await db.execute(stmt)
+            population_data = cast(list[WorldPopDataPoint], result.scalars().all())
 
             processed_data = []
-            for record in population_data:
+            for pop_record in population_data:
                 processed_data.append({
-                    "year": record.year,
-                    "latitude": record.latitude,
-                    "longitude": record.longitude,
-                    "population_total": record.population_total,
-                    "population_density": record.population_density,
-                    "population_children_u5": record.population_children_u5,
-                    "urban_rural_classification": record.urban_rural_classification,
-                    "travel_time_to_healthcare": record.travel_time_to_healthcare,
+                    "year": pop_record.year,
+                    "latitude": pop_record.latitude,
+                    "longitude": pop_record.longitude,
+                    "population_total": pop_record.population_total,
+                    "population_density": pop_record.population_density,
+                    "population_children_u5": pop_record.population_children_u5,
+                    "urban_rural_classification": pop_record.urban_rural_classification,
+                    "travel_time_to_healthcare": pop_record.travel_time_to_healthcare,
                 })
 
             exploration_results = {
@@ -735,37 +746,39 @@ async def get_interactive_data_exploration(
 
         elif data_type == "risk":
             # Risk assessment data exploration
-            query = db.query(MalariaRiskIndex)
+            stmt = select(MalariaRiskIndex)
 
             # Apply filters
             if date_filters.get("start"):
-                query = query.filter(MalariaRiskIndex.assessment_date >= date_filters["start"])
+                stmt = stmt.where(MalariaRiskIndex.assessment_date >= date_filters["start"])
             if date_filters.get("end"):
-                query = query.filter(MalariaRiskIndex.assessment_date <= date_filters["end"])
+                stmt = stmt.where(MalariaRiskIndex.assessment_date <= date_filters["end"])
             if location_filters.get("lat_range"):
                 lat_min, lat_max = location_filters["lat_range"]
-                query = query.filter(MalariaRiskIndex.latitude.between(lat_min, lat_max))
+                stmt = stmt.where(MalariaRiskIndex.latitude.between(lat_min, lat_max))
             if location_filters.get("lon_range"):
                 lon_min, lon_max = location_filters["lon_range"]
-                query = query.filter(MalariaRiskIndex.longitude.between(lon_min, lon_max))
+                stmt = stmt.where(MalariaRiskIndex.longitude.between(lon_min, lon_max))
 
-            risk_data = query.limit(limit).all()
+            stmt = stmt.limit(limit)
+            result = await db.execute(stmt)
+            risk_data = cast(list[MalariaRiskIndex], result.scalars().all())
 
             processed_data = []
-            for record in risk_data:
+            for risk_record in risk_data:
                 processed_data.append({
-                    "assessment_date": record.assessment_date.isoformat(),
-                    "latitude": record.latitude,
-                    "longitude": record.longitude,
-                    "location_name": record.location_name,
-                    "composite_risk_score": record.composite_risk_score,
-                    "risk_level": record.risk_level,
-                    "confidence_score": record.confidence_score,
-                    "temperature_risk": record.temperature_risk_component,
-                    "precipitation_risk": record.precipitation_risk_component,
-                    "humidity_risk": record.humidity_risk_component,
-                    "vegetation_risk": record.vegetation_risk_component,
-                    "model_type": record.model_type,
+                    "assessment_date": risk_record.assessment_date.isoformat(),
+                    "latitude": risk_record.latitude,
+                    "longitude": risk_record.longitude,
+                    "location_name": risk_record.location_name,
+                    "composite_risk_score": risk_record.composite_risk_score,
+                    "risk_level": risk_record.risk_level,
+                    "confidence_score": risk_record.confidence_score,
+                    "temperature_risk": risk_record.temperature_risk_component,
+                    "precipitation_risk": risk_record.precipitation_risk_component,
+                    "humidity_risk": risk_record.humidity_risk_component,
+                    "vegetation_risk": risk_record.vegetation_risk_component,
+                    "model_type": risk_record.model_type,
                 })
 
             exploration_results = {
@@ -855,14 +868,16 @@ async def generate_custom_report(
         for source in data_sources:
             if source == "risk":
                 # Risk assessment data
-                query = db.query(MalariaRiskIndex)
+                stmt = select(MalariaRiskIndex)
 
                 if start_date:
-                    query = query.filter(MalariaRiskIndex.assessment_date >= start_date)
+                    stmt = stmt.where(MalariaRiskIndex.assessment_date >= start_date)
                 if end_date:
-                    query = query.filter(MalariaRiskIndex.assessment_date <= end_date)
+                    stmt = stmt.where(MalariaRiskIndex.assessment_date <= end_date)
 
-                risk_data = query.limit(5000).all()
+                stmt = stmt.limit(5000)
+                result = await db.execute(stmt)
+                risk_data = result.scalars().all()
 
                 custom_report["data_sections"]["risk_assessments"] = {
                     "total_assessments": len(risk_data),
@@ -879,13 +894,15 @@ async def generate_custom_report(
 
             elif source == "environmental":
                 # Environmental data summary
-                climate_query = db.query(ProcessedClimateData)
+                climate_stmt = select(ProcessedClimateData)
                 if start_date:
-                    climate_query = climate_query.filter(ProcessedClimateData.date >= start_date)
+                    climate_stmt = climate_stmt.where(ProcessedClimateData.date >= start_date)
                 if end_date:
-                    climate_query = climate_query.filter(ProcessedClimateData.date <= end_date)
+                    climate_stmt = climate_stmt.where(ProcessedClimateData.date <= end_date)
 
-                climate_data = climate_query.limit(1000).all()
+                climate_stmt = climate_stmt.limit(1000)
+                climate_result = await db.execute(climate_stmt)
+                climate_data = climate_result.scalars().all()
 
                 custom_report["data_sections"]["environmental_conditions"] = {
                     "total_observations": len(climate_data),
