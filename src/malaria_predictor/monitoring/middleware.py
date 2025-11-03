@@ -32,10 +32,10 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
 
     def __init__(
         self,
-        app,
+        app: Any,
         include_paths: list[str] | None = None,
         exclude_paths: list[str] | None = None,
-    ):
+    ) -> None:
         super().__init__(app)
         self.metrics = get_metrics()
         self.include_paths = include_paths or []
@@ -135,7 +135,7 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
 
         # Normalize path parameters
         if hasattr(request, "path_info"):
-            return request.path_info
+            return request.path_info  # type: ignore[no-any-return]
 
         # Simple normalization for common patterns
         # In production, you might want more sophisticated path normalization
@@ -150,7 +150,7 @@ class TracingMiddleware(BaseHTTPMiddleware):
     attributes and context propagation.
     """
 
-    def __init__(self, app) -> None:
+    def __init__(self, app: Any) -> None:
         super().__init__(app)
         self.tracer = get_api_tracer()
         self.logger = get_logger(__name__)
@@ -186,7 +186,7 @@ class TracingMiddleware(BaseHTTPMiddleware):
                         pass
 
                 self.tracer.add_request_metrics(
-                    span,
+                    span,  # type: ignore[arg-type]
                     response.status_code,
                     response_size,
                     processing_time,
@@ -217,7 +217,7 @@ class HealthCheckMiddleware(BaseHTTPMiddleware):
     component status and metrics.
     """
 
-    def __init__(self, app, health_endpoint: str = "/health") -> None:
+    def __init__(self, app: Any, health_endpoint: str = "/health") -> None:
         super().__init__(app)
         self.health_endpoint = health_endpoint
         self.health_checker = get_health_checker()
@@ -340,11 +340,11 @@ class PerformanceMonitoringMiddleware(BaseHTTPMiddleware):
 
     def __init__(
         self,
-        app,
+        app: Any,
         slow_request_threshold: float = 1.0,  # seconds
         log_slow_requests: bool = True,
         track_request_sizes: bool = True,
-    ):
+    ) -> None:
         super().__init__(app)
         self.slow_request_threshold = slow_request_threshold
         self.log_slow_requests = log_slow_requests
@@ -480,14 +480,14 @@ class MonitoringMiddleware(BaseHTTPMiddleware):
 
     def __init__(
         self,
-        app,
+        app: Any,
         enable_metrics: bool = True,
         enable_tracing: bool = True,
         enable_health_checks: bool = True,
         enable_performance_monitoring: bool = True,
         health_endpoint: str = "/health",
         metrics_endpoint: str = "/metrics",
-    ):
+    ) -> None:
         super().__init__(app)
         self.enable_metrics = enable_metrics
         self.enable_tracing = enable_tracing
