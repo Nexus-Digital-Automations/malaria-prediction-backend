@@ -74,7 +74,7 @@ class PositionalEncoding(nn.Module):
         ]  # [batch_size, seq_len, d_model//2]
 
         # Get temporal encoding
-        temporal_encoding = self.temporal_pe[temporal_idx % self.temporal_pe.shape[0]]
+        temporal_encoding = self.temporal_pe[temporal_idx % self.temporal_pe.shape[0]]  # type: ignore[index]
         temporal_encoding = (
             temporal_encoding.unsqueeze(0).unsqueeze(0).expand(batch_size, seq_len, -1)
         )  # [batch_size, seq_len, d_model//2]
@@ -168,7 +168,7 @@ class SpatialTemporalAttention(nn.Module):
             .view(batch_size, seq_len, self.d_model)
         )
 
-        return self.output_proj(attended)
+        return self.output_proj(attended)  # type: ignore[no-any-return]
 
     def _compute_spatial_distances(self, spatial_coords: torch.Tensor) -> torch.Tensor:
         """Compute pairwise spatial distances."""
@@ -180,7 +180,7 @@ class SpatialTemporalAttention(nn.Module):
             coord1 - coord2, dim=-1
         )  # [batch_size, seq_len, seq_len]
 
-        return distances
+        return distances  # type: ignore[no-any-return]
 
 
 class TransformerEncoderLayer(nn.Module):
@@ -465,7 +465,7 @@ class MalariaTransformer(pl.LightningModule):
 
         return total_loss
 
-    def configure_optimizers(self) -> dict[str, Any]:
+    def configure_optimizers(self) -> dict[str, Any]:  # type: ignore[override]
         """Configure optimizers and learning rate schedulers."""
         optimizer = AdamW(
             self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay
@@ -529,14 +529,14 @@ class MalariaTransformer(pl.LightningModule):
         attention_maps = []
 
         # Hook function to capture attention weights
-        def attention_hook(module, input, output):
+        def attention_hook(module: Any, input: Any, output: Any) -> None:
             if hasattr(module, "attention_weights"):
                 attention_maps.append(module.attention_weights)
 
         # Register hooks
         hooks = []
         for layer in self.encoder_layers:
-            hook = layer.attention.register_forward_hook(attention_hook)
+            hook = layer.attention.register_forward_hook(attention_hook)  # type: ignore[union-attr]
             hooks.append(hook)
 
         try:
@@ -601,7 +601,7 @@ class MalariaTransformer(pl.LightningModule):
             results.append(result)
         return results
 
-    def load_from_checkpoint(self, checkpoint_path: str) -> None:
+    def load_from_checkpoint(self, checkpoint_path: str) -> None:  # type: ignore[override]
         """Load model from checkpoint for testing compatibility."""
         # Mock loading - call torch.load for test compatibility
         import torch
@@ -614,7 +614,7 @@ class MalariaTransformer(pl.LightningModule):
         import json
 
         with open(metadata_path) as f:
-            return json.load(f)
+            return json.load(f)  # type: ignore[no-any-return]
 
 
 # Configuration dataclass for easy model setup
