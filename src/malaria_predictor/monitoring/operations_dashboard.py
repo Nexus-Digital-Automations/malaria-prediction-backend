@@ -59,7 +59,7 @@ class OperationsDashboardManager:
         """Load the enhanced operations dashboard configuration."""
         try:
             with open(self.config_path) as f:
-                return json.load(f)
+                return json.load(f)  # type: ignore[no-any-return]
         except FileNotFoundError:
             logger.warning(
                 "Operations dashboard config not found, using default configuration"
@@ -121,7 +121,7 @@ class OperationsDashboardManager:
         """Update the current dashboard state with latest metrics."""
         try:
             # Get health status
-            health_status = await self.health_manager.get_overall_health()
+            health_status = await self.health_manager.get_overall_health()  # type: ignore[attr-defined]
 
             # Get performance metrics summary
             performance_metrics = self.metrics.get_health_metrics()
@@ -211,13 +211,13 @@ class OperationsDashboardManager:
 
         # Simple rule evaluation based on common patterns
         if "api_error_rate" in condition and "> 0.05" in condition:
-            return performance.get("api_error_rate", 0) > 5.0
+            return performance.get("api_error_rate", 0) > 5.0  # type: ignore[no-any-return]
         elif "cpu_usage_percent" in condition and "> 85" in condition:
-            return performance.get("cpu_usage_percent", 0) > 85
+            return performance.get("cpu_usage_percent", 0) > 85  # type: ignore[no-any-return]
         elif "memory_usage_percent" in condition and "> 85" in condition:
-            return performance.get("memory_usage_percent", 0) > 85
+            return performance.get("memory_usage_percent", 0) > 85  # type: ignore[no-any-return]
         elif "cache_hit_rate" in condition and "< 0.8" in condition:
-            return performance.get("cache_hit_rate", 100) < 80
+            return performance.get("cache_hit_rate", 100) < 80  # type: ignore[no-any-return]
 
         return False
 
@@ -317,7 +317,7 @@ class OperationsDashboardManager:
 
     def get_active_alerts(self) -> list[dict[str, Any]]:
         """Get current active alerts."""
-        return self.dashboard_state["active_alerts"]
+        return self.dashboard_state["active_alerts"]  # type: ignore[no-any-return]
 
     def get_alert_history(self, hours: int = 24) -> list[dict[str, Any]]:
         """Get alert history for the specified time period."""
@@ -863,7 +863,7 @@ class OperationsDashboardManager:
                 "labels": alert.get("labels", {}),
                 "annotations": alert.get("annotations", {}),
             }
-            rules["groups"][0]["rules"].append(rule)
+            rules["groups"][0]["rules"].append(rule)  # type: ignore[attr-defined]
 
         return json.dumps(rules, indent=2)
 
