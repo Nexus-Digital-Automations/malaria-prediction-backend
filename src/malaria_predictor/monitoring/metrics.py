@@ -44,8 +44,8 @@ class MetricsCollector:
         name: str,
         description: str,
         labels: list[str] | None = None,
-    ) -> Counter:
-        """Create a Prometheus Counter metric."""
+    ) -> Counter | None:
+        """Create a Prometheus Counter metric or None if disabled."""
         if not self.enabled:
             return None
 
@@ -64,8 +64,8 @@ class MetricsCollector:
         name: str,
         description: str,
         labels: list[str] | None = None,
-    ) -> Gauge:
-        """Create a Prometheus Gauge metric."""
+    ) -> Gauge | None:
+        """Create a Prometheus Gauge metric or None if disabled."""
         if not self.enabled:
             return None
 
@@ -85,8 +85,8 @@ class MetricsCollector:
         description: str,
         labels: list[str] | None = None,
         buckets: tuple | None = None,
-    ) -> Histogram:
-        """Create a Prometheus Histogram metric."""
+    ) -> Histogram | None:
+        """Create a Prometheus Histogram metric or None if disabled."""
         if not self.enabled:
             return None
 
@@ -115,8 +115,8 @@ class MetricsCollector:
         name: str,
         description: str,
         labels: list[str] | None = None,
-    ) -> Summary:
-        """Create a Prometheus Summary metric."""
+    ) -> Summary | None:
+        """Create a Prometheus Summary metric or None if disabled."""
         if not self.enabled:
             return None
 
@@ -659,21 +659,16 @@ class SystemMetrics(MetricsCollector):
                 labels_received = {"interface": interface, "direction": "received"}
 
                 # Note: These are cumulative counters, so we set them directly
-                if hasattr(
-                    self.get_metric("malaria_system_network_bytes_total"), "_value"
-                ):
-                    self.get_metric("malaria_system_network_bytes_total").labels(
-                        **labels_sent
-                    )._value.set(stats.bytes_sent)
-                    self.get_metric("malaria_system_network_bytes_total").labels(
-                        **labels_received
-                    )._value.set(stats.bytes_recv)
-                    self.get_metric("malaria_system_network_packets_total").labels(
-                        **labels_sent
-                    )._value.set(stats.packets_sent)
-                    self.get_metric("malaria_system_network_packets_total").labels(
-                        **labels_received
-                    )._value.set(stats.packets_recv)
+                bytes_metric = self.get_metric("malaria_system_network_bytes_total")
+                packets_metric = self.get_metric("malaria_system_network_packets_total")
+
+                if bytes_metric is not None and hasattr(bytes_metric, "_value"):
+                    bytes_metric.labels(**labels_sent)._value.set(stats.bytes_sent)
+                    bytes_metric.labels(**labels_received)._value.set(stats.bytes_recv)
+
+                if packets_metric is not None and hasattr(packets_metric, "_value"):
+                    packets_metric.labels(**labels_sent)._value.set(stats.packets_sent)
+                    packets_metric.labels(**labels_received)._value.set(stats.packets_recv)
 
         except Exception as e:
             # Log error but don't fail the application
