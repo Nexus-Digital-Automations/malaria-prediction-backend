@@ -146,7 +146,7 @@ class DHIS2Client:
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     data = await response.json()
-                    org_units = data.get('organisationUnits', [])
+                    org_units: list[dict[str, Any]] = data.get('organisationUnits', [])
                     logger.info(f"Retrieved {len(org_units)} organization units")
                     return org_units
                 else:

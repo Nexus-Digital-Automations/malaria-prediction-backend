@@ -486,7 +486,7 @@ class HealthChecker:
         unhealthy_count = 0
 
         for i, result in enumerate(results):
-            if isinstance(result, Exception):
+            if isinstance(result, BaseException):
                 # Handle exceptions from health checks
                 check_result = ComponentHealth(
                     name=self.checks[i].name,

@@ -200,7 +200,7 @@ class UnifiedDataHarmonizer:
         self.quality_manager = QualityManager()
 
         # Initialize caching
-        cache_dir = Path(settings.cache_directory) / "harmonized_data"
+        cache_dir = Path(settings.data.directory) / "harmonized_data"
         self.cache_manager = CacheManager(cache_dir)
 
         logger.info("UnifiedDataHarmonizer initialized with all data sources")

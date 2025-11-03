@@ -397,6 +397,7 @@ module = [
     "malaria_predictor.outbreak.widgets.forecasting",
     "malaria_predictor.outbreak.widgets.summaries",
     "malaria_predictor.performance.cache_optimization",
+    "malaria_predictor.performance.*",
 ]
 ignore_errors = true
 

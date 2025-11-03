@@ -309,7 +309,7 @@ class DHIS2Integration:
         self.base_url = base_url
         self.username = username
         self.password = password
-        self.session_token = None
+        self.session_token: str | None = None
 
     async def authenticate(self) -> bool:
         """

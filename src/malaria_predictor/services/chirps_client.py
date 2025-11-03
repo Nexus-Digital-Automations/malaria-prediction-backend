@@ -255,7 +255,7 @@ class CHIRPSClient:
         self,
         file_path: Path,
         area_bounds: tuple[float, float, float, float] | None = None,
-    ) -> np.ndarray | None:
+    ) -> dict[str, Any] | None:
         """Process CHIRPS GeoTIFF file and extract rainfall data.
 
         Args:

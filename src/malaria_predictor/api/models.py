@@ -354,7 +354,7 @@ class SinglePredictionRequest(BaseModel):
 class BatchPredictionRequest(BaseModel):
     """Batch prediction request for multiple locations."""
 
-    locations: list[LocationPoint] = Field(..., description="List of geographic locations", min_items=1, max_items=100)
+    locations: list[LocationPoint] = Field(..., description="List of geographic locations", min_length=1, max_length=100)
     target_date: date = Field(..., description="Target date for prediction")
     model_type: ModelType = Field(default=ModelType.ENSEMBLE, description="ML model to use")
     prediction_horizon: PredictionHorizon = Field(default=PredictionHorizon.ONE_WEEK, description="Prediction time horizon")
