@@ -224,6 +224,7 @@ async def get_knowledge_resources(
             description="Comprehensive WHO guidelines for malaria diagnosis and treatment",
             content_type="guideline",
             content_url="https://www.who.int/publications/i/item/guidelines-for-malaria",
+            embedded_content=None,
             tags=["malaria", "treatment", "diagnosis", "WHO"],
             evidence_level="Grade A",
             source_organization="World Health Organization",
@@ -235,6 +236,7 @@ async def get_knowledge_resources(
             category="surveillance_guidance",
             description="Guidelines for monitoring and reporting antimalarial drug resistance",
             content_type="protocol",
+            content_url=None,
             embedded_content="""
             # Antimalarial Drug Resistance Surveillance Protocol
 
@@ -264,6 +266,7 @@ async def get_knowledge_resources(
             category="clinical_guidelines",
             description="Specialized guidelines for malaria management in children under 5",
             content_type="guideline",
+            content_url=None,
             embedded_content="""
             # Pediatric Malaria Management
 
@@ -429,7 +432,9 @@ async def get_case_notes(
                     "parasite_species": "P. falciparum"
                 }
             },
-            created_at=datetime.now() - timedelta(hours=2)
+            created_at=datetime.now() - timedelta(hours=2),
+            is_confidential=False,
+            signed_by=None
         )
     ]
 
@@ -443,7 +448,7 @@ async def get_case_notes(
 # Helper Functions for Documentation
 # ==========================================
 
-def _generate_case_summary_report(request: DocumentationRequest, current_user) -> ClinicalReport:
+def _generate_case_summary_report(request: DocumentationRequest, current_user: Any) -> ClinicalReport:
     """Generate a comprehensive case summary report."""
 
     return ClinicalReport(
@@ -488,7 +493,7 @@ def _generate_case_summary_report(request: DocumentationRequest, current_user) -
     )
 
 
-def _generate_surveillance_analysis_report(request: DocumentationRequest, current_user) -> ClinicalReport:
+def _generate_surveillance_analysis_report(request: DocumentationRequest, current_user: Any) -> ClinicalReport:
     """Generate surveillance data analysis report."""
 
     return ClinicalReport(
@@ -529,7 +534,7 @@ def _generate_surveillance_analysis_report(request: DocumentationRequest, curren
     )
 
 
-def _generate_treatment_outcome_report(request: DocumentationRequest, current_user) -> ClinicalReport:
+def _generate_treatment_outcome_report(request: DocumentationRequest, current_user: Any) -> ClinicalReport:
     """Generate treatment outcome analysis report."""
 
     return ClinicalReport(
@@ -566,7 +571,7 @@ def _generate_treatment_outcome_report(request: DocumentationRequest, current_us
     )
 
 
-def _generate_risk_assessment_summary(request: DocumentationRequest, current_user) -> ClinicalReport:
+def _generate_risk_assessment_summary(request: DocumentationRequest, current_user: Any) -> ClinicalReport:
     """Generate risk assessment summary report."""
 
     return ClinicalReport(
@@ -625,4 +630,4 @@ def _translate_report(report: ClinicalReport, target_language: str) -> ClinicalR
         for rec in report.recommendations
     ]
 
-    return cast(ClinicalReport, translated_report)
+    return translated_report
