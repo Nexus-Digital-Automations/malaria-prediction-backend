@@ -15,7 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from ..healthcare_security import get_current_healthcare_professional
-from ..models import LocationPoint, RiskLevel
+from ..models import LocationPoint, RiskLevelEnum as RiskLevel
 
 logger = logging.getLogger(__name__)
 
@@ -184,6 +184,7 @@ async def get_risk_assessment_templates(
             description="Standardized malaria risk assessment based on WHO guidelines",
             version="2.1",
             language=language,
+            is_active=True,
             categories=[
                 {
                     "name": "Clinical Symptoms",
@@ -270,6 +271,7 @@ async def get_risk_assessment_templates(
             description="Specialized risk assessment for children under 5 years",
             version="1.3",
             language=language,
+            is_active=True,
             categories=[
                 {
                     "name": "Age and Development",
@@ -377,6 +379,7 @@ async def conduct_risk_assessment(
             calculated_risk_score=combined_risk,
             risk_level=risk_level,
             recommendations=recommendations,
+            validated_by=None,
             environmental_risk=environmental_risk,
             clinical_risk=clinical_risk
         )
@@ -421,6 +424,7 @@ async def create_patient_case(
         location=location,
         case_type=case_type,
         symptoms=symptoms,
+        status="pending",
         notes=[{
             "timestamp": datetime.now().isoformat(),
             "author": current_user.id,
@@ -942,6 +946,8 @@ async def submit_surveillance_report(
         vector_data=vector_data,
         environmental_observations=environmental_observations,
         intervention_activities=intervention_activities,
+        dhis2_export_status="pending",
+        validation_status="pending",
         data_quality_indicators=data_quality
     )
 
