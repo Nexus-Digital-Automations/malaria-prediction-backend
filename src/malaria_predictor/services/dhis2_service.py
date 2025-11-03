@@ -7,7 +7,7 @@ for surveillance data reporting, organization unit management, and health system
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, cast
 from urllib.parse import urljoin
 
 import aiohttp
@@ -53,7 +53,7 @@ class DHIS2Client:
         await self._create_session()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Async context manager exit."""
         await self._close_session()
 
@@ -92,6 +92,9 @@ class DHIS2Client:
 
             if not self.session:
                 await self._create_session()
+
+            if not self.session:
+                raise RuntimeError("Failed to create session")
 
             async with self.session.get(url) as response:
                 if response.status == 200:
@@ -137,6 +140,9 @@ class DHIS2Client:
             if not self.session:
                 await self._create_session()
 
+            if not self.session:
+                raise RuntimeError("Failed to create session")
+
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -168,10 +174,13 @@ class DHIS2Client:
             if not self.session:
                 await self._create_session()
 
+            if not self.session:
+                raise RuntimeError("Failed to create session")
+
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     data = await response.json()
-                    data_sets = data.get('dataSets', [])
+                    data_sets = cast(list[dict[str, Any]], data.get('dataSets', []))
                     logger.info(f"Retrieved {len(data_sets)} data sets")
                     return data_sets
                 else:
@@ -213,6 +222,9 @@ class DHIS2Client:
 
             if not self.session:
                 await self._create_session()
+
+            if not self.session:
+                raise RuntimeError("Failed to create session")
 
             async with self.session.post(url, json=payload) as response:
                 result = await response.json()
@@ -265,10 +277,13 @@ class DHIS2Client:
             if not self.session:
                 await self._create_session()
 
+            if not self.session:
+                raise RuntimeError("Failed to create session")
+
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     data = await response.json()
-                    data_elements = data.get('dataElements', [])
+                    data_elements = cast(list[dict[str, Any]], data.get('dataElements', []))
                     logger.info(f"Retrieved {len(data_elements)} data elements")
                     return data_elements
                 else:
@@ -306,6 +321,9 @@ class DHIS2Client:
 
             if not self.session:
                 await self._create_session()
+
+            if not self.session:
+                raise RuntimeError("Failed to create session")
 
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:

@@ -286,7 +286,7 @@ class AlertHistoryManager:
 
                 type_result = await db.execute(type_stmt)
                 type_results = type_result.all()
-                type_stats: dict[str, int] = {str(result.alert_type): int(result.count) for result in type_results}  # type: ignore[call-overload]
+                type_stats: dict[str, int] = {str(result.alert_type): int(result.count) for result in type_results}
 
                 # Alerts by status
                 status_stmt = select(
@@ -299,7 +299,7 @@ class AlertHistoryManager:
 
                 status_result = await db.execute(status_stmt)
                 status_results = status_result.all()
-                status_stats: dict[str, int] = {str(result.status): int(result.count) for result in status_results}  # type: ignore[call-overload]
+                status_stats: dict[str, int] = {str(result.status): int(result.count) for result in status_results}
 
                 # Response time analysis
                 response_stmt = select(Alert.response_time_seconds).join(AlertConfiguration).where(
@@ -518,7 +518,7 @@ class AlertHistoryManager:
                         archived_by_level[level] = archived_by_level.get(level, 0) + 1
 
                         # Mark as archived (you might want to move to separate table)
-                        alert.status = "archived"  # type: ignore[assignment]
+                        alert.status = "archived"
                         archived_count += 1
 
                     await db.commit()

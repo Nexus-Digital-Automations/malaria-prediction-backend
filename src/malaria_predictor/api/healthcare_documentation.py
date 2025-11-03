@@ -8,7 +8,7 @@ malaria prediction system.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
@@ -85,7 +85,7 @@ class ProfessionalNote(BaseModel):
 @router.post("/documentation/generate", response_model=ClinicalReport)
 async def generate_professional_documentation(
     request: DocumentationRequest,
-    current_user = Depends(get_current_healthcare_professional)
+    current_user: Any = Depends(get_current_healthcare_professional)
 ) -> ClinicalReport:
     """
     Generate professional documentation and reports.
@@ -122,7 +122,7 @@ async def generate_professional_documentation(
 async def get_documentation_templates(
     category: str | None = None,
     language: str = "en",
-    current_user = Depends(get_current_healthcare_professional)
+    current_user: Any = Depends(get_current_healthcare_professional)
 ) -> dict[str, Any]:
     """
     Get available documentation templates.
@@ -205,7 +205,7 @@ async def get_knowledge_resources(
     tags: list[str] | None = None,
     language: str = "en",
     evidence_level: str | None = None,
-    current_user = Depends(get_current_healthcare_professional)
+    current_user: Any = Depends(get_current_healthcare_professional)
 ) -> list[KnowledgeResource]:
     """
     Get knowledge management resources.
@@ -321,7 +321,7 @@ async def search_knowledge_base(
     category: str | None = None,
     language: str = "en",
     limit: int = 10,
-    current_user = Depends(get_current_healthcare_professional)
+    current_user: Any = Depends(get_current_healthcare_professional)
 ) -> dict[str, Any]:
     """
     Search the knowledge base.
@@ -373,7 +373,7 @@ async def create_clinical_note(
     content: str,
     structured_data: dict[str, Any] | None = None,
     is_confidential: bool = False,
-    current_user = Depends(get_current_healthcare_professional)
+    current_user: Any = Depends(get_current_healthcare_professional)
 ) -> ProfessionalNote:
     """
     Create a professional clinical note.
@@ -405,7 +405,7 @@ async def create_clinical_note(
 async def get_case_notes(
     case_id: str,
     note_type: str | None = None,
-    current_user = Depends(get_current_healthcare_professional)
+    current_user: Any = Depends(get_current_healthcare_professional)
 ) -> list[ProfessionalNote]:
     """Get all clinical notes for a case."""
     logger.info(f"Retrieving notes for case {case_id}")
@@ -625,4 +625,4 @@ def _translate_report(report: ClinicalReport, target_language: str) -> ClinicalR
         for rec in report.recommendations
     ]
 
-    return translated_report
+    return cast(ClinicalReport, translated_report)

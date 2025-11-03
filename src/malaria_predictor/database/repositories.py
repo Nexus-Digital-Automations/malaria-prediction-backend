@@ -7,6 +7,7 @@ clean separation of concerns and testability.
 
 import logging
 from datetime import datetime, timedelta
+from typing import cast
 
 import pandas as pd
 from sqlalchemy import and_, func, select
@@ -82,7 +83,7 @@ class ERA5Repository:
         await self.session.commit()
 
         logger.info(f"Bulk inserted/updated {result.rowcount} ERA5 data points")
-        return result.rowcount
+        return cast(int, result.rowcount)
 
     async def get_data_range(
         self,
@@ -124,7 +125,7 @@ class ERA5Repository:
         query = query.order_by(ERA5DataPoint.timestamp)
 
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return cast(list[ERA5DataPoint], result.scalars().all())
 
     async def get_data_by_location_and_timerange(
         self,
@@ -177,7 +178,7 @@ class ERA5Repository:
             )
 
         result = await self.session.execute(query)
-        return result.scalar()
+        return cast(datetime | None, result.scalar())
 
     async def delete_old_data(self, days_to_keep: int = 365) -> int:
         """Delete data older than specified days.
@@ -198,7 +199,7 @@ class ERA5Repository:
         await self.session.commit()
 
         logger.info(f"Deleted {result.rowcount} old ERA5 data points")
-        return result.rowcount
+        return cast(int, result.rowcount)
 
 
 class ProcessedClimateRepository:
@@ -276,7 +277,7 @@ class ProcessedClimateRepository:
         await self.session.commit()
 
         logger.info(f"Saved {result.rowcount} processed climate records")
-        return result.rowcount
+        return cast(int, result.rowcount)
 
     async def get_location_data(
         self,
@@ -360,7 +361,7 @@ class ProcessedClimateRepository:
         )
 
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return cast(list[ProcessedClimateData], result.scalars().all())
 
 
 class MalariaRiskRepository:
@@ -444,7 +445,7 @@ class MalariaRiskRepository:
         )
 
         result = await self.session.execute(query)
-        return result.scalar_one_or_none()
+        return cast(MalariaRiskIndex | None, result.scalar_one_or_none())
 
     async def get_risk_history(
         self,
@@ -481,7 +482,7 @@ class MalariaRiskRepository:
         )
 
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return cast(list[MalariaRiskIndex], result.scalars().all())
 
     def _calculate_risk_level(self, risk_score: float) -> str:
         """Calculate risk level from numeric score.
@@ -568,7 +569,7 @@ class MalariaRiskRepository:
         )
 
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return cast(list[MalariaRiskIndex], result.scalars().all())
 
     async def update_risk_assessment(
         self, assessment_id: str, updated_data: dict
@@ -593,7 +594,7 @@ class MalariaRiskRepository:
         result = await self.session.execute(stmt)
         await self.session.commit()
 
-        return result.rowcount
+        return cast(int, result.rowcount)
 
 
 class EnvironmentalDataRepository:
@@ -716,7 +717,7 @@ class EnvironmentalDataRepository:
             raise ValueError(f"Unsupported environmental data type: {data_type}")
 
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return cast(list, result.scalars().all())
 
 
 class MalariaIncidenceRepository:
@@ -788,7 +789,7 @@ class MalariaIncidenceRepository:
         )
 
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return cast(list, result.scalars().all())
 
 
 class PredictionRepository:
@@ -867,7 +868,7 @@ class PredictionRepository:
         )
 
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return cast(list, result.scalars().all())
 
 
 class UserRepository:
@@ -984,7 +985,7 @@ class UserRepository:
         result = await self.session.execute(stmt)
         await self.session.commit()
 
-        return result.rowcount > 0
+        return cast(int, result.rowcount) > 0
 
     async def delete_user(self, user_id: str) -> bool:
         """Delete user by ID.

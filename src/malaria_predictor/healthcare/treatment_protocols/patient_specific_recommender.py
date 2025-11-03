@@ -107,10 +107,10 @@ class PatientSpecificRecommender:
 
     def __init__(
         self,
-        who_guidelines_engine,
+        who_guidelines_engine: Any,
         resistance_analyzer: DrugResistanceAnalyzer,
         local_protocols_db: str | None = None
-    ):
+    ) -> None:
         """
         Initialize Patient-Specific Recommender.
 
@@ -260,7 +260,7 @@ class PatientSpecificRecommender:
     ) -> dict[str, Any]:
         """Assess patient-specific risk factors"""
 
-        risk_factors = {}
+        risk_factors: dict[str, Any] = {}
 
         # Age-based risk assessment
         if patient_profile.age < 5:
@@ -521,7 +521,7 @@ class PatientSpecificRecommender:
             ]
 
         # Filter out contraindicated drugs and primary treatment
-        primary_drug = primary_treatment.drug_regimen[0]["drug_name"].lower()
+        primary_drug = str(primary_treatment.drug_regimen[0]["drug_name"]).lower()
         safe_alternatives = [
             drug for drug in alternative_drugs
             if drug not in contraindicated_drugs and drug != primary_drug
@@ -545,7 +545,7 @@ class PatientSpecificRecommender:
     ) -> dict[str, Any]:
         """Create personalized monitoring plan"""
 
-        monitoring_plan = {
+        monitoring_plan: dict[str, Any] = {
             "baseline_assessments": [
                 "Complete blood count",
                 "Basic metabolic panel",
@@ -575,7 +575,7 @@ class PatientSpecificRecommender:
 
         # Add drug-specific monitoring
         for drug in treatment.drug_regimen:
-            if "artesunate" in drug["drug_name"].lower():
+            if "artesunate" in str(drug["drug_name"]).lower():
                 monitoring_plan["safety_monitoring"].append(
                     "Monitor for post-artesunate delayed hemolysis (weekly CBC for 4 weeks)"
                 )

@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Any, cast
 
 try:
-    import firebase_admin  # type: ignore[import-not-found]
+    import firebase_admin
     from firebase_admin import credentials, messaging
     FIREBASE_AVAILABLE = True
 except ImportError:
@@ -21,7 +21,7 @@ except ImportError:
 
 # Type aliases for optional Firebase types
 if FIREBASE_AVAILABLE:
-    from firebase_admin.messaging import Message  # type: ignore[import-not-found]
+    from firebase_admin.messaging import Message
 else:
     Message = object  # Placeholder for type annotations
 from pydantic import BaseModel

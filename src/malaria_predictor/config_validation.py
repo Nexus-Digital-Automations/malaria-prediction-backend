@@ -181,9 +181,9 @@ class ConfigValidator:
         self._validate_configuration()
 
         # Run health checks
-        await self._check_database_health()
-        await self._check_redis_health()
-        await self._check_external_apis_health()
+        await self._check_database_health_simple()
+        await self._check_redis_health_simple()
+        await self._check_external_apis_health_simple()
 
         # Run other checks
         self._check_file_system_access()
@@ -229,7 +229,7 @@ class ConfigValidator:
             self._add_result("configuration", "failed", f"Configuration error: {e}")
             return False
 
-    async def _check_database_health(self) -> None:
+    async def _check_database_health_simple(self) -> None:
         """Test-compatible database health check."""
         try:
             # Mock database check for tests
@@ -249,7 +249,7 @@ class ConfigValidator:
         except Exception as e:
             self._add_result("database", "failed", f"Database connection failed: {e}")
 
-    async def _check_redis_health(self) -> None:
+    async def _check_redis_health_simple(self) -> None:
         """Test-compatible Redis health check."""
         try:
             # Mock Redis check for tests
@@ -266,7 +266,7 @@ class ConfigValidator:
         except Exception as e:
             self._add_result("redis", "failed", f"Redis connection failed: {e}")
 
-    async def _check_external_apis_health(self) -> None:
+    async def _check_external_apis_health_simple(self) -> None:
         """Test-compatible external API health check."""
         try:
             # Check various APIs

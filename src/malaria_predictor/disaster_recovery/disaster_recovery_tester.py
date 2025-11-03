@@ -19,10 +19,10 @@ import time
 from datetime import datetime
 from typing import Any, cast
 
-import asyncpg  # type: ignore[import-untyped]
+import asyncpg
 import httpx
 import redis.asyncio as redis
-from kubernetes import client  # type: ignore[import-untyped]
+from kubernetes import client
 from kubernetes import config as k8s_config
 
 # Setup logging

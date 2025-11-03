@@ -602,7 +602,7 @@ class DisasterRecoveryOrchestrator:
             return False
 
     async def _create_backup_metadata(
-        self, backup_file: Path, backup_component: str, backup_type: str = None
+        self, backup_file: Path, backup_component: str, backup_type: str | None = None
     ) -> None:
         """Create metadata file for backup.
 
