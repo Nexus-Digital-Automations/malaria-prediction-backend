@@ -18,9 +18,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
-from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.schedulers.asyncio import AsyncIOScheduler  # type: ignore[import-not-found]
+from apscheduler.triggers.cron import CronTrigger  # type: ignore[import-not-found]
+from apscheduler.triggers.interval import IntervalTrigger  # type: ignore[import-not-found]
 
 # Setup logging
 logging.basicConfig(
@@ -172,15 +172,15 @@ class DRScheduleConfig:
 
     def get_backup_schedule(self, backup_type: str) -> dict[str, Any] | None:
         """Get backup schedule configuration."""
-        return self.config.get("backup_schedules", {}).get(backup_type)
+        return self.config.get("backup_schedules", {}).get(backup_type)  # type: ignore[no-any-return]
 
     def get_testing_schedule(self, test_type: str) -> dict[str, Any] | None:
         """Get testing schedule configuration."""
-        return self.config.get("testing_schedules", {}).get(test_type)
+        return self.config.get("testing_schedules", {}).get(test_type)  # type: ignore[no-any-return]
 
     def get_monitoring_schedule(self, monitoring_type: str) -> dict[str, Any] | None:
         """Get monitoring schedule configuration."""
-        return self.config.get("monitoring_schedules", {}).get(monitoring_type)
+        return self.config.get("monitoring_schedules", {}).get(monitoring_type)  # type: ignore[no-any-return]
 
     def is_maintenance_window(self) -> bool:
         """Check if current time is within a maintenance window."""
@@ -296,10 +296,10 @@ class DRTaskExecutor:
                 logger.info(
                     f"Backup task {backup_type} completed successfully in {duration:.2f}s"
                 )
-                self.task_stats["successful_executions"] += 1
+                self.task_stats["successful_executions"] += 1  # type: ignore[operator]
             else:
                 logger.error(f"Backup task {backup_type} failed: {stderr.decode()}")
-                self.task_stats["failed_executions"] += 1
+                self.task_stats["failed_executions"] += 1  # type: ignore[operator]
 
             # Cleanup old backups if retention is configured
             if config.get("retention_days"):
@@ -309,7 +309,7 @@ class DRTaskExecutor:
 
         except Exception as e:
             logger.error(f"Error executing backup task {backup_type}: {e}")
-            self.task_stats["failed_executions"] += 1
+            self.task_stats["failed_executions"] += 1  # type: ignore[operator]
             return {
                 "task_type": "backup",
                 "backup_type": backup_type,
@@ -319,8 +319,8 @@ class DRTaskExecutor:
                 "end_time": datetime.now().isoformat(),
             }
         finally:
-            self.task_stats["total_executions"] += 1
-            self.task_stats["last_execution_time"] = datetime.now().isoformat()
+            self.task_stats["total_executions"] += 1  # type: ignore[operator]
+            self.task_stats["last_execution_time"] = datetime.now().isoformat()  # type: ignore[assignment]
 
     async def execute_testing_task(
         self, test_type: str, config: dict[str, Any]
@@ -374,16 +374,16 @@ class DRTaskExecutor:
                 logger.info(
                     f"DR test {test_type} completed successfully in {duration:.2f}s"
                 )
-                self.task_stats["successful_executions"] += 1
+                self.task_stats["successful_executions"] += 1  # type: ignore[operator]
             else:
                 logger.error(f"DR test {test_type} failed: {stderr.decode()}")
-                self.task_stats["failed_executions"] += 1
+                self.task_stats["failed_executions"] += 1  # type: ignore[operator]
 
             return task_result
 
         except Exception as e:
             logger.error(f"Error executing DR test {test_type}: {e}")
-            self.task_stats["failed_executions"] += 1
+            self.task_stats["failed_executions"] += 1  # type: ignore[operator]
             return {
                 "task_type": "testing",
                 "test_type": test_type,
@@ -393,8 +393,8 @@ class DRTaskExecutor:
                 "end_time": datetime.now().isoformat(),
             }
         finally:
-            self.task_stats["total_executions"] += 1
-            self.task_stats["last_execution_time"] = datetime.now().isoformat()
+            self.task_stats["total_executions"] += 1  # type: ignore[operator]
+            self.task_stats["last_execution_time"] = datetime.now().isoformat()  # type: ignore[assignment]
 
     async def execute_monitoring_task(
         self, monitoring_type: str, config: dict[str, Any]
@@ -484,16 +484,16 @@ class DRTaskExecutor:
 
             if task_result["success"]:
                 logger.info(f"Monitoring task {monitoring_type} completed successfully")
-                self.task_stats["successful_executions"] += 1
+                self.task_stats["successful_executions"] += 1  # type: ignore[operator]
             else:
                 logger.error(f"Monitoring task {monitoring_type} failed")
-                self.task_stats["failed_executions"] += 1
+                self.task_stats["failed_executions"] += 1  # type: ignore[operator]
 
             return task_result
 
         except Exception as e:
             logger.error(f"Error executing monitoring task {monitoring_type}: {e}")
-            self.task_stats["failed_executions"] += 1
+            self.task_stats["failed_executions"] += 1  # type: ignore[operator]
             return {
                 "task_type": "monitoring",
                 "monitoring_type": monitoring_type,
@@ -503,8 +503,8 @@ class DRTaskExecutor:
                 "end_time": datetime.now().isoformat(),
             }
         finally:
-            self.task_stats["total_executions"] += 1
-            self.task_stats["last_execution_time"] = datetime.now().isoformat()
+            self.task_stats["total_executions"] += 1  # type: ignore[operator]
+            self.task_stats["last_execution_time"] = datetime.now().isoformat()  # type: ignore[assignment]
 
     async def _cleanup_old_backups(self, backup_type: str, retention_days: int) -> None:
         """Clean up old backups based on retention policy."""
@@ -785,7 +785,7 @@ class DRScheduler:
             return False
 
 
-async def main():
+async def main() -> None:
     """Main entry point for DR scheduler."""
     import argparse
 
