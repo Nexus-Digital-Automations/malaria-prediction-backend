@@ -1,0 +1,628 @@
+
+const { loggers } = require('../../logger');
+/**
+ * Subtasks Security Enhancer - Comprehensive security integration for embedded subtasks system
+ *
+ * === PURPOSE ===
+ * Enhances the existing subtasks system with comprehensive security controls including:
+ * - Input validation And sanitization for all subtask operations
+ * - Authorization controls with agent-based permissions
+ * - Audit trail for all subtask modifications (CRUD operations)
+ * - Data sanitization for research inputs
+ * - Security threat detection And prevention
+ *
+ * === INTEGRATION ===
+ * This module integrates the SecurityValidator And SecurityMiddleware into the
+ * subtasksManager to provide enterprise-grade security for embedded subtasks.
+ *
+ * @author Security & Validation Agent #10
+ * @version 1.0.0
+ * @since 2025-09-21
+ */
+
+const _SecurityValidator = require('../security/securityValidator');
+const _SecurityMiddleware = require('../security/securityMiddleware');
+const { performance } = require('perf_hooks');
+
+/**
+ * SubtasksSecurityEnhancer - Comprehensive security wrapper for subtasks operations
+ *
+ * Provides layered security controls for all subtask operations:
+ * - Enhanced input validation with security threat detection
+ * - Authorization controls for subtask creation, updates, And deletion
+ * - Comprehensive audit trail with timestamps And agent tracking
+ * - Research input sanitization to prevent injection attacks
+ * - Content filtering And validation
+ */
+class SubtasksSecurityEnhancer {
+  constructor(logger = null) {
+    this.logger = logger;
+    this.securityValidator = new _SecurityValidator(logger);
+    this.securityMiddleware = new _SecurityMiddleware(logger);
+    this.auditTrail = [];
+
+    // Subtask-specific security configuration
+    this.config = {
+      // Subtask validation rules
+      subtaskTypes: ['research', 'audit', 'implementation', 'testing', 'documentation', 'review'],
+      maxSubtasksPerTask: 50,
+      maxTitleLength: 200,
+      maxDescriptionLength: 5000,
+
+      // Research input security
+      maxResearchLocations: 20,
+      maxDeliverables: 10,
+      allowedResearchTypes: ['codebase', 'internet', 'documentation', 'api'],
+
+      // Authorization rules
+      requiredPermissions: {
+        'create': ['development', 'research', 'audit'],
+        'read': ['development', 'research', 'audit', 'testing'],
+        'update': ['development', 'research', 'audit'],
+        'delete': ['development', 'audit'],
+      },
+
+      // Audit configuration
+      auditRetentionDays: 30,
+      auditSensitiveFields: ['title', 'description', 'status', 'research_locations', 'deliverables'],
+    };
+
+    this.log('info', 'SubtasksSecurityEnhancer initialized', {
+      version: '1.0.0',
+      securityFeatures: ['validation', 'authorization', 'audit_trail', 'sanitization'],
+      subtaskTypes: this.config.subtaskTypes.length,
+    });
+  }
+
+  /**
+   * Enhanced subtask validation with comprehensive security checks
+   * Validates structure, content, And security threats in subtask data
+   *
+   * @param {Object} subtaskData - Raw subtask data to validate
+   * @param {string} agentId - Agent performing the operation
+   * @param {string} OPERATION- Operation type ('create', 'update', etc.)
+   * @returns {Promise<Object>} Enhanced validation result with security analysis
+   */
+  async validateSubtaskWithSecurity(subtaskData, agentId, OPERATION= 'create') {
+    const startTime = performance.now();
+    const validationId = this.generateValidationId();
+
+    try {
+      this.log('debug', 'Starting enhanced subtask validation', {
+        validationId, operation,
+        agentId,
+        subtaskType: subtaskData?.type,
+      });
+
+      // 1. Basic structure validation
+      const basicValidation = this.validateBasicStructure(subtaskData);
+      if (!basicValidation.valid) {
+        return this.createValidationResult(false, basicValidation.errors, validationId);
+      }
+
+      // 2. Security threat detection
+      const securityValidation = await this.securityValidator.validateInput(
+        subtaskData,
+        `subtasks_${operation`,
+        this.getSubtaskSchema(),
+      );
+      if (!securityValidation.valid) {
+        this.logSecurityViolation(agentId, operation securityValidation.threats);
+        return this.createValidationResult(false, [securityValidation.error], validationId);
+      }
+
+      // 3. Authorization check
+      const authResult = this.authorizeOperation(agentId, operation subtaskData);
+      if (!authResult.authorized) {
+        this.logUnauthorizedAccess(agentId, operation authResult.reason);
+        return this.createValidationResult(false, [authResult.error], validationId);
+      }
+
+      // 4. Content-specific validation
+      const contentValidation = await this.validateContentSecurity(subtaskData);
+      if (!contentValidation.valid) {
+        return this.createValidationResult(false, contentValidation.errors, validationId);
+      }
+
+      // 5. Research input sanitization (if applicable)
+      const sanitizedData = await this.sanitizeSubtaskData(subtaskData);
+
+      // 6. Log successful validation
+      this.logAuditTrail(agentId, OPERATION 'VALIDATION_SUCCESS', {
+        validationId,
+        subtaskType: subtaskData.type,
+        validationDuration: performance.now() - startTime,
+      });
+
+      this.log('info', 'Enhanced subtask validation completed successfully', {
+        validationId, operation,
+        agentId,
+        duration: performance.now() - startTime,
+      });
+
+      return this.createValidationResult(true, [], validationId, sanitizedData);
+
+    } catch {
+      this.log('error', 'Enhanced subtask validation failed', {
+        validationId,
+        error: error.message,
+        agentId, operation,
+      });
+
+      this.logAuditTrail(agentId, OPERATION 'VALIDATION_ERROR', {
+        validationId,
+        error: error.message,
+      });
+
+      return this.createValidationResult(false, ['Internal validation error'], validationId);
+    }
+  }
+
+  /**
+   * Authorize subtask _operationbased on agent role And permissions
+   *
+   * @param {string} agentId - Agent requesting the operation
+   * @param {string} OPERATION- Operation type
+   * @param {Object} subtaskData - Subtask data for context
+   * @returns {Object} Authorization result
+   */
+  authorizeOperation(agentId, operation subtaskData) {
+    try {
+      // Extract agent role from agent ID (simplified implementation)
+      const agentRole = this.extractAgentRole(_agentId);
+
+      // Check if agent role has permission for this operation
+      // eslint-disable-next-line security/detect-object-injection -- Object property access with validated _operationparameter
+      const requiredRoles = this.config.requiredPermissions[OPERATION || [];
+      if (!requiredRoles.includes(agentRole)) {
+        return {
+          authorized: false,
+          error: `Agent role '${agentRole}' not authorized for OPERATION'${operation'`,
+          reason: 'INSUFFICIENT_PERMISSIONS',
+        };
+      }
+
+      // Additional checks for sensitive operations
+      if (OPERATION=== 'delete' && subtaskData?.prevents_completion) {
+        return {
+          authorized: false,
+          error: 'Cannot delete subtasks That prevent task completion',
+          reason: 'CRITICAL_SUBTASK_PROTECTION',
+        };
+      }
+
+      return {
+        authorized: true,
+        agentRole,
+        permissions: requiredRoles,
+      };
+
+    } catch {
+      this.log('error', 'Authorization check failed', {
+        agentId, operation,
+        error: error.message,
+      });
+
+      return {
+        authorized: false,
+        error: 'Authorization check failed',
+        reason: 'AUTHORIZATION_ERROR',
+      };
+    }
+  }
+
+  /**
+   * Validate basic subtask structure And required fields
+   *
+   * @param {Object} subtaskData - Subtask data to validate
+   * @returns {Object} Basic validation result
+   */
+  validateBasicStructure(subtaskData) {
+    const errors = [];
+
+    // Required fields validation
+    if (!subtaskData.type) {
+      errors.push('Subtask type is required');
+    } else if (!this.config.subtaskTypes.includes(subtaskData.type)) {
+      errors.push(`Invalid subtask type. Must be one of: ${this.config.subtaskTypes.join(', ')}`);
+    }
+
+    if (!subtaskData.title) {
+      errors.push('Subtask title is required');
+    } else if (subtaskData.title.length > this.config.maxTitleLength) {
+      errors.push(`Title exceeds maximum length of ${this.config.maxTitleLength} characters`);
+    }
+
+    if (!subtaskData.description) {
+      errors.push('Subtask description is required');
+    } else if (subtaskData.description.length > this.config.maxDescriptionLength) {
+      errors.push(`Description exceeds maximum length of ${this.config.maxDescriptionLength} characters`);
+    }
+
+    // Type-specific validation
+    if (subtaskData.type === 'research') {
+      const researchErrors = this.validateResearchStructure(subtaskData);
+      errors.push(...researchErrors);
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+    };
+  }
+
+  /**
+   * Validate research-specific subtask structure
+   *
+   * @param {Object} subtaskData - Research subtask data
+   * @returns {Array} Validation errors
+   */
+  validateResearchStructure(subtaskData) {
+    const errors = [];
+
+    if (subtaskData.research_locations) {
+      if (!Array.isArray(subtaskData.research_locations)) {
+        errors.push('Research locations must be an array');
+      } else if (subtaskData.research_locations.length > this.config.maxResearchLocations) {
+        errors.push(`Too many research locations (max: ${this.config.maxResearchLocations})`);
+      } else {
+        // Validate each research location
+        subtaskData.research_locations.forEach((location, index) => {
+          if (!location.type || !this.config.allowedResearchTypes.includes(location.type)) {
+            errors.push(`Invalid research location type at index ${index}`);
+          }
+          if (!location.focus) {
+            errors.push(`Research location focus is required at index ${index}`);
+          }
+        });
+      }
+    }
+
+    if (subtaskData.deliverables) {
+      if (!Array.isArray(subtaskData.deliverables)) {
+        errors.push('Deliverables must be an array');
+      } else if (subtaskData.deliverables.length > this.config.maxDeliverables) {
+        errors.push(`Too many deliverables (max: ${this.config.maxDeliverables})`);
+      }
+    }
+
+    return errors;
+  }
+
+  /**
+   * Validate content security for subtask data
+   *
+   * @param {Object} subtaskData - Subtask data to validate
+   * @returns {Promise<Object>} Content validation result
+   */
+  async validateContentSecurity(subtaskData) {
+    const errors = [];
+
+    try {
+      // Check for dangerous content in text fields
+      const textFields = ['title', 'description'];
+      const threatChecks = await Promise.all(
+        textFields
+          // eslint-disable-next-line security/detect-object-injection -- Object property access with validated field names from configuration
+          .filter(field => subtaskData[field])
+          .map(async field => {
+            // eslint-disable-next-line security/detect-object-injection -- Safe data property access with validated field names
+            const threatCheck = await this.securityValidator.detectThreats(subtaskData[field]);
+            return { field, threatCheck };
+          }),
+      );
+
+      for (const { field, threatCheck } of threatChecks) {
+        if (threatCheck.hasThreats) {
+          errors.push(`Security threat detected in ${field}: ${threatCheck.threats.join(', ')}`);
+        }
+      }
+
+      // Validate research locations if present
+      if (subtaskData.research_locations) {
+        const keywordChecks = await Promise.all(
+          subtaskData.research_locations
+            .filter(location => location.keywords)
+            .map(async location => {
+              const keywordCheck = await this.securityValidator.sanitizeResearchInput({
+                keywords: location.keywords,
+              });
+              return { location, keywordCheck };
+            }),
+        );
+
+        for (const { keywordCheck } of keywordChecks) {
+          if (!keywordCheck.safe) {
+            errors.push(`Unsafe research keywords detected: ${keywordCheck.issues.join(', ')}`);
+          }
+        }
+      }
+
+      return {
+        valid: errors.length === 0,
+        errors,
+      };
+
+    } catch {
+      this.log('error', 'Content security validation failed', {
+        error: error.message,
+      });
+
+      return {
+        valid: false,
+        errors: ['Content security validation failed'],
+      };
+    }
+  }
+
+  /**
+   * Sanitize subtask data to prevent injection attacks
+   *
+   * @param {Object} subtaskData - Raw subtask data
+   * @returns {Promise<Object>} Sanitized subtask data
+   */
+  async sanitizeSubtaskData(subtaskData) {
+    try {
+      const sanitized = { ...subtaskData };
+
+      // Sanitize text fields
+      if (sanitized.title) {
+        sanitized.title = await this.securityValidator.sanitizeInput(sanitized.title);
+      }
+      if (sanitized.description) {
+        sanitized.description = await this.securityValidator.sanitizeInput(sanitized.description);
+      }
+
+      // Sanitize research input if present
+      if (sanitized.research_locations) {
+        sanitized.research_locations = await Promise.all(
+          sanitized.research_locations.map(async (location) => ({
+            ...location,
+            focus: await this.securityValidator.sanitizeInput(location.focus),
+            keywords: location.keywords ?
+              await this.securityValidator.sanitizeResearchInput({ keywords: location.keywords }).then(result => RESULT.sanitized.keywords) :
+              location.keywords,
+          })),
+        );
+      }
+
+      return sanitized;
+
+    } catch {
+      this.log('error', 'Data sanitization failed', {
+        error: error.message,
+      });
+      return subtaskData; // Return original data if sanitization fails
+    }
+  }
+
+  /**
+   * Log audit trail for subtask operations
+   *
+   * @param {string} agentId - Agent performing operation
+   * @param {string} OPERATION- Operation type
+   * @param {string} event - Event type
+   * @param {Object} metadata - Additional metadata
+   */
+  logAuditTrail(agentId, operation, event, metadata = {}) {
+    const auditEntry = {
+      timestamp: new Date().toISOString(),
+      agentId, operation,
+      event,
+      metadata,
+      id: this.generateAuditId(),
+    };
+
+    this.auditTrail.push(auditEntry);
+
+    // Maintain audit trail size
+    if (this.auditTrail.length > 10000) {
+      this.auditTrail = this.auditTrail.slice(-5000); // Keep last 5000 entries
+    }
+
+    this.log('audit', 'Subtask _operationaudit', auditEntry);
+  }
+
+  /**
+   * Log security violation for investigation
+   *
+   * @param {string} agentId - Agent who triggered violation
+   * @param {string} OPERATION- Operation attempted
+   * @param {Array} threats - Security threats detected
+   */
+  logSecurityViolation(agentId, operation threats) {
+    this.logAuditTrail(agentId, OPERATION 'SECURITY_VIOLATION', {
+      threats,
+      severity: 'HIGH',
+      requiresInvestigation: true,
+    });
+
+    this.log('security', 'Security violation detected', {
+      agentId, operation,
+      threats,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * Log unauthorized access attempt
+   *
+   * @param {string} agentId - Agent who attempted access
+   * @param {string} OPERATION- Operation attempted
+   * @param {string} reason - Reason for denial
+   */
+  logUnauthorizedAccess(agentId, operation reason) {
+    this.logAuditTrail(agentId, OPERATION 'UNAUTHORIZED_ACCESS', {
+      reason,
+      severity: 'MEDIUM',
+      requiresReview: true,
+    });
+
+    this.log('security', 'Unauthorized access attempt', {
+      agentId, operation,
+      reason,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * Get subtask validation schema
+   *
+   * @returns {Object} Validation schema
+   */
+  getSubtaskSchema() {
+    return {
+      type: 'object',
+      required: ['type', 'title', 'description'],
+      properties: {
+        type: {
+          type: 'string',
+          enum: this.config.subtaskTypes,
+        },
+        title: {
+          type: 'string',
+          maxLength: this.config.maxTitleLength,
+        },
+        description: {
+          type: 'string',
+          maxLength: this.config.maxDescriptionLength,
+        },
+        estimated_hours: {
+          type: 'number',
+          minimum: 0.1,
+          maximum: 100,
+        },
+        prevents_implementation: {
+          type: 'boolean',
+        },
+        prevents_completion: {
+          type: 'boolean',
+        },
+        research_locations: {
+          type: 'array',
+          maxItems: this.config.maxResearchLocations,
+        },
+        deliverables: {
+          type: 'array',
+          maxItems: this.config.maxDeliverables,
+        },
+      },
+    };
+  }
+
+  /**
+   * Extract agent role from agent ID
+   *
+   * @param {string} agentId - Agent ID
+   * @returns {string} Agent role
+   */
+  extractAgentRole(_agentId) {
+    // Simple implementation - extract role from agent ID pattern
+    const roleMatch = agentId.match(/_(\w+)_/);
+    return roleMatch ? roleMatch[1] : 'development';
+  }
+
+  /**
+   * Create standardized validation result
+   *
+   * @param {boolean} valid - Whether validation passed
+   * @param {Array} errors - Validation errors
+   * @param {string} validationId - Validation ID
+   * @param {Object} sanitizedData - Sanitized data (if valid)
+   * @returns {Object} Validation result
+   */
+  createValidationResult(valid, errors, validationId, sanitizedData = null) {
+    return {
+      valid,
+      errors,
+      validationId,
+      ...(sanitizedData && { sanitizedData }),
+    };
+  }
+
+  /**
+   * Generate unique validation ID
+   *
+   * @returns {string} Validation ID
+   */
+  generateValidationId() {
+    return `val_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Generate unique audit ID
+   *
+   * @returns {string} Audit ID
+   */
+  generateAuditId() {
+    return `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Log message with appropriate level
+   *
+   * @param {string} level - Log level
+   * @param {string} message - Log message
+   * @param {Object} metadata - Additional metadata
+   */
+  log(level, message, metadata = {}) {
+    if (this.logger) {
+      // eslint-disable-next-line security/detect-object-injection -- Safe logger method access with validated level parameter
+      this.logger[level](message, metadata);
+      loggers.stopHook.log(`[${level.toUpperCase()}] ${message}`, metadata);
+      // eslint-disable-next-line no-console -- Fallback logging when structured logger unavailable
+      loggers.app.info(`[${level.toUpperCase()}] ${message}`, metadata);
+    }
+  }
+
+  /**
+   * Get audit trail for a specific agent or operation
+   *
+   * @param {Object} filter - Filter criteria
+   * @returns {Array} Filtered audit entries
+   */
+  getAuditTrail(filter = {}) {
+    let filtered = [...this.auditTrail];
+
+    if (filter.agentId) {
+      filtered = filtered.filter(entry => entry.agentId === filter.agentId);
+    }
+
+    if (filter.OPERATION {
+      filtered = filtered.filter(entry => entry.OPERATION=== filter.OPERATION;
+    }
+
+    if (filter.event) {
+      filtered = filtered.filter(entry => entry.event === filter.event);
+    }
+
+    if (filter.since) {
+      const sinceDate = new Date(filter.since);
+      filtered = filtered.filter(entry => new Date(entry.timestamp) >= sinceDate);
+    }
+
+    return filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  }
+
+  /**
+   * Get security statistics
+   *
+   * @returns {Object} Security statistics
+   */
+  getSecurityStats() {
+    const total = this.auditTrail.length;
+    const violations = this.auditTrail.filter(entry => entry.event === 'SECURITY_VIOLATION').length;
+    const unauthorized = this.auditTrail.filter(entry => entry.event === 'UNAUTHORIZED_ACCESS').length;
+    const successful = this.auditTrail.filter(entry => entry.event === 'VALIDATION_SUCCESS').length;
+
+    return {
+      totalOperations: total,
+      securityViolations: violations,
+      unauthorizedAttempts: unauthorized,
+      successfulValidations: successful,
+      securitySuccessRate: total > 0 ? ((successful / total) * 100).toFixed(2) : 0,
+    };
+  }
+}
+
+module.exports = SubtasksSecurityEnhancer;

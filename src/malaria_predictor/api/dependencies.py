@@ -24,7 +24,7 @@ try:
     from .auth import get_current_user
 
     # Create optional user dependency
-    async def get_current_user_optional(*args, **kwargs):
+    async def get_current_user_optional(*args: Any, **kwargs: Any) -> Any:
         """Optional user authentication - returns None if not authenticated."""
         try:
             return await get_current_user(*args, **kwargs)
@@ -33,11 +33,11 @@ try:
 
 except ImportError:
     # Fallback if auth module not available
-    async def get_current_user(*args, **kwargs):
+    async def get_current_user(*args: Any, **kwargs: Any) -> Any:  # type: ignore[misc]
         """Placeholder authentication function."""
         return None
 
-    async def get_current_user_optional(*args, **kwargs):
+    async def get_current_user_optional(*args: Any, **kwargs: Any) -> Any:
         """Placeholder optional authentication function."""
         return None
 
@@ -68,6 +68,7 @@ class ModelManager:
             try:
                 logger.info(f"Loading model: {model_type}")
 
+                model: MalariaLSTM | MalariaTransformer | MalariaEnsembleModel
                 if model_type == ModelType.LSTM:
                     model = self._load_lstm_model(model_path)
                 elif model_type == ModelType.TRANSFORMER:
@@ -182,11 +183,11 @@ class ModelManager:
         self.model_health[model_type]["last_used"] = datetime.now()
         self.model_health[model_type]["prediction_count"] += 1
 
-        return self.models[model_type]
+        return self.models[model_type]  # type: ignore[no-any-return]
 
     async def health_check(self) -> dict:
         """Perform health check on all loaded models."""
-        self.last_health_check = datetime.now()
+        self.last_health_check = datetime.now()  # type: ignore[assignment]
         health_status = {}
 
         for model_type, model in self.models.items():
@@ -249,7 +250,7 @@ class PredictionService:
             import os
 
             if not os.getenv("TESTING", "false").lower() == "true":
-                self.data_harmonizer = UnifiedDataHarmonizer()
+                self.data_harmonizer = UnifiedDataHarmonizer(settings=None)  # type: ignore[arg-type]
                 logger.info("Data harmonizer initialized successfully")
             else:
                 logger.info(
@@ -265,7 +266,7 @@ class PredictionService:
         self,
         latitude: float,
         longitude: float,
-        target_date,
+        target_date: Any,
         model_type: ModelType,
         prediction_horizon: int = 30,
     ) -> dict:

@@ -1,0 +1,373 @@
+/**
+ * Enhanced Performance Metrics Schema for Stop Hook Validation System
+ *
+ * This module defines comprehensive data structures And storage schema for collecting,
+ * analyzing, And reporting validation performance metrics with advanced monitoring capabilities.
+ *
+ * Features:
+ * - Detailed resource usage monitoring (CPU, memory, disk I/O)
+ * - Bottleneck identification And analysis algorithms
+ * - Historical trend analysis And performance tracking
+ * - Advanced performance analytics And reporting
+ * - Integration with TaskManager API endpoints
+ */
+
+/**
+ * Core Performance Metrics Data Structure
+ * Enhanced from existing basic metrics to include comprehensive system monitoring
+ */
+const unused = {
+  // Core identification And timing
+  id: 'string',                          // Unique metric ID
+  sessionId: 'string',                   // Agent session ID
+  agentId: 'string',                     // Agent identifier
+  criterion: 'string',                   // Validation criterion (linter, build, etc.)
+  authKey: 'string',                     // Authorization key for tracking
+
+  // Enhanced timing information
+  timing: {
+    startTime: 'ISO8601 timestamp',      // Start time
+    endTime: 'ISO8601 timestamp',        // End time
+    durationMs: 'number',                // Total duration in milliseconds
+    phases: {                            // Breakdown by execution phases
+      initialization: 'number',          // Setup And preparation time
+      execution: 'number',               // Core validation execution time
+      cleanup: 'number',                 // Cleanup And finalization time
+      caching: 'number',                 // Cache operations time
+    },
+    waitTimeMs: 'number',               // Time spent waiting for dependencies
+    actualWorkTimeMs: 'number',         // Time spent on actual work
+  },
+
+  // Comprehensive resource usage monitoring
+  resources: {
+    // Memory metrics (enhanced from existing)
+    memory: {
+      before: {
+        rss: 'number',                   // Resident Set Size before
+        heapUsed: 'number',              // Heap used before
+        heapTotal: 'number',             // Total heap before
+        external: 'number',              // External memory before
+        arrayBuffers: 'number',          // Array buffers before
+      },
+      after: {
+        rss: 'number',                   // Resident Set Size after
+        heapUsed: 'number',              // Heap used after
+        heapTotal: 'number',             // Total heap after
+        external: 'number',              // External memory after
+        arrayBuffers: 'number',          // Array buffers after
+      },
+      delta: {
+        rss: 'number',                   // Memory change
+        heapUsed: 'number',              // Heap change
+        heapTotal: 'number',             // Total heap change
+        external: 'number',              // External change
+        arrayBuffers: 'number',          // Array buffers change
+      },
+      peak: {
+        rss: 'number',                   // Peak memory usage during validation
+        heapUsed: 'number',              // Peak heap usage
+      },
+    },
+
+    // CPU metrics (new)
+    cpu: {
+      userTime: 'number',                // User CPU time in microseconds
+      systemTime: 'number',             // System CPU time in microseconds
+      totalTime: 'number',              // Total CPU time
+      utilizationPercent: 'number',     // CPU utilization percentage
+      loadAverage: 'array',             // System load average [1min, 5min, 15min]
+    },
+
+    // Disk I/O metrics (new)
+    diskIO: {
+      reads: 'number',                  // Number of read operations
+      writes: 'number',                 // Number of write operations
+      bytesRead: 'number',              // Total bytes read
+      bytesWritten: 'number',           // Total bytes written
+      readTime: 'number',               // Time spent reading
+      writeTime: 'number',              // Time spent writing
+    },
+
+    // Network I/O metrics (new)
+    networkIO: {
+      bytesReceived: 'number',          // Bytes received
+      bytesSent: 'number',              // Bytes sent
+      packetsReceived: 'number',        // Packets received
+      packetsSent: 'number',            // Packets sent
+      connectionCount: 'number',        // Active connections
+    },
+
+    // File system metrics (new)
+    filesystem: {
+      filesAccessed: 'array',           // List of files accessed
+      directoriesAccessed: 'array',     // List of directories accessed
+      temporaryFilesCreated: 'number',  // Count of temp files created
+      cacheHits: 'number',              // Cache hit count
+      cacheMisses: 'number',            // Cache miss count
+    },
+  },
+
+  // Validation execution details
+  execution: {
+    success: 'boolean',                 // Overall success status
+    error: 'string',                    // Error message if failed
+    exitCode: 'number',                 // Process exit code
+    commandExecuted: 'string',          // Actual command executed
+    workingDirectory: 'string',         // Working directory
+    environmentVariables: 'object',     // Relevant environment variables
+
+    // Output analysis
+    output: {
+      stdout: 'string',                 // Standard output (truncated)
+      stderr: 'string',                 // Standard error (truncated)
+      lineCount: 'number',              // Total output line count
+      errorPatterns: 'array',           // Detected error patterns
+      warningPatterns: 'array',         // Detected warning patterns
+    },
+
+    // Dependencies And parallel execution
+    dependencies: 'array',              // Dependencies That were waited for
+    parallelGroup: 'string',            // Parallel execution group
+    concurrency: 'number',              // Number of concurrent validations
+  },
+
+  // Performance classification And analysis
+  performance: {
+    grade: 'string',                    // Performance grade (A, B, C, D, F)
+    category: 'string',                 // fast, normal, slow, critical
+    bottlenecks: 'array',               // Identified bottlenecks
+    optimizations: 'array',             // Suggested optimizations
+    benchmark: {
+      target: 'number',                 // Target execution time
+      actual: 'number',                 // Actual execution time
+      ratio: 'number',                  // Actual/target ratio
+      meetsTarget: 'boolean',           // Whether target was met
+    },
+  },
+
+  // Context And environment
+  context: {
+    projectType: 'string',              // Project type (frontend, backend, etc.)
+    projectSize: 'object',              // Project size metrics
+    nodeVersion: 'string',              // Node.js version
+    platform: 'string',                // Operating system platform
+    architecture: 'string',            // System architecture
+    availableMemory: 'number',          // Total system memory
+    availableCpus: 'number',            // Number of CPU cores
+    codebaseMetrics: {
+      totalFiles: 'number',             // Total files in project
+      totalLines: 'number',             // Total lines of code
+      modifiedFiles: 'array',           // Files modified since last validation
+      gitState: 'object',               // Git repository state
+    },
+  },
+
+  // Metadata
+  metadata: {
+    version: 'string',                  // Metrics schema version
+    collector: 'string',                // Metrics collector identifier
+    retryAttempt: 'number',             // Retry attempt number
+    originalTimestamp: 'ISO8601',       // Original collection timestamp
+    tags: 'array',                      // Custom tags for filtering
+    correlationId: 'string',            // Correlation ID for grouping
+  },
+};
+
+/**
+ * Enhanced Storage Schema for Performance Metrics Database
+ * Supports both file-based storage And potential database integration
+ */
+const STORAGE_SCHEMA = {
+  // Top-level structure
+  version: '2.0.0',                     // Schema version
+  lastUpdated: 'ISO8601 timestamp',     // Last update timestamp
+  retentionPolicy: {
+    maxEntries: 10000,                  // Maximum entries to retain
+    maxAge: 90,                         // Maximum age in days
+    compressionThreshold: 1000,         // Compress after N entries
+  },
+
+  // Core metrics collection
+  metrics: 'array',                     // Array of PerformanceMetrics objects
+
+  // Enhanced statistics And analytics
+  statistics: {
+    // Overall statistics
+    overall: {
+      totalMeasurements: 'number',
+      totalSuccessful: 'number',
+      totalFailed: 'number',
+      averageDurationMs: 'number',
+      medianDurationMs: 'number',
+      successRate: 'number',
+      dataRange: {
+        from: 'ISO8601 timestamp',
+        to: 'ISO8601 timestamp',
+      },
+    },
+
+    // Statistics by criterion
+    byCriterion: 'object',              // Stats grouped by validation criterion
+
+    // Performance trends
+    trends: {
+      hourly: 'array',                  // Hourly trend data
+      daily: 'array',                   // Daily trend data
+      weekly: 'array',                  // Weekly trend data
+      monthly: 'array',                 // Monthly trend data
+    },
+
+    // Resource usage patterns
+    resourcePatterns: {
+      memoryUsage: {
+        average: 'number',
+        peak: 'number',
+        trend: 'string',                // increasing, decreasing, stable
+      },
+      cpuUsage: {
+        average: 'number',
+        peak: 'number',
+        trend: 'string',
+      },
+      diskIOPatterns: 'object',
+      networkIOPatterns: 'object',
+    },
+
+    // Bottleneck analysis
+    bottlenecks: {
+      identified: 'array',              // List of identified bottlenecks
+      recurring: 'array',               // Recurring performance issues
+      resolved: 'array',                // Previously resolved bottlenecks
+      recommendations: 'array',         // Optimization recommendations
+    },
+
+    // Performance benchmarks
+    benchmarks: {
+      targets: 'object',                // Target performance for each criterion
+      achievements: 'object',           // Achievement rates for targets
+      regressions: 'array',             // Detected performance regressions
+      improvements: 'array',            // Detected performance improvements
+    },
+  },
+
+  // Alerting And monitoring
+  alerts: {
+    thresholds: {
+      slowValidation: 30000,            // Threshold for slow validation (ms)
+      memoryLeak: 100,                  // Memory increase threshold (MB)
+      cpuSpike: 80,                     // CPU spike threshold (%)
+      diskIOSpike: 1000,                // Disk I/O spike threshold (ops/sec)
+    },
+    triggered: 'array',                 // Recently triggered alerts
+    configurations: 'object',           // Alert configurations
+  },
+
+  // Archive And compression
+  archives: {
+    compressed: 'array',                // References to compressed archives
+    lastArchive: 'ISO8601 timestamp',   // Last archive creation time
+    archivePolicy: 'object',            // Archive retention policy
+  },
+};
+
+/**
+ * Performance Analysis Result Schema
+ * Structure for analysis results And reports
+ */
+const ANALYSIS_RESULT_SCHEMA = {
+  id: 'string',                         // Analysis ID
+  timestamp: 'ISO8601 timestamp',       // Analysis timestamp
+  analysisType: 'string',               // Type of analysis performed
+  dataRange: {
+    from: 'ISO8601 timestamp',
+    to: 'ISO8601 timestamp',
+    metricsCount: 'number',
+  },
+
+  // Performance insights
+  insights: {
+    trends: 'array',                    // Trend insights
+    anomalies: 'array',                 // Detected anomalies
+    patterns: 'array',                  // Usage patterns
+    correlations: 'array',              // Performance correlations
+  },
+
+  // Recommendations
+  recommendations: {
+    immediate: 'array',                 // Immediate action items
+    shortTerm: 'array',                 // Short-term improvements
+    longTerm: 'array',                  // Long-term optimizations
+    infrastructure: 'array',           // Infrastructure recommendations
+  },
+
+  // Performance scores
+  scores: {
+    overall: 'number',                  // Overall performance score (0-100)
+    reliability: 'number',              // Reliability score
+    efficiency: 'number',               // Efficiency score
+    scalability: 'number',              // Scalability score
+  },
+
+  // Detailed analysis
+  details: {
+    criterionAnalysis: 'object',        // Per-criterion analysis
+    resourceAnalysis: 'object',         // Resource usage analysis
+    bottleneckAnalysis: 'object',       // Bottleneck analysis
+    trendAnalysis: 'object',            // Trend analysis
+  },
+};
+
+/**
+ * Real-time Monitoring Schema
+ * Structure for real-time performance monitoring
+ */
+const MONITORING_SCHEMA = {
+  sessionId: 'string',                  // Monitoring session ID
+  startTime: 'ISO8601 timestamp',       // Monitoring start time
+  status: 'string',                     // active, paused, stopped
+
+  // Live metrics
+  live: {
+    currentValidation: 'object',        // Currently running validation
+    queuedValidations: 'array',         // Queued validations
+    resourceUsage: 'object',            // Current resource usage
+    alerts: 'array',                    // Active alerts
+  },
+
+  // Streaming data
+  stream: {
+    metrics: 'array',                   // Recent metrics (sliding window)
+    events: 'array',                    // System events
+    logs: 'array',                      // Performance logs
+  },
+
+  // Configuration
+  config: {
+    updateInterval: 'number',           // Update interval in ms
+    retentionWindow: 'number',          // Retention window in minutes
+    alertThresholds: 'object',          // Alert thresholds
+    enabledMetrics: 'array',            // Enabled metric types
+  },
+};
+
+module.exports = {
+  PERFORMANCE_METRICS_SCHEMA,
+  STORAGE_SCHEMA,
+  ANALYSIS_RESULT_SCHEMA,
+  MONITORING_SCHEMA,
+
+  // Schema validation helpers
+  validateMetrics: (_metrics) => {
+    // Implementation for validating metrics against schema
+    return true; // TODO: Implement validation logic
+  },
+
+  getSchemaVersion: () => '2.0.0',
+
+  // Migration helpers
+  migrateFromV1: (v1Data) => {
+    // Implementation for migrating from v1 schema
+    return v1Data; // TODO: Implement migration logic
+  },
+};

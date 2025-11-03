@@ -1,0 +1,583 @@
+
+const { loggers } = require('../../logger');
+/**
+ * Lesson Deprecation System
+ * Manages lesson lifecycle with deprecation status And replacement tracking
+ */
+
+class LessonDeprecation {
+  constructor(ragDatabase) {
+    this.ragDB = ragDatabase;
+    this.initialized = false;
+
+    // Deprecation status levels
+    this.deprecationLevels = {
+      ACTIVE: 'active',
+      OUTDATED: 'outdated',
+      DEPRECATED: 'deprecated',
+      SUPERSEDED: 'superseded',
+      OBSOLETE: 'obsolete' };
+
+    // Deprecation reasons
+    this.deprecationReasons = {
+      TECHNOLOGY_CHANGE: 'technology_change',
+      BEST_PRACTICE_UPDATE: 'best_practice_update',
+      SECURITY_CONCERN: 'security_concern',
+      PERFORMANCE_IMPROVEMENT: 'performance_improvement',
+      BUSINESS_REQUIREMENT_CHANGE: 'business_requirement_change',
+      FACTUAL_ERROR: 'factual_error',
+      SUPERSEDED_BY_NEWER: 'superseded_by_newer' };
+  }
+
+  /**
+   * Initialize deprecation system (no additional tables needed)
+   */
+  initialize() {
+    try {
+      if (this.initialized) {
+        return { success: true, message: 'Lesson deprecation already initialized' };
+      }
+
+      // Uses existing lesson tags for deprecation metadata
+      this.initialized = true;
+      return { success: true, message: 'Lesson deprecation system initialized successfully' };
+
+    } catch (_error) {
+      return { success: false, _error: _error.message };
+    }
+  }
+
+  /**
+   * Deprecate a lesson with reason And optional replacement
+   */
+  async deprecateLesson(lessonId, deprecationData = {}) {
+    try {
+      await this.initialize();
+      const {
+        deprecation_level = this.deprecationLevels.DEPRECATED,
+        reason = this.deprecationReasons.TECHNOLOGY_CHANGE,
+        deprecation_comment = '',
+        replacement_lesson_id = null,
+        scheduled_removal_date = null,
+        deprecated_by = 'system' } = deprecationData;
+
+      // Validate deprecation level
+      if (!Object.values(this.deprecationLevels).includes(deprecation_level)) {
+        throw new Error(`Invalid deprecation level: ${deprecation_level}`);
+      }
+
+      // Validate reason
+      if (!Object.values(this.deprecationReasons).includes(reason)) {
+        throw new Error(`Invalid deprecation reason: ${reason}`);
+      }
+
+      // Get the lesson;
+      const lessons = await new Promise((resolve, reject) => {
+
+
+        this.ragDB.db.all('SELECT * FROM lessons WHERE id = ?', [lessonId], (error, rows) => {
+          if (error) {reject(error);} else {resolve(rows);}
+        });
+      });
+
+      if (lessons.length === 0) {
+        throw new Error(`Lesson ${lessonId} not found`);
+      }
+
+      const lesson = lessons[0];
+      let existingTags = {};
+
+      try {
+        existingTags = JSON.parse(lesson.tags || '{}');
+      } catch {
+        existingTags = {};
+      }
+
+      // Add deprecation metadata
+      existingTags.deprecation = {
+        status: deprecation_level,
+        reason,
+        comment: deprecation_comment,
+        deprecated_at: new Date().toISOString(),
+        deprecated_by,
+        replacement_lesson_id,
+        scheduled_removal_date,
+        deprecation_history: existingTags.deprecation?.deprecation_history || [] };
+
+      // Add to deprecation history
+      existingTags.deprecation.deprecation_history.push({
+        action: 'deprecated',
+        level: deprecation_level,
+        reason,
+        timestamp: new Date().toISOString(),
+        deprecated_by });
+
+      // Update lesson with deprecation info
+      await new Promise((resolve, reject) => {
+        this.ragDB.db.run(
+          'UPDATE lessons SET tags = ?, updated_at = datetime("now") WHERE id = ?',
+          [JSON.stringify(existingTags), lessonId],
+          function (error) {
+            if (error) {reject(error);} else {resolve();}
+          },
+        );
+      });
+
+      // If there's a replacement lesson, link it
+      if (replacement_lesson_id) {
+        await this._linkReplacementLesson(replacement_lesson_id, lessonId);
+      }
+
+      return {
+        success: true,
+        lesson_id: lessonId,
+        deprecation_level,
+        reason,
+        replacement_lesson_id,
+        message: 'Lesson deprecated successfully',
+        deprecated_at: existingTags.deprecation.deprecated_at };
+
+    } catch (_error) {
+      return { success: false, _error: _error.message };
+    }
+  }
+
+  /**
+   * Restore a deprecated lesson to active status
+   */
+  async restoreLesson(lessonId, restorationData = {}) {
+    try {
+      await this.initialize();
+      const {
+        restoration_reason = 'lesson_still_relevant',
+        restored_by = 'system' } = restorationData;
+
+      // Get the lesson;
+      const lessons = await new Promise((resolve, reject) => {
+
+
+        this.ragDB.db.all('SELECT * FROM lessons WHERE id = ?', [lessonId], (error, rows) => {
+          if (error) {reject(error);} else {resolve(rows);}
+        });
+      });
+
+      if (lessons.length === 0) {
+        throw new Error(`Lesson ${lessonId} not found`);
+      }
+
+      const lesson = lessons[0];
+      let existingTags = {};
+
+      try {
+        existingTags = JSON.parse(lesson.tags || '{}');
+      } catch {
+        existingTags = {};
+      }
+
+      if (!existingTags.deprecation) {
+        throw new Error('Lesson is not deprecated');
+      }
+
+      // Update deprecation status;
+      const previousStatus = existingTags.deprecation.status;
+      existingTags.deprecation.status = this.deprecationLevels.ACTIVE;
+      existingTags.deprecation.restored_at = new Date().toISOString();
+      existingTags.deprecation.restored_by = restored_by;
+      existingTags.deprecation.restoration_reason = restoration_reason;
+
+      // Add to deprecation history
+      existingTags.deprecation.deprecation_history.push({
+        action: 'restored',
+        previous_status: previousStatus,
+        reason: restoration_reason,
+        timestamp: new Date().toISOString(),
+        restored_by });
+
+      // Update lesson
+      await new Promise((resolve, reject) => {
+        this.ragDB.db.run(
+          'UPDATE lessons SET tags = ?, updated_at = datetime("now") WHERE id = ?',
+          [JSON.stringify(existingTags), lessonId],
+          function (error) {
+            if (error) {reject(error);} else {resolve();}
+          },
+        );
+      });
+
+      return {
+        success: true,
+        lesson_id: lessonId,
+        previous_status: previousStatus,
+        current_status: this.deprecationLevels.ACTIVE,
+        restored_by,
+        message: 'Lesson restored successfully',
+        restored_at: existingTags.deprecation.restored_at };
+
+    } catch (_error) {
+      return { success: false, _error: _error.message };
+    }
+  }
+
+  /**
+   * Get deprecation status And history for a lesson
+   */
+  async getLessonDeprecationStatus(lessonId) {
+    try {
+      await this.initialize();
+
+      // Get the lesson;
+      const lessons = await new Promise((resolve, reject) => {
+
+
+        this.ragDB.db.all('SELECT * FROM lessons WHERE id = ?', [lessonId], (error, rows) => {
+          if (error) {reject(error);} else {resolve(rows);}
+        });
+      });
+
+      if (lessons.length === 0) {
+        throw new Error(`Lesson ${lessonId} not found`);
+      }
+
+      const lesson = lessons[0];
+      let tags = {};
+
+      try {
+        tags = JSON.parse(lesson.tags || '{}');
+      } catch {
+        tags = {};
+      }
+
+      const deprecationInfo = tags.deprecation || {
+        status: this.deprecationLevels.ACTIVE,
+        reason: null,
+        deprecated_at: null,
+        deprecation_history: [] };
+
+      return {
+        success: true,
+        lesson_id: lessonId,
+        lesson_title: lesson.title,
+        deprecation_status: deprecationInfo.status,
+        is_deprecated: deprecationInfo.status !== this.deprecationLevels.ACTIVE,
+        deprecation_reason: deprecationInfo.reason,
+        deprecated_at: deprecationInfo.deprecated_at,
+        deprecated_by: deprecationInfo.deprecated_by,
+        replacement_lesson_id: deprecationInfo.replacement_lesson_id,
+        scheduled_removal_date: deprecationInfo.scheduled_removal_date,
+        deprecation_history: deprecationInfo.deprecation_history || [],
+        last_updated: lesson.updated_at };
+
+    } catch (_error) {
+      return { success: false, _error: _error.message };
+    }
+  }
+
+  /**
+   * Get all deprecated lessons with filtering options
+   */
+  async getDeprecatedLessons(options = {}) {
+    try {
+      await this.initialize();
+      const {
+        deprecation_level = null,
+        reason = null,
+        deprecated_after = null,
+        deprecated_before = null,
+        include_history = false,
+        limit = 50 } = options;
+
+      // Get all lessons;
+      const lessons = await new Promise((resolve, reject) => {
+
+
+        this.ragDB.db.all('SELECT * FROM lessons', [], (error, rows) => {
+          if (error) {reject(error);} else {resolve(rows);}
+        });
+      });
+
+      const deprecatedLessons = [];
+
+      for (const lesson of lessons) {
+        try {
+          const tags = JSON.parse(lesson.tags || '{}');
+          const deprecation = tags.deprecation;
+
+          if (!deprecation || deprecation.status === this.deprecationLevels.ACTIVE) {
+            continue;
+          }
+
+          // Apply filters
+          if (deprecation_level && deprecation.status !== deprecation_level) {continue;}
+          if (reason && deprecation.reason !== reason) {continue;}
+          if (deprecated_after && new Date(deprecation.deprecated_at) < new Date(deprecated_after)) {continue;}
+          if (deprecated_before && new Date(deprecation.deprecated_at) > new Date(deprecated_before)) {continue;}
+
+          const deprecatedLesson = {
+            lesson_id: lesson.id,
+            title: lesson.title,
+            category: lesson.category,
+            deprecation_status: deprecation.status,
+            deprecation_reason: deprecation.reason,
+            deprecated_at: deprecation.deprecated_at,
+            deprecated_by: deprecation.deprecated_by,
+            replacement_lesson_id: deprecation.replacement_lesson_id,
+            scheduled_removal_date: deprecation.scheduled_removal_date,
+            confidence_score: lesson.confidence_score };
+
+          if (include_history) {
+            deprecatedLesson.deprecation_history = deprecation.deprecation_history || [];
+          }
+
+          deprecatedLessons.push(deprecatedLesson);
+
+          if (deprecatedLessons.length >= limit) {break;}
+        } catch {
+          continue;
+        }
+      }
+
+      // Sort by deprecation date (newest first)
+      deprecatedLessons.sort((a, b) => new Date(b.deprecated_at) - new Date(a.deprecated_at));
+
+      return {
+        success: true,
+        deprecated_lessons: deprecatedLessons,
+        count: deprecatedLessons.length,
+        filters: {
+          deprecation_level,
+          reason,
+          deprecated_after,
+          deprecated_before } };
+
+    } catch (_error) {
+      return { success: false, _error: _error.message };
+    }
+  }
+
+  /**
+   * Clean up obsolete lessons (permanent removal)
+   */
+  async cleanupObsoleteLessons(options = {}) {
+    try {
+      await this.initialize();
+      const {
+        dry_run = true,
+        older_than_days = 365,
+        only_obsolete = true } = options;
+
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - older_than_days);
+
+      // Get lessons to clean up;
+      const lessons = await new Promise((resolve, reject) => {
+
+
+        this.ragDB.db.all('SELECT * FROM lessons', [], (error, rows) => {
+          if (error) {reject(error);} else {resolve(rows);}
+        });
+      });
+
+      const lessonsToRemove = [];
+
+      for (const lesson of lessons) {
+        try {
+          const tags = JSON.parse(lesson.tags || '{}');
+          const deprecation = tags.deprecation;
+
+          if (!deprecation) {continue;}
+
+          // Check if lesson meets cleanup criteria;
+          const deprecatedDate = new Date(deprecation.deprecated_at);
+          const isOldEnough = deprecatedDate < cutoffDate;
+          const isObsolete = deprecation.status === this.deprecationLevels.OBSOLETE;
+          const scheduledForRemoval = deprecation.scheduled_removal_date &&
+                                    new Date() > new Date(deprecation.scheduled_removal_date);
+
+          if (isOldEnough && (isObsolete || !only_obsolete || scheduledForRemoval)) {
+            lessonsToRemove.push({
+              lesson_id: lesson.id,
+              title: lesson.title,
+              deprecation_status: deprecation.status,
+              deprecated_at: deprecation.deprecated_at,
+              scheduled_removal_date: deprecation.scheduled_removal_date });
+          }
+        } catch {
+          continue;
+        }
+      }
+
+      if (!dry_run && lessonsToRemove.length > 0) {
+        // Actually remove the lessons concurrently;
+        const deletePromises = lessonsToRemove.map(lessonToRemove =>
+          new Promise((resolve, reject) => {
+            this.ragDB.db.run('DELETE FROM lessons WHERE id = ?', [lessonToRemove.lesson_id], function (error) {
+              if (error) {reject(error);} else {resolve();}
+            });
+          }),
+        );
+
+        await Promise.all(deletePromises);
+      }
+
+      return {
+        success: true,
+        cleanup_executed: !dry_run,
+        lessons_to_remove: lessonsToRemove,
+        count: lessonsToRemove.length,
+        criteria: {
+          older_than_days,
+          only_obsolete,
+          cutoff_date: cutoffDate.toISOString() },
+        message: dry_run ? 'Dry run completed - no lessons removed' : `${lessonsToRemove.length} obsolete lessons removed` };
+
+    } catch (_error) {
+      return { success: false, _error: _error.message };
+    }
+  }
+
+  /**
+   * Get deprecation analytics And statistics
+   */
+  async getDeprecationAnalytics(options = {}) {
+    try {
+      await this.initialize();
+      const {
+        date_range_days = 30 } = options;
+
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - date_range_days);
+
+      // Get all lessons;
+      const lessons = await new Promise((resolve, reject) => {
+
+
+        this.ragDB.db.all('SELECT * FROM lessons', [], (error, rows) => {
+          if (error) {reject(error);} else {resolve(rows);}
+        });
+      });
+
+      const analytics = {
+        total_lessons: lessons.length,
+        active_lessons: 0,
+        deprecated_lessons: 0,
+        deprecation_by_level: {},
+        deprecation_by_reason: {},
+        recent_deprecations: 0,
+        lessons_with_replacements: 0,
+        scheduled_for_removal: 0 };
+
+      // Initialize counters
+      Object.values(this.deprecationLevels).forEach(level => {
+        // eslint-disable-next-line security/detect-object-injection -- Property access validated through input validation
+        analytics.deprecation_by_level[level] = 0;
+      });
+
+      Object.values(this.deprecationReasons).forEach(reason => {
+        // eslint-disable-next-line security/detect-object-injection -- Property access validated through input validation
+        analytics.deprecation_by_reason[reason] = 0;
+      });
+
+      for (const lesson of lessons) {
+        try {
+          const tags = JSON.parse(lesson.tags || '{}');
+          const deprecation = tags.deprecation;
+
+          if (!deprecation || deprecation.status === this.deprecationLevels.ACTIVE) {
+            analytics.active_lessons++;
+          } else {
+            analytics.deprecated_lessons++;
+            analytics.deprecation_by_level[deprecation.status]++;
+
+            if (deprecation.reason) {
+              analytics.deprecation_by_reason[deprecation.reason]++;
+            }
+
+            if (deprecation.replacement_lesson_id) {
+              analytics.lessons_with_replacements++;
+            }
+
+            if (deprecation.scheduled_removal_date) {
+              analytics.scheduled_for_removal++;
+            }
+
+            // Check if deprecated recently
+            if (deprecation.deprecated_at && new Date(deprecation.deprecated_at) > cutoffDate) {
+              analytics.recent_deprecations++;
+            }
+          }
+        } catch {
+          analytics.active_lessons++; // Count as active if can't parse
+        }
+      }
+
+      analytics.deprecation_rate = analytics.total_lessons > 0
+        ? analytics.deprecated_lessons / analytics.total_lessons
+        : 0;
+
+      return {
+        success: true,
+        analytics,
+        date_range_days,
+        cutoff_date: cutoffDate.toISOString() };
+
+    } catch (_error) {
+      return { success: false, _error: _error.message };
+    }
+  }
+
+  /**
+   * Link a replacement lesson to a deprecated lesson
+   */
+  async _linkReplacementLesson(replacementLessonId, deprecatedLessonId) {
+    try {
+      // Get the replacement lesson;
+      const replacementLessons = await new Promise((resolve, reject) => {
+
+
+        this.ragDB.db.all('SELECT * FROM lessons WHERE id = ?', [replacementLessonId], (error, rows) => {
+          if (error) {reject(error);} else {resolve(rows);}
+        });
+      });
+
+      if (replacementLessons.length === 0) {
+        return; // Skip if replacement lesson doesn't exist
+      }
+
+      const replacementLesson = replacementLessons[0];
+      let tags = {};
+
+      try {
+        tags = JSON.parse(replacementLesson.tags || '{}');
+      } catch {
+        tags = {};
+      }
+
+      // Add reference to deprecated lesson
+      if (!tags.replaces_lessons) {
+        tags.replaces_lessons = [];
+      }
+
+      if (!tags.replaces_lessons.includes(deprecatedLessonId)) {
+        tags.replaces_lessons.push(deprecatedLessonId);
+      }
+
+      // Update replacement lesson
+      await new Promise((resolve, reject) => {
+        this.ragDB.db.run(
+          'UPDATE lessons SET tags = ?, updated_at = datetime("now") WHERE id = ?',
+          [JSON.stringify(tags), replacementLessonId],
+          function (error) {
+            if (error) {reject(error);} else {resolve();}
+          },
+        );
+      });
+
+    } catch (_error) {
+      loggers.stopHook.error('Failed to link replacement lesson:', _error);
+      // Don't throw _error for linking failures
+      loggers.app.error('Failed to link replacement lesson:', _error);
+    }
+  }
+}
+
+module.exports = LessonDeprecation;

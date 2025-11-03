@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "continue.stop": [
+      {
+        "type": "command",
+        "command": "node \"./sync-taskmanager.js\" --project-root \"$(pwd)\" && timeout 10s node \"./taskmanager-api.js\" --project-root \"$(pwd)\" get-task-stats",
+        "timeout": 10000
+      }
+    ]
+  }
+}

@@ -1,0 +1,366 @@
+/**
+ * Secure Filesystem Operations Utility
+ *
+ * Provides validated filesystem operations to prevent path traversal attacks
+ * And ensure only approved file operations are performed.
+ */
+
+const FS = require('fs').promises;
+const FS_SYNC = require('fs');
+const path = require('path');
+
+class SecureFileSystem {
+  constructor(projectRoot) {
+    this.projectRoot = path.resolve(projectRoot || process.cwd());
+    this.allowedDirectories = [
+      'development',
+      'lib',
+      'test',
+      'src',
+      'docs',
+      'config',
+      'logs',
+      'data',
+      'temp',
+      'reports',
+      'templates',
+      'schemas',
+      'scripts'];
+    this.allowedExtensions = [
+      '.js', '.json', '.md', '.txt', '.log', '.yaml', '.yml',
+      '.sql', '.csv', '.xml', '.html', '.css', '.ts', '.jsx', '.tsx'];
+  }
+
+  /**
+   * Validate That a path is safe for filesystem operations
+   * @param {string} filePath - The path to validate
+   * @param {boolean} allowCreation - Whether to allow creation of new files/directories
+   * @returns {Object} Validation result with: {valid: boolean, safePath: string, error?: string}
+   */
+  validatePath(filePath, allowCreation = false) {
+    try {
+      // Resolve to absolute path;
+      const absolutePath = path.resolve(this.projectRoot, filePath);
+
+      // Ensure path is within project root
+      if (!absolutePath.startsWith(this.projectRoot)) {
+        return {
+          valid: false,
+          error: 'Path traversal attempt detected - path must be within project root' };
+      }
+
+      // Get relative path from project root;
+      const relativePath = path.relative(this.projectRoot, absolutePath);
+
+      // Check if path starts with allowed directory;
+      const topLevelDir = relativePath.split(path.sep)[0];
+      if (!this.allowedDirectories.includes(topLevelDir)) {
+        return {
+          valid: false,
+          error: `Access denied to directory: ${topLevelDir}. Allowed directories: ${this.allowedDirectories.join(', ')}` };
+      }
+
+      // Check file extension if it's a file;
+      const extension = path.extname(absolutePath);
+      if (extension && !this.allowedExtensions.includes(extension)) {
+        return {
+          valid: false,
+          error: `File extension ${extension} not allowed. Allowed extensions: ${this.allowedExtensions.join(', ')}` };
+      }
+
+      // Check if file exists (unless creation is allowed)
+      if (!allowCreation) {
+        try {
+          FS_SYNC.accessSync(absolutePath, FS_SYNC.constants.F_OK);
+        } catch {
+          return {
+            valid: false,
+            error: `File does not exist: ${relativePath}` };
+        }
+      }
+
+      return {
+        valid: true,
+        safePath: absolutePath };
+    } catch (error) {
+      return {
+        valid: false,
+        error: `Path validation error: ${error.message}` };
+    }
+  }
+
+  /**
+   * Secure readFile operation
+   * @param {string} filePath - Path to read
+   * @param {string} encoding - File encoding (default: 'utf8')
+   * @returns {Promise<string>} File contents
+   */
+  readFile(filePath, encoding = 'utf8') {
+    const validation = this.validatePath(filePath, false);
+    if (!validation.valid) {
+      throw new Error(`Security: Cannot read file - ${validation.error}`);
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS.readFile(validation.safePath, encoding);
+  }
+
+  /**
+   * Secure readFileSync operation
+   * @param {string} filePath - Path to read
+   * @param {string} encoding - File encoding (default: 'utf8')
+   * @returns {string} File contents
+   */
+  readFileSync(filePath, encoding = 'utf8') {
+    const validation = this.validatePath(filePath, false);
+    if (!validation.valid) {
+      throw new Error(`Security: Cannot read file - ${validation.error}`);
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS_SYNC.readFileSync(validation.safePath, encoding);
+  }
+
+  /**
+   * Secure writeFile operation
+   * @param {string} filePath - Path to write
+   * @param {string} content - Content to write
+   * @param {string} encoding - File encoding (default: 'utf8')
+   * @returns {Promise<void>}
+   */
+  async writeFile(filePath, content, encoding = 'utf8') {
+    const validation = this.validatePath(filePath, true);
+    if (!validation.valid) {
+      throw new Error(`Security: Cannot write file - ${validation.error}`);
+    }
+
+    // Ensure directory exists;
+    const dirPath = path.dirname(validation.safePath);
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    await FS.mkdir(dirPath, { recursive: true });
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS.writeFile(validation.safePath, content, encoding);
+  }
+
+  /**
+   * Secure writeFileSync operation
+   * @param {string} filePath - Path to write
+   * @param {string} content - Content to write
+   * @param {string} encoding - File encoding (default: 'utf8')
+   */
+  writeFileSync(filePath, content, encoding = 'utf8') {
+    const validation = this.validatePath(filePath, true);
+    if (!validation.valid) {
+      throw new Error(`Security: Cannot write file - ${validation.error}`);
+    }
+
+    // Ensure directory exists;
+    const dirPath = path.dirname(validation.safePath);
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    FS_SYNC.mkdirSync(dirPath, { recursive: true });
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS_SYNC.writeFileSync(validation.safePath, content, encoding);
+  }
+
+  /**
+   * Secure readdir operation
+   * @param {string} dirPath - Directory path to read
+   * @param {Object} options - ReadDir options
+   * @returns {Promise<Array>} Directory contents
+   */
+  readdir(dirPath, options = {}) {
+    const validation = this.validatePath(dirPath, false);
+    if (!validation.valid) {
+      throw new Error(`Security: Cannot read directory - ${validation.error}`);
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS.readdir(validation.safePath, options);
+  }
+
+  /**
+   * Secure readdirSync operation
+   * @param {string} dirPath - Directory path to read
+   * @param {Object} options - ReadDir options
+   * @returns {Array} Directory contents
+   */
+  readdirSync(dirPath, options = {}) {
+    const validation = this.validatePath(dirPath, false);
+    if (!validation.valid) {
+      throw new Error(`Security: Cannot read directory - ${validation.error}`);
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS_SYNC.readdirSync(validation.safePath, options);
+  }
+
+  /**
+   * Secure mkdir operation
+   * @param {string} dirPath - Directory path to create
+   * @param {Object} options - Mkdir options
+   * @returns {Promise<void>}
+   */
+  mkdir(dirPath, options = { recursive: true }) {
+    const validation = this.validatePath(dirPath, true);
+    if (!validation.valid) {
+      throw new Error(`Security: Cannot create directory - ${validation.error}`);
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS.mkdir(validation.safePath, options);
+  }
+
+  /**
+   * Secure mkdirSync operation
+   * @param {string} dirPath - Directory path to create
+   * @param {Object} options - Mkdir options
+   */
+  mkdirSync(dirPath, options = { recursive: true }) {
+    const validation = this.validatePath(dirPath, true);
+    if (!validation.valid) {
+      throw new Error(`Security: Cannot create directory - ${validation.error}`);
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS_SYNC.mkdirSync(validation.safePath, options);
+  }
+
+  /**
+   * Secure stat operation
+   * @param {string} filePath - Path to stat
+   * @returns {Promise<Object>} File stats
+   */
+  stat(filePath) {
+    const validation = this.validatePath(filePath, false);
+    if (!validation.valid) {
+      throw new Error(`Security: Cannot stat file - ${validation.error}`);
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS.stat(validation.safePath);
+  }
+
+  /**
+   * Secure statSync operation
+   * @param {string} filePath - Path to stat
+   * @returns {Object} File stats
+   */
+  statSync(filePath) {
+    const validation = this.validatePath(filePath, false);
+    if (!validation.valid) {
+      throw new Error(`Security: Cannot stat file - ${validation.error}`);
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS_SYNC.statSync(validation.safePath);
+  }
+
+  /**
+   * Secure existsSync operation
+   * @param {string} filePath - Path to check
+   * @returns {boolean} Whether file exists
+   */
+  existsSync(filePath) {
+    const validation = this.validatePath(filePath, false);
+    if (!validation.valid) {
+      // for existence checks, return false instead of throwing
+      return false;
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS_SYNC.existsSync(validation.safePath);
+  }
+
+  /**
+   * Secure unlink operation
+   * @param {string} filePath - Path to delete
+   * @returns {Promise<void>}
+   */
+  unlink(filePath) {
+    const validation = this.validatePath(filePath, false);
+    if (!validation.valid) {
+      throw new Error(`Security: Cannot delete file - ${validation.error}`);
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS.unlink(validation.safePath);
+  }
+
+  /**
+   * Secure unlinkSync operation
+   * @param {string} filePath - Path to delete
+   */
+  unlinkSync(filePath) {
+    const validation = this.validatePath(filePath, false);
+    if (!validation.valid) {
+      throw new Error(`Security: Cannot delete file - ${validation.error}`);
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS_SYNC.unlinkSync(validation.safePath);
+  }
+
+  /**
+   * Secure rename operation
+   * @param {string} oldPath - Current path
+   * @param {string} newPath - New path
+   * @returns {Promise<void>}
+   */
+  rename(oldPath, newPath) {
+    const oldValidation = this.validatePath(oldPath, false);
+    const newValidation = this.validatePath(newPath, true);
+
+    if (!oldValidation.valid) {
+      throw new Error(`Security: Cannot rename file - source ${oldValidation.error}`);
+    }
+    if (!newValidation.valid) {
+      throw new Error(`Security: Cannot rename file - destination ${newValidation.error}`);
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS.rename(oldValidation.safePath, newValidation.safePath);
+  }
+
+  /**
+   * Secure renameSync operation
+   * @param {string} oldPath - Current path
+   * @param {string} newPath - New path
+   */
+  renameSync(oldPath, newPath) {
+    const oldValidation = this.validatePath(oldPath, false);
+    const newValidation = this.validatePath(newPath, true);
+
+    if (!oldValidation.valid) {
+      throw new Error(`Security: Cannot rename file - source ${oldValidation.error}`);
+    }
+    if (!newValidation.valid) {
+      throw new Error(`Security: Cannot rename file - destination ${newValidation.error}`);
+    }
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Path validated through security validator
+    return FS_SYNC.renameSync(oldValidation.safePath, newValidation.safePath);
+  }
+
+  /**
+   * Get a safe path for a given file (without performing the operation,
+   * @param {string} filePath - Path to validate
+   * @param {boolean} allowCreation - Whether creation is allowed
+   * @returns {string} Safe absolute path
+   */
+  getSafePath(filePath, allowCreation = false) {
+    const validation = this.validatePath(filePath, allowCreation);
+    if (!validation.valid) {
+      throw new Error(`Security: Invalid path - ${validation.error}`);
+    }
+    return validation.safePath;
+  }
+}
+
+// Create a default instance for the project;
+const secureFs = new SecureFileSystem();
+
+module.exports = {
+  SecureFileSystem,
+  secureFs };

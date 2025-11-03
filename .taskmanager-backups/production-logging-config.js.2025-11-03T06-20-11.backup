@@ -1,0 +1,361 @@
+const { loggers } = require('./logger');
+/**
+ * Production Logging Configuration
+ *
+ * Enhanced configuration for production monitoring, observability,
+ * and integration with monitoring platforms like Datadog, New Relic, etc.
+ */
+
+const path = require('path');
+
+/**
+ * Production logging configuration with monitoring platform integration
+ */
+const productionConfig = {
+  // Core Pino configuration
+  level: process.env.LOG_LEVEL || 'info',
+
+  // Structured logging format for monitoring platforms
+  formatters: {
+    level: (label) => ({ level: label.toUpperCase() }),
+    log: (object) => ({
+      ...object,
+      // Standard fields for monitoring platforms
+      hostname: process.env.HOSTNAME || require('os').hostname(),
+      pid: process.pid,
+      service: process.env.SERVICE_NAME || 'infinite-continue-stop-hook',
+      version: process.env.SERVICE_VERSION || '1.0.0',
+      environment: process.env.NODE_ENV || 'production',
+      region: process.env.AWS_REGION || process.env.REGION || 'unknown',
+
+      // Monitoring platform fields
+      'dd.service': process.env.DD_SERVICE || 'taskmanager',
+      'dd.env': process.env.DD_ENV || process.env.NODE_ENV || 'production',
+      'dd.version': process.env.DD_VERSION || process.env.SERVICE_VERSION || '1.0.0',
+
+      // New Relic compatibility
+      'service.name': process.env.SERVICE_NAME || 'infinite-continue-stop-hook',
+      'service.version': process.env.SERVICE_VERSION || '1.0.0',
+
+      // Kubernetes/Docker metadata
+      'k8s.pod.name': process.env.POD_NAME,
+      'k8s.namespace': process.env.POD_NAMESPACE,
+      'k8s.node.name': process.env.NODE_NAME,
+      'container.id': process.env.HOSTNAME,
+    }),
+  },
+
+  // ISO timestamp for consistent time parsing
+  timestamp: () => `,"timestamp":"${new Date().toISOString()}"`,
+
+  // Production transport configuration
+  transport: getProductionTransport(),
+
+  // Enhanced error serialization
+  serializers: {
+    error: (error) => ({
+      type: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+      statusCode: error.statusCode,
+      // Add custom error fields
+      correlationId: error.correlationId,
+      userId: error.userId,
+      requestId: error.requestId }),
+    request: (request) => ({
+      id: request.id,
+      method: request.method,
+      url: request.url,
+      headers: sanitizeHeaders(request.headers),
+      userAgent: request.headers?.['user-agent'],
+      ip: request.ip || request.socket?.remoteAddress }),
+    response: (response) => ({
+      statusCode: response.statusCode,
+      headers: sanitizeHeaders(response.headers),
+      responseTime: response.responseTime }) },
+
+  // Custom log levels for production
+  customLevels: {
+    audit: 25,     // Between info(30) and warn(40)
+    security: 35,  // Between info(30) and warn(40)
+    business: 20,  // Between debug(20) and info(30)
+  },
+
+  // Hook for monitoring platform integration
+  hooks: {
+    logMethod: function (inputArgs, method) {
+      // Send critical errors to monitoring platforms
+      if (inputArgs[0] && inputArgs[0].level >= 50) { // Error level
+        sendToMonitoringPlatform(inputArgs[0]);
+      }
+      return method.apply(this, inputArgs);
+    },
+  },
+};
+
+/**
+ * Get production transport configuration based on environment
+ */
+function getProductionTransport() {
+  const environment = process.env.NODE_ENV || 'production';
+
+  if (environment === 'production') {
+    // Production: JSON output to stdout for container logging,
+    return {
+      target: 'pino/file',
+      options: {
+        destination: 1, // stdout
+      },
+    };
+  } else if (environment === 'staging') {
+    // Staging: JSON with some pretty printing for debugging
+    return {
+      targets: [
+        {
+          target: 'pino/file',
+          options: { destination: 1 },
+        },
+        {
+          target: 'pino/file',
+          options: {
+            destination: path.join(process.cwd(), 'logs', 'staging.log'),
+            mkdir: true,
+          },
+        },
+      ],
+    };
+  } else {
+    // Development: Pretty printing,
+    return {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'yyyy-mm-dd HH:MM:ss.l',
+        ignore: 'pid,hostname' },
+    };
+  }
+}
+
+/**
+ * Sanitize headers to remove sensitive information
+ */
+function sanitizeHeaders(headers) {
+  const sanitized = { ...headers };
+  const sensitiveHeaders = [
+    'authorization',
+    'cookie',
+    'x-api-key',
+    'x-auth-token',
+    'x-secret',
+  ];
+
+  sensitiveHeaders.forEach(header => {
+    // eslint-disable-next-line security/detect-object-injection -- Iterating over known safe header names from trusted array
+    if (sanitized[header]) {
+      // eslint-disable-next-line security/detect-object-injection -- Iterating over known safe header names from trusted array
+      sanitized[header] = '[REDACTED]';
+    }
+  });
+
+  return sanitized;
+}
+
+/**
+ * Send critical logs to monitoring platforms
+ */
+function sendToMonitoringPlatform(logObject) {
+  try {
+    // Datadog integration
+    if (process.env.DD_API_KEY) {
+      sendToDatadog(logObject);
+    }
+
+    // New Relic integration
+    if (process.env.NEW_RELIC_LICENSE_KEY) {
+      sendToNewRelic(logObject);
+    }
+
+    // Slack alerts for critical errors
+    if (process.env.SLACK_WEBHOOK_URL && logObject.level >= 50) {
+      sendSlackAlert(logObject);
+    }
+
+    // PagerDuty integration for urgent issues
+    if (process.env.PAGERDUTY_ROUTING_KEY && logObject.level >= 60) {
+      sendPagerDutyAlert(logObject);
+    }
+  } catch (error) {
+    // Don't let monitoring integration failures crash the app
+    loggers.app.error('Failed to send log to monitoring platform:', error.message);
+  }
+}
+
+/**
+ * Send logs to Datadog
+ */
+function sendToDatadog(logObject) {
+  if (!process.env.DD_API_KEY) {return;}
+
+  // This would normally use the Datadog SDK or HTTP API
+  // Placeholder for actual implementation
+  loggers.app.info('Sending to Datadog:', {
+    service: logObject['dd.service'],
+    message: logObject.msg,
+    level: logObject.level,
+    timestamp: logObject.timestamp,
+  });
+}
+
+/**
+ * Send logs to New Relic
+ */
+function sendToNewRelic(logObject) {
+  if (!process.env.NEW_RELIC_LICENSE_KEY) {return;}
+
+  // This would normally use the New Relic SDK
+  // Placeholder for actual implementation
+  loggers.app.info('Sending to New Relic:', {
+    message: logObject.msg,
+    level: logObject.level,
+    service: logObject['service.name'],
+  });
+}
+
+/**
+ * Send Slack alerts for critical errors
+ */
+function sendSlackAlert(logObject) {
+  if (!process.env.SLACK_WEBHOOK_URL) {return;}
+
+  const payload = {
+    text: `🚨 Critical Error in ${logObject.service}`,
+    attachments: [
+      {
+        color: 'danger',
+        fields: [
+          {
+            title: 'Message',
+            value: logObject.msg,
+            short: false,
+          },
+          {
+            title: 'Service',
+            value: logObject.service,
+            short: true,
+          },
+          {
+            title: 'Environment',
+            value: logObject.environment,
+            short: true,
+          },
+          {
+            title: 'Agent ID',
+            value: logObject.agentId || 'unknown',
+            short: true,
+          },
+          {
+            title: 'Task ID',
+            value: logObject.taskId || 'none',
+            short: true,
+          },
+        ],
+        ts: Math.floor(Date.now() / 1000),
+      },
+    ],
+  };
+
+  // This would normally make an HTTP request to Slack
+  loggers.app.info('Sending Slack alert:', payload);
+}
+
+/**
+ * Send PagerDuty alerts for urgent issues
+ */
+function sendPagerDutyAlert(logObject) {
+  if (!process.env.PAGERDUTY_ROUTING_KEY) {return;}
+
+  const payload = {
+    routing_key: process.env.PAGERDUTY_ROUTING_KEY,
+    event_action: 'trigger',
+    payload: {
+      summary: `Critical error in ${logObject.service}: ${logObject.msg}`,
+      severity: 'critical',
+      source: logObject.hostname,
+      component: logObject.module,
+      group: logObject.service,
+      class: 'application',
+      custom_details: {
+        agentId: logObject.agentId,
+        taskId: logObject.taskId,
+        environment: logObject.environment,
+        error: logObject.error,
+      },
+    },
+  };
+
+  // This would normally make an HTTP request to PagerDuty
+  loggers.app.info('Sending PagerDuty alert:', payload);
+}
+
+/**
+ * Log retention and rotation configuration
+ */
+const logRetentionConfig = {
+  // Rotate logs daily in production
+  rotation: {
+    enabled: process.env.NODE_ENV === 'production',
+    frequency: 'daily',
+    maxFiles: 30, // Keep 30 days
+    maxSize: '100MB',
+  },
+
+  // Compression for older logs
+  compression: {
+    enabled: true,
+    algorithm: 'gzip',
+    daysOld: 7,
+  },
+
+  // Archive to cloud storage
+  archival: {
+    enabled: process.env.LOG_ARCHIVE_ENABLED === 'true',
+    provider: process.env.LOG_ARCHIVE_PROVIDER || 's3',
+    bucket: process.env.LOG_ARCHIVE_BUCKET,
+    retention: process.env.LOG_ARCHIVE_RETENTION || '7y', // 7 years for compliance
+  },
+};
+
+/**
+ * Performance monitoring integration
+ */
+const performanceConfig = {
+  // Request/response timing
+  requestLogging: {
+    enabled: true,
+    includeHeaders: process.env.LOG_INCLUDE_HEADERS === 'true',
+    includeBody: process.env.LOG_INCLUDE_BODY === 'true',
+    sensitiveFields: ['password', 'secret', 'token', 'key'],
+  },
+
+  // Database query logging
+  databaseLogging: {
+    enabled: process.env.LOG_DATABASE_QUERIES === 'true',
+    slowQueryThreshold: parseInt(process.env.SLOW_QUERY_THRESHOLD) || 1000,
+    includeParams: process.env.LOG_DB_PARAMS === 'true',
+  },
+
+  // Memory and CPU monitoring
+  systemMetrics: {
+    enabled: process.env.LOG_SYSTEM_METRICS === 'true',
+    interval: parseInt(process.env.METRICS_INTERVAL) || 60000, // 1 minute
+  },
+};
+
+module.exports = {
+  productionConfig,
+  logRetentionConfig,
+  performanceConfig,
+  sendToMonitoringPlatform,
+  sanitizeHeaders,
+};

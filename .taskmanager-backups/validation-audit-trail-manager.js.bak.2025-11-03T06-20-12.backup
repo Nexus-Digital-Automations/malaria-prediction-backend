@@ -1,0 +1,1331 @@
+
+
+/**
+ * ValidationAuditTrailManager - Comprehensive Validation History & Audit Trail System
+ *
+ * This system provides comprehensive audit trail capabilities for the stop hook validation system,
+ * building on existing performance metrics And authorization infrastructure to deliver:
+ *
+ * • Complete authorization session tracking with detailed step-by-step validation history
+ * • Searchable audit logs with advanced filtering And aggregation capabilities
+ * • Compliance reporting for SOX, GDPR, ISO 27001, And other regulatory frameworks
+ * • Historical trend analysis And failure pattern detection for continuous improvement
+ * • Real-time project state snapshots during validation attempts
+ * • Administrative action logging And sensitive access tracking
+ * • Automated compliance certificate generation And data retention management
+ *
+ * Features:
+ * - Session-based audit tracking with unique session IDs
+ * - Individual validation criterion step tracking with performance metrics
+ * - Project state capture (git commit, branch, working tree status)
+ * - Searchable audit trail with time-based And criteria-based filtering
+ * - Compliance flags And data retention policy enforcement
+ * - Export capabilities (CSV, JSON) for external audit systems
+ * - Historical trend analysis And failure pattern detection
+ * - Agent-specific audit summaries And administrative action logs
+ *
+ * @author Principal Engineer Agent
+ * @version 1.0.0
+ * @since 2025-09-27
+ */
+
+const FS = require('fs');
+const PATH = require('path');
+const crypto = require('crypto');
+const { execSync } = require('child_process');
+
+
+class ValidationAuditTrailManager {
+  constructor(projectRoot = process.cwd()) {
+    this.projectRoot = projectRoot;
+    this.auditTrailFile = PATH.join(projectRoot, '.validation-audit-trail.json');
+    this.criteriaHistoryFile = PATH.join(projectRoot, '.validation-criteria-history.json');
+    this.complianceLogsDir = PATH.join(projectRoot, '.compliance-logs');
+    this.auditSnapshotsDir = PATH.join(projectRoot, '.audit-snapshots');
+    this.performanceFile = PATH.join(projectRoot, '.validation-performance.json');
+
+    // Configuration for data retention And compliance
+    this.config = {
+      dataRetentionDays: 2555, // 7 years for SOX compliance
+      maxSessionsInMemory: 1000,
+      compressionThresholdDays: 90,
+      complianceStandards: ['SOX', 'GDPR', 'ISO27001', 'HIPAA'],
+      sensitiveDataPatterns: [
+        /password/i, /secret/i, /key/i, /token/i, /credential/i,
+        /ssn/i, /social.*security/i, /credit.*card/i, /account.*number/i,
+      ],
+    };
+
+    // Initialize audit trail infrastructure
+    this._initializeAuditInfrastructure();
+
+    // Load existing audit data
+    this.auditTrail = this._loadAuditTrail();
+    this.criteriaHistory = this._loadCriteriaHistory();
+  }
+
+  /**
+   * Initialize audit trail infrastructure And directories
+   */
+  _initializeAuditInfrastructure() {
+    try {
+      // Create compliance logs directory
+      if (!FS.existsSync(this.complianceLogsDir)) {
+        FS.mkdirSync(this.complianceLogsDir, { recursive: true });
+      }
+
+      // Create audit snapshots directory
+      if (!FS.existsSync(this.auditSnapshotsDir)) {
+        FS.mkdirSync(this.auditSnapshotsDir, { recursive: true });
+      }
+
+      // Initialize audit trail file if it doesn't exist
+      if (!FS.existsSync(this.auditTrailFile)) {
+        const initialData = {
+          version: '1.0.0',
+          created: new Date().toISOString(),
+          sessions: [],
+          metadata: {
+            totalSessions: 0,
+            totalValidations: 0,
+            retentionPolicy: this.config.dataRetentionDays,
+            complianceStandards: this.config.complianceStandards,
+          },
+        };
+        FS.writeFileSync(this.auditTrailFile, JSON.stringify(initialData, null, 2));
+      }
+
+      // Initialize criteria history file
+      if (!FS.existsSync(this.criteriaHistoryFile)) {
+        const initialHistory = {
+          version: '1.0.0',
+          created: new Date().toISOString(),
+          criteria: {},
+          statistics: {
+            totalValidations: 0,
+            criteriaSuccessRates: {},
+            averageDurations: {},
+            failurePatterns: [],
+          },
+        };
+        FS.writeFileSync(this.criteriaHistoryFile, JSON.stringify(initialHistory, null, 2));
+      }
+    } catch {
+      loggers.stopHook.error('❌ Failed to initialize audit infrastructure:', error.message);
+      throw new Error(`Audit infrastructure initialization failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Load existing audit trail data
+   */
+  _loadAuditTrail() {
+    try {
+      if (FS.existsSync(this.auditTrailFile)) {
+        const data = JSON.parse(FS.readFileSync(this.auditTrailFile, 'utf8'));
+        return data;
+      }
+      loggers.stopHook.error('❌ Failed to load audit trail:', error.message);
+    } catch {
+      loggers.app.error('❌ Failed to load audit trail:', error.message);
+      return { sessions: [], metadata: {} };
+    }
+  }
+
+  /**
+   * Load existing criteria history data
+   */
+  _loadCriteriaHistory() {
+    try {
+      if (FS.existsSync(this.criteriaHistoryFile)) {
+        const data = JSON.parse(FS.readFileSync(this.criteriaHistoryFile, 'utf8'));
+        return data;
+      }
+      loggers.stopHook.error('❌ Failed to load criteria history:', error.message);
+    } catch {
+      loggers.app.error('❌ Failed to load criteria history:', error.message);
+      return { criteria: {}, statistics: {} };
+    }
+  }
+
+  /**
+   * Save audit trail data to disk
+   */
+  _saveAuditTrail() {
+    try {
+      // Update metadata
+      this.auditTrail.metadata.lastUpdated = new Date().toISOString();
+      this.auditTrail.metadata.totalSessions = this.auditTrail.sessions.length;
+
+      // Write to file with backup
+      const backupFile = `${this.auditTrailFile}.backup`;
+      if (FS.existsSync(this.auditTrailFile)) {
+        FS.copyFileSync(this.auditTrailFile, backupFile);
+      }
+
+      FS.writeFileSync(this.auditTrailFile, JSON.stringify(this.auditTrail, null, 2));
+
+      // Clean up old backup
+      if (FS.existsSync(backupFile)) {
+        const stats = FS.statSync(backupFile);
+        const age = Date.now() - stats.mtime.getTime();
+        if (age > 24 * 60 * 60 * 1000) { // 24 hours
+          FS.unlinkSync(backupFile);
+        }
+      }
+      loggers.stopHook.error('❌ Failed to save audit trail:', error.message);
+    } catch {
+      loggers.app.error('❌ Failed to save audit trail:', error.message);
+      throw new Error(`Audit trail save failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Save criteria history data to disk
+   */
+  _saveCriteriaHistory() {
+    try {
+      this.criteriaHistory.statistics.lastUpdated = new Date().toISOString();
+      loggers.stopHook.error('❌ Failed to save criteria history:', error.message);
+    } catch {
+      loggers.app.error('❌ Failed to save criteria history:', error.message);
+      throw new Error(`Criteria history save failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Start tracking a new authorization session
+   */
+  startAuthorizationSession(agentId, authorizationKey, requiredSteps = []) {
+    try {
+      const sessionId = this._generateSessionId();
+      const projectState = this._captureProjectState();
+
+      const session = {
+        sessionId,
+        agentId,
+        authorizationKey: this._hashAuthKey(authorizationKey),
+        startTime: new Date().toISOString(),
+        endTime: null,
+        status: 'in_progress',
+        totalSteps: requiredSteps.length,
+        completedSteps: 0,
+        failedSteps: 0,
+        requiredSteps: [...requiredSteps],
+        validationSteps: [],
+        projectState,
+        complianceFlags: {
+          dataRetention: true,
+          accessLogged: true,
+          sensitiveDataHandled: this._detectSensitiveData(JSON.stringify(projectState)),
+        },
+        metadata: {
+          userAgent: process.env.USER_AGENT || 'TaskManager-API',
+          nodeVersion: process.version,
+          platform: process.platform,
+          workingDirectory: this.projectRoot,
+        },
+      };
+
+      // Add to audit trail
+      this.auditTrail.sessions.push(session);
+      this._saveAuditTrail();
+
+      // Log compliance event
+      this._logComplianceEvent({
+        type: 'AUTHORIZATION_SESSION_STARTED',
+        sessionId,
+        agentId,
+        timestamp: new Date().toISOString(),
+        details: {
+          requiredSteps: requiredSteps.length,
+          projectState: projectState.gitCommit,
+        },
+      });
+
+      loggers.stopHook.log(`🔍 Started audit session ${sessionId} for agent ${agentId}`);
+      loggers.app.info(`🔍 Started audit session ${sessionId} for agent ${agentId}`);
+      return { sessionId, success: true };
+    } catch {
+      loggers.stopHook.error('❌ Failed to start authorization session:', error.message);
+      loggers.app.error('❌ Failed to start authorization session:', error.message);
+      throw new Error(`Authorization session start failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Track individual validation criterion attempt
+   */
+  trackValidationStep(sessionId, criterion, result, duration, error = null, metadata = {}) {
+    try {
+      const session = this._findSession(sessionId);
+      if (!session) {
+        throw new Error(`Session ${sessionId} not found`);
+      }
+
+      const stepData = {
+        criterion,
+        startTime: new Date(Date.now() - duration).toISOString(),
+        endTime: new Date().toISOString(),
+        durationMs: duration,
+        result: result ? 'passed' : 'failed',
+        error: error ? error.message || error : null,
+        memoryUsage: this._getMemoryUsage(),
+        metadata: {
+          ...metadata,
+          retryCount: session.validationSteps.filter(s => s.criterion === criterion).length,
+          stepIndex: session.validationSteps.length,
+        },
+      };
+
+      // Add step to session
+      session.validationSteps.push(stepData);
+
+      // Update session counters
+      if (result) {
+        session.completedSteps++;
+      } else {
+        session.failedSteps++;
+      }
+
+      // Update criteria history
+      this._updateCriteriaHistory(criterion, stepData);
+
+      // Check if session is complete
+      if (session.completedSteps === session.totalSteps) {
+        this._completeSession(session, 'completed');
+      } else if (session.failedSteps > 0 && !result) {
+        this._completeSession(session, 'failed');
+      }
+
+      this._saveAuditTrail();
+      this._saveCriteriaHistory();
+
+      // Log compliance event
+      this._logComplianceEvent({
+        type: 'VALIDATION_STEP_COMPLETED',
+        sessionId,
+        criterion,
+        result: result ? 'PASSED' : 'FAILED',
+        timestamp: new Date().toISOString(),
+        duration,
+      });
+
+      return { success: true, stepIndex: session.validationSteps.length - 1 };
+      loggers.stopHook.error('❌ Failed to track validation step:', error.message);
+    } catch {
+      loggers.app.error('❌ Failed to track validation step:', error.message);
+      throw new Error(`Validation step tracking failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Complete authorization session
+   */
+  completeAuthorizationSession(sessionId, finalStatus = 'completed') {
+    try {
+      const session = this._findSession(sessionId);
+      if (!session) {
+        throw new Error(`Session ${sessionId} not found`);
+      }
+
+      this._completeSession(session, finalStatus);
+      this._saveAuditTrail();
+
+      // Generate session summary
+      const summary = this._generateSessionSummary(session);
+
+      // Log compliance event
+      this._logComplianceEvent({
+        type: 'AUTHORIZATION_SESSION_COMPLETED',
+        sessionId,
+        status: finalStatus,
+        timestamp: new Date().toISOString(),
+        summary,
+      });
+
+      loggers.stopHook.log(`✅ Authorization session ${sessionId} completed with status: ${finalStatus}`);
+
+      loggers.app.info(`✅ Authorization session ${sessionId} completed with status: ${finalStatus}`);
+      return { success: true, summary };
+    } catch {
+      loggers.stopHook.error('❌ Failed to complete authorization session:', error.message);
+      loggers.app.error('❌ Failed to complete authorization session:', error.message);
+      throw new Error(`Authorization session completion failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Search audit trail with advanced filtering
+   */
+  searchAuditTrail(searchCriteria = {}) {
+    try {
+      let results = [...this.auditTrail.sessions];
+
+      // Apply time range filter
+      if (searchCriteria.timeRange) {
+        const { start, end } = searchCriteria.timeRange;
+        results = results.filter(session => {
+          const sessionTime = new Date(session.startTime);
+          return (!start || sessionTime >= new Date(start)) &&
+                 (!end || sessionTime <= new Date(end));
+        });
+      }
+
+      // Apply agent filter
+      if (searchCriteria.agentId) {
+        const agentPattern = new RegExp(searchCriteria.agentId.replace('*', '.*'));
+        results = results.filter(session => agentPattern.test(session.agentId));
+      }
+
+      // Apply validation criteria filter
+      if (searchCriteria.validationCriteria) {
+        results = results.filter(session =>
+          session.validationSteps.some(step =>
+            searchCriteria.validationCriteria.includes(step.criterion),
+          ),
+        );
+      }
+
+      // Apply outcome filter
+      if (searchCriteria.outcome) {
+        results = results.filter(session => session.status === searchCriteria.outcome);
+      }
+
+      // Apply project state filter
+      if (searchCriteria.projectState) {
+        const { branch, gitCommit } = searchCriteria.projectState;
+        results = results.filter(session => {
+          const state = session.projectState;
+          return (!branch || state.branch === branch) &&
+                 (!gitCommit || state.gitCommit.startsWith(gitCommit.replace('*', '')));
+        });
+      }
+
+      // Apply performance threshold filter
+      if (searchCriteria.performanceThreshold) {
+        const threshold = searchCriteria.performanceThreshold;
+        results = results.filter(session => {
+          const totalDuration = session.validationSteps.reduce((sum, step) => sum + step.durationMs, 0);
+          if (threshold.durationMs) {
+            const [operator, value] = threshold.durationMs.match(/([><]=?)(\d+)/).slice(1);
+            const numValue = parseInt(value);
+            switch (operator) {
+              case '>': return totalDuration > numValue;
+              case '<': return totalDuration < numValue;
+              case '>=': return totalDuration >= numValue;
+              case '<=': return totalDuration <= numValue;
+              default: return totalDuration === numValue;
+            }
+          }
+          return true;
+        });
+      }
+
+      // Apply aggregations if requested
+      let aggregations = {};
+      if (searchCriteria.aggregations) {
+        aggregations = this._generateAggregations(results, searchCriteria.aggregations);
+      }
+
+      return {
+        success: true,
+        totalResults: results.length,
+        results: results.slice(0, searchCriteria.limit || 100),
+        aggregations,
+      };
+      loggers.stopHook.error('❌ Failed to search audit trail:', error.message);
+    } catch {
+      loggers.app.error('❌ Failed to search audit trail:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Generate compliance report for specified date
+   */
+  generateComplianceReport(date = new Date().toISOString().split('T')[0]) {
+    try {
+      const startDate = new Date(date);
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+
+      const sessions = this.auditTrail.sessions.filter(session => {
+        const sessionDate = new Date(session.startTime);
+        return sessionDate >= startDate && sessionDate < endDate;
+      });
+
+      const report = {
+        reportDate: date,
+        generatedAt: new Date().toISOString(),
+        reportType: 'DAILY_COMPLIANCE_REPORT',
+        complianceStandards: this.config.complianceStandards,
+        summary: {
+          totalSessions: sessions.length,
+          successfulSessions: sessions.filter(s => s.status === 'completed').length,
+          failedSessions: sessions.filter(s => s.status === 'failed').length,
+          inProgressSessions: sessions.filter(s => s.status === 'in_progress').length,
+          totalValidations: sessions.reduce((sum, s) => sum + s.validationSteps.length, 0),
+          averageSessionDuration: this._calculateAverageSessionDuration(sessions),
+          uniqueAgents: [...new Set(sessions.map(s => s.agentId))].length,
+        },
+        criteriaAnalysis: this._analyzeCriteriaPerformance(sessions),
+        complianceFlags: this._analyzeComplianceFlags(sessions),
+        recommendations: this._generateComplianceRecommendations(sessions),
+        dataRetention: {
+          totalRecords: this.auditTrail.sessions.length,
+          retentionPolicyDays: this.config.dataRetentionDays,
+          oldestRecord: this.auditTrail.sessions.length > 0 ?
+            Math.min(...this.auditTrail.sessions.map(s => new Date(s.startTime))) : null,
+          recordsToExpire: this._getExpiringRecords().length,
+        },
+      };
+
+      // Save compliance report
+      const reportFile = PATH.join(this.complianceLogsDir, `compliance-report-${date}.json`);
+      FS.writeFileSync(reportFile, JSON.stringify(report, null, 2));
+
+      return { success: true, report, reportFile };
+      loggers.stopHook.error('❌ Failed to generate compliance report:', error.message);
+    } catch {
+      loggers.app.error('❌ Failed to generate compliance report:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Export audit data in specified format
+   */
+  exportAuditData(options = {}) {
+    try {
+      const { format = 'json', dateRange = '30d', includeSteps = true } = options;
+
+      // Calculate date range
+      const endDate = new Date();
+      const startDate = new Date();
+      const days = parseInt(dateRange.replace('d', '')) || 30;
+      startDate.setDate(startDate.getDate() - days);
+
+      // Filter sessions by date range
+      const sessions = this.auditTrail.sessions.filter(session => {
+        const sessionDate = new Date(session.startTime);
+        return sessionDate >= startDate && sessionDate <= endDate;
+      });
+
+      let exportData;
+
+      if (format === 'csv') {
+        exportData = this._convertToCSV(sessions, includeSteps);
+      } else {
+        exportData = {
+          exportedAt: new Date().toISOString(),
+          dateRange: { start: startDate.toISOString(), end: endDate.toISOString() },
+          totalSessions: sessions.length,
+          sessions: includeSteps ? sessions : sessions.map(s => ({
+            ...s,
+            validationSteps: s.validationSteps.length,
+          })),
+        };
+      }
+
+      // Generate export filename
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `audit-export-${timestamp}.${format}`;
+      const exportPath = PATH.join(this.complianceLogsDir, filename);
+
+      // Write export file
+      if (format === 'csv') {
+        FS.writeFileSync(exportPath, exportData);
+      } else {
+        FS.writeFileSync(exportPath, JSON.stringify(exportData, null, 2));
+      }
+
+      return {
+        success: true,
+        exportPath,
+        filename,
+        recordCount: sessions.length,
+        format,
+      };
+      loggers.stopHook.error('❌ Failed to export audit data:', error.message);
+    } catch {
+      loggers.app.error('❌ Failed to export audit data:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get validation trends analysis
+   */
+  getValidationTrends(options = {}) {
+    try {
+      const { metric = 'success_rate', period = '30d' } = options;
+      const days = parseInt(period.replace('d', '')) || 30;
+
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      const sessions = this.auditTrail.sessions.filter(session => {
+        const sessionDate = new Date(session.startTime);
+        return sessionDate >= startDate && sessionDate <= endDate;
+      });
+
+      // Group sessions by day
+      const dailyData = {};
+      sessions.forEach(session => {
+        const day = session.startTime.split('T')[0];
+        if (!dailyData[day]) {
+          dailyData[day] = { total: 0, successful: 0, failed: 0, totalDuration: 0 };
+        }
+        dailyData[day].total++;
+        if (session.status === 'completed') {dailyData[day].successful++;}
+        if (session.status === 'failed') {dailyData[day].failed++;}
+
+        const sessionDuration = session.validationSteps.reduce((sum, step) => sum + step.durationMs, 0);
+        dailyData[day].totalDuration += sessionDuration;
+      });
+
+      // Calculate trend data
+      const trendData = Object.entries(dailyData).map(([date, data]) => {
+        const successRate = data.total > 0 ? (data.successful / data.total) * 100 : 0;
+        const avgDuration = data.total > 0 ? data.totalDuration / data.total : 0;
+
+        return {
+          date,
+          total: data.total,
+          successful: data.successful,
+          failed: data.failed,
+          successRate: Math.round(successRate * 100) / 100,
+          averageDuration: Math.round(avgDuration),
+        };
+      }).sort((a, b) => a.date.localeCompare(b.date));
+
+      // Calculate trend analysis
+      const analysis = this._calculateTrendAnalysis(trendData, metric);
+
+      return {
+        success: true,
+        metric,
+        period,
+        trendData,
+        analysis,
+        summary: {
+          totalSessions: sessions.length,
+          dateRange: { start: startDate.toISOString(), end: endDate.toISOString() },
+          overallSuccessRate: sessions.length > 0 ?
+            (sessions.filter(s => s.status === 'completed').length / sessions.length) * 100 : 0,
+        },
+      };
+      loggers.stopHook.error('❌ Failed to get validation trends:', error.message);
+    } catch {
+      loggers.app.error('❌ Failed to get validation trends:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Analyze failure patterns for specific criterion
+   */
+  analyzeFailurePatterns(options = {}) {
+    try {
+      const { criterion, lookback = '7d' } = options;
+      const days = parseInt(lookback.replace('d', '')) || 7;
+
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // Get failed validation steps for the criterion
+      const failedSteps = [];
+      this.auditTrail.sessions.forEach(session => {
+        const sessionDate = new Date(session.startTime);
+        if (sessionDate >= startDate && sessionDate <= endDate) {
+          session.validationSteps.forEach(step => {
+            if (step.criterion === criterion && step.result === 'failed') {
+              failedSteps.push({
+                ...step,
+                sessionId: session.sessionId,
+                agentId: session.agentId,
+              });
+            }
+          });
+        }
+      });
+
+      // Analyze patterns
+      const patterns = {
+        errorMessages: this._analyzeErrorPatterns(failedSteps),
+        timingPatterns: this._analyzeTimingPatterns(failedSteps),
+        agentPatterns: this._analyzeAgentPatterns(failedSteps),
+        contextPatterns: this._analyzeContextPatterns(failedSteps),
+      };
+
+      const recommendations = this._generateFailureRecommendations(patterns, criterion);
+
+      return {
+        success: true,
+        criterion,
+        lookback,
+        totalFailures: failedSteps.length,
+        patterns,
+        recommendations,
+        dateRange: { start: startDate.toISOString(), end: endDate.toISOString() },
+      };
+      loggers.stopHook.error('❌ Failed to analyze failure patterns:', error.message);
+    } catch {
+      loggers.app.error('❌ Failed to analyze failure patterns:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get agent-specific audit summary
+   */
+  getAgentAuditSummary(_agentId) {
+    try {
+      const agentSessions = this.auditTrail.sessions.filter(session => session.agentId === agentId);
+
+      if (agentSessions.length === 0) {
+        return {
+          success: true,
+          agentId,
+          message: 'No audit sessions found for this agent',
+          sessions: [],
+        };
+      }
+
+      const summary = {
+        agentId,
+        totalSessions: agentSessions.length,
+        successfulSessions: agentSessions.filter(s => s.status === 'completed').length,
+        failedSessions: agentSessions.filter(s => s.status === 'failed').length,
+        inProgressSessions: agentSessions.filter(s => s.status === 'in_progress').length,
+        totalValidations: agentSessions.reduce((sum, s) => sum + s.validationSteps.length, 0),
+        averageSessionDuration: this._calculateAverageSessionDuration(agentSessions),
+        firstSession: agentSessions[0].startTime,
+        lastSession: agentSessions[agentSessions.length - 1].startTime,
+        criteriaPerformance: this._analyzeCriteriaPerformance(agentSessions),
+        complianceScore: this._calculateAgentComplianceScore(agentSessions),
+        recentActivity: agentSessions.slice(-10).map(s => ({
+          sessionId: s.sessionId,
+          startTime: s.startTime,
+          status: s.status,
+          stepCount: s.validationSteps.length,
+        })),
+      };
+
+      return { success: true, summary };
+      loggers.stopHook.error('❌ Failed to get agent audit summary:', error.message);
+    } catch {
+      loggers.app.error('❌ Failed to get agent audit summary:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ========================================
+  // UTILITY METHODS
+  // ========================================
+
+  /**
+   * Generate unique session ID
+   */
+  _generateSessionId() {
+    const timestamp = Date.now();
+    const random = crypto.randomBytes(4).toString('hex');
+    return `audit_${timestamp}_${random}`;
+  }
+
+  /**
+   * Hash authorization key for security
+   */
+  _hashAuthKey(authKey) {
+    return crypto.createHash('sha256').update(authKey).digest('hex').substring(0, 16);
+  }
+
+  /**
+   * Capture current project state
+   */
+  _captureProjectState() {
+    try {
+      const gitCommit = execSync('git rev-parse HEAD', {
+        cwd: this.projectRoot,
+        encoding: 'utf8',
+      }).trim();
+
+      const branch = execSync('git branch --show-current', {
+        cwd: this.projectRoot,
+        encoding: 'utf8',
+      }).trim();
+
+      const workingTreeClean = execSync('git status --porcelain', {
+        cwd: this.projectRoot,
+        encoding: 'utf8',
+      }).trim() === '';
+
+      const lastModified = execSync('git log -1 --format=%ci', {
+        cwd: this.projectRoot,
+        encoding: 'utf8',
+      }).trim();
+
+      return {
+        gitCommit,
+        branch,
+        workingTreeClean,
+        lastModified,
+        capturedAt: new Date().toISOString(),
+      };
+    } catch {
+      return {
+        gitCommit: 'unknown',
+        branch: 'unknown',
+        workingTreeClean: false,
+        lastModified: null,
+        capturedAt: new Date().toISOString(),
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Get current memory usage
+   */
+  _getMemoryUsage() {
+    return process.memoryUsage();
+  }
+
+  /**
+   * Detect sensitive data in content
+   */
+  _detectSensitiveData(content) {
+    return this.config.sensitiveDataPatterns.some(pattern => pattern.test(content));
+  }
+
+  /**
+   * Find session by ID
+   */
+  _findSession(sessionId) {
+    return this.auditTrail.sessions.find(session => session.sessionId === sessionId);
+  }
+
+  /**
+   * Complete a session with final status
+   */
+  _completeSession(session, status) {
+    session.endTime = new Date().toISOString();
+    session.status = status;
+
+    // Calculate total duration
+    const startTime = new Date(session.startTime);
+    const endTime = new Date(session.endTime);
+    session.totalDurationMs = endTime - startTime;
+
+    // Create project state snapshot
+    this._createProjectSnapshot(session.sessionId);
+  }
+
+  /**
+   * Create project state snapshot
+   */
+  _createProjectSnapshot(sessionId) {
+    try {
+      const snapshotDir = PATH.join(this.auditSnapshotsDir, sessionId);
+      if (!FS.existsSync(snapshotDir)) {
+        FS.mkdirSync(snapshotDir, { recursive: true });
+      }
+
+      // Save current project state
+      const projectState = this._captureProjectState();
+      FS.writeFileSync(
+        PATH.join(snapshotDir, 'project-state.json'),
+        JSON.stringify(projectState, null, 2),
+      );
+
+      // Save important file checksums
+      const checksums = this._calculateFileChecksums();
+      FS.writeFileSync(
+        PATH.join(snapshotDir, 'file-checksums.json'),
+        JSON.stringify(checksums, null, 2),
+      );
+      loggers.stopHook.error('⚠️ Failed to create project snapshot:', error.message);
+    } catch {
+      loggers.app.error('⚠️ Failed to create project snapshot:', error.message);
+    }
+  }
+
+  /**
+   * Calculate file checksums for important files
+   */
+  _calculateFileChecksums() {
+    const importantFiles = [
+      'package.json', 'TASKS.json', 'taskmanager-api.js',
+      '.validation-performance.json', '.claude-validation.json',
+    ];
+
+    const checksums = {};
+    importantFiles.forEach(file => {
+      const filePath = PATH.join(this.projectRoot, file);
+      if (FS.existsSync(filePath)) {
+        const content = FS.readFileSync(filePath);
+        checksums[file] = crypto.createHash('md5').update(content).digest('hex');
+      }
+    });
+
+    return checksums;
+  }
+
+  /**
+   * Update criteria history with new validation step
+   */
+  _updateCriteriaHistory(criterion, stepData) {
+    if (!this.criteriaHistory.criteria[criterion]) {
+      this.criteriaHistory.criteria[criterion] = {
+        totalAttempts: 0,
+        successfulAttempts: 0,
+        totalDuration: 0,
+        averageDuration: 0,
+        successRate: 0,
+        errorMessages: {},
+        lastUpdate: null,
+      };
+    }
+
+    const criteriaData = this.criteriaHistory.criteria[criterion];
+    criteriaData.totalAttempts++;
+    criteriaData.totalDuration += stepData.durationMs;
+    criteriaData.averageDuration = criteriaData.totalDuration / criteriaData.totalAttempts;
+
+    if (stepData.result === 'passed') {
+      criteriaData.successfulAttempts++;
+    } else if (stepData.error) {
+      const errorKey = stepData.error.substring(0, 100);
+      criteriaData.errorMessages[errorKey] = (criteriaData.errorMessages[errorKey] || 0) + 1;
+    }
+
+    criteriaData.successRate = (criteriaData.successfulAttempts / criteriaData.totalAttempts) * 100;
+    criteriaData.lastUpdate = new Date().toISOString();
+
+    // Update global statistics
+    this.criteriaHistory.statistics.totalValidations++;
+    this.criteriaHistory.statistics.criteriaSuccessRates[criterion] = criteriaData.successRate;
+    this.criteriaHistory.statistics.averageDurations[criterion] = criteriaData.averageDuration;
+  }
+
+  /**
+   * Generate session summary
+   */
+  _generateSessionSummary(session) {
+    const totalDuration = session.validationSteps.reduce((sum, step) => sum + step.durationMs, 0);
+    const passedSteps = session.validationSteps.filter(step => step.result === 'passed').length;
+
+    return {
+      sessionDuration: session.totalDurationMs,
+      validationDuration: totalDuration,
+      stepsCompleted: session.validationSteps.length,
+      stepsPassed: passedSteps,
+      stepsFailed: session.validationSteps.length - passedSteps,
+      successRate: session.validationSteps.length > 0 ?
+        (passedSteps / session.validationSteps.length) * 100 : 0,
+      averageStepDuration: session.validationSteps.length > 0 ?
+        totalDuration / session.validationSteps.length : 0,
+    };
+  }
+
+  /**
+   * Log compliance event
+   */
+  _logComplianceEvent(event) {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const logFile = PATH.join(this.complianceLogsDir, `compliance-${today}.log`);
+
+      const logEntry = `${new Date().toISOString()} [${event.type}] ${JSON.stringify(event)}\n`;
+      FS.appendFileSync(logFile, logEntry);
+      loggers.stopHook.error('⚠️ Failed to log compliance event:', error.message);
+    } catch {
+      loggers.app.error('⚠️ Failed to log compliance event:', error.message);
+    }
+  }
+
+  /**
+   * Generate aggregations for search results
+   */
+  _generateAggregations(sessions, aggregationOptions) {
+    const aggregations = {};
+
+    if (aggregationOptions.byAgent) {
+      aggregations.byAgent = {};
+      sessions.forEach(session => {
+        if (!aggregations.byAgent[session.agentId]) {
+          aggregations.byAgent[session.agentId] = { count: 0, successful: 0, failed: 0 };
+        }
+        aggregations.byAgent[session.agentId].count++;
+        if (session.status === 'completed') {aggregations.byAgent[session.agentId].successful++;}
+        if (session.status === 'failed') {aggregations.byAgent[session.agentId].failed++;}
+      });
+    }
+
+    if (aggregationOptions.byCriterion) {
+      aggregations.byCriterion = {};
+      sessions.forEach(session => {
+        session.validationSteps.forEach(step => {
+          if (!aggregations.byCriterion[step.criterion]) {
+            aggregations.byCriterion[step.criterion] = { count: 0, passed: 0, failed: 0 };
+          }
+          aggregations.byCriterion[step.criterion].count++;
+          if (step.result === 'passed') {aggregations.byCriterion[step.criterion].passed++;}
+          if (step.result === 'failed') {aggregations.byCriterion[step.criterion].failed++;}
+        });
+      });
+    }
+
+    if (aggregationOptions.byTimeHour) {
+      aggregations.byTimeHour = {};
+      sessions.forEach(session => {
+        const hour = new Date(session.startTime).getHours();
+        if (!aggregations.byTimeHour[hour]) {
+          aggregations.byTimeHour[hour] = { count: 0 };
+        }
+        aggregations.byTimeHour[hour].count++;
+      });
+    }
+
+    if (aggregationOptions.successRateMetrics) {
+      const totalSessions = sessions.length;
+      const successfulSessions = sessions.filter(s => s.status === 'completed').length;
+      aggregations.successRateMetrics = {
+        totalSessions,
+        successfulSessions,
+        successRate: totalSessions > 0 ? (successfulSessions / totalSessions) * 100 : 0,
+      };
+    }
+
+    return aggregations;
+  }
+
+  /**
+   * Calculate average session duration
+   */
+  _calculateAverageSessionDuration(sessions) {
+    const completedSessions = sessions.filter(s => s.endTime);
+    if (completedSessions.length === 0) {return 0;}
+
+    const totalDuration = completedSessions.reduce((sum, session) => {
+      return sum + (new Date(session.endTime) - new Date(session.startTime));
+    }, 0);
+
+    return Math.round(totalDuration / completedSessions.length);
+  }
+
+  /**
+   * Analyze criteria performance for sessions
+   */
+  _analyzeCriteriaPerformance(sessions) {
+    const criteriaStats = {};
+
+    sessions.forEach(session => {
+      session.validationSteps.forEach(step => {
+        if (!criteriaStats[step.criterion]) {
+          criteriaStats[step.criterion] = {
+            total: 0, passed: 0, failed: 0, totalDuration: 0,
+          };
+        }
+
+        criteriaStats[step.criterion].total++;
+        if (step.result === 'passed') {criteriaStats[step.criterion].passed++;}
+        if (step.result === 'failed') {criteriaStats[step.criterion].failed++;}
+        criteriaStats[step.criterion].totalDuration += step.durationMs;
+      });
+    });
+
+    // Calculate percentages And averages
+    Object.keys(criteriaStats).forEach(criterion => {
+      const stats = criteriaStats[criterion];
+      stats.successRate = stats.total > 0 ? (stats.passed / stats.total) * 100 : 0;
+      stats.averageDuration = stats.total > 0 ? stats.totalDuration / stats.total : 0;
+    });
+
+    return criteriaStats;
+  }
+
+  /**
+   * Analyze compliance flags from sessions
+   */
+  _analyzeComplianceFlags(sessions) {
+    const analysis = {
+      dataRetentionCompliant: 0,
+      accessLoggedCompliant: 0,
+      sensitiveDataDetected: 0,
+      totalSessions: sessions.length,
+    };
+
+    sessions.forEach(session => {
+      if (session.complianceFlags?.dataRetention) {analysis.dataRetentionCompliant++;}
+      if (session.complianceFlags?.accessLogged) {analysis.accessLoggedCompliant++;}
+      if (session.complianceFlags?.sensitiveDataHandled) {analysis.sensitiveDataDetected++;}
+    });
+
+    return analysis;
+  }
+
+  /**
+   * Generate compliance recommendations
+   */
+  _generateComplianceRecommendations(sessions) {
+    const recommendations = [];
+
+    const failureRate = sessions.length > 0 ?
+      (sessions.filter(s => s.status === 'failed').length / sessions.length) * 100 : 0;
+
+    if (failureRate > 20) {
+      recommendations.push({
+        priority: 'HIGH',
+        type: 'VALIDATION_FAILURE_RATE',
+        message: `High validation failure rate (${failureRate.toFixed(1)}%). Consider reviewing validation criteria.`,
+      });
+    }
+
+    const sensitiveDataSessions = sessions.filter(s => s.complianceFlags?.sensitiveDataHandled);
+    if (sensitiveDataSessions.length > 0) {
+      recommendations.push({
+        priority: 'MEDIUM',
+        type: 'SENSITIVE_DATA_HANDLING',
+        message: `${sensitiveDataSessions.length} sessions detected sensitive data. Ensure proper data protection.`,
+      });
+    }
+
+    return recommendations;
+  }
+
+  /**
+   * Get records That are expiring based on retention policy
+   */
+  _getExpiringRecords() {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - this.config.dataRetentionDays);
+
+    return this.auditTrail.sessions.filter(session =>
+      new Date(session.startTime) < cutoffDate,
+    );
+  }
+
+  /**
+   * Convert sessions to CSV format
+   */
+  _convertToCSV(sessions, includeSteps) {
+    const headers = [
+      'SessionID', 'AgentID', 'StartTime', 'EndTime', 'Status',
+      'TotalSteps', 'CompletedSteps', 'FailedSteps', 'GitCommit', 'Branch',
+    ];
+
+    if (includeSteps) {
+      headers.push('StepCriterion', 'StepResult', 'StepDuration', 'StepError');
+    }
+
+    let csv = headers.join(',') + '\n';
+
+    sessions.forEach(session => {
+      const baseRow = [
+        session.sessionId,
+        session.agentId,
+        session.startTime,
+        session.endTime || '',
+        session.status,
+        session.totalSteps,
+        session.completedSteps,
+        session.failedSteps,
+        session.projectState?.gitCommit || '',
+        session.projectState?.branch || '',
+      ];
+
+      if (includeSteps && session.validationSteps.length > 0) {
+        session.validationSteps.forEach(step => {
+          const row = [...baseRow,
+            step.criterion,
+            step.result,
+            step.durationMs,
+            (step.error || '').replace(/,/g, ';'),
+          ];
+          csv += row.join(',') + '\n';
+        });
+      } else {
+        if (!includeSteps) {
+          csv += baseRow.join(',') + '\n';
+        }
+      }
+    });
+
+    return csv;
+  }
+
+  /**
+   * Calculate trend analysis for metrics
+   */
+  _calculateTrendAnalysis(trendData, metric) {
+    if (trendData.length < 2) {
+      return { trend: 'insufficient_data', change: 0, confidence: 'low' };
+    }
+
+    const values = trendData.map(d => d[metric === 'success_rate' ? 'successRate' : 'averageDuration']);
+    const recent = values.slice(-3);
+    const earlier = values.slice(0, -3);
+
+    if (earlier.length === 0) {
+      return { trend: 'insufficient_data', change: 0, confidence: 'low' };
+    }
+
+    const recentAvg = recent.reduce((sum, val) => sum + val, 0) / recent.length;
+    const earlierAvg = earlier.reduce((sum, val) => sum + val, 0) / earlier.length;
+
+    const change = ((recentAvg - earlierAvg) / earlierAvg) * 100;
+
+    let trend = 'stable';
+    if (Math.abs(change) > 10) {
+      trend = change > 0 ? 'improving' : 'declining';
+    }
+
+    return {
+      trend,
+      change: Math.round(change * 100) / 100,
+      confidence: values.length > 7 ? 'high' : 'medium',
+      recentAverage: Math.round(recentAvg * 100) / 100,
+      earlierAverage: Math.round(earlierAvg * 100) / 100,
+    };
+  }
+
+  /**
+   * Analyze error patterns in failed steps
+   */
+  _analyzeErrorPatterns(failedSteps) {
+    const errorCounts = {};
+    const errorCategories = {};
+
+    failedSteps.forEach(step => {
+      if (step.error) {
+        errorCounts[step.error] = (errorCounts[step.error] || 0) + 1;
+
+        // Categorize errors
+        let category = 'other';
+        if (step.error.includes('timeout')) {category = 'timeout';} else if (step.error.includes('permission')) {category = 'permission';} else if (step.error.includes('not found')) {category = 'missing_resource';} else if (step.error.includes('syntax')) {category = 'syntax';}
+
+        errorCategories[category] = (errorCategories[category] || 0) + 1;
+      }
+    });
+
+    return { errorCounts, errorCategories };
+  }
+
+  /**
+   * Analyze timing patterns in failed steps
+   */
+  _analyzeTimingPatterns(failedSteps) {
+    const hourCounts = {};
+    const dayOfWeekCounts = {};
+
+    failedSteps.forEach(step => {
+      const date = new Date(step.startTime);
+      const hour = date.getHours();
+      const dayOfWeek = date.getDay();
+
+      hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+      dayOfWeekCounts[dayOfWeek] = (dayOfWeekCounts[dayOfWeek] || 0) + 1;
+    });
+
+    return { hourCounts, dayOfWeekCounts };
+  }
+
+  /**
+   * Analyze agent patterns in failed steps
+   */
+  _analyzeAgentPatterns(failedSteps) {
+    const agentCounts = {};
+
+    failedSteps.forEach(step => {
+      agentCounts[step.agentId] = (agentCounts[step.agentId] || 0) + 1;
+    });
+
+    return { agentCounts };
+  }
+
+  /**
+   * Analyze context patterns in failed steps
+   */
+  _analyzeContextPatterns(failedSteps) {
+    const metadataPatterns = {};
+
+    failedSteps.forEach(step => {
+      if (step.metadata) {
+        Object.keys(step.metadata).forEach(key => {
+          if (!metadataPatterns[key]) {metadataPatterns[key] = {};}
+          const value = String(step.metadata[key]);
+          metadataPatterns[key][value] = (metadataPatterns[key][value] || 0) + 1;
+        });
+      }
+    });
+
+    return { metadataPatterns };
+  }
+
+  /**
+   * Generate failure recommendations based on patterns
+   */
+  _generateFailureRecommendations(patterns, criterion) {
+    const recommendations = [];
+
+    // Error pattern recommendations
+    const topErrors = Object.entries(patterns.errorMessages.errorCounts || {})
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3);
+
+    topErrors.forEach(([error, count]) => {
+      recommendations.push({
+        type: 'error_pattern',
+        priority: count > 5 ? 'HIGH' : 'MEDIUM',
+        message: `Recurring error: "${error}" (${count} occurrences)`,
+        suggestion: `Review ${criterion} validation logic for this error pattern`,
+      });
+    });
+
+    // Timing pattern recommendations
+    const { hourCounts } = patterns.timingPatterns;
+    const peakHour = Object.entries(hourCounts).sort(([,a], [,b]) => b - a)[0];
+
+    if (peakHour && peakHour[1] > 3) {
+      recommendations.push({
+        type: 'timing_pattern',
+        priority: 'LOW',
+        message: `Most failures occur at hour ${peakHour[0]} (${peakHour[1]} failures)`,
+        suggestion: 'Consider system resource availability during peak failure times',
+      });
+    }
+
+    return recommendations;
+  }
+
+  /**
+   * Calculate agent compliance score
+   */
+  _calculateAgentComplianceScore(sessions) {
+    if (sessions.length === 0) {return 100;}
+
+    const successfulSessions = sessions.filter(s => s.status === 'completed').length;
+    const baseScore = (successfulSessions / sessions.length) * 100;
+
+    // Adjust for recent activity
+    const recentSessions = sessions.filter(s => {
+      const sessionDate = new Date(s.startTime);
+      const daysDiff = (Date.now() - sessionDate.getTime()) / (1000 * 60 * 60 * 24);
+      return daysDiff <= 7;
+    });
+
+    const recentSuccessRate = recentSessions.length > 0 ?
+      (recentSessions.filter(s => s.status === 'completed').length / recentSessions.length) * 100 : 100;
+
+    // Weighted average: 70% overall, 30% recent
+    const complianceScore = (baseScore * 0.7) + (recentSuccessRate * 0.3);
+
+    return Math.round(complianceScore * 100) / 100;
+  }
+}
+
+module.exports = ValidationAuditTrailManager;
