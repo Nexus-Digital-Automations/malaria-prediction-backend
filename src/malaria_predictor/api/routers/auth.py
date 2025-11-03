@@ -60,7 +60,7 @@ async def register_user(
     """
     try:
         # Check if username or email already exists
-        existing_user_result = await session.execute(
+        existing_user_result = await session.execute(  # type: ignore[call-overload]
             f"SELECT id FROM users WHERE username = '{user_data.username}' OR email = '{user_data.email}'"
         )
         existing_user = existing_user_result.fetchone()
@@ -227,7 +227,7 @@ async def refresh_token(
 
         # Check if refresh token exists in database and is not revoked
         token_hash = hash_api_key(refresh_token)
-        result = await session.execute(
+        result = await session.execute(  # type: ignore[call-overload]
             f"SELECT * FROM refresh_tokens WHERE token_hash = '{token_hash}' "
             f"AND is_revoked = false AND expires_at > '{datetime.utcnow()}'"
         )
@@ -245,7 +245,7 @@ async def refresh_token(
             )
 
         # Get user
-        user_result = await session.execute(
+        user_result = await session.execute(  # type: ignore[call-overload]
             f"SELECT * FROM users WHERE id = '{stored_token.user_id}' AND is_active = true"
         )
         user_data = user_result.fetchone()
@@ -264,7 +264,7 @@ async def refresh_token(
         new_refresh_token = create_refresh_token(str(user_data.id))
 
         # Revoke old refresh token
-        await session.execute(
+        await session.execute(  # type: ignore[call-overload]
             f"UPDATE refresh_tokens SET is_revoked = true WHERE id = '{stored_token.id}'"
         )
 
@@ -328,7 +328,7 @@ async def logout(
     """
     try:
         # Revoke all active refresh tokens for the user
-        await session.execute(
+        await session.execute(  # type: ignore[call-overload]
             f"UPDATE refresh_tokens SET is_revoked = true "
             f"WHERE user_id = '{current_user.id}' AND is_revoked = false"
         )
@@ -443,7 +443,7 @@ async def create_api_key(
         return {
             "api_key": api_key,  # Only shown once
             "id": str(new_api_key.id),
-            "name": new_api_key.name,
+            "name": new_api_key.name,  # type: ignore[dict-item]
             "message": "API key created successfully. Save it securely - it won't be shown again.",
         }
 
@@ -471,7 +471,7 @@ async def list_api_keys(
         list[APIKeyResponse]: List of user's API keys (excluding key values)
     """
     try:
-        result = await session.execute(
+        result = await session.execute(  # type: ignore[call-overload]
             f"SELECT * FROM api_keys WHERE user_id = '{current_user.id}' ORDER BY created_at DESC"
         )
         api_keys = result.fetchall()
@@ -525,7 +525,7 @@ async def revoke_api_key(
     """
     try:
         # Check if API key exists and belongs to current user
-        result = await session.execute(
+        result = await session.execute(  # type: ignore[call-overload]
             f"SELECT * FROM api_keys WHERE id = '{api_key_id}' AND user_id = '{current_user.id}'"
         )
         api_key = result.fetchone()
@@ -536,7 +536,7 @@ async def revoke_api_key(
             )
 
         # Deactivate API key
-        await session.execute(
+        await session.execute(  # type: ignore[call-overload]
             f"UPDATE api_keys SET is_active = false WHERE id = '{api_key_id}'"
         )
         await session.commit()
