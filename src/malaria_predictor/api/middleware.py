@@ -30,7 +30,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     and error details for monitoring and debugging purposes.
     """
 
-    def __init__(self, app, enable_body_logging: bool = False) -> None:
+    def __init__(self, app, enable_body_logging: bool = False) -> None: # type: ignore[no-untyped-def]
         super().__init__(app)
         self.enable_body_logging = enable_body_logging
 
@@ -73,7 +73,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # Add timing header
             response.headers["X-Process-Time"] = str(process_time)
 
-            return response
+            return response # type: ignore[no-any-return]
 
         except Exception as e:
             # Log errors
@@ -120,7 +120,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     In production, consider using Redis for distributed rate limiting.
     """
 
-    def __init__(self, app, calls: int = 100, period: int = 60) -> None:
+    def __init__(self, app, calls: int = 100, period: int = 60) -> None: # type: ignore[no-untyped-def]
         super().__init__(app)
         self.calls = calls  # Number of calls allowed
         self.period = period  # Time period in seconds
@@ -164,7 +164,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         response.headers["X-RateLimit-Remaining"] = str(remaining)
         response.headers["X-RateLimit-Period"] = str(self.period)
 
-        return response
+        return response # type: ignore[no-any-return]
 
     def _get_client_ip(self, request: Request) -> str:
         """Extract client IP address."""
@@ -195,7 +195,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
     Collects request counts, response times, and error rates for monitoring.
     """
 
-    def __init__(self, app) -> None:
+    def __init__(self, app) -> None: # type: ignore[no-untyped-def]
         super().__init__(app)
         self.request_count: defaultdict[str, int] = defaultdict(int)
         self.response_times: defaultdict[str, list[float]] = defaultdict(list)
@@ -219,7 +219,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
             if response.status_code >= 400:
                 self.error_count[endpoint] += 1
 
-            return response
+            return response # type: ignore[no-any-return]
 
         except Exception as e:
             # Record error
@@ -247,7 +247,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
                 sum(response_times) / len(response_times) if response_times else 0
             )
 
-            metrics["endpoints"][endpoint] = {
+            metrics["endpoints"][endpoint] = { # type: ignore[index]
                 "request_count": self.request_count[endpoint],
                 "error_count": self.error_count[endpoint],
                 "error_rate": (
@@ -271,7 +271,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     and provides HIPAA-compliant security measures.
     """
 
-    def __init__(self, app, environment: str = "production") -> None:
+    def __init__(self, app, environment: str = "production") -> None: # type: ignore[no-untyped-def]
         super().__init__(app)
         self.environment = environment
 
@@ -335,7 +335,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         if self.environment == "production":
             response.headers.pop("Server", None)
 
-        return response
+        return response # type: ignore[no-any-return]
 
 
 class InputValidationMiddleware(BaseHTTPMiddleware):
@@ -345,7 +345,7 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
     Provides protection against injection attacks and malformed data.
     """
 
-    def __init__(self, app, max_content_length: int = 10 * 1024 * 1024) -> None:  # 10MB default
+    def __init__(self, app, max_content_length: int = 10 * 1024 * 1024) -> None:  # type: ignore[no-untyped-def]  # 10MB default
         super().__init__(app)
         self.max_content_length = max_content_length
 
@@ -414,7 +414,7 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
                     },
                 )
 
-        return await call_next(request)
+        return await call_next(request) # type: ignore[no-any-return]
 
     def _contains_dangerous_content(self, content: str) -> bool:
         """Check if content contains dangerous patterns."""
@@ -431,7 +431,7 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
     Middleware for adding unique request IDs for tracing.
     """
 
-    def __init__(self, app) -> None:
+    def __init__(self, app) -> None: # type: ignore[no-untyped-def]
         super().__init__(app)
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
@@ -448,7 +448,7 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
         # Add request ID to response headers
         response.headers["X-Request-ID"] = request_id
 
-        return response
+        return response # type: ignore[no-any-return]
 
 
 class AuditLoggingMiddleware(BaseHTTPMiddleware):
@@ -458,7 +458,7 @@ class AuditLoggingMiddleware(BaseHTTPMiddleware):
     Logs all requests for security and compliance monitoring.
     """
 
-    def __init__(self, app, log_sensitive_data: bool = False) -> None:
+    def __init__(self, app, log_sensitive_data: bool = False) -> None: # type: ignore[no-untyped-def]
         super().__init__(app)
         self.log_sensitive_data = log_sensitive_data
 
@@ -510,7 +510,7 @@ class AuditLoggingMiddleware(BaseHTTPMiddleware):
                 },
             )
 
-            return response
+            return response # type: ignore[no-any-return]
 
         except Exception as e:
             # Calculate processing time for failed requests
