@@ -163,7 +163,7 @@ class AlertEngine:
             return []
 
         finally:
-            db.close() # type: ignore[unused-coroutine]
+            db.close()
 
     async def process_risk_index(self, risk_index: MalariaRiskIndex) -> list[Alert]:
         """Process a risk index and generate alerts if needed.
@@ -328,7 +328,7 @@ class AlertEngine:
             List of applicable alert rules
         """
         # Base query for active rules
-        query = db.query(AlertRule).join(AlertConfiguration).filter( # type: ignore[attr-defined]
+        query = db.query(AlertRule).join(AlertConfiguration).filter(
             AlertRule.is_active,
             AlertConfiguration.is_active
         )
@@ -399,11 +399,11 @@ class AlertEngine:
             suppressed, suppression_reason = await self._check_suppression(db, rule, request)
 
             # Update rule statistics
-            rule.evaluation_count += 1 # type: ignore[assignment]
-            rule.last_evaluation = datetime.now() # type: ignore[assignment]
+            rule.evaluation_count += 1
+            rule.last_evaluation = datetime.now()
 
             if triggered:
-                rule.triggered_count += 1 # type: ignore[assignment]
+                rule.triggered_count += 1
                 self.stats["rules_triggered"] = cast(int, self.stats["rules_triggered"]) + 1
 
             await db.commit()
@@ -606,7 +606,7 @@ class AlertEngine:
 
         # Check cooldown period
         if rule.id in self.suppression_cache:
-            last_triggered = self.suppression_cache[rule.id] # type: ignore[index]
+            last_triggered = self.suppression_cache[rule.id]
             cooldown_end = last_triggered + timedelta(hours=int(rule.cooldown_period_hours))
 
             if now < cooldown_end:
@@ -762,7 +762,7 @@ class AlertEngine:
             title = title.replace(f"{{{var}}}", str(value))
             message = message.replace(f"{{{var}}}", str(value))
 
-        return title, message # type: ignore[return-value]
+        return title, message
 
     def _generate_default_message(
         self,

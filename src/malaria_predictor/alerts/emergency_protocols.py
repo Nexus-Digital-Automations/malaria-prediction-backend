@@ -210,14 +210,14 @@ class EmergencyResponseProtocolManager:
                 # Prepare notification data
                 notification_data = {
                     "alert_id": alert.id,
-                    "risk_level": alert.risk_level,  # type: ignore[attr-defined]
+                    "risk_level": alert.risk_level,
                     "location": {
                         "latitude": alert.latitude,
                         "longitude": alert.longitude,
-                        "area": alert.area_name  # type: ignore[attr-defined]
+                        "area": alert.area_name
                     },
                     "timestamp": alert.created_at.isoformat(),
-                    "message": alert.message,  # type: ignore[attr-defined]
+                    "message": alert.message,
                     "protocol_id": protocol.protocol_id
                 }
 
@@ -266,9 +266,9 @@ class EmergencyResponseProtocolManager:
                 # Send notifications via configured methods
                 for method in contact.notification_methods:
                     notification_request = NotificationRequest(
-                        alert_id=alert.id,  # type: ignore[arg-type]
+                        alert_id=alert.id,
                         recipient=contact.email,
-                        message=f"EMERGENCY ALERT: {alert.message}",  # type: ignore[attr-defined]
+                        message=f"EMERGENCY ALERT: {alert.message}",
                         channel=method,
                         priority="emergency",
                         metadata={
@@ -284,7 +284,7 @@ class EmergencyResponseProtocolManager:
                         "contact": contact.name,
                         "method": method,
                         "success": result.success,
-                        "details": result.details  # type: ignore[attr-defined]
+                        "details": result.details
                     })
 
                     if result.success:
@@ -380,9 +380,9 @@ class EmergencyResponseProtocolManager:
         # Check risk level condition
         if "risk_level" in conditions:
             risk_condition = conditions["risk_level"]
-            if "min" in risk_condition and alert.risk_level < risk_condition["min"]:  # type: ignore[attr-defined]
+            if "min" in risk_condition and alert.risk_level < risk_condition["min"]:
                 return False
-            if "max" in risk_condition and alert.risk_level > risk_condition["max"]:  # type: ignore[attr-defined]
+            if "max" in risk_condition and alert.risk_level > risk_condition["max"]:
                 return False
 
         # Additional condition checks can be added here

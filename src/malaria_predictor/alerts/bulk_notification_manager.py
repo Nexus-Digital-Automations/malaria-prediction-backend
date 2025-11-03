@@ -745,7 +745,7 @@ class BulkNotificationManager:
 
             if "push" in channels:
                 async with get_session() as db:
-                    device_tokens = db.query(UserDeviceToken).filter(  # type: ignore[attr-defined]
+                    device_tokens = db.query(UserDeviceToken).filter(
                         UserDeviceToken.user_id.in_(user_ids),
                         UserDeviceToken.is_active,
                         UserDeviceToken.is_valid

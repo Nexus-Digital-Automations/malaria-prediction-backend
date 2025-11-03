@@ -313,7 +313,7 @@ async def get_cache_status(
     """
     try:
         from ...performance.cache_optimization import (
-            get_cache_optimizer,  # type: ignore[import-untyped]
+            get_cache_optimizer,
         )
 
         cache_optimizer = await get_cache_optimizer()

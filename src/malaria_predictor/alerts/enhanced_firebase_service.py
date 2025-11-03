@@ -789,7 +789,7 @@ class EnhancedFirebaseService:
         """Get active device tokens for a user."""
         try:
             async with get_session() as db:
-                tokens = db.query(UserDeviceToken).filter(  # type: ignore[attr-defined]
+                tokens = db.query(UserDeviceToken).filter(
                     UserDeviceToken.user_id == user_id,
                     UserDeviceToken.is_active,
                     UserDeviceToken.is_valid

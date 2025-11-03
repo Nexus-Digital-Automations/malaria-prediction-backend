@@ -807,7 +807,7 @@ class NotificationService:
             db.add(delivery)
             db.commit()
 
-            result.delivery_id = delivery.id  # type: ignore[assignment]
+            result.delivery_id = delivery.id
 
         except Exception as e:
             db.rollback()
@@ -890,12 +890,12 @@ class NotificationService:
                 return None
 
             return EmailConfig(
-                smtp_host=self.settings.SMTP_HOST,  # type: ignore[attr-defined]
+                smtp_host=self.settings.SMTP_HOST,
                 smtp_port=getattr(self.settings, "SMTP_PORT", 587),
-                smtp_username=self.settings.SMTP_USERNAME,  # type: ignore[attr-defined]
-                smtp_password=self.settings.SMTP_PASSWORD,  # type: ignore[attr-defined]
+                smtp_username=self.settings.SMTP_USERNAME,
+                smtp_password=self.settings.SMTP_PASSWORD,
                 smtp_use_tls=getattr(self.settings, "SMTP_USE_TLS", True),
-                from_email=self.settings.FROM_EMAIL,  # type: ignore[attr-defined]
+                from_email=self.settings.FROM_EMAIL,
                 from_name=getattr(self.settings, "FROM_NAME", "Malaria Alert System")
             )
 
@@ -916,10 +916,10 @@ class NotificationService:
                 return None
 
             return SMSConfig(
-                provider=self.settings.SMS_PROVIDER,  # type: ignore[attr-defined]
-                api_key=self.settings.SMS_API_KEY,  # type: ignore[attr-defined]
-                api_secret=self.settings.SMS_API_SECRET,  # type: ignore[attr-defined]
-                from_number=self.settings.SMS_FROM_NUMBER,  # type: ignore[attr-defined]
+                provider=self.settings.SMS_PROVIDER,
+                api_key=self.settings.SMS_API_KEY,
+                api_secret=self.settings.SMS_API_SECRET,
+                from_number=self.settings.SMS_FROM_NUMBER,
                 api_endpoint=getattr(self.settings, "SMS_API_ENDPOINT", None)
             )
 

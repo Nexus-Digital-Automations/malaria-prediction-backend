@@ -441,7 +441,7 @@ class EmergencyAlertSystem:
             cancelled_count = 0
             for notification in related_notifications:
                 if notification.status == NotificationStatus.PENDING:
-                    notification.status = NotificationStatus.CANCELED  # type: ignore[assignment]
+                    notification.status = NotificationStatus.CANCELED
                     cancelled_count += 1
 
             session.commit()
