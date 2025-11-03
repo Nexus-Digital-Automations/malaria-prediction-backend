@@ -262,7 +262,7 @@ class FeatureEngineer:
             0.4 * temp_suitability + 0.4 * water_suitability + 0.2 * veg_suitability
         )
 
-        return np.clip(breeding_index, 0, 1)
+        return cast(np.ndarray, np.clip(breeding_index, 0, 1))
 
     def _calculate_climate_stress(
         self, temperature: np.ndarray, precipitation: np.ndarray, veg_stress: np.ndarray
@@ -373,7 +373,7 @@ class FeatureEngineer:
         stress[valid_mask] = 1 - (current_ndvi[valid_mask] / max_ndvi[valid_mask])
         stress = np.clip(stress, 0, 1)
 
-        return stress
+        return cast(np.ndarray, stress)
 
     def _calculate_temporal_features(
         self, harmonized_data: dict[str, Any], target_date: datetime
@@ -449,7 +449,7 @@ class QualityManager:
     """
 
     def __init__(self) -> None:
-        self.quality_thresholds = {
+        self.quality_thresholds: dict[str, dict[str, Any]] = {
             "era5": {
                 "temperature_range": (-50, 60),  # Celsius
                 "confidence_threshold": 0.8,
@@ -482,7 +482,7 @@ class QualityManager:
         Returns:
             Quality assessment with scores and flags
         """
-        quality_assessment = {
+        quality_assessment: dict[str, Any] = {
             "overall_quality": 1.0,
             "source_quality": {},
             "consistency_checks": {},
@@ -493,8 +493,8 @@ class QualityManager:
         # Assess each source individually
         for source_name, source_data in harmonized_data.items():
             source_quality = self._assess_source_quality(source_name, source_data)
-            quality_assessment["source_quality"][source_name] = source_quality
-            quality_assessment["overall_quality"] *= source_quality["score"]
+            cast(dict, quality_assessment["source_quality"])[source_name] = source_quality
+            quality_assessment["overall_quality"] = cast(float, quality_assessment["overall_quality"]) * source_quality["score"]
 
         # Cross-source consistency checks
         if len(harmonized_data) > 1:
@@ -502,21 +502,22 @@ class QualityManager:
             quality_assessment["consistency_checks"] = consistency
 
             if not consistency["overall_consistency"]:
-                quality_assessment["overall_quality"] *= 0.8  # Penalize inconsistency
+                quality_assessment["overall_quality"] = cast(float, quality_assessment["overall_quality"]) * 0.8  # Penalize inconsistency
 
         # Data completeness assessment
         completeness = self._assess_data_completeness(harmonized_data)
         quality_assessment["data_completeness"] = completeness
-        quality_assessment["overall_quality"] *= completeness["overall_completeness"]
+        quality_assessment["overall_quality"] = cast(float, quality_assessment["overall_quality"]) * completeness["overall_completeness"]
 
         # Overall quality categorization
-        if quality_assessment["overall_quality"] > 0.8:
+        overall_quality = cast(float, quality_assessment["overall_quality"])
+        if overall_quality > 0.8:
             quality_assessment["quality_category"] = "high"
-        elif quality_assessment["overall_quality"] > 0.6:
+        elif overall_quality > 0.6:
             quality_assessment["quality_category"] = "medium"
         else:
             quality_assessment["quality_category"] = "low"
-            quality_assessment["processing_flags"].append("low_overall_quality")
+            cast(list, quality_assessment["processing_flags"]).append("low_overall_quality")
 
         return quality_assessment
 
