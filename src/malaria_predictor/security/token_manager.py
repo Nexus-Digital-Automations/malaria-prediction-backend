@@ -154,7 +154,7 @@ class SecureTokenStorage:
         try:
             # Update cache
             self._token_cache[identifier] = token_data
-            self._cache_expiry[identifier] = token_data.expires_at
+            self._cache_expiry[identifier] = token_data.expires_at  # type: ignore[assignment]
 
             # Record access pattern
             self._record_access(identifier, "store")
@@ -184,7 +184,7 @@ class SecureTokenStorage:
                 token_data = self._token_cache[identifier]
 
                 # Check expiration
-                if datetime.now(UTC) >= token_data.expires_at:
+                if datetime.now(UTC) >= token_data.expires_at:  # type: ignore[operator]
                     logger.warning(f"Token expired for identifier: {identifier[:8]}...")
                     await self.remove_token(identifier)
                     return None
@@ -292,8 +292,8 @@ class SecureTokenStorage:
                     "access_token": token_data.access_token,
                     "refresh_token": token_data.refresh_token,
                     "token_type": token_data.token_type,
-                    "expires_at": token_data.expires_at.isoformat(),
-                    "issued_at": token_data.issued_at.isoformat(),
+                    "expires_at": token_data.expires_at.isoformat(),  # type: ignore[union-attr]
+                    "issued_at": token_data.issued_at.isoformat(),  # type: ignore[union-attr]
                     "scopes": list(token_data.scopes) if token_data.scopes else [],
                     "user_id": token_data.user_id,
                     "session_id": token_data.session_id,
@@ -352,7 +352,7 @@ class SecureTokenStorage:
                 )
 
                 self._token_cache[identifier] = token_data
-                self._cache_expiry[identifier] = token_data.expires_at
+                self._cache_expiry[identifier] = token_data.expires_at  # type: ignore[assignment]
 
             # Load metadata if available
             if self.metadata_file.exists():
@@ -606,7 +606,7 @@ class TokenManager:
                 details={"scopes": payload.get("scopes", [])},
             )
 
-            return payload
+            return payload  # type: ignore[no-any-return]
 
         except JWTError as e:
             await self._log_security_event(
@@ -698,6 +698,9 @@ class TokenManager:
                 if attempt == self.max_refresh_attempts - 1:
                     raise TokenError(f"Token refresh failed after {self.max_refresh_attempts} attempts: {e}") from e
                 await asyncio.sleep(2 ** attempt)
+
+        # Should never reach here due to raises in the loop, but satisfy mypy
+        raise TokenError(f"Token refresh failed after {self.max_refresh_attempts} attempts")
 
     async def revoke_token(self, session_id: str, user_id: str, reason: str = "user_request") -> bool:
         """
