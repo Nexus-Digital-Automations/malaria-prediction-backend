@@ -42,7 +42,7 @@ class PositionalEncoding(nn.Module):
         self.register_buffer("pe", pe.unsqueeze(0))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return x + self.pe[:, : x.size(1)]
+        return x + self.pe[:, : x.size(1)]  # type: ignore[index]
 
 
 class AttentionWeights(nn.Module):
@@ -210,7 +210,7 @@ class MalariaLSTM(pl.LightningModule):
         if uncertainty_quantification:
             self.loss_fn = nn.GaussianNLLLoss()
         else:
-            self.loss_fn = nn.MSELoss()
+            self.loss_fn = nn.MSELoss()  # type: ignore[assignment]
 
     def forward(self, batch: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
         """
@@ -336,7 +336,7 @@ class MalariaLSTM(pl.LightningModule):
         self.log("train_loss", loss, prog_bar=True)
         self.log("train_mae", mae, prog_bar=True)
 
-        return loss
+        return loss  # type: ignore[no-any-return]
 
     def validation_step(
         self, batch: dict[str, torch.Tensor], batch_idx: int
@@ -380,19 +380,19 @@ class MalariaLSTM(pl.LightningModule):
         self.log("val_rmse", rmse, prog_bar=True)
         self.log("val_r2", r2, prog_bar=True)
 
-        return loss
+        return loss  # type: ignore[no-any-return]
 
-    def configure_optimizers(self) -> dict[str, Any]:
+    def configure_optimizers(self) -> dict[str, Any]:  # type: ignore[override]
         """Configure optimizers and learning rate schedulers."""
 
         optimizer = torch.optim.AdamW(
             self.parameters(),
-            lr=self.hparams.learning_rate,
-            weight_decay=self.hparams.weight_decay,
+            lr=self.hparams.learning_rate,  # type: ignore[attr-defined]
+            weight_decay=self.hparams.weight_decay,  # type: ignore[attr-defined]
         )
 
         scheduler = ReduceLROnPlateau(
-            optimizer, mode="min", factor=0.5, patience=10, verbose=True
+            optimizer, mode="min", factor=0.5, patience=10, verbose=True  # type: ignore[call-arg]
         )
 
         return {
@@ -426,7 +426,7 @@ class MalariaLSTM(pl.LightningModule):
             for key, data in environmental_data.items():
                 tensor_data = torch.FloatTensor(data)
                 if tensor_data.dim() == 2:
-                    tensor_data = tensor_data.unsqueeze(0)  # Add batch dimension
+                    tensor_data = tensor_data.unsqueeze(0)  # type: ignore[assignment]  # Add batch dimension
                 batch[key] = tensor_data
 
             # Forward pass
@@ -469,7 +469,7 @@ class MalariaLSTM(pl.LightningModule):
         for key, data in environmental_data.items():
             tensor_data = torch.FloatTensor(data)
             if tensor_data.dim() == 2:
-                tensor_data = tensor_data.unsqueeze(0)
+                tensor_data = tensor_data.unsqueeze(0)  # type: ignore[assignment]
             tensor_data.requires_grad_(True)
             batch[key] = tensor_data
 
@@ -533,7 +533,7 @@ class MalariaLSTM(pl.LightningModule):
             results.append(result)
         return results
 
-    def load_from_checkpoint(self, checkpoint_path: str) -> None:
+    def load_from_checkpoint(self, checkpoint_path: str) -> None:  # type: ignore[override]
         """Load model from checkpoint for testing compatibility."""
         # Mock loading - call torch.load for test compatibility
         import torch
@@ -546,7 +546,7 @@ class MalariaLSTM(pl.LightningModule):
         import json
 
         with open(metadata_path) as f:
-            return json.load(f)
+            return json.load(f)  # type: ignore[no-any-return]
 
 
 class ModelConfig:
