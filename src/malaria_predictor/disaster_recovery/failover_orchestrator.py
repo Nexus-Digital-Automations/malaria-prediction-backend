@@ -20,7 +20,7 @@ from datetime import datetime
 from typing import Any
 
 import httpx
-from kubernetes import client
+from kubernetes import client  # type: ignore[import-untyped]
 from kubernetes import config as k8s_config
 
 # Setup logging
@@ -54,7 +54,7 @@ class ServiceHealthChecker:
         Returns:
             Health status dictionary
         """
-        health_status = {
+        health_status: dict[str, Any] = {
             "healthy": False,
             "response_time": None,
             "status_code": None,
@@ -102,9 +102,9 @@ class ServiceHealthChecker:
         Returns:
             Database health status
         """
-        import asyncpg
+        import asyncpg  # type: ignore[import-untyped]
 
-        health_status = {
+        health_status: dict[str, Any] = {
             "healthy": False,
             "connection_time": None,
             "replication_status": None,
@@ -564,7 +564,7 @@ class FailoverOrchestrator:
 
         # Failover state
         self.failover_in_progress = False
-        self.last_health_check = None
+        self.last_health_check: dict[str, Any] | None = None
         self.consecutive_failures = 0
         self.max_failures_before_failover = 3
 
@@ -574,7 +574,7 @@ class FailoverOrchestrator:
         Returns:
             Health status summary
         """
-        health_summary = {
+        health_summary: dict[str, Any] = {
             "overall_healthy": False,
             "timestamp": datetime.now(),
             "components": {},
@@ -614,7 +614,7 @@ class FailoverOrchestrator:
             return {"error": "Failover already in progress"}
 
         self.failover_in_progress = True
-        failover_result = {
+        failover_result: dict[str, Any] = {
             "started_at": datetime.now(),
             "type": "blue_green_failover",
             "success": False,
@@ -762,7 +762,7 @@ class FailoverOrchestrator:
         Returns:
             Database failover result
         """
-        failover_result = {
+        failover_result: dict[str, Any] = {
             "started_at": datetime.now(),
             "type": "database_failover",
             "success": False,
@@ -944,7 +944,7 @@ class FailoverOrchestrator:
                 await asyncio.sleep(60)  # Wait longer on error
 
 
-async def main():
+async def main() -> int:
     """Main entry point for failover orchestrator."""
     import argparse
 
@@ -999,7 +999,7 @@ async def main():
 
     if not args.command:
         parser.print_help()
-        return
+        return 1
 
     # Initialize orchestrator
     orchestrator = FailoverOrchestrator(
