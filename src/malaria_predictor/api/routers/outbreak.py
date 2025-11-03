@@ -437,29 +437,29 @@ async def generate_visualization(
 
         # Add chart-specific configurations
         if chart_type == "timeline":
-            chart_config["data"]["events"] = []
-            chart_config["data"]["outbreak_markers"] = []
-            chart_config["configuration"]["show_interventions"] = True
+            chart_config["data"]["events"] = [] # type: ignore[index]
+            chart_config["data"]["outbreak_markers"] = [] # type: ignore[index]
+            chart_config["configuration"]["show_interventions"] = True # type: ignore[index]
 
         elif chart_type == "epidemic_curve":
-            chart_config["data"]["case_series"] = []
-            chart_config["data"]["trend_lines"] = []
-            chart_config["configuration"]["show_moving_average"] = True
+            chart_config["data"]["case_series"] = [] # type: ignore[index]
+            chart_config["data"]["trend_lines"] = [] # type: ignore[index]
+            chart_config["configuration"]["show_moving_average"] = True # type: ignore[index]
 
         elif chart_type == "transmission_pattern":
-            chart_config["data"]["network_nodes"] = []
-            chart_config["data"]["network_edges"] = []
-            chart_config["data"]["intensity_heatmap"] = []
+            chart_config["data"]["network_nodes"] = [] # type: ignore[index]
+            chart_config["data"]["network_edges"] = [] # type: ignore[index]
+            chart_config["data"]["intensity_heatmap"] = [] # type: ignore[index]
 
         elif chart_type == "geographic_cluster":
-            chart_config["data"]["clusters"] = []
-            chart_config["data"]["hotspots"] = []
-            chart_config["configuration"]["map_style"] = "terrain"
+            chart_config["data"]["clusters"] = [] # type: ignore[index]
+            chart_config["data"]["hotspots"] = [] # type: ignore[index]
+            chart_config["configuration"]["map_style"] = "terrain" # type: ignore[index]
 
         elif chart_type == "surveillance_dashboard":
-            chart_config["data"]["surveillance_metrics"] = {}
-            chart_config["data"]["alert_summary"] = {}
-            chart_config["configuration"]["widget_layout"] = "grid"
+            chart_config["data"]["surveillance_metrics"] = {} # type: ignore[index]
+            chart_config["data"]["alert_summary"] = {} # type: ignore[index]
+            chart_config["configuration"]["widget_layout"] = "grid" # type: ignore[index]
 
         response = {
             "operation_id": operation_id,
