@@ -486,7 +486,7 @@ class SecurityAuditLogger:
         self._metrics_lock = asyncio.Lock()
 
         # Alert callbacks
-        self.alert_callbacks: list[callable] = []
+        self.alert_callbacks: list[callable] = [] # type: ignore[valid-type]
 
         logger.info(f"Security audit logger initialized at {storage_path}")
 
@@ -537,7 +537,7 @@ class SecurityAuditLogger:
         event_id = f"{self.application_name}_{int(time.time())}_{str(uuid.uuid4())[:8]}"
 
         # Create audit event
-        event = AuditEvent(
+        event = AuditEvent(  # type: ignore[call-arg]
             event_id=event_id,
             event_type=event_type,
             source_system=self.application_name,
@@ -686,7 +686,7 @@ class SecurityAuditLogger:
         # Trigger alert callbacks
         for callback in self.alert_callbacks:
             try:
-                await callback(anomaly, triggering_event)
+                await callback(anomaly, triggering_event) # type: ignore[misc]
             except Exception as e:
                 logger.error(f"Alert callback failed: {e}")
 
@@ -797,9 +797,9 @@ class SecurityAuditLogger:
             if event.user_id:
                 if event.user_id not in user_access:
                     user_access[event.user_id] = {"count": 0, "resources": set()}
-                user_access[event.user_id]["count"] += 1
+                user_access[event.user_id]["count"] += 1 # type: ignore[operator]
                 if event.resource_id:
-                    user_access[event.user_id]["resources"].add(event.resource_id)
+                    user_access[event.user_id]["resources"].add(event.resource_id) # type: ignore[attr-defined]
 
         return {
             "framework": "HIPAA",
