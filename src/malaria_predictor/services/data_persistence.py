@@ -85,27 +85,27 @@ class ERA5DataPersistence:
             if temp_var is not None and temp_var.attrs.get("units") == "K":
                 temp_values = temp_var.values - 273.15
             else:
-                temp_values = temp_var.values if temp_var is not None else None
+                temp_values = temp_var.values if temp_var is not None else None  # type: ignore[assignment]
 
             if temp_max_var is not None and temp_max_var.attrs.get("units") == "K":
                 temp_max_values = temp_max_var.values - 273.15
             else:
                 temp_max_values = (
-                    temp_max_var.values if temp_max_var is not None else None
+                    temp_max_var.values if temp_max_var is not None else None  # type: ignore[assignment]
                 )
 
             if temp_min_var is not None and temp_min_var.attrs.get("units") == "K":
                 temp_min_values = temp_min_var.values - 273.15
             else:
                 temp_min_values = (
-                    temp_min_var.values if temp_min_var is not None else None
+                    temp_min_var.values if temp_min_var is not None else None  # type: ignore[assignment]
                 )
 
             if dewpoint_var is not None and dewpoint_var.attrs.get("units") == "K":
                 dewpoint_values = dewpoint_var.values - 273.15
             else:
                 dewpoint_values = (
-                    dewpoint_var.values if dewpoint_var is not None else None
+                    dewpoint_var.values if dewpoint_var is not None else None  # type: ignore[assignment]
                 )
 
             # Create data points for each time/location combination
@@ -303,7 +303,7 @@ class ERA5DataPersistence:
                     for lon_idx, lon in enumerate(lons):
                         risk_data = {
                             "composite_score": float(
-                                composite_risk.values[t_idx, lat_idx, lon_idx]
+                                composite_risk.values[t_idx, lat_idx, lon_idx]  # type: ignore[union-attr]
                             ),
                             "temp_risk": (
                                 float(temp_risk.values[t_idx, lat_idx, lon_idx])
