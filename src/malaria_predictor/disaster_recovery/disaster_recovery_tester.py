@@ -17,11 +17,12 @@ import logging
 import subprocess
 import time
 from datetime import datetime
+from typing import Any, cast
 
-import asyncpg
+import asyncpg  # type: ignore[import-untyped]
 import httpx
 import redis.asyncio as redis
-from kubernetes import client
+from kubernetes import client  # type: ignore[import-untyped]
 from kubernetes import config as k8s_config
 
 # Setup logging
@@ -39,9 +40,9 @@ logger = logging.getLogger(__name__)
 class DRTestMetrics:
     """Metrics collection for disaster recovery testing."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize metrics collector."""
-        self.metrics = {
+        self.metrics: dict[str, Any] = {
             "test_start_time": None,
             "test_end_time": None,
             "recovery_start_time": None,
@@ -91,7 +92,7 @@ class DRTestMetrics:
         """Add performance metric."""
         self.metrics["performance_metrics"][metric_name] = value
 
-    def get_summary(self) -> dict:
+    def get_summary(self) -> dict[str, Any]:
         """Get test metrics summary."""
         return {
             "test_info": {
@@ -131,9 +132,9 @@ class SystemValidator:
         self.database_url = database_url
         self.redis_url = redis_url
 
-    async def validate_api_health(self) -> dict:
+    async def validate_api_health(self) -> dict[str, Any]:
         """Validate API service health."""
-        results = {
+        results: dict[str, Any] = {
             "liveness_check": False,
             "readiness_check": False,
             "startup_check": False,
@@ -177,9 +178,9 @@ class SystemValidator:
 
         return results
 
-    async def validate_database_health(self) -> dict:
+    async def validate_database_health(self) -> dict[str, Any]:
         """Validate database connectivity and integrity."""
-        results = {
+        results: dict[str, Any] = {
             "connection_test": False,
             "basic_queries": False,
             "timescaledb_status": False,
@@ -260,9 +261,9 @@ class SystemValidator:
 
         return results
 
-    async def validate_redis_health(self) -> dict:
+    async def validate_redis_health(self) -> dict[str, Any]:
         """Validate Redis connectivity and performance."""
-        results = {
+        results: dict[str, Any] = {
             "connection_test": False,
             "ping_test": False,
             "basic_operations": False,
@@ -327,9 +328,9 @@ class SystemValidator:
 
         return results
 
-    async def validate_prediction_functionality(self) -> dict:
+    async def validate_prediction_functionality(self) -> dict[str, Any]:
         """Validate ML prediction functionality."""
-        results = {
+        results: dict[str, Any] = {
             "prediction_endpoint": False,
             "sample_prediction": False,
             "model_loading": False,
@@ -403,7 +404,7 @@ class KubernetesManager:
         self.apps_v1 = client.AppsV1Api()
         self.core_v1 = client.CoreV1Api()
 
-    async def get_deployment_status(self, deployment_name: str) -> dict:
+    async def get_deployment_status(self, deployment_name: str) -> dict[str, Any]:
         """Get deployment status and health."""
         try:
             deployment = self.apps_v1.read_namespaced_deployment(
@@ -511,7 +512,7 @@ class DisasterRecoveryTester:
         self.k8s_manager = KubernetesManager(namespace)
         self.metrics = DRTestMetrics()
 
-    async def test_backup_integrity(self) -> dict:
+    async def test_backup_integrity(self) -> dict[str, Any]:
         """Test backup file integrity and metadata."""
         self.metrics.start_test("backup_integrity")
 
@@ -564,7 +565,7 @@ class DisasterRecoveryTester:
         self.metrics.end_test()
         return verification_results
 
-    async def test_application_recovery(self) -> dict:
+    async def test_application_recovery(self) -> dict[str, Any]:
         """Test application pod recovery."""
         self.metrics.start_test("application_recovery")
 
@@ -621,7 +622,7 @@ class DisasterRecoveryTester:
         self.metrics.end_test()
         return recovery_results
 
-    async def test_database_recovery_simulation(self) -> dict:
+    async def test_database_recovery_simulation(self) -> dict[str, Any]:
         """Test database recovery procedures (simulation only)."""
         self.metrics.start_test("database_recovery_simulation")
 
@@ -703,7 +704,7 @@ class DisasterRecoveryTester:
         self.metrics.end_test()
         return recovery_results
 
-    async def run_performance_benchmark(self) -> dict:
+    async def run_performance_benchmark(self) -> dict[str, Any]:
         """Run performance benchmark after recovery."""
         benchmark_results = {
             "api_performance": {},
@@ -752,7 +753,7 @@ class DisasterRecoveryTester:
 
             await conn.close()
         except Exception as e:
-            benchmark_results["database_performance"]["error"] = str(e)
+            cast(dict[str, Any], benchmark_results["database_performance"])["error"] = str(e)
 
         # Redis performance test
         try:
@@ -774,17 +775,17 @@ class DisasterRecoveryTester:
 
             await redis_client.close()
         except Exception as e:
-            benchmark_results["redis_performance"]["error"] = str(e)
+            cast(dict[str, Any], benchmark_results["redis_performance"])["error"] = str(e)
 
         # Calculate overall performance grade
         api_good = (
-            benchmark_results["api_performance"].get("avg_response_time", 999) < 1.0
+            cast(dict[str, Any], benchmark_results["api_performance"]).get("avg_response_time", 999) < 1.0
         )
         db_good = (
-            benchmark_results["database_performance"].get("avg_query_time", 999) < 0.1
+            cast(dict[str, Any], benchmark_results["database_performance"]).get("avg_query_time", 999) < 0.1
         )
         redis_good = (
-            benchmark_results["redis_performance"].get("avg_ping_time", 999) < 0.01
+            cast(dict[str, Any], benchmark_results["redis_performance"]).get("avg_ping_time", 999) < 0.01
         )
 
         if api_good and db_good and redis_good:
@@ -798,7 +799,7 @@ class DisasterRecoveryTester:
 
         return benchmark_results
 
-    async def run_comprehensive_test(self) -> dict:
+    async def run_comprehensive_test(self) -> dict[str, Any]:
         """Run comprehensive disaster recovery test."""
         logger.info("Starting comprehensive disaster recovery test")
 
@@ -820,15 +821,15 @@ class DisasterRecoveryTester:
             logger.info(f"Running test: {test_name}")
             try:
                 result = await test_func()
-                comprehensive_results["test_results"][test_name] = result
+                cast(dict[str, Any], comprehensive_results["test_results"])[test_name] = result
                 logger.info(f"Test {test_name} completed")
             except Exception as e:
                 logger.error(f"Test {test_name} failed: {e}")
-                comprehensive_results["test_results"][test_name] = {"error": str(e)}
+                cast(dict[str, Any], comprehensive_results["test_results"])[test_name] = {"error": str(e)}
 
         # Determine overall success
         test_successes = []
-        for test_name, result in comprehensive_results["test_results"].items():
+        for test_name, result in cast(dict[str, Any], comprehensive_results["test_results"]).items():
             if test_name == "backup_integrity":
                 success = result.get("backup_verification_passed", False)
             elif test_name == "application_recovery":
@@ -859,7 +860,7 @@ class DisasterRecoveryTester:
         return comprehensive_results
 
 
-async def main():
+async def main() -> int:
     """Main entry point for DR testing."""
     import argparse
 
@@ -894,7 +895,7 @@ async def main():
 
     if not args.test:
         parser.print_help()
-        return
+        return 0
 
     # Initialize tester
     tester = DisasterRecoveryTester(
