@@ -216,7 +216,7 @@ class MalariaTrainingPipeline:
         X = np.vstack(all_features)
         y = np.concatenate(all_targets)
         dates = np.array(all_dates)
-        locations = np.array(all_locations)
+        locations = np.array(all_locations)  # type: ignore[assignment]
 
         # Apply feature scaling
         X_scaled = self.scaler.fit_transform(X)
@@ -545,7 +545,7 @@ class MalariaTrainingPipeline:
         )
 
         # Define objective function
-        def objective(trial):
+        def objective(trial: optuna.Trial) -> float:
             # Sample hyperparameters
             params = {
                 "hidden_size": trial.suggest_categorical("hidden_size", [64, 128, 256]),
@@ -578,7 +578,7 @@ class MalariaTrainingPipeline:
                 # Get optimization metric
                 metric_key = f"{self.config['optimization_metric']}_mean"
                 if metric_key in cv_summary:
-                    return cv_summary[metric_key]
+                    return cv_summary[metric_key]  # type: ignore[no-any-return]
                 else:
                     return float("inf")
 
@@ -776,7 +776,7 @@ class MalariaTrainingPipeline:
 
         return X_scaled.astype(np.float32), y
 
-    async def train_model(self, model, X: np.ndarray, y: np.ndarray) -> dict:
+    async def train_model(self, model: Any, X: np.ndarray, y: np.ndarray) -> dict:
         """Train individual model for testing compatibility."""
         # Mock training implementation
         if hasattr(model, "train"):
@@ -785,7 +785,7 @@ class MalariaTrainingPipeline:
             train_X, val_X = X[:split_idx], X[split_idx:]
             train_y, val_y = y[:split_idx], y[split_idx:]
 
-            return await model.train(train_X, train_y, val_X, val_y)
+            return await model.train(train_X, train_y, val_X, val_y)  # type: ignore[no-any-return]
         else:
             # Return mock training history
             return {
@@ -820,7 +820,7 @@ class MalariaTrainingPipeline:
         best_score = 0.87 + np.random.rand() * 0.1  # Mock score
         return best_params, best_score
 
-    async def validate_model(self, model, X_val: np.ndarray, y_val: np.ndarray) -> dict:
+    async def validate_model(self, model: Any, X_val: np.ndarray, y_val: np.ndarray) -> dict:
         """Validate model for testing compatibility."""
         # Mock validation
         if hasattr(model, "predict_batch"):
@@ -829,7 +829,7 @@ class MalariaTrainingPipeline:
             )
             pred_classes = [np.argmax(pred["predictions"]) for pred in predictions]
         else:
-            pred_classes = [0] * len(y_val)  # Mock predictions
+            pred_classes = [0] * len(y_val)  # type: ignore[list-item]
 
         from sklearn.metrics import (
             accuracy_score,
@@ -849,14 +849,14 @@ class MalariaTrainingPipeline:
             "confusion_matrix": confusion_matrix(y_val, pred_classes).tolist(),
         }
 
-    async def save_model(self, model, model_path: str) -> None:
+    async def save_model(self, model: Any, model_path: str) -> None:
         """Save model for testing compatibility."""
         # Mock saving - just create the file
         from pathlib import Path
 
         Path(model_path).touch()
 
-    async def load_model(self, model, model_path: str) -> None:
+    async def load_model(self, model: Any, model_path: str) -> None:
         """Load model for testing compatibility."""
         # Mock loading - model loading handled by model.load_from_checkpoint in tests
         pass
