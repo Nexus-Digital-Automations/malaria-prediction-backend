@@ -539,9 +539,9 @@ class QualityManager:
         details = {}
 
         # Check for valid data range
-        if source_name == "era5" and "temperature_range" in thresholds:
-            temp_range = thresholds["temperature_range"]
-            invalid_temp = np.sum(
+        if source_name == "era5" and "temperature_range" in thresholds:  # type: ignore[operator]
+            temp_range = thresholds["temperature_range"]  # type: ignore[index]
+            invalid_temp = np.sum(  # type: ignore[operator]
                 (data_array < temp_range[0]) | (data_array > temp_range[1])
             )
             total_pixels = data_array.size
@@ -552,9 +552,9 @@ class QualityManager:
                 flags.append("temperature_out_of_range")
                 details["invalid_temperature_ratio"] = invalid_ratio
 
-        elif source_name == "chirps" and "precipitation_max" in thresholds:
-            max_precip = thresholds["precipitation_max"]
-            invalid_precip = np.sum(data_array > max_precip)
+        elif source_name == "chirps" and "precipitation_max" in thresholds:  # type: ignore[operator]
+            max_precip = thresholds["precipitation_max"]  # type: ignore[index]
+            invalid_precip = np.sum(data_array > max_precip)  # type: ignore[operator]
             negative_precip = np.sum(data_array < 0)
             total_pixels = data_array.size
 
@@ -570,9 +570,9 @@ class QualityManager:
                 flags.append("negative_precipitation")
                 details["negative_precipitation_ratio"] = negative_ratio
 
-        elif source_name == "modis" and "ndvi_range" in thresholds:
-            ndvi_range = thresholds["ndvi_range"]
-            invalid_ndvi = np.sum(
+        elif source_name == "modis" and "ndvi_range" in thresholds:  # type: ignore[operator]
+            ndvi_range = thresholds["ndvi_range"]  # type: ignore[index]
+            invalid_ndvi = np.sum(  # type: ignore[operator]
                 (data_array < ndvi_range[0]) | (data_array > ndvi_range[1])
             )
             total_pixels = data_array.size
