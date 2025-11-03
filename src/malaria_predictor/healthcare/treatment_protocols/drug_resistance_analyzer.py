@@ -558,7 +558,7 @@ class DrugResistanceAnalyzer:
             "low": 0.6
         }.get(location_data.get("surveillance_quality", "medium"), 0.8)
 
-        return base_score * population_factor * quality_multiplier
+        return float(base_score * population_factor * quality_multiplier)
 
     # Additional helper methods would be implemented here
     def _get_resistance_profile(self, drug: str, location: str) -> dict:

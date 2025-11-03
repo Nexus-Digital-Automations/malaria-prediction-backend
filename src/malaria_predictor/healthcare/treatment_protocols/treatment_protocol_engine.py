@@ -579,7 +579,9 @@ class TreatmentProtocolEngine:
 
     def _get_default_who_protocol(self) -> TreatmentProtocol:
         """Get default WHO protocol"""
-        return list(self._protocols.values())[0] if self._protocols else None
+        if not self._protocols:
+            raise ValueError("No WHO protocols loaded")
+        return list(self._protocols.values())[0]
 
     def _identify_alternative_protocols(
         self,

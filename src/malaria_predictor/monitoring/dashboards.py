@@ -7,7 +7,7 @@ and alerting rules for the malaria prediction system monitoring.
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 
 class DashboardConfig:
@@ -20,25 +20,25 @@ class DashboardConfig:
         """Load dashboard configuration from JSON file."""
         try:
             with open(self.config_path) as f:
-                return json.load(f)
+                return cast(dict[str, Any], json.load(f))
         except FileNotFoundError:
             return {"dashboards": [], "alerts": []}
 
     def get_dashboards(self) -> list[dict[str, Any]]:
         """Get list of dashboard configurations."""
         config = self.load_config()
-        return config.get("dashboards", [])
+        return cast(list[dict[str, Any]], config.get("dashboards", []))
 
     def get_alerts(self) -> list[dict[str, Any]]:
         """Get list of alert configurations."""
         config = self.load_config()
-        return config.get("alerts", [])
+        return cast(list[dict[str, Any]], config.get("alerts", []))
 
     def export_prometheus_rules(self) -> str:
         """Export alert rules in Prometheus format."""
         alerts = self.get_alerts()
 
-        rules = {"groups": [{"name": "malaria_prediction_api_alerts", "rules": []}]}
+        rules: dict[str, list[dict[str, Any]]] = {"groups": [{"name": "malaria_prediction_api_alerts", "rules": []}]}
 
         for alert in alerts:
             rule = {
