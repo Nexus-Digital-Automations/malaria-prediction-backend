@@ -710,14 +710,14 @@ async def get_report_metrics(
         format_usage: dict[str, int] = {}
         for report in reports:
             if report.export_formats:
-                for fmt in report.export_formats:
+                for fmt in report.export_formats:  # type: ignore[attr-defined]
                     format_usage[fmt] = format_usage.get(fmt, 0) + 1
 
         # Template usage
         template_usage: dict[str, int] = {}
         for report in reports:
             if report.template_id:
-                template_usage[report.template_id] = template_usage.get(report.template_id, 0) + 1
+                template_usage[report.template_id] = template_usage.get(report.template_id, 0) + 1  # type: ignore[index, call-overload]
 
         return {
             "period": period,
