@@ -608,17 +608,17 @@ class WHOGuidelinesEngine:
     def _create_vivax_treatment_regimen(self, patient_profile: PatientProfile) -> TreatmentRecommendation:
         """Create P. vivax treatment regimen with radical cure"""
         # Implementation for P. vivax treatment
-        pass
+        raise NotImplementedError("P. vivax treatment regimen not yet implemented")
 
     def _create_non_falciparum_regimen(self, patient_profile: PatientProfile, species: MalariaSpecies) -> TreatmentRecommendation:
         """Create treatment regimen for non-falciparum species"""
         # Implementation for P. ovale, P. malariae treatment
-        pass
+        raise NotImplementedError("Non-falciparum species treatment not yet implemented")
 
     def _create_artesunate_amodiaquine_regimen(self, patient_profile: PatientProfile) -> TreatmentRecommendation:
         """Create artesunate-amodiaquine treatment regimen"""
         # Implementation for alternative ACT
-        pass
+        raise NotImplementedError("Artesunate-amodiaquine regimen not yet implemented")
 
     def _create_critical_care_regimen(
         self,
@@ -627,4 +627,4 @@ class WHOGuidelinesEngine:
     ) -> TreatmentRecommendation:
         """Create critical care regimen for critical malaria"""
         # Implementation for critical malaria with adjunctive therapies
-        pass
+        raise NotImplementedError("Critical care regimen not yet implemented")
