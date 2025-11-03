@@ -187,7 +187,7 @@ class DetailedError(Exception):
         self.category = category
         self.severity = severity
         self.error_code = error_code or self._generate_error_code()
-        self.context = context or ErrorContext()
+        self.context = context or ErrorContext()  # type: ignore[call-arg]
         self.original_exception = original_exception
         self.retry_eligible = retry_eligible
         self.user_message = user_message or self._get_default_user_message()
@@ -590,21 +590,21 @@ class ErrorHandler:
 
         for strategy_name in error.recovery_suggestions:
             if strategy_name in self.recovery_strategies:
-                recovery_result["attempted_strategies"].append(strategy_name)
+                recovery_result["attempted_strategies"].append(strategy_name)  # type: ignore[attr-defined]
 
                 try:
                     strategy_func = self.recovery_strategies[strategy_name]
                     result = await strategy_func(error)
 
                     if result.get("success", False):
-                        recovery_result["successful_strategies"].append(strategy_name)
+                        recovery_result["successful_strategies"].append(strategy_name)  # type: ignore[attr-defined]
                         logger.info(f"Recovery strategy '{strategy_name}' succeeded for error {error.error_code}")
                     else:
-                        recovery_result["failed_strategies"].append(strategy_name)
+                        recovery_result["failed_strategies"].append(strategy_name)  # type: ignore[attr-defined]
                         logger.warning(f"Recovery strategy '{strategy_name}' failed for error {error.error_code}")
 
                 except Exception as e:
-                    recovery_result["failed_strategies"].append(strategy_name)
+                    recovery_result["failed_strategies"].append(strategy_name)  # type: ignore[attr-defined]
                     logger.error(f"Recovery strategy '{strategy_name}' raised exception: {e}")
 
         recovery_result["recovery_time"] = time.time() - start_time
@@ -773,13 +773,13 @@ class ErrorHandler:
             cat_key = error.category.value
             if cat_key not in category_stats:
                 category_stats[cat_key] = {"count": 0, "severities": {}}
-            category_stats[cat_key]["count"] += 1
+            category_stats[cat_key]["count"] += 1  # type: ignore[operator]
 
             # Severity within category
             sev_key = error.severity.value
-            if sev_key not in category_stats[cat_key]["severities"]:
-                category_stats[cat_key]["severities"][sev_key] = 0
-            category_stats[cat_key]["severities"][sev_key] += 1
+            if sev_key not in category_stats[cat_key]["severities"]:  # type: ignore[operator]
+                category_stats[cat_key]["severities"][sev_key] = 0  # type: ignore[index]
+            category_stats[cat_key]["severities"][sev_key] += 1  # type: ignore[index]
 
             # Overall severity statistics
             if sev_key not in severity_stats:
