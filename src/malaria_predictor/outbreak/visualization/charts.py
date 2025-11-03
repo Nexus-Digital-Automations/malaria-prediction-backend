@@ -25,16 +25,13 @@ logger = structlog.get_logger(__name__)
 
 class ChartConfiguration(BaseModel):
     """Base configuration for outbreak charts."""
-    title: str = Field(..., description="Chart title")
-    width: int = Field(800, description="Chart width in pixels")
-    height: int = Field(600, description="Chart height in pixels")
-    theme: str = Field("light", description="Chart theme (light/dark)")
-    interactive: bool = Field(True, description="Enable interactive features")
-    export_formats: list[str] = Field(
-        default_factory=lambda: ["png", "svg", "pdf"],
-        description="Supported export formats"
-    )
-    color_scheme: str = Field("viridis", description="Color scheme for visualizations")
+    title: str
+    width: int = 800
+    height: int = 600
+    theme: str = "light"
+    interactive: bool = True
+    export_formats: list[str] = ["png", "svg", "pdf"]
+    color_scheme: str = "viridis"
 
 
 class OutbreakTimelineChart:
@@ -51,7 +48,7 @@ class OutbreakTimelineChart:
         self.config = config or ChartConfiguration(title="Outbreak Timeline")
 
         # Chart styling configuration
-        self.styles = {
+        self.styles: dict[str, Any] = {
             "outbreak_severity": {
                 "low": {"color": "#28a745", "size": 8},
                 "moderate": {"color": "#ffc107", "size": 10},
@@ -235,7 +232,7 @@ class OutbreakTimelineChart:
     ) -> dict[str, Any]:
         """Prepare surveillance data context for timeline."""
         # Aggregate surveillance data by date
-        daily_data = {}
+        daily_data: dict[str, Any] = {}
 
         for data in surveillance_data:
             date_key = data.reported_at.date().isoformat()
@@ -265,7 +262,7 @@ class OutbreakTimelineChart:
             "summary": {
                 "total_days": len(timeline_data),
                 "peak_cases": max([d["total_cases"] for d in timeline_data], default=0),
-                "peak_date": max(timeline_data, key=lambda x: int(x["total_cases"]), default={}).get("date"),
+                "peak_date": max(timeline_data, key=lambda x: int(x["total_cases"]), default={"date": None}).get("date") if timeline_data else None,
                 "average_cases": sum([d["total_cases"] for d in timeline_data]) / max(len(timeline_data), 1)
             }
         }
@@ -487,7 +484,7 @@ class EpidemicCurveChart:
     ) -> list[dict[str, Any]]:
         """Prepare epidemic curve data."""
         # Group data by time period
-        aggregated_data = {}
+        aggregated_data: dict[str, Any] = {}
 
         for data in surveillance_data:
             # Determine aggregation key
