@@ -93,7 +93,7 @@ async def get_detailed_health_status(
     cache, ML models, and external API connectivity.
     """
     health_manager = get_health_checker()
-    return await health_manager.get_overall_health()
+    return await health_manager.check_all()
 
 
 @router.get("/metrics/prometheus")
@@ -312,7 +312,7 @@ async def get_cache_status(
     and connection health.
     """
     try:
-        from ...performance.cache_optimization import get_cache_optimizer  # type: ignore[import-untyped]
+        from ...performance.cache_optimization import get_cache_optimizer  # type: ignore[import-not-found]
 
         cache_optimizer = await get_cache_optimizer()
         cache_stats = await cache_optimizer.get_cache_statistics()
