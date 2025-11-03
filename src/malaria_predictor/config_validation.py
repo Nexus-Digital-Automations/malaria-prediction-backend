@@ -39,7 +39,7 @@ class HealthCheckError(Exception):
 class ConfigValidationError(Exception):
     """Raised when configuration validation fails."""
 
-    def __init__(self, message: str, cause: Exception = None) -> None:
+    def __init__(self, message: str, cause: Exception | None = None) -> None:
         super().__init__(message)
         self.cause = cause
 
@@ -52,8 +52,8 @@ class HealthCheckResult:
         component: str,
         status: str,
         message: str,
-        response_time: float = None,
-        error: str = None,
+        response_time: float | None = None,
+        error: str | None = None,
     ):
         self.component = component
         self.status = status
@@ -71,8 +71,8 @@ class ExternalServiceStatus:
         name: str,
         url: str,
         status: str,
-        response_time: float = None,
-        error: str = None,
+        response_time: float | None = None,
+        error: str | None = None,
     ):
         self.name = name
         self.url = url
@@ -234,7 +234,7 @@ class ConfigValidator:
         try:
             # Mock database check for tests
             if hasattr(self.config, "_spec") or str(
-                self.config.database_url
+                self.config.get_database_url()
             ).startswith("postgresql+asyncpg://test_"):
                 # This is a mock, simulate success
                 self._add_result(
@@ -253,7 +253,7 @@ class ConfigValidator:
         """Test-compatible Redis health check."""
         try:
             # Mock Redis check for tests
-            if hasattr(self.config, "_spec") or str(self.config.redis_url).startswith(
+            if hasattr(self.config, "_spec") or str(self.config.get_redis_url()).startswith(
                 "redis://localhost:6379"
             ):
                 # This is a mock, simulate success
@@ -357,8 +357,8 @@ class ConfigValidator:
         component: str,
         status: str,
         message: str,
-        response_time: float = None,
-        error: str = None,
+        response_time: float | None = None,
+        error: str | None = None,
     ) -> None:
         """Add a validation result."""
         result = HealthCheckResult(component, status, message, response_time, error)
