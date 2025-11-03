@@ -131,6 +131,54 @@ Continuous integration and deployment.
 
 ---
 
+### 🚀 Getting Started
+- **[Getting Started Guide](./getting-started/)** - Complete setup and quickstart guide
+  - Prerequisites and system requirements
+  - Docker quick start (5 minutes)
+  - Local development setup
+  - First API request walkthrough
+  - Running tests
+
+### 🏗️ Architecture & Design
+- **[System Architecture](./architecture/)** - Comprehensive architecture documentation
+  - High-level system overview
+  - Component architecture details
+  - Data flow diagrams
+  - Technology stack
+  - Deployment architecture
+  - Security architecture
+
+### 🔒 Security
+- **[Security Documentation](./security/)** - Security architecture and compliance
+  - Authentication & authorization (JWT, RBAC)
+  - Data protection & encryption
+  - API security
+  - Infrastructure security
+  - HIPAA & GDPR compliance
+  - Incident response procedures
+
+### 📖 User Guides
+- **[User Guides](./user-guides/)** - Practical guides for common tasks
+  - Healthcare professional workflows
+  - Data scientist guides (training models, feature engineering)
+  - System administrator guides (deployment, monitoring)
+  - API developer integration examples
+
+### 📱 Frontend Development
+- **[Flutter Frontend](./frontend/)** - Flutter application documentation
+  - Architecture & project structure
+  - BLoC pattern implementation
+  - Features (maps, analytics, alerts)
+  - API integration
+  - Testing guide
+
+### 💻 Code Examples
+- **[Code Examples](./examples/)** - Practical code snippets
+  - API usage examples (Python, JavaScript, cURL)
+  - ML model training examples
+  - Data processing examples
+  - Integration examples
+
 ### 📖 Additional Documentation
 
 #### Pre-Commit Hooks
@@ -151,35 +199,42 @@ Continuous integration and deployment.
 
 ### For New Developers
 
-1. **Start Here**: [Root README](../README.md)
-2. **Understand the Architecture**: [Features](../development/essentials/features.md)
-3. **Setup Development Environment**: [Docker Deployment](./deployment/DOCKER.md)
-4. **Make Your First API Call**: [API Overview](./api/overview.md)
+1. **Start Here**: [Getting Started Guide](./getting-started/)
+2. **Understand the Architecture**: [System Architecture](./architecture/)
+3. **Setup Development Environment**: [Getting Started - Local Setup](./getting-started/README.md#local-development-setup)
+4. **Make Your First API Call**: [Getting Started - First API Request](./getting-started/README.md#first-api-request)
 5. **Run Tests**: [Testing Framework](../tests/README.md)
+6. **Explore Examples**: [Code Examples](./examples/)
 
 ### For Data Scientists
 
-1. **Model Architecture**: [ML Models](./ml/model-architecture.md)
-2. **Data Sources**: [Data Integration](./data-sources/overview.md)
-3. **Feature Engineering**: [Features](./ml/feature-engineering.md)
-4. **Train Models**: [Training Guide](./ml/training-guide.md)
-5. **Evaluate Performance**: [Model Evaluation](./ml/model-evaluation.md)
+1. **Quick Start**: [Getting Started](./getting-started/)
+2. **Model Architecture**: [ML Models](./ml/model-architecture.md)
+3. **Data Sources**: [Data Integration](./data-sources/overview.md)
+4. **Feature Engineering**: [Features](./ml/feature-engineering.md)
+5. **Train Models**: [Training Guide](./ml/training-guide.md) + [User Guide - Model Training](./user-guides/README.md#model-training)
+6. **Evaluate Performance**: [Model Evaluation](./ml/model-evaluation.md)
+7. **Code Examples**: [ML Examples](./examples/README.md#ml-model-examples)
 
 ### For DevOps Engineers
 
-1. **Deployment**: [Docker Guide](./deployment/DOCKER.md)
-2. **CI/CD**: [CI/CD Implementation](./cicd/IMPLEMENTATION_GUIDE.md)
-3. **Monitoring**: [Production Monitoring](./monitoring/PRODUCTION_MONITORING_GUIDE.md)
-4. **Runbooks**: [Operations Runbooks](./cicd/runbooks/)
-5. **ML Deployment**: [ML Deployment Workflow](./ml/deployment-workflow.md)
+1. **Quick Start**: [Getting Started - Docker](./getting-started/README.md#quick-start-docker)
+2. **Architecture**: [System Architecture](./architecture/)
+3. **Security**: [Security Documentation](./security/)
+4. **Deployment**: [Docker Guide](./deployment/DOCKER.md) + [User Guide - Deployment](./user-guides/README.md#deployment)
+5. **CI/CD**: [CI/CD Implementation](./cicd/IMPLEMENTATION_GUIDE.md)
+6. **Monitoring**: [Production Monitoring](./monitoring/PRODUCTION_MONITORING_GUIDE.md)
+7. **Runbooks**: [Operations Runbooks](./cicd/runbooks/)
 
 ### For Frontend Developers
 
-1. **Flutter Architecture**: [Flutter Frontend](../development/essentials/flutter-frontend-architecture.md)
-2. **API Integration**: [API Endpoints](./api/endpoints.md)
-3. **Authentication**: [JWT Auth](./api/authentication.md)
-4. **WebSockets**: [Real-time Alerts](./api/websockets.md)
-5. **Map Integration**: [Map Client Usage](./map_client_usage.md)
+1. **Flutter Setup**: [Frontend Documentation](./frontend/)
+2. **Architecture**: [Flutter Architecture](./frontend/README.md#architecture)
+3. **API Integration**: [API Endpoints](./api/endpoints.md) + [Frontend API Integration](./frontend/README.md#api-integration)
+4. **Authentication**: [JWT Auth](./api/authentication.md)
+5. **WebSockets**: [Real-time Alerts](./api/websockets.md)
+6. **Map Integration**: [Map Client Usage](./map_client_usage.md)
+7. **Code Examples**: [Frontend Examples](./examples/)
 
 ---
 
@@ -235,6 +290,25 @@ Continuous integration and deployment.
 
 ---
 
-**Last Updated**: October 27, 2025
+---
 
-**Documentation Version**: 1.0.0
+## 📊 Documentation Statistics
+
+- **Total Documentation Files**: 50+ markdown files
+- **Getting Started**: Complete quickstart guide
+- **Architecture**: Comprehensive system design documentation
+- **Security**: Full security & compliance guide
+- **User Guides**: Practical guides for all user types
+- **API Documentation**: 6 comprehensive guides
+- **ML Documentation**: 6 detailed guides
+- **Data Sources**: 8 integration guides
+- **Frontend**: Complete Flutter application guide
+- **Code Examples**: Extensive practical examples
+- **Deployment & Operations**: 15+ runbooks and guides
+- **Code Coverage**: 95%+ target
+
+---
+
+**Last Updated**: November 3, 2025
+
+**Documentation Version**: 2.0.0
