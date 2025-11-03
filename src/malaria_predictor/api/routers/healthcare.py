@@ -15,7 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from ..healthcare_security import get_current_healthcare_professional
-from ..models import LocationPoint, RiskLevel
+from ..models import LocationPoint, RiskLevelEnum as RiskLevel
 
 logger = logging.getLogger(__name__)
 
