@@ -11,7 +11,7 @@ import inspect
 import time
 from collections.abc import Callable, Generator, Sequence
 from contextlib import contextmanager
-from typing import Any
+from typing import Any, ContextManager
 
 from opentelemetry import trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
@@ -39,7 +39,7 @@ class TracingConfig:
         self,
         service_name: str = "malaria-prediction-api",
         service_version: str = "1.0.0",
-        environment: str = None,
+        environment: str | None = None,
         jaeger_endpoint: str = "http://localhost:14268/api/traces",
         sampling_rate: float = 1.0,
         enable_console_export: bool = False,
@@ -68,7 +68,7 @@ class TracingConfig:
         return Resource.create(resource_attributes)
 
 
-def setup_tracing(config: TracingConfig | None = None) -> TracerProvider:
+def setup_tracing(config: TracingConfig | None = None) -> TracerProvider | None:
     """
     Initialize OpenTelemetry tracing with comprehensive configuration.
 
@@ -76,7 +76,7 @@ def setup_tracing(config: TracingConfig | None = None) -> TracerProvider:
         config: Tracing configuration, uses defaults if None
 
     Returns:
-        Configured TracerProvider instance
+        Configured TracerProvider instance or None if tracing is disabled
     """
     if not settings.monitoring.enable_tracing:
         return None
@@ -195,7 +195,7 @@ def create_span(
     name: str,
     attributes: dict[str, Any] | None = None,
     links: list | None = None,
-) -> Generator[trace.Span, None, None]:
+) -> Generator[trace.Span | None, None, None]:
     """
     Context manager for creating and managing spans.
 
@@ -206,7 +206,7 @@ def create_span(
         links: Optional span links
 
     Yields:
-        Active span instance
+        Active span instance or None if tracing is disabled
     """
     if not settings.monitoring.enable_tracing:
         yield None
@@ -251,7 +251,7 @@ def trace_function(
         span_name = name or f"{func.__module__}.{func.__name__}"
 
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             span_attributes = attributes.copy() if attributes else {}
             span_attributes.update(
                 {
@@ -304,7 +304,7 @@ def trace_async_function(
         span_name = name or f"{func.__module__}.{func.__name__}"
 
         @functools.wraps(func)
-        async def async_wrapper(*args, **kwargs):
+        async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
             span_attributes = attributes.copy() if attributes else {}
             span_attributes.update(
                 {
@@ -350,7 +350,7 @@ class MLModelTracer:
         model_name: str,
         model_version: str,
         model_type: str,
-    ) -> contextmanager:
+    ) -> ContextManager[trace.Span | None]:
         """Trace model loading operations."""
         attributes = {
             "ml.model.name": model_name,
@@ -371,7 +371,7 @@ class MLModelTracer:
         model_version: str,
         input_features: int,
         batch_size: int = 1,
-    ) -> contextmanager:
+    ) -> ContextManager[trace.Span | None]:
         """Trace model prediction operations."""
         attributes = {
             "ml.model.name": model_name,
@@ -392,7 +392,7 @@ class MLModelTracer:
         data_source: str,
         feature_count: int,
         processing_type: str,
-    ) -> contextmanager:
+    ) -> ContextManager[trace.Span | None]:
         """Trace feature extraction operations."""
         attributes = {
             "ml.feature_extraction.data_source": data_source,
@@ -441,9 +441,9 @@ class DatabaseTracer:
     def trace_query(
         self,
         query_type: str,
-        table_name: str = None,
-        query_hash: str = None,
-    ) -> contextmanager:
+        table_name: str | None = None,
+        query_hash: str | None = None,
+    ) -> ContextManager[trace.Span | None]:
         """Trace database query operations."""
         attributes = {
             "db.operation": query_type,
@@ -466,7 +466,7 @@ class DatabaseTracer:
         span: trace.Span,
         rows_affected: int,
         execution_time_ms: float,
-        connection_pool_size: int = None,
+        connection_pool_size: int | None = None,
     ) -> None:
         """Add query-specific metrics to a span."""
         if not span:
@@ -501,9 +501,9 @@ class APITracer:
         self,
         method: str,
         endpoint: str,
-        user_id: str = None,
-        request_id: str = None,
-    ) -> contextmanager:
+        user_id: str | None = None,
+        request_id: str | None = None,
+    ) -> ContextManager[trace.Span | None]:
         """Trace API request operations."""
         attributes = {
             "http.method": method,
@@ -587,9 +587,9 @@ def trace_ml_prediction(
         record_metrics: Whether to record prediction metrics
     """
 
-    def decorator(func):
+    def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
-        async def wrapper(*args, **kwargs):
+        async def wrapper(*args: Any, **kwargs: Any) -> Any:
             ml_tracer = get_ml_tracer()
 
             # Determine input features count from function signature
