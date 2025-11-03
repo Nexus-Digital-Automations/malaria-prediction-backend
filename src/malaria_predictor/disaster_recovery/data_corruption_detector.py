@@ -852,7 +852,7 @@ class DataCorruptionMonitor:
                 current_metrics = await self.integrity_checker.check_table_integrity(
                     table_name
                 )
-                scan_results["tables_scanned"].append(
+                scan_results["tables_scanned"].append(  # type: ignore[attr-defined]
                     {
                         "table_name": table_name,
                         "quality_score": current_metrics.quality_score,
@@ -879,7 +879,7 @@ class DataCorruptionMonitor:
                             recovery_estimate="1-2 hours",
                         )
                         self.active_alerts.append(alert)
-                        scan_results["alerts_generated"].append(alert.dict())
+                        scan_results["alerts_generated"].append(alert.dict())  # type: ignore[attr-defined]
 
                 # Detect corruption patterns
                 pattern_alerts = (
@@ -887,7 +887,7 @@ class DataCorruptionMonitor:
                 )
                 for alert in pattern_alerts:
                     self.active_alerts.append(alert)
-                    scan_results["alerts_generated"].append(alert.dict())
+                    scan_results["alerts_generated"].append(alert.dict())  # type: ignore[attr-defined]
 
             except Exception as e:
                 logger.error(f"Failed to scan table {table_name}: {e}")
@@ -896,7 +896,7 @@ class DataCorruptionMonitor:
         consistency_alerts = await self.integrity_checker.check_data_consistency()
         for alert in consistency_alerts:
             self.active_alerts.append(alert)
-            scan_results["alerts_generated"].append(alert.dict())
+            scan_results["alerts_generated"].append(alert.dict())  # type: ignore[attr-defined]
 
         # Calculate overall health score
         if all_quality_scores:
@@ -916,7 +916,7 @@ class DataCorruptionMonitor:
                 recovery_result = (
                     await self.corruption_recovery.recover_from_corruption(alert)
                 )
-                scan_results["recoveries_attempted"].append(recovery_result)
+                scan_results["recoveries_attempted"].append(recovery_result)  # type: ignore[attr-defined]
 
                 if recovery_result["recovery_successful"]:
                     # Remove alert if recovery was successful
@@ -928,7 +928,7 @@ class DataCorruptionMonitor:
                 logger.error(f"Failed to recover from alert {alert.alert_id}: {e}")
 
         logger.info(
-            f"Corruption scan completed: {len(scan_results['alerts_generated'])} alerts, "
+            f"Corruption scan completed: {len(scan_results['alerts_generated'])} alerts, "  # type: ignore[arg-type]
             f"overall health score: {scan_results['overall_health_score']:.3f}"
         )
 
@@ -971,7 +971,7 @@ class DataCorruptionMonitor:
 
             async with httpx.AsyncClient() as client:
                 await client.post(
-                    self.alert_webhook_url,
+                    self.alert_webhook_url,  # type: ignore[arg-type]
                     json={
                         "service": "malaria-prediction-data-corruption",
                         "timestamp": datetime.now().isoformat(),
@@ -985,7 +985,7 @@ class DataCorruptionMonitor:
             logger.error(f"Failed to send alerts to webhook: {e}")
 
 
-async def main():
+async def main() -> int:
     """Main entry point for data corruption detection service."""
     import argparse
 
@@ -1022,7 +1022,7 @@ async def main():
 
     if not args.command:
         parser.print_help()
-        return
+        return 1
 
     # Initialize monitor
     monitor = DataCorruptionMonitor(
