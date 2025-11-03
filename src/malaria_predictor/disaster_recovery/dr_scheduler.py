@@ -785,7 +785,7 @@ class DRScheduler:
             return False
 
 
-async def main() -> None:
+async def main() -> int:
     """Main entry point for DR scheduler."""
     import argparse
 
@@ -810,7 +810,7 @@ async def main() -> None:
 
     if not args.command:
         parser.print_help()
-        return
+        return 1
 
     # Initialize scheduler
     scheduler = DRScheduler(
