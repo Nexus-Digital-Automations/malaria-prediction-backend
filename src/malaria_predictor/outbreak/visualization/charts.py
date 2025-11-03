@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import structlog
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from ..models import (
     CaseCluster,

@@ -117,7 +117,7 @@ class OutbreakDetector:
             # Filter by confidence threshold
             valid_detections = [
                 detection for detection in detections
-                if detection.confidence_level >= confidence_threshold
+                if detection.get("confidence_level", 0.0) >= confidence_threshold
             ]
 
             # Create outbreak events from detections
@@ -618,7 +618,7 @@ class OutbreakDetector:
     def _calculate_seasonal_baseline(self, cases: np.ndarray) -> float:
         """Calculate seasonal baseline for anomaly detection."""
         if len(cases) < 52:
-            return np.mean(cases)
+            return float(np.mean(cases))
 
         # Simple seasonal decomposition - calculate same week average
         current_week = len(cases) % 52
@@ -629,7 +629,7 @@ class OutbreakDetector:
             if week_idx < len(cases):
                 seasonal_values.append(cases[week_idx])
 
-        return np.mean(seasonal_values) if seasonal_values else np.mean(cases)
+        return float(np.mean(seasonal_values)) if seasonal_values else float(np.mean(cases))
 
     async def calculate_outbreak_metrics(self, outbreak: OutbreakEvent) -> OutbreakMetrics:
         """Calculate comprehensive metrics for an outbreak."""

@@ -96,15 +96,6 @@ class OutbreakAlert:
         self.alert_history: list[AlertItem] = []
         self.acknowledged_alerts: dict[str, AlertItem] = {}
 
-        # Alert processing
-        self.alert_processors = {
-            "outbreak_detection": self._process_outbreak_detection_alert,
-            "severity_escalation": self._process_severity_escalation_alert,
-            "system_alert": self._process_system_alert,
-            "threshold_exceeded": self._process_threshold_alert,
-            "pattern_anomaly": self._process_pattern_anomaly_alert
-        }
-
         self.logger.info("Outbreak alert widget initialized", config=self.config.model_dump())
 
     async def generate_alert_widget(

@@ -53,7 +53,12 @@ class DHIS2Client:
         await self._create_session()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: object
+    ) -> None:
         """Async context manager exit."""
         await self._close_session()
 
@@ -93,6 +98,7 @@ class DHIS2Client:
             if not self.session:
                 await self._create_session()
 
+            assert self.session is not None, "Session should be created"
             async with self.session.get(url) as response:
                 if response.status == 200:
                     user_info = await response.json()
@@ -137,10 +143,11 @@ class DHIS2Client:
             if not self.session:
                 await self._create_session()
 
+            assert self.session is not None, "Session should be created"
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     data = await response.json()
-                    org_units = data.get('organisationUnits', [])
+                    org_units: list[dict[str, Any]] = data.get('organisationUnits', [])
                     logger.info(f"Retrieved {len(org_units)} organization units")
                     return org_units
                 else:
@@ -168,10 +175,11 @@ class DHIS2Client:
             if not self.session:
                 await self._create_session()
 
+            assert self.session is not None, "Session should be created"
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     data = await response.json()
-                    data_sets = data.get('dataSets', [])
+                    data_sets: list[dict[str, Any]] = data.get('dataSets', [])
                     logger.info(f"Retrieved {len(data_sets)} data sets")
                     return data_sets
                 else:
@@ -214,6 +222,7 @@ class DHIS2Client:
             if not self.session:
                 await self._create_session()
 
+            assert self.session is not None, "Session should be created"
             async with self.session.post(url, json=payload) as response:
                 result = await response.json()
 
@@ -265,10 +274,11 @@ class DHIS2Client:
             if not self.session:
                 await self._create_session()
 
+            assert self.session is not None, "Session should be created"
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     data = await response.json()
-                    data_elements = data.get('dataElements', [])
+                    data_elements: list[dict[str, Any]] = data.get('dataElements', [])
                     logger.info(f"Retrieved {len(data_elements)} data elements")
                     return data_elements
                 else:
@@ -307,6 +317,7 @@ class DHIS2Client:
             if not self.session:
                 await self._create_session()
 
+            assert self.session is not None, "Session should be created"
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     data = await response.json()

@@ -15,7 +15,6 @@ from typing import Any, cast
 import pandas as pd
 from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from ..database.models import (
     ERA5DataPoint,
