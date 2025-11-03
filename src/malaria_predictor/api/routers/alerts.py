@@ -14,7 +14,7 @@ import asyncio
 import json
 import logging
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 from fastapi import (
     APIRouter,
@@ -273,7 +273,7 @@ async def create_alert_configuration(
         if not config:
             raise HTTPException(status_code=400, detail="Failed to create alert configuration")
 
-        return AlertConfigurationResponse.from_orm(config)
+        return cast(AlertConfigurationResponse, AlertConfigurationResponse.from_orm(config))
 
     except Exception as e:
         logger.error(f"Failed to create alert configuration: {e}")
@@ -320,7 +320,7 @@ async def get_alert_configuration(
         if not config:
             raise HTTPException(status_code=404, detail="Alert configuration not found")
 
-        return AlertConfigurationResponse.from_orm(config)
+        return cast(AlertConfigurationResponse, AlertConfigurationResponse.from_orm(config))
 
     except HTTPException:
         raise
@@ -355,7 +355,7 @@ async def update_alert_configuration(
         db.commit()
         db.refresh(config)
 
-        return AlertConfigurationResponse.from_orm(config)
+        return cast(AlertConfigurationResponse, AlertConfigurationResponse.from_orm(config))
 
     except HTTPException:
         raise
@@ -428,7 +428,7 @@ async def create_alert_rule(
         if not rule:
             raise HTTPException(status_code=400, detail="Failed to create alert rule")
 
-        return AlertRuleResponse.from_orm(rule)
+        return cast(AlertRuleResponse, AlertRuleResponse.from_orm(rule))
 
     except HTTPException:
         raise
@@ -547,7 +547,7 @@ async def get_alert(
             alert.viewed_at = datetime.now()
             db.commit()
 
-        return AlertResponse.from_orm(alert)
+        return cast(AlertResponse, AlertResponse.from_orm(alert))
 
     except HTTPException:
         raise
@@ -1093,7 +1093,7 @@ async def get_alert_kpis(
         from ...alerts.alert_analytics import alert_analytics_engine
 
         kpis = await alert_analytics_engine.get_alert_kpis(force_refresh=force_refresh)
-        return kpis.dict()
+        return cast(dict[str, Any], kpis.dict())
 
     except Exception as e:
         logger.error(f"Failed to get alert KPIs: {e}")
@@ -1125,7 +1125,7 @@ async def get_user_engagement_metrics(
         from ...alerts.alert_analytics import alert_analytics_engine
 
         engagement_metrics = await alert_analytics_engine.get_user_engagement_metrics()
-        return engagement_metrics.dict()
+        return cast(dict[str, Any], engagement_metrics.dict())
 
     except Exception as e:
         logger.error(f"Failed to get user engagement metrics: {e}")
@@ -1141,7 +1141,7 @@ async def get_alert_effectiveness_metrics(
         from ...alerts.alert_analytics import alert_analytics_engine
 
         effectiveness_metrics = await alert_analytics_engine.get_alert_effectiveness_metrics()
-        return effectiveness_metrics.dict()
+        return cast(dict[str, Any], effectiveness_metrics.dict())
 
     except Exception as e:
         logger.error(f"Failed to get effectiveness metrics: {e}")
@@ -1157,7 +1157,7 @@ async def get_system_health_metrics(
         from ...alerts.alert_analytics import alert_analytics_engine
 
         health_metrics = await alert_analytics_engine.get_system_health_metrics()
-        return health_metrics.dict()
+        return cast(dict[str, Any], health_metrics.dict())
 
     except Exception as e:
         logger.error(f"Failed to get system health metrics: {e}")
@@ -1174,7 +1174,7 @@ async def get_alert_trends(
         from ...alerts.alert_analytics import alert_analytics_engine
 
         trend_analysis = await alert_analytics_engine.get_trend_analysis(days=days)
-        return trend_analysis.dict()
+        return cast(dict[str, Any], trend_analysis.dict())
 
     except Exception as e:
         logger.error(f"Failed to get trend analysis: {e}")
@@ -1264,7 +1264,7 @@ async def get_alert_history_summary(
             user_id=str(current_user.id),
             days=days
         )
-        return summary.dict()
+        return cast(dict[str, Any], summary.dict())
 
     except Exception as e:
         logger.error(f"Failed to get alert history summary: {e}")
