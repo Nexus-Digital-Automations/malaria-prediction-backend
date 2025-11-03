@@ -439,7 +439,7 @@ async def predict_time_series(
 
                 time_series.append(
                     TimeSeriesPoint(
-                        date=current_date,
+                        prediction_date=current_date,
                         risk_score=prediction["risk_score"],
                         risk_level=_calculate_risk_level(prediction["risk_score"]),
                         uncertainty=prediction["uncertainty"],

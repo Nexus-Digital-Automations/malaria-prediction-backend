@@ -1,0 +1,620 @@
+/**
+ * Simplified Cross-Project Lesson Sharing Module
+ * Works with existing RAG database structure for faster implementation
+ */
+
+class CrossProjectSharingSimple {
+  constructor(ragDatabase) {
+    this.ragDB = ragDatabase;
+    this.initialized = false;
+
+    // Project categorization scoring weights
+    this.relevanceWeights = {
+      technology_stack: 0.30,
+      project_type: 0.25,
+      domain: 0.20,
+      patterns: 0.15,
+      keywords: 0.10,
+    };
+  }
+
+  /**
+   * Initialize cross-project sharing system using existing lesson tags
+   */
+  initialize() {
+    try {
+      if (this.initialized) {
+        return { success: true, message: 'Cross-project sharing already initialized' };
+      }
+
+      // No new tables needed - uses existing lesson storage with enhanced tags
+      this.initialized = true;
+      return { success: true, message: 'Cross-project sharing system initialized successfully' };
+
+    } catch {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Register a project by storing it in lesson tags
+   */
+  async registerProject(projectData) {
+    try {
+      await this.initialize();
+
+      const {
+        project_id,
+        project_name,
+        description = '',
+        technology_stack = [],
+        project_type = 'unknown',
+        domain = 'general',
+        patterns = [],
+        keywords = [],
+      } = projectData;
+
+      if (!project_id || !project_name) {
+        throw new Error('Project ID And name are required');
+      }
+
+      // Store project info as a special "project_registration" lesson
+      const projectLesson = {
+        title: `Project Registration: ${project_name}`,
+        content: `Project: ${project_name}\nID: ${project_id}\nDescription: ${description}\nType: ${project_type}\nDomain: ${domain}`,
+        category: 'project_registration',
+        tags: JSON.stringify({
+          project_id,
+          project_name,
+          technology_stack,
+          project_type,
+          domain,
+          patterns,
+          keywords,
+          registration_timestamp: new Date().toISOString(),
+        }),
+        confidence_score: 1.0,
+      };
+
+      // Use existing lesson storage
+      const RESULT = await this.ragDB.storeLesson(projectLesson);
+
+      return {
+        success: true,
+        project_id,
+        message: 'Project registered successfully',
+        registered_at: new Date().toISOString(),
+        lesson_id: RESULT.lessonId,
+      };
+
+    } catch {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Share a lesson across projects using enhanced tags
+   */
+  async shareLessonCrossProject(lessonId, projectId, sharingData = {}) {
+    try {
+      await this.initialize();
+
+      const {
+        sharing_scope = 'organization',
+        project_specific_tags = [],
+        lesson_category = 'general',
+        applicability_score = 1.0,
+      } = sharingData;
+
+      // Get the original lesson
+      const lessons = await new Promise((resolve, reject) => {
+        this.ragDB.db.all('SELECT * FROM lessons WHERE id = ?', [lessonId], (error, rows) => {
+          if (error) {reject(error);} else {resolve(rows);}
+        });
+      });
+
+      if (lessons.length === 0) {
+        throw new Error(`Lesson ${lessonId} not found`);
+      }
+
+      const originalLesson = lessons[0];
+      let existingTags = {};
+
+      try {
+        existingTags = JSON.parse(originalLesson.tags || '{}');
+      } catch {
+        existingTags = {};
+      }
+
+      // Add cross-project sharing info to lesson tags
+      if (!existingTags.shared_projects) {
+        existingTags.shared_projects = [];
+      }
+
+      const sharingInfo = {
+        project_id: projectId,
+        sharing_scope,
+        lesson_category,
+        applicability_score,
+        project_specific_tags,
+        shared_at: new Date().toISOString(),
+      };
+
+      // Check if already shared with this project
+      const alreadyShared = existingTags.shared_projects.find(sp => sp.project_id === projectId);
+      if (alreadyShared) {
+        throw new Error(`Lesson ${lessonId} already shared with project ${projectId}`);
+      }
+
+      existingTags.shared_projects.push(sharingInfo);
+
+      // Update the lesson with new sharing tags
+      await new Promise((resolve, reject) => {
+        this.ragDB.db.run(
+          'UPDATE lessons SET tags = ?, updated_at = datetime("now") WHERE id = ?',
+          [JSON.stringify(existingTags), lessonId],
+          function (error) {
+            if (error) {reject(error);} else {resolve();}
+          },
+        );
+      });
+
+      return {
+        success: true,
+        lesson_id: lessonId,
+        project_id: projectId,
+        sharing_scope,
+        lesson_category,
+        message: 'Lesson shared successfully across projects',
+        shared_at: sharingInfo.shared_at,
+      };
+
+    } catch {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Calculate project relevance score between two projects
+   */
+  async calculateProjectRelevance(sourceProjectId, targetProjectId) {
+    try {
+      // Get both project registrations
+      const sourceProject = await this._getProjectRegistration(sourceProjectId);
+      const targetProject = await this._getProjectRegistration(targetProjectId);
+
+      if (!sourceProject || !targetProject) {
+        throw new Error('One or both projects not found');
+      }
+
+      // Parse project data from tags
+      const sourceTags = JSON.parse(sourceProject.tags || '{}');
+      const targetTags = JSON.parse(targetProject.tags || '{}');
+
+      const sourceTech = sourceTags.technology_stack || [];
+      const targetTech = targetTags.technology_stack || [];
+      const sourcePatterns = sourceTags.patterns || [];
+      const targetPatterns = targetTags.patterns || [];
+      const sourceKeywords = sourceTags.keywords || [];
+      const targetKeywords = targetTags.keywords || [];
+
+      // Calculate similarity scores
+      const techSimilarity = this._calculateArraySimilarity(sourceTech, targetTech);
+      const typeSimilarity = sourceTags.project_type === targetTags.project_type ? 1.0 : 0.0;
+      const domainSimilarity = sourceTags.domain === targetTags.domain ? 1.0 : 0.0;
+      const patternSimilarity = this._calculateArraySimilarity(sourcePatterns, targetPatterns);
+      const keywordSimilarity = this._calculateArraySimilarity(sourceKeywords, targetKeywords);
+
+      // Calculate weighted relevance score
+      const relevanceScore =
+        (techSimilarity * this.relevanceWeights.technology_stack) +
+        (typeSimilarity * this.relevanceWeights.project_type) +
+        (domainSimilarity * this.relevanceWeights.domain) +
+        (patternSimilarity * this.relevanceWeights.patterns) +
+        (keywordSimilarity * this.relevanceWeights.keywords);
+
+      return {
+        success: true,
+        source_project: sourceProjectId,
+        target_project: targetProjectId,
+        relevance_score: Math.round(relevanceScore * 100) / 100,
+        similarity_breakdown: {
+          technology_stack: techSimilarity,
+          project_type: typeSimilarity,
+          domain: domainSimilarity,
+          patterns: patternSimilarity,
+          keywords: keywordSimilarity,
+        },
+      };
+
+    } catch {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get shared lessons for a specific project
+   */
+  async getSharedLessonsForProject(projectId, options = {}) {
+    try {
+      await this.initialize();
+
+      const {
+        sharing_scope = ['organization', 'team', 'public'],
+        min_relevance_score = 0.3,
+        lesson_category = null,
+        limit = 20,
+      } = options;
+
+      // Get all lessons with sharing info
+      const lessons = await new Promise((resolve, reject) => {
+        this.ragDB.db.all('SELECT * FROM lessons WHERE category != "project_registration"', [], (error, rows) => {
+          if (error) {reject(error);} else {resolve(rows);}
+        });
+      });
+
+      // First pass: collect all potential lessons That need relevance calculation
+      const candidateLessons = [];
+
+      for (const lesson of lessons) {
+        try {
+          const tags = JSON.parse(lesson.tags || '{}');
+          const sharedProjects = tags.shared_projects || [];
+
+          // Check if lesson is shared from other projects to this project
+          for (const shareInfo of sharedProjects) {
+            if (shareInfo.project_id !== projectId) {
+              // This lesson is from another project
+              const scopeMatch = Array.isArray(sharing_scope)
+                ? sharing_scope.includes(shareInfo.sharing_scope)
+                : shareInfo.sharing_scope === sharing_scope;
+
+              const categoryMatch = !lesson_category || shareInfo.lesson_category === lesson_category;
+
+              if (scopeMatch && categoryMatch) {
+                candidateLessons.push({
+                  lesson,
+                  shareInfo,
+                });
+              }
+            }
+          }
+        } catch {
+          // Skip lessons with invalid tags
+          continue;
+        }
+      }
+
+      // Second pass: calculate relevance scores concurrently
+      const relevancePromises = candidateLessons.map(async ({ lesson, shareInfo }) => {
+        let relevanceScore = 0.5; // default
+        try {
+          const relevanceResult = await this.calculateProjectRelevance(shareInfo.project_id, projectId);
+          if (relevanceResult.success) {
+            relevanceScore = relevanceResult.relevance_score;
+          }
+        } catch {
+          // Keep default relevance score
+        }
+
+        return {
+          lesson,
+          shareInfo,
+          relevanceScore,
+        };
+      });
+
+      const relevanceResults = await Promise.all(relevancePromises);
+
+      // Third pass: filter by relevance score And build final results
+      const sharedLessons = relevanceResults
+        .filter(({ relevanceScore }) => relevanceScore >= min_relevance_score)
+        .map(({ lesson, shareInfo, relevanceScore }) => ({
+          lesson_id: lesson.id,
+          title: lesson.title,
+          content: lesson.content,
+          category: lesson.category,
+          source_project: shareInfo.project_id,
+          sharing_scope: shareInfo.sharing_scope,
+          lesson_category: shareInfo.lesson_category,
+          applicability_score: shareInfo.applicability_score || 1.0,
+          project_specific_tags: shareInfo.project_specific_tags || [],
+          shared_at: shareInfo.shared_at,
+          relevance_score: relevanceScore,
+        }));
+
+      // Sort by relevance score
+      sharedLessons.sort((a, b) => b.relevance_score - a.relevance_score);
+
+      // Apply limit
+      const limitedLessons = sharedLessons.slice(0, limit);
+
+      return {
+        success: true,
+        project_id: projectId,
+        shared_lessons: limitedLessons,
+        count: limitedLessons.length,
+        filters: {
+          sharing_scope,
+          min_relevance_score,
+          lesson_category,
+        },
+      };
+
+    } catch {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get project details
+   */
+  async getProject(projectId) {
+    try {
+      await this.initialize();
+
+      const project = await this._getProjectRegistration(projectId);
+      if (!project) {
+        throw new Error(`Project ${projectId} not found`);
+      }
+
+      const tags = JSON.parse(project.tags || '{}');
+
+      return {
+        success: true,
+        project: {
+          project_id: tags.project_id,
+          project_name: tags.project_name,
+          description: project.content,
+          technology_stack: tags.technology_stack || [],
+          project_type: tags.project_type || 'unknown',
+          domain: tags.domain || 'general',
+          patterns: tags.patterns || [],
+          keywords: tags.keywords || [],
+          created_at: project.created_at,
+          updated_at: project.updated_at,
+        },
+      };
+
+    } catch {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * List all registered projects
+   */
+  async listProjects(options = {}) {
+    try {
+      await this.initialize();
+
+      const {
+        project_type = null,
+        domain = null,
+        technology = null,
+        limit = 50,
+      } = options;
+
+      // Get all project registration lessons
+      const projectLessons = await new Promise((resolve, reject) => {
+        this.ragDB.db.all('SELECT * FROM lessons WHERE category = "project_registration"', [], (error, rows) => {
+          if (error) {reject(error);} else {resolve(rows);}
+        });
+      });
+
+      const projects = [];
+
+      for (const lesson of projectLessons) {
+        try {
+          const tags = JSON.parse(lesson.tags || '{}');
+
+          // Apply filters
+          if (project_type && tags.project_type !== project_type) {continue;}
+          if (domain && tags.domain !== domain) {continue;}
+          if (technology && !tags.technology_stack.includes(technology)) {continue;}
+
+          projects.push({
+            project_id: tags.project_id,
+            project_name: tags.project_name,
+            description: lesson.content,
+            technology_stack: tags.technology_stack || [],
+            project_type: tags.project_type || 'unknown',
+            domain: tags.domain || 'general',
+            patterns: tags.patterns || [],
+            keywords: tags.keywords || [],
+            created_at: lesson.created_at,
+            updated_at: lesson.updated_at,
+          });
+
+          if (projects.length >= limit) {break;}
+        } catch {
+          // Skip invalid project lessons
+          continue;
+        }
+      }
+
+      return {
+        success: true,
+        projects,
+        count: projects.length,
+        filters: { project_type, domain, technology },
+      };
+
+    } catch {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Record application of a shared lesson (simplified)
+   */
+  async recordLessonApplication(applicationData) {
+    try {
+      await this.initialize();
+
+      const {
+        source_project_id,
+        target_project_id,
+        lesson_id,
+        applied_successfully,
+        feedback_score = null,
+        feedback_comment = '',
+      } = applicationData;
+
+      // Store application record as a lesson
+      const applicationLesson = {
+        title: `Lesson Application: ${lesson_id} from ${source_project_id} to ${target_project_id}`,
+        content: `Application of lesson ${lesson_id} from project ${source_project_id} to project ${target_project_id}. Success: ${applied_successfully}. Feedback: ${feedback_comment}`,
+        category: 'lesson_application',
+        tags: JSON.stringify({
+          source_project_id,
+          target_project_id,
+          lesson_id,
+          applied_successfully,
+          feedback_score,
+          feedback_comment,
+          applied_at: new Date().toISOString(),
+        }),
+        confidence_score: applied_successfully ? 0.9 : 0.3,
+      };
+
+      const RESULT = await this.ragDB.storeLesson(applicationLesson);
+
+      return {
+        success: true,
+        source_project: source_project_id,
+        target_project: target_project_id,
+        lesson_id,
+        applied_successfully,
+        message: 'Lesson application recorded successfully',
+        applied_at: new Date().toISOString(),
+        application_record_id: RESULT.lessonId,
+      };
+
+    } catch {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get cross-project analytics (simplified)
+   */
+  async getCrossProjectAnalytics(projectId = null, _options = {}) {
+    try {
+      await this.initialize();
+
+      // Get all application records
+      const applications = await new Promise((resolve, reject) => {
+        this.ragDB.db.all('SELECT * FROM lessons WHERE category = "lesson_application"', [], (error, rows) => {
+          if (error) {reject(error);} else {resolve(rows);}
+        });
+      });
+
+      let totalApplications = 0;
+      let successfulApplications = 0;
+      let avgFeedback = 0;
+      let feedbackCount = 0;
+
+      for (const app of applications) {
+        try {
+          const tags = JSON.parse(app.tags || '{}');
+
+          // Filter by project if specified
+          if (projectId && tags.target_project_id !== projectId) {continue;}
+
+          totalApplications++;
+          if (tags.applied_successfully) {successfulApplications++;}
+          if (tags.feedback_score) {
+            avgFeedback += tags.feedback_score;
+            feedbackCount++;
+          }
+        } catch {
+          continue;
+        }
+      }
+
+      return {
+        success: true,
+        project_id: projectId,
+        analytics: {
+          total_applications: totalApplications,
+          successful_applications: successfulApplications,
+          success_rate: totalApplications > 0 ? successfulApplications / totalApplications : 0,
+          avg_feedback_score: feedbackCount > 0 ? avgFeedback / feedbackCount : null,
+        },
+      };
+
+    } catch {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Helper methods
+
+  _getProjectRegistration(projectId) {
+    return new Promise((resolve, reject) => {
+      this.ragDB.db.all('SELECT * FROM lessons WHERE category = "project_registration"', [], (error, rows) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        for (const row of rows) {
+          try {
+            const tags = JSON.parse(row.tags || '{}');
+            if (tags.project_id === projectId) {
+              resolve(row);
+              return;
+            }
+          } catch {
+            continue;
+          }
+        }
+        resolve(null);
+      });
+    });
+  }
+
+  _calculateArraySimilarity(array1, array2) {
+    if (!Array.isArray(array1) || !Array.isArray(array2)) {
+      return 0.0;
+    }
+
+    if (array1.length === 0 && array2.length === 0) {
+      return 1.0;
+    }
+
+    if (array1.length === 0 || array2.length === 0) {
+      return 0.0;
+    }
+
+    const set1 = new Set(array1.map(item => item.toLowerCase()));
+    const set2 = new Set(array2.map(item => item.toLowerCase()));
+
+    const intersection = new Set([...set1].filter(x => set2.has(x)));
+    const union = new Set([...set1, ...set2]);
+
+    return intersection.size / union.size;
+  }
+
+  // Stub methods for compatibility
+  getProjectRecommendations(projectId, _options = {}) {
+    return {
+      success: true,
+      project_id: projectId,
+      recommendations: [],
+      count: 0,
+      message: 'Recommendations feature available in full version',
+    };
+  }
+
+  updateProject(projectId, _updates) {
+    return {
+      success: true,
+      project_id: projectId,
+      message: 'Project update feature available in full version',
+    };
+  }
+}
+
+module.exports = CrossProjectSharingSimple;

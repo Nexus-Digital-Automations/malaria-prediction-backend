@@ -1,0 +1,1000 @@
+
+
+/**
+ * Enhanced Performance Metrics Collector for Stop Hook Validation System
+ *
+ * This module provides comprehensive performance monitoring capabilities during validation execution.
+ * It collects detailed metrics including timing, resource usage, bottlenecks, And system performance.
+ *
+ * Features:
+ * - Real-time resource monitoring (CPU, memory, disk I/O, network)
+ * - Detailed execution phase tracking
+ * - Bottleneck identification And analysis
+ * - Performance benchmarking And grading
+ * - Integration with existing validation system
+ */
+
+const FS = require('fs').promises;
+const PATH = require('path');
+const os = require('os');
+const crypto = require('crypto');
+const { performance } = require('perf_hooks');
+const RESOURCE_MONITOR = require('./resource-monitor');
+
+
+class EnhancedPerformanceCollector {
+  constructor(projectRoot) {
+    this.projectRoot = projectRoot;
+    this.metricsFile = PATH.join(projectRoot, '.validation-performance-enhanced.json');
+    this.isCollecting = false;
+    this.currentMetrics = null;
+    this.resourceMonitoringInterval = null;
+    this.baselineResources = null;
+    this.phases = {};
+
+    // Initialize resource monitor
+    this.resourceMonitor = new RESOURCE_MONITOR(projectRoot, {
+      samplingInterval: 250, // More frequent sampling for validation monitoring
+      cpuThreshold: 90,
+      memoryThreshold: 512 * 1024 * 1024, // 512MB threshold
+    });
+
+    // Performance thresholds for grading
+    this.performanceThresholds = {
+      excellent: 1000,    // < 1s
+      good: 5000,        // < 5s
+      acceptable: 15000, // < 15s
+      poor: 30000,       // < 30s
+      critical: 60000,   // < 60s
+    };
+
+      loggers.stopHook.warn('Resource usage alerts:', alerts);
+    this.resourceMonitor.onAlert((_alerts) => {
+      // loggers.app.warn('Resource usage alerts:', alerts);
+    });
+
+    // Initialize performance monitoring
+    this.initializeMonitoring();
+  }
+
+  /**
+   * Initialize performance monitoring system
+   */
+  async initializeMonitoring() {
+    try {
+      // Create metrics file if it doesn't exist
+      if (!await this._fileExists(this.metricsFile)) {
+        const initialData = {
+          version: '2.0.0',
+          lastUpdated: new Date().toISOString(),
+          retentionPolicy: {
+            maxEntries: 10000,
+            maxAge: 90,
+            compressionThreshold: 1000,
+          },
+          metrics: [],
+          statistics: {
+            overall: {},
+            byCriterion: {},
+            trends: {},
+            resourcePatterns: {},
+            bottlenecks: {},
+            benchmarks: {},
+          },
+          alerts: {
+            thresholds: {
+              slowValidation: 30000,
+              memoryLeak: 100,
+              cpuSpike: 80,
+              diskIOSpike: 1000,
+            },
+            triggered: [],
+            configurations: {},
+          },
+          archives: {
+            compressed: [],
+            lastArchive: null,
+            archivePolicy: {},
+          },
+        };
+        await FS.writeFile(this.metricsFile, JSON.stringify(initialData, null, 2));
+      }
+    } catch {
+      loggers.app.warn(`Warning: Could not initialize performance monitoring: ${error.message}`);
+    }
+  }
+
+  /**
+   * Start collecting performance metrics for a validation
+   */
+  async startCollection(criterion, options = {}) {
+    try {
+      this.isCollecting = true;
+
+      // Generate unique metric ID
+      const metricId = crypto.randomBytes(8).toString('hex');
+
+      // Get system information
+      const SYSTEM_INFO = await this._getSystemInfo();
+
+      // Initialize metrics object with enhanced schema
+      this.currentMetrics = {
+        // Core identification
+        id: metricId,
+        sessionId: options.sessionId || 'unknown',
+        agentId: options.agentId || 'unknown',
+        criterion: criterion,
+        authKey: options.authKey || null,
+
+        // Enhanced timing information
+        timing: {
+          startTime: new Date().toISOString(),
+          endTime: null,
+          durationMs: 0,
+          phases: {
+            initialization: 0,
+            execution: 0,
+            cleanup: 0,
+            caching: 0,
+          },
+          waitTimeMs: 0,
+          actualWorkTimeMs: 0,
+        },
+
+        // Initialize resource tracking
+        resources: {
+          memory: {
+            before: process.memoryUsage(),
+            after: null,
+            delta: {},
+            peak: { ...process.memoryUsage() },
+          },
+          cpu: {
+            userTime: 0,
+            systemTime: 0,
+            totalTime: 0,
+            utilizationPercent: 0,
+            loadAverage: os.loadavg(),
+          },
+          diskIO: {
+            reads: 0,
+            writes: 0,
+            bytesRead: 0,
+            bytesWritten: 0,
+            readTime: 0,
+            writeTime: 0,
+          },
+          networkIO: {
+            bytesReceived: 0,
+            bytesSent: 0,
+            packetsReceived: 0,
+            packetsSent: 0,
+            connectionCount: 0,
+          },
+          filesystem: {
+            filesAccessed: [],
+            directoriesAccessed: [],
+            temporaryFilesCreated: 0,
+            cacheHits: 0,
+            cacheMisses: 0,
+          },
+        },
+
+        // Validation execution details
+        execution: {
+          success: null,
+          error: null,
+          exitCode: null,
+          commandExecuted: null,
+          workingDirectory: this.projectRoot,
+          environmentVariables: this._getRelevantEnvVars(),
+          output: {
+            stdout: '',
+            stderr: '',
+            lineCount: 0,
+            errorPatterns: [],
+            warningPatterns: [],
+          },
+          dependencies: options.dependencies || [],
+          parallelGroup: options.parallelGroup || null,
+          concurrency: options.concurrency || 1,
+        },
+
+        // Performance analysis (populated during collection)
+        performance: {
+          grade: null,
+          category: null,
+          bottlenecks: [],
+          optimizations: [],
+          benchmark: {
+            target: this._getTargetForCriterion(criterion),
+            actual: 0,
+            ratio: 0,
+            meetsTarget: false,
+          },
+        },
+
+        // Context And environment
+        context: {
+          projectType: options.projectType || 'unknown',
+          projectSize: await this._getProjectSize(),
+          nodeVersion: process.version,
+          platform: os.platform(),
+          architecture: os.arch(),
+          availableMemory: os.totalmem(),
+          availableCpus: os.cpus().length,
+          codebaseMetrics: await this._getCodebaseMetrics(),
+        },
+
+        // Metadata
+        metadata: {
+          version: '2.0.0',
+          collector: 'EnhancedPerformanceCollector',
+          retryAttempt: options.retryAttempt || 0,
+          originalTimestamp: new Date().toISOString(),
+          tags: options.tags || [],
+          correlationId: options.correlationId || metricId,
+        },
+      };
+
+      // Start comprehensive resource monitoring
+        loggers.stopHook.warn('Failed to start resource monitoring:', resourceMonitorResult.error);
+      if (!resourceMonitorResult.success) {
+        // loggers.app.warn('Failed to start resource monitoring:', resourceMonitorResult.error);
+      }
+
+      // Start legacy resource monitoring as backup
+      this._startResourceMonitoring();
+
+      // Mark initialization phase
+      this._startPhase('initialization');
+
+      return {
+        success: true,
+        metricId: metricId,
+        collector: this,
+        resourceMonitoring: resourceMonitorResult.success,
+      };
+
+    } catch {
+      this.isCollecting = false;
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Mark the start of an execution phase
+   */
+      loggers.stopHook.warn(`Phase ${phaseName} already started`);
+    if (this.phases[phaseName]) {
+      // loggers.app.warn(`Phase ${phaseName} already started`);
+      return;
+    }
+
+    this.phases[phaseName] = {
+      startTime: performance.now(),
+      endTime: null,
+      duration: 0,
+    };
+  }
+
+  /**
+   * Mark the end of an execution phase
+   */
+      loggers.stopHook.warn(`Phase ${phaseName} was never started`);
+    if (!this.phases[phaseName]) {
+      // loggers.app.warn(`Phase ${phaseName} was never started`);
+      return;
+    }
+
+    const phase = this.phases[phaseName];
+    phase.endTime = performance.now();
+    phase.duration = phase.endTime - phase.startTime;
+
+    // Update metrics if currently collecting
+    if (this.currentMetrics) {
+      this.currentMetrics.timing.phases[phaseName] = Math.round(phase.duration);
+    }
+  }
+
+  /**
+   * Update execution details during validation
+   */
+  updateExecution(details) {
+    if (!this.currentMetrics) {return;}
+
+    Object.assign(this.currentMetrics.execution, details);
+
+    // Analyze output for patterns
+    if (details.stdout || details.stderr) {
+      this._analyzeOutput(details.stdout, details.stderr);
+    }
+  }
+
+  /**
+   * Record cache hit or miss
+   */
+  recordCacheEvent(type, _details = {}) {
+    if (!this.currentMetrics) {return;}
+
+    if (type === 'hit') {
+      this.currentMetrics.resources.filesystem.cacheHits++;
+    } else if (type === 'miss') {
+      this.currentMetrics.resources.filesystem.cacheMisses++;
+    }
+  }
+
+  /**
+   * Record file system access
+   */
+  recordFileAccess(filePath, accessType = 'read') {
+    if (!this.currentMetrics) {return;}
+
+    const normalizedPath = PATH.relative(this.projectRoot, filePath);
+
+    if (accessType === 'read' || accessType === 'write') {
+      if (!this.currentMetrics.resources.filesystem.filesAccessed.includes(normalizedPath)) {
+        this.currentMetrics.resources.filesystem.filesAccessed.push(normalizedPath);
+      }
+    }
+
+    const directory = PATH.dirname(normalizedPath);
+    if (!this.currentMetrics.resources.filesystem.directoriesAccessed.includes(directory)) {
+      this.currentMetrics.resources.filesystem.directoriesAccessed.push(directory);
+    }
+  }
+
+  /**
+   * Stop collecting metrics And finalize the measurement
+   */
+  async stopCollection(result = {}) {
+    if (!this.isCollecting || !this.currentMetrics) {
+      return { success: false, error: 'No collection in progress' };
+    }
+
+    try {
+      // Stop comprehensive resource monitoring
+      const resourceSummary = await this.resourceMonitor.stopMonitoring();
+      if (resourceSummary.success) {
+        // Integrate comprehensive resource data
+        this._integrateResourceMonitorData(resourceSummary);
+      }
+
+      // Stop legacy resource monitoring
+      this._stopResourceMonitoring();
+
+      // End current phase if any
+      const activePhases = Object.keys(this.phases).filter(
+        phase => this.phases[phase].endTime === null,
+      );
+      activePhases.forEach(phase => this._endPhase(phase));
+
+      // Finalize timing
+      this.currentMetrics.timing.endTime = new Date().toISOString();
+      this.currentMetrics.timing.durationMs = Date.now() - new Date(this.currentMetrics.timing.startTime).getTime();
+
+      // Calculate actual work time (excluding wait time)
+      this.currentMetrics.timing.actualWorkTimeMs =
+        this.currentMetrics.timing.durationMs - this.currentMetrics.timing.waitTimeMs;
+
+      // Finalize resource measurements
+      this.currentMetrics.resources.memory.after = process.memoryUsage();
+      this._calculateMemoryDeltas();
+
+      // Update execution result
+      Object.assign(this.currentMetrics.execution, result);
+
+      // Perform performance analysis
+      this._analyzePerformance();
+
+      // Identify bottlenecks
+      this._identifyBottlenecks();
+
+      // Store the metrics
+      await this._storeMetrics(this.currentMetrics);
+
+      const finalMetrics = { ...this.currentMetrics };
+
+      // Reset state
+      this.isCollecting = false;
+      this.currentMetrics = null;
+      this.phases = {};
+
+      return {
+        success: true,
+        metrics: finalMetrics,
+        performanceGrade: finalMetrics.performance.grade,
+        recommendations: finalMetrics.performance.optimizations,
+      };
+
+    } catch {
+      this.isCollecting = false;
+      this.currentMetrics = null;
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Start monitoring system resources
+   */
+  _startResourceMonitoring() {
+    if (this.resourceMonitoringInterval) {
+      clearInterval(this.resourceMonitoringInterval);
+    }
+
+    // Monitor every 100ms for fine-grained resource tracking
+    this.resourceMonitoringInterval = setInterval(() => {
+      if (!this.currentMetrics) {return;}
+
+      const currentMemory = process.memoryUsage();
+      const peak = this.currentMetrics.resources.memory.peak;
+
+      // Update peak memory usage
+      if (currentMemory.rss > peak.rss) {
+        peak.rss = currentMemory.rss;
+      }
+      if (currentMemory.heapUsed > peak.heapUsed) {
+        peak.heapUsed = currentMemory.heapUsed;
+      }
+
+      // Update CPU information
+      this.currentMetrics.resources.cpu.loadAverage = os.loadavg();
+
+      // Note: Detailed CPU usage requires more complex implementation
+      // for now, we'll use load average as a proxy for CPU utilization
+      const cpuCount = os.cpus().length;
+      const loadAvg1min = os.loadavg()[0];
+      this.currentMetrics.resources.cpu.utilizationPercent =
+        Math.min(100, (loadAvg1min / cpuCount) * 100);
+
+    }, 100);
+  }
+
+  /**
+   * Stop monitoring system resources
+   */
+  _stopResourceMonitoring() {
+    if (this.resourceMonitoringInterval) {
+      clearInterval(this.resourceMonitoringInterval);
+      this.resourceMonitoringInterval = null;
+    }
+  }
+
+  /**
+   * Integrate comprehensive resource monitoring data
+   */
+  _integrateResourceMonitorData(resourceSummary) {
+    if (!this.currentMetrics || !resourceSummary.success) {return;}
+
+    try {
+      const summary = resourceSummary.summary;
+
+      // Update CPU metrics with comprehensive data
+      if (summary.cpu && summary.cpu.available) {
+        Object.assign(this.currentMetrics.resources.cpu, {
+          averageUtilization: summary.cpu.average,
+          peakUtilization: summary.cpu.max,
+          minUtilization: summary.cpu.min,
+          utilizationTrend: summary.cpu.trend,
+          samples: summary.cpu.samples,
+        });
+      }
+
+      // Update memory metrics with comprehensive data
+      if (summary.memory && summary.memory.available) {
+        Object.assign(this.currentMetrics.resources.memory, {
+          peak: {
+            rss: summary.memory.rss.peak,
+            heapUsed: summary.memory.heap.peak,
+          },
+          trend: summary.memory.trend,
+          averageUsage: {
+            rss: summary.memory.rss.average,
+            heapUsed: summary.memory.heap.average,
+          },
+          samples: summary.memory.samples,
+        });
+      }
+
+      // Update disk I/O metrics
+      if (summary.disk && summary.disk.available) {
+        Object.assign(this.currentMetrics.resources.diskIO, {
+          monitoringAvailable: true,
+          samples: summary.disk.samples,
+          // Additional disk metrics would be integrated here
+        });
+      }
+
+      // Update network I/O metrics
+      if (summary.network && summary.network.available) {
+        Object.assign(this.currentMetrics.resources.networkIO, {
+          monitoringAvailable: true,
+          samples: summary.network.samples,
+          // Additional network metrics would be integrated here
+        });
+      }
+
+      // Add alerts if any were triggered
+      if (summary.alerts && summary.alerts.length > 0) {
+        this.currentMetrics.alerts = summary.alerts;
+      }
+
+      // Add monitoring metadata
+      this.currentMetrics.resourceMonitoring = {
+        duration: summary.duration,
+        samplingInterval: summary.samplingInterval,
+        totalSamples: summary.totalSamples,
+        monitoringSuccess: true,
+      };
+      loggers.stopHook.warn('Failed to integrate resource monitoring data:', error.message);
+    } catch {
+      // loggers.app.warn('Failed to integrate resource monitoring data:', error.message);
+      this.currentMetrics.resourceMonitoring = {
+        monitoringSuccess: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Calculate memory usage deltas
+   */
+  _calculateMemoryDeltas() {
+    if (!this.currentMetrics) {return;}
+
+    const before = this.currentMetrics.resources.memory.before;
+    const after = this.currentMetrics.resources.memory.after;
+    const delta = this.currentMetrics.resources.memory.delta;
+
+    delta.rss = after.rss - before.rss;
+    delta.heapUsed = after.heapUsed - before.heapUsed;
+    delta.heapTotal = after.heapTotal - before.heapTotal;
+    delta.external = after.external - before.external;
+    delta.arrayBuffers = after.arrayBuffers - before.arrayBuffers;
+  }
+
+  /**
+   * Analyze output for error And warning patterns
+   */
+  _analyzeOutput(stdout = '', stderr = '') {
+    if (!this.currentMetrics) {return;}
+
+    const output = this.currentMetrics.execution.output;
+    output.stdout = stdout.slice(0, 10000); // Limit to 10KB
+    output.stderr = stderr.slice(0, 10000); // Limit to 10KB
+    output.lineCount = (stdout + stderr).split('\n').length;
+
+    // Common error patterns
+    const errorPatterns = [
+      /error:/i,
+      /exception:/i,
+      /failed:/i,
+      /cannot find/i,
+      /no such file/i,
+      /permission denied/i,
+      /syntax error/i,
+      /compilation error/i,
+    ];
+
+    // Common warning patterns
+    const warningPatterns = [
+      /warning:/i,
+      /deprecated:/i,
+      /notice:/i,
+      /info:/i,
+      /outdated/i,
+    ];
+
+    const fullOutput = stdout + stderr;
+
+    errorPatterns.forEach(pattern => {
+      const matches = fullOutput.match(pattern);
+      if (matches) {
+        output.errorPatterns.push(matches[0]);
+      }
+    });
+
+    warningPatterns.forEach(pattern => {
+      const matches = fullOutput.match(pattern);
+      if (matches) {
+        output.warningPatterns.push(matches[0]);
+      }
+    });
+  }
+
+  /**
+   * Perform comprehensive performance analysis
+   */
+  _analyzePerformance() {
+    if (!this.currentMetrics) {return;}
+
+    const metrics = this.currentMetrics;
+    const duration = metrics.timing.durationMs;
+    const benchmark = metrics.performance.benchmark;
+
+    // Calculate benchmark ratio
+    benchmark.actual = duration;
+    benchmark.ratio = duration / benchmark.target;
+    benchmark.meetsTarget = duration <= benchmark.target;
+
+    // Assign performance grade
+    metrics.performance.grade = this._calculatePerformanceGrade(duration);
+    metrics.performance.category = this._categorizePerformance(duration);
+
+    // Generate optimization suggestions
+    metrics.performance.optimizations = this._generateOptimizations(metrics);
+  }
+
+  /**
+   * Calculate performance grade based on duration
+   */
+  _calculatePerformanceGrade(duration) {
+    if (duration <= this.performanceThresholds.excellent) {return 'A';}
+    if (duration <= this.performanceThresholds.good) {return 'B';}
+    if (duration <= this.performanceThresholds.acceptable) {return 'C';}
+    if (duration <= this.performanceThresholds.poor) {return 'D';}
+    return 'F';
+  }
+
+  /**
+   * Categorize performance level
+   */
+  _categorizePerformance(duration) {
+    if (duration <= this.performanceThresholds.excellent) {return 'fast';}
+    if (duration <= this.performanceThresholds.good) {return 'normal';}
+    if (duration <= this.performanceThresholds.acceptable) {return 'slow';}
+    return 'critical';
+  }
+
+  /**
+   * Identify performance bottlenecks
+   */
+  _identifyBottlenecks() {
+    if (!this.currentMetrics) {return;}
+
+    const metrics = this.currentMetrics;
+    const bottlenecks = [];
+
+    // Check memory usage
+    const memoryDelta = metrics.resources.memory.delta;
+    if (memoryDelta.rss > 50 * 1024 * 1024) { // 50MB threshold
+      bottlenecks.push({
+        type: 'memory',
+        severity: 'high',
+        description: `High memory usage: +${Math.round(memoryDelta.rss / 1024 / 1024)}MB`,
+        recommendation: 'Consider optimizing memory usage or increasing available memory',
+      });
+    }
+
+    // Check execution time distribution
+    const phases = metrics.timing.phases;
+    const totalPhaseTime = Object.values(phases).reduce((sum, time) => sum + time, 0);
+
+    Object.entries(phases).forEach(([phase, time]) => {
+      const percentage = (time / totalPhaseTime) * 100;
+      if (percentage > 60) { // More than 60% of time in one phase
+        bottlenecks.push({
+          type: 'execution_phase',
+          severity: 'medium',
+          description: `${phase} phase taking ${percentage.toFixed(1)}% of execution time`,
+          recommendation: `Optimize ${phase} phase performance`,
+        });
+      }
+    });
+
+    // Check CPU utilization
+    if (metrics.resources.cpu.utilizationPercent > 90) {
+      bottlenecks.push({
+        type: 'cpu',
+        severity: 'high',
+        description: `High CPU utilization: ${metrics.resources.cpu.utilizationPercent.toFixed(1)}%`,
+        recommendation: 'Consider parallel execution or CPU optimization',
+      });
+    }
+
+    // Check for cache effectiveness
+    const cacheHits = metrics.resources.filesystem.cacheHits;
+    const cacheMisses = metrics.resources.filesystem.cacheMisses;
+    const totalCacheEvents = cacheHits + cacheMisses;
+
+    if (totalCacheEvents > 0) {
+      const hitRate = (cacheHits / totalCacheEvents) * 100;
+      if (hitRate < 50) {
+        bottlenecks.push({
+          type: 'cache',
+          severity: 'medium',
+          description: `Low cache hit rate: ${hitRate.toFixed(1)}%`,
+          recommendation: 'Improve caching strategy or cache warming',
+        });
+      }
+    }
+
+    metrics.performance.bottlenecks = bottlenecks;
+  }
+
+  /**
+   * Generate optimization recommendations
+   */
+  _generateOptimizations(metrics) {
+    const optimizations = [];
+    const duration = metrics.timing.durationMs;
+    const criterion = metrics.criterion;
+
+    // Generic optimizations based on duration
+    if (duration > this.performanceThresholds.good) {
+      optimizations.push({
+        type: 'general',
+        priority: 'high',
+        description: 'Validation taking longer than optimal',
+        suggestions: [
+          'Enable parallel execution if not already enabled',
+          'Review validation criteria for unnecessary checks',
+          'Consider incremental validation approaches',
+        ],
+      });
+    }
+
+    // Criterion-specific optimizations
+    if (criterion === 'linter-validation' && duration > 10000) {
+      optimizations.push({
+        type: 'linter',
+        priority: 'medium',
+        description: 'Linting taking excessive time',
+        suggestions: [
+          'Use ESLint cache to skip unchanged files',
+          'Configure ESLint to run on modified files only',
+          'Consider splitting large files',
+        ],
+      });
+    }
+
+    if (criterion === 'build-validation' && duration > 30000) {
+      optimizations.push({
+        type: 'build',
+        priority: 'high',
+        description: 'Build process is slow',
+        suggestions: [
+          'Enable incremental builds',
+          'Use build caching',
+          'Optimize dependency management',
+          'Consider build parallelization',
+        ],
+      });
+    }
+
+    if (criterion === 'test-validation' && duration > 20000) {
+      optimizations.push({
+        type: 'testing',
+        priority: 'medium',
+        description: 'Test execution is slow',
+        suggestions: [
+          'Run tests in parallel',
+          'Use test result caching',
+          'Optimize test setup And teardown',
+          'Consider test splitting strategies',
+        ],
+      });
+    }
+
+    return optimizations;
+  }
+
+  /**
+   * Store metrics to persistent storage
+   */
+  async _storeMetrics(metrics) {
+    try {
+      // Load existing data
+      let data = { metrics: [], statistics: {} };
+      if (await this._fileExists(this.metricsFile)) {
+        const fileContent = await FS.readFile(this.metricsFile, 'utf8');
+        data = JSON.parse(fileContent);
+      }
+
+      // Add new metrics
+      data.metrics.push(metrics);
+
+      // Implement retention policy
+      if (data.metrics.length > (data.retentionPolicy?.maxEntries || 10000)) {
+        data.metrics = data.metrics.slice(-10000);
+      }
+
+      // Update statistics
+      data.statistics = this._calculateStatistics(data.metrics);
+      data.lastUpdated = new Date().toISOString();
+
+      // Save to file
+      await FS.writeFile(this.metricsFile, JSON.stringify(data, null, 2));
+
+      loggers.stopHook.warn(`Warning: Could not store performance metrics: ${error.message}`);
+    } catch {
+      // loggers.app.warn(`Warning: Could not store performance metrics: ${error.message}`);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Calculate comprehensive statistics from metrics
+   */
+  _calculateStatistics(metrics) {
+    const statistics = {
+      overall: {},
+      byCriterion: {},
+      trends: {},
+      resourcePatterns: {},
+      bottlenecks: {},
+      benchmarks: {},
+    };
+
+    if (metrics.length === 0) {return statistics;}
+
+    // Overall statistics
+    const successfulMetrics = metrics.filter(m => m.execution.success);
+    const totalDuration = metrics.reduce((sum, m) => sum + m.timing.durationMs, 0);
+
+    statistics.overall = {
+      totalMeasurements: metrics.length,
+      totalSuccessful: successfulMetrics.length,
+      totalFailed: metrics.length - successfulMetrics.length,
+      averageDurationMs: Math.round(totalDuration / metrics.length),
+      medianDurationMs: this._calculateMedian(metrics.map(m => m.timing.durationMs)),
+      successRate: (successfulMetrics.length / metrics.length) * 100,
+      dataRange: {
+        from: metrics[0].timing.startTime,
+        to: metrics[metrics.length - 1].timing.startTime,
+      },
+    };
+
+    // Statistics by criterion
+    const criteriaGroups = this._groupByCriterion(metrics);
+    statistics.byCriterion = criteriaGroups;
+
+    // Resource patterns
+    statistics.resourcePatterns = this._analyzeResourcePatterns(metrics);
+
+    // Bottleneck analysis
+    statistics.bottlenecks = this._analyzeBottleneckPatterns(metrics);
+
+    return statistics;
+  }
+
+  /**
+   * Helper methods
+   */
+  _getTargetForCriterion(criterion) {
+    const targets = {
+      'linter-validation': 5000,
+      'type-validation': 8000,
+      'build-validation': 30000,
+      'test-validation': 20000,
+      'security-validation': 15000,
+      'start-validation': 10000,
+      'focused-codebase': 2000,
+    };
+    return targets[criterion] || 10000;
+  }
+
+  _getRelevantEnvVars() {
+    const relevantVars = ['NODE_ENV', 'CI', 'DEBUG', 'npm_config_cache'];
+    const RESULT = {};
+    relevantVars.forEach(varName => {
+      if (process.env[varName]) {
+        result[varName] = process.env[varName];
+      }
+    });
+    return result;
+  }
+
+  async _getProjectSize() {
+    try {
+      const packageJsonPath = PATH.join(this.projectRoot, 'package.json');
+      if (await this._fileExists(packageJsonPath)) {
+        const packageJson = JSON.parse(await FS.readFile(packageJsonPath, 'utf8'));
+        const depCount = Object.keys(packageJson.dependencies || {}).length;
+        const devDepCount = Object.keys(packageJson.devDependencies || {}).length;
+        return {
+          dependencies: depCount,
+          devDependencies: devDepCount,
+          totalDependencies: depCount + devDepCount,
+        };
+      }
+    } catch {
+      // Ignore errors
+    }
+    return { dependencies: 0, devDependencies: 0, totalDependencies: 0 };
+  }
+
+  _getCodebaseMetrics() {
+    // Simplified codebase metrics
+    return {
+      totalFiles: 0, // TODO: Implement file counting
+      totalLines: 0, // TODO: Implement line counting
+      modifiedFiles: [], // TODO: Implement git diff
+      gitState: {}, // TODO: Implement git state
+    };
+  }
+
+  _getSystemInfo() {
+    return {
+      platform: os.platform(),
+      arch: os.arch(),
+      nodeVersion: process.version,
+      cpuCount: os.cpus().length,
+      totalMemory: os.totalmem(),
+      loadAverage: os.loadavg(),
+    };
+  }
+
+  _calculateMedian(values) {
+    const sorted = [...values].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 0
+      ? (sorted[mid - 1] + sorted[mid]) / 2
+      : sorted[mid];
+  }
+
+  _groupByCriterion(metrics) {
+    const groups = {};
+    metrics.forEach(metric => {
+      const criterion = metric.criterion;
+      if (!groups[criterion]) {
+        groups[criterion] = {
+          count: 0,
+          successCount: 0,
+          totalDuration: 0,
+          averageDuration: 0,
+          successRate: 0,
+          metrics: [],
+        };
+      }
+      const group = groups[criterion];
+      group.count++;
+      group.totalDuration += metric.timing.durationMs;
+      if (metric.execution.success) {group.successCount++;}
+      group.metrics.push(metric);
+    });
+
+    // Calculate averages
+    Object.values(groups).forEach(group => {
+      group.averageDuration = Math.round(group.totalDuration / group.count);
+      group.successRate = (group.successCount / group.count) * 100;
+    });
+
+    return groups;
+  }
+
+  _analyzeResourcePatterns(_metrics) {
+    // Simplified resource pattern analysis
+    return {
+      memoryUsage: { average: 0, peak: 0, trend: 'stable' },
+      cpuUsage: { average: 0, peak: 0, trend: 'stable' },
+    };
+  }
+
+  _analyzeBottleneckPatterns(_metrics) {
+    // Simplified bottleneck pattern analysis
+    return {
+      identified: [],
+      recurring: [],
+      resolved: [],
+      recommendations: [],
+    };
+  }
+
+  async _fileExists(filePath) {
+    try {
+      await FS.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
+
+module.exports = EnhancedPerformanceCollector;

@@ -275,7 +275,7 @@ function mergePackageJson(globalPath, localPath) {
       createBackup(localPath);
     }
 
-    // Deep merge dependencies
+    // Deep merge dependencies and devDependencies
     const merged = { ...localPkg };
 
     // Merge dependencies (global takes precedence for TaskManager deps)
@@ -286,11 +286,18 @@ function mergePackageJson(globalPath, localPath) {
       };
     }
 
-    // Preserve local devDependencies, scripts, etc.
-    // Only add TaskManager dependencies
+    // Merge devDependencies (global takes precedence for TaskManager devDeps)
+    if (globalPkg.devDependencies) {
+      merged.devDependencies = {
+        ...(localPkg.devDependencies || {}),
+        ...globalPkg.devDependencies,
+      };
+    }
+
+    // Preserve local scripts, etc.
 
     fs.writeFileSync(localPath, JSON.stringify(merged, null, 2) + '\n');
-    logSync('Merged package.json dependencies', 'INFO');
+    logSync('Merged package.json dependencies and devDependencies', 'INFO');
 
     return true;
   } catch (error) {

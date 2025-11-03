@@ -374,7 +374,7 @@ class SpatialPredictionRequest(BaseModel):
 class TimeSeriesPoint(BaseModel):
     """Time series data point."""
 
-    date: DateType = Field(..., description="Prediction date")
+    prediction_date: DateType = Field(..., alias="date", description="Prediction date")
     risk_score: float = Field(..., description="Risk score", ge=0, le=1)
     risk_level: RiskLevelEnum = Field(..., description="Categorical risk level")
     uncertainty: float | None = Field(None, description="Prediction uncertainty")

@@ -1,0 +1,988 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://infinite-continue-stop-hook.local/schemas/enhanced-todo-schema.json",
+  "title": "Enhanced TaskManager Data Schema",
+  "description": "Optimized JSON schema for TaskManager with embedded subtasks, performance indexing, and data integrity",
+  "type": "object",
+  "version": "2.0.0",
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Schema metadata and project information",
+      "properties": {
+        "project": {
+          "type": "string",
+          "description": "Project name identifier",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "schema_version": {
+          "type": "string",
+          "const": "2.0.0",
+          "description": "Schema version for compatibility validation"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Schema creation timestamp"
+        },
+        "last_modified": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last modification timestamp"
+        },
+        "total_tasks": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of tasks in the system"
+        },
+        "indexes_last_built": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when indexes were last rebuilt"
+        }
+      },
+      "required": ["project", "schema_version", "created_at", "last_modified"],
+      "additionalProperties": false
+    },
+    "indexes": {
+      "type": "object",
+      "description": "Performance indexes for O(1) lookups and optimized queries",
+      "properties": {
+        "by_id": {
+          "type": "object",
+          "description": "Direct task lookup by ID mapping to array index",
+          "patternProperties": {
+            "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "by_status": {
+          "type": "object",
+          "description": "Status-based task grouping for efficient filtering",
+          "properties": {
+            "pending": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            },
+            "in_progress": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            },
+            "completed": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            },
+            "archived": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            },
+            "blocked": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "by_category": {
+          "type": "object",
+          "description": "Category-based task grouping for workflow optimization",
+          "properties": {
+            "feature": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            },
+            "error": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            },
+            "test": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            },
+            "subtask": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            },
+            "research": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            },
+            "audit": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "by_priority": {
+          "type": "object",
+          "description": "Priority-based task indexing for urgency management",
+          "properties": {
+            "critical": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            },
+            "high": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            },
+            "medium": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            },
+            "low": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "subtasks_by_parent": {
+          "type": "object",
+          "description": "Parent-to-subtask relationship mapping for hierarchical navigation",
+          "patternProperties": {
+            "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "by_agent": {
+          "type": "object",
+          "description": "Agent-to-task assignment mapping for workload distribution",
+          "patternProperties": {
+            "^[a-zA-Z0-9_-]+$": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+              },
+              "uniqueItems": true
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["by_id", "by_status", "by_category", "by_priority"],
+      "additionalProperties": false
+    },
+    "tasks": {
+      "type": "array",
+      "description": "Array of all tasks in the system",
+      "items": {
+        "$ref": "#/definitions/Task"
+      }
+    },
+    "success_criteria_templates": {
+      "type": "object",
+      "description": "Reusable success criteria templates for consistent quality standards",
+      "properties": {
+        "feature_standards": {
+          "$ref": "#/definitions/SuccessCriteriaTemplate"
+        },
+        "error_fix_standards": {
+          "$ref": "#/definitions/SuccessCriteriaTemplate"
+        },
+        "test_standards": {
+          "$ref": "#/definitions/SuccessCriteriaTemplate"
+        },
+        "audit_standards": {
+          "$ref": "#/definitions/SuccessCriteriaTemplate"
+        },
+        "research_standards": {
+          "$ref": "#/definitions/SuccessCriteriaTemplate"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/SuccessCriteriaTemplate"
+      }
+    }
+  },
+  "required": ["metadata", "indexes", "tasks"],
+  "additionalProperties": false,
+  "definitions": {
+    "Task": {
+      "type": "object",
+      "description": "Primary task object with enhanced validation and lifecycle tracking",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$",
+          "description": "Unique task identifier following standard pattern"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Task title with length constraints"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Detailed task description"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["feature", "error", "test", "subtask", "research", "audit"],
+          "description": "Task category for workflow management"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"],
+          "default": "medium",
+          "description": "Task priority level"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "in_progress", "completed", "archived", "blocked"],
+          "default": "pending",
+          "description": "Current task status"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$"
+          },
+          "uniqueItems": true,
+          "description": "Array of task IDs that must be completed first"
+        },
+        "important_files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[^\\0]+$"
+          },
+          "uniqueItems": true,
+          "description": "Files critical to this task implementation"
+        },
+        "success_criteria": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SuccessCriterion"
+          },
+          "description": "Specific success criteria for task completion"
+        },
+        "estimate": {
+          "type": "string",
+          "pattern": "^(\\d+(\\.\\d+)?\\s?(hours?|days?|weeks?)|)$",
+          "description": "Time estimate for task completion"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Task creation timestamp"
+        },
+        "started_at": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Task start timestamp"
+        },
+        "completed_at": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Task completion timestamp"
+        },
+        "agent_assignment": {
+          "$ref": "#/definitions/AgentAssignment",
+          "description": "Current and historical agent assignments"
+        },
+        "subtasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Subtask"
+          },
+          "description": "Embedded subtasks for complex task decomposition"
+        },
+        "parent_task_id": {
+          "type": ["string", "null"],
+          "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$",
+          "description": "Parent task ID for hierarchical relationships"
+        },
+        "lifecycle": {
+          "$ref": "#/definitions/TaskLifecycle",
+          "description": "Task lifecycle and milestone tracking"
+        },
+        "validation_results": {
+          "$ref": "#/definitions/ValidationResults",
+          "description": "Automated validation and quality gate results"
+        }
+      },
+      "required": ["id", "title", "category", "status", "created_at"],
+      "additionalProperties": false
+    },
+    "Subtask": {
+      "type": "object",
+      "description": "Embedded subtask with type-specific validation",
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseSubtask"
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "research"
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/BaseSubtask"
+              },
+              {
+                "$ref": "#/definitions/ResearchSubtask"
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "audit"
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/BaseSubtask"
+              },
+              {
+                "$ref": "#/definitions/AuditSubtask"
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "implementation"
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/BaseSubtask"
+              },
+              {
+                "$ref": "#/definitions/ImplementationSubtask"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "BaseSubtask": {
+      "type": "object",
+      "description": "Base subtask properties shared across all subtask types",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z]+_[0-9]+_[a-zA-Z0-9]+$",
+          "description": "Unique subtask identifier"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["research", "audit", "implementation", "validation", "documentation"],
+          "description": "Subtask type for specialized handling"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Subtask title"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Detailed subtask description"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "in_progress", "completed", "blocked"],
+          "default": "pending",
+          "description": "Current subtask status"
+        },
+        "estimated_hours": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 168,
+          "description": "Estimated hours for completion"
+        },
+        "prevents_implementation": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this subtask must be completed before implementation"
+        },
+        "prevents_completion": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this subtask must be completed before task completion"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Subtask creation timestamp"
+        },
+        "completed_by": {
+          "type": ["string", "null"],
+          "description": "Agent ID that completed this subtask"
+        },
+        "agent_assignment": {
+          "$ref": "#/definitions/AgentAssignment",
+          "description": "Subtask agent assignment tracking"
+        }
+      },
+      "required": ["id", "type", "title", "status", "created_at"],
+      "additionalProperties": false
+    },
+    "ResearchSubtask": {
+      "type": "object",
+      "description": "Research-specific subtask properties",
+      "properties": {
+        "research_locations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResearchLocation"
+          },
+          "minItems": 1,
+          "description": "Locations and sources for research investigation"
+        },
+        "deliverables": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Expected research deliverables"
+        },
+        "research_output": {
+          "type": ["object", "null"],
+          "properties": {
+            "report_path": {
+              "type": "string",
+              "description": "Path to generated research report"
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Key research findings"
+            },
+            "recommendations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Implementation recommendations"
+            },
+            "risks": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Identified risks and challenges"
+            },
+            "alternatives": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Alternative approaches considered"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Research output and results"
+        }
+      },
+      "required": ["research_locations", "deliverables"],
+      "additionalProperties": false
+    },
+    "AuditSubtask": {
+      "type": "object",
+      "description": "Audit-specific subtask properties",
+      "properties": {
+        "success_criteria": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SuccessCriterion"
+          },
+          "description": "Audit validation criteria"
+        },
+        "prevents_self_review": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prevents implementer from auditing own work"
+        },
+        "original_implementer": {
+          "type": ["string", "null"],
+          "description": "Agent ID of original implementer"
+        },
+        "audit_type": {
+          "type": "string",
+          "enum": ["embedded_quality_gate", "post_completion", "security_review", "performance_audit"],
+          "description": "Type of audit being performed"
+        },
+        "audit_results": {
+          "type": ["object", "null"],
+          "properties": {
+            "criteria_passed": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of criteria that passed"
+            },
+            "criteria_failed": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of criteria that failed"
+            },
+            "overall_result": {
+              "type": "string",
+              "enum": ["pass", "fail", "conditional_pass"],
+              "description": "Overall audit result"
+            },
+            "detailed_results": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AuditResult"
+              },
+              "description": "Detailed results for each criterion"
+            },
+            "recommendations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Audit recommendations"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Comprehensive audit results"
+        }
+      },
+      "required": ["success_criteria", "audit_type"],
+      "additionalProperties": false
+    },
+    "ImplementationSubtask": {
+      "type": "object",
+      "description": "Implementation-specific subtask properties",
+      "properties": {
+        "implementation_scope": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Scope of implementation work"
+        },
+        "affected_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Files affected by this implementation"
+        },
+        "testing_requirements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Testing requirements for this implementation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ResearchLocation": {
+      "type": "object",
+      "description": "Research source and location specification",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["codebase", "internet", "documentation", "api", "database"],
+          "description": "Type of research location"
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific paths or locations to investigate"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Keywords for targeted research"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific sources to consult"
+        },
+        "focus": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Focus area for this research location"
+        }
+      },
+      "required": ["type", "focus"],
+      "additionalProperties": false
+    },
+    "SuccessCriterion": {
+      "type": "object",
+      "description": "Individual success criterion with validation rules",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique criterion identifier"
+        },
+        "title": {
+          "type": "string",
+          "description": "Human-readable criterion title"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed criterion description"
+        },
+        "validation_type": {
+          "type": "string",
+          "enum": ["manual", "automated", "command", "file_check", "test_run"],
+          "description": "Type of validation required"
+        },
+        "validation_command": {
+          "type": "string",
+          "description": "Command to execute for validation"
+        },
+        "expected_result": {
+          "type": "string",
+          "description": "Expected result from validation"
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1,
+          "description": "Relative importance weight"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["quality", "performance", "security", "functionality", "documentation"],
+          "description": "Criterion category"
+        },
+        "required": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether this criterion is mandatory"
+        }
+      },
+      "required": ["title", "validation_type", "category"],
+      "additionalProperties": false
+    },
+    "SuccessCriteriaTemplate": {
+      "type": "object",
+      "description": "Reusable template for success criteria",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Template name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Template description"
+        },
+        "criteria": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SuccessCriterion"
+          },
+          "description": "Template criteria list"
+        },
+        "applicable_categories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["feature", "error", "test", "subtask", "research", "audit"]
+          },
+          "description": "Task categories this template applies to"
+        }
+      },
+      "required": ["name", "criteria"],
+      "additionalProperties": false
+    },
+    "AgentAssignment": {
+      "type": "object",
+      "description": "Agent assignment tracking with history",
+      "properties": {
+        "current_agent": {
+          "type": ["string", "null"],
+          "description": "Currently assigned agent ID"
+        },
+        "assigned_at": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Current assignment timestamp"
+        },
+        "assignment_history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "agent_id": {
+                "type": "string",
+                "description": "Agent identifier"
+              },
+              "role": {
+                "type": "string",
+                "description": "Agent role for this assignment"
+              },
+              "assigned_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Assignment start timestamp"
+              },
+              "unassigned_at": {
+                "type": ["string", "null"],
+                "format": "date-time",
+                "description": "Assignment end timestamp"
+              },
+              "reason": {
+                "type": "string",
+                "description": "Assignment change reason"
+              }
+            },
+            "required": ["agent_id", "role", "assigned_at"],
+            "additionalProperties": false
+          },
+          "description": "Complete assignment history"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TaskLifecycle": {
+      "type": "object",
+      "description": "Task lifecycle and milestone tracking",
+      "properties": {
+        "phase": {
+          "type": "string",
+          "enum": ["planning", "research", "implementation", "testing", "review", "completed"],
+          "description": "Current lifecycle phase"
+        },
+        "milestones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Milestone name"
+              },
+              "completed_at": {
+                "type": ["string", "null"],
+                "format": "date-time",
+                "description": "Milestone completion timestamp"
+              },
+              "notes": {
+                "type": "string",
+                "description": "Milestone notes"
+              }
+            },
+            "required": ["name"],
+            "additionalProperties": false
+          },
+          "description": "Lifecycle milestones"
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Blocker identifier"
+              },
+              "description": {
+                "type": "string",
+                "description": "Blocker description"
+              },
+              "blocking_task_id": {
+                "type": "string",
+                "description": "Task ID causing the block"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Blocker creation timestamp"
+              },
+              "resolved_at": {
+                "type": ["string", "null"],
+                "format": "date-time",
+                "description": "Blocker resolution timestamp"
+              }
+            },
+            "required": ["id", "description", "created_at"],
+            "additionalProperties": false
+          },
+          "description": "Current and historical blockers"
+        }
+      },
+      "required": ["phase"],
+      "additionalProperties": false
+    },
+    "ValidationResults": {
+      "type": ["object", "null"],
+      "description": "Automated validation and quality gate results",
+      "properties": {
+        "last_validated": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Last validation timestamp"
+        },
+        "validation_passed": {
+          "type": ["boolean", "null"],
+          "description": "Overall validation result"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "criterion_id": {
+                "type": "string",
+                "description": "Validated criterion ID"
+              },
+              "passed": {
+                "type": "boolean",
+                "description": "Whether criterion passed"
+              },
+              "output": {
+                "type": "string",
+                "description": "Validation output"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Validation timestamp"
+              }
+            },
+            "required": ["criterion_id", "passed", "timestamp"],
+            "additionalProperties": false
+          },
+          "description": "Individual validation results"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditResult": {
+      "type": "object",
+      "description": "Individual audit criterion result",
+      "properties": {
+        "criterion_id": {
+          "type": "string",
+          "description": "Audited criterion ID"
+        },
+        "criterion_title": {
+          "type": "string",
+          "description": "Criterion title"
+        },
+        "result": {
+          "type": "string",
+          "enum": ["pass", "fail", "warning", "not_applicable"],
+          "description": "Audit result for this criterion"
+        },
+        "evidence": {
+          "type": "string",
+          "description": "Evidence supporting the result"
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Recommendations for improvement"
+        },
+        "validated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Validation timestamp"
+        }
+      },
+      "required": ["criterion_id", "result", "validated_at"],
+      "additionalProperties": false
+    }
+  }
+}
