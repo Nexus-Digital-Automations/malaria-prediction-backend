@@ -75,14 +75,14 @@ class MalariaEnsembleModel(pl.LightningModule):
                 dropout=ensemble_dropout,
             )
         elif fusion_method == "mlp":
-            self.fusion_layer = MLPFusion(  # type: ignore[assignment]
+            self.fusion_layer = MLPFusion(
                 input_dim=fusion_input_dim,
                 hidden_dim=fusion_input_dim // 2,
                 output_dim=prediction_horizon,
                 dropout=ensemble_dropout,
             )
         elif fusion_method == "weighted":
-            self.fusion_layer = WeightedFusion(  # type: ignore[assignment]
+            self.fusion_layer = WeightedFusion(
                 num_models=2, prediction_horizon=prediction_horizon
             )
         else:
@@ -225,7 +225,7 @@ class MalariaEnsembleModel(pl.LightningModule):
 
         return total_loss
 
-    def configure_optimizers(self) -> dict[str, Any]:  # type: ignore[override]
+    def configure_optimizers(self) -> dict[str, Any]:
         """Configure optimizers and learning rate schedulers."""
         optimizer = AdamW(
             self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay
@@ -368,7 +368,7 @@ class MalariaEnsembleModel(pl.LightningModule):
             results.append(result)
         return results
 
-    def load_from_checkpoint(self, checkpoint_path: str) -> None:  # type: ignore[override]
+    def load_from_checkpoint(self, checkpoint_path: str) -> None:
         """Load model from checkpoint for testing compatibility."""
         # Mock loading - call torch.load for test compatibility
         import torch
@@ -410,7 +410,7 @@ class AttentionFusion(nn.Module):
 
         # Aggregate attended predictions
         fused = torch.mean(attended, dim=1)
-        return self.output_projection(fused)  # type: ignore[no-any-return]
+        return self.output_projection(fused)
 
 
 class MLPFusion(nn.Module):
@@ -436,7 +436,7 @@ class MLPFusion(nn.Module):
         """Apply MLP fusion."""
         # Concatenate predictions
         combined = torch.cat([lstm_predictions, transformer_predictions], dim=-1)
-        return self.fusion_network(combined)  # type: ignore[no-any-return]
+        return self.fusion_network(combined)
 
 
 class WeightedFusion(nn.Module):

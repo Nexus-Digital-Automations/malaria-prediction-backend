@@ -494,6 +494,13 @@ class MODISClient:
                             "tile_id": tile.tile_id,
                         }
 
+            # If we reach here, all retries were exhausted (e.g., file too small on all attempts)
+            return {
+                "success": False,
+                "error": "All download attempts failed",
+                "tile_id": tile.tile_id,
+            }
+
         except Exception as e:
             logger.error(
                 f"Unexpected error downloading {product} for {tile.tile_id}: {e}"

@@ -307,7 +307,7 @@ class NotificationService:
 
         results = []
 
-        for email in config.email_addresses:  # type: ignore[attr-defined]
+        for email in config.email_addresses:
             request = NotificationRequest(
                 alert_id=int(alert.id),
                 channel="email",
@@ -344,7 +344,7 @@ class NotificationService:
 
         results = []
 
-        for phone in config.phone_numbers:  # type: ignore[attr-defined]
+        for phone in config.phone_numbers:
             request = NotificationRequest(
                 alert_id=int(alert.id),
                 channel="sms",
@@ -379,7 +379,7 @@ class NotificationService:
 
         results = []
 
-        for webhook_url in config.webhook_urls:  # type: ignore[attr-defined]
+        for webhook_url in config.webhook_urls:
             request = NotificationRequest(
                 alert_id=int(alert.id),
                 channel="webhook",
@@ -736,12 +736,12 @@ class NotificationService:
             config: Alert configuration
         """
         try:
-            alert.escalated_at = datetime.now()  # type: ignore[assignment]
-            alert.escalation_level = 1  # type: ignore[assignment]
+            alert.escalated_at = datetime.now()
+            alert.escalation_level = 1
 
             # Send to emergency email contacts
             if config.emergency_contact_emails:
-                for email in config.emergency_contact_emails:  # type: ignore[attr-defined]
+                for email in config.emergency_contact_emails:
                     request = NotificationRequest(
                         alert_id=int(alert.id),
                         channel="email",
@@ -755,7 +755,7 @@ class NotificationService:
 
             # Send to emergency phone contacts
             if config.emergency_contact_phones:
-                for phone in config.emergency_contact_phones:  # type: ignore[attr-defined]
+                for phone in config.emergency_contact_phones:
                     request = NotificationRequest(
                         alert_id=int(alert.id),
                         channel="sms",

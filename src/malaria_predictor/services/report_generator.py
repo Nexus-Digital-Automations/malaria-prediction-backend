@@ -682,7 +682,7 @@ class ReportGenerator:
             db_session: Database session for data access
         """
         self.db = db_session
-        self.data_export = DataExportService(db_session)  # type: ignore[arg-type]
+        self.data_export = DataExportService(db_session)
         self.chart_renderer = ChartRenderer()
         self.template_processor = TemplateProcessor()
         self.exporter = ReportExporter()
@@ -808,12 +808,12 @@ class ReportGenerator:
 
             # Update report with results
             generation_time = time.time() - start_time
-            report.status = "completed"  # type: ignore[assignment]
-            report.export_status = export_results  # type: ignore[assignment]
-            report.file_paths = file_paths  # type: ignore[assignment]
-            report.file_sizes = file_sizes  # type: ignore[assignment]
-            report.generation_time_seconds = generation_time  # type: ignore[assignment]
-            report.data_points_count = self._count_data_points(report_data)  # type: ignore[assignment]
+            report.status = "completed"
+            report.export_status = export_results
+            report.file_paths = file_paths
+            report.file_sizes = file_sizes
+            report.generation_time_seconds = generation_time
+            report.data_points_count = self._count_data_points(report_data)
 
             self.db.commit()
 
@@ -833,8 +833,8 @@ class ReportGenerator:
 
             # Update report status if it exists
             if 'report' in locals():
-                report.status = "failed"  # type: ignore[assignment]
-                report.error_message = str(e)  # type: ignore[assignment]
+                report.status = "failed"
+                report.error_message = str(e)
                 self.db.commit()
 
             raise

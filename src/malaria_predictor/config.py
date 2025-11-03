@@ -60,7 +60,7 @@ class SecuritySettings(BaseModel):
 class DatabaseSettings(BaseModel):
     """Database configuration settings."""
 
-    url: PostgresDsn = Field(  # type: ignore[assignment]
+    url: PostgresDsn = Field(
         default="postgresql+asyncpg://user:password@localhost/malaria_prediction",
         description="PostgreSQL database URL with TimescaleDB",
     )
@@ -97,7 +97,7 @@ class DatabaseSettings(BaseModel):
 class RedisSettings(BaseModel):
     """Redis configuration settings."""
 
-    url: RedisDsn = Field(  # type: ignore[assignment]
+    url: RedisDsn = Field(
         default="redis://localhost:6379/0",
         description="Redis URL for caching and job queues",
     )
@@ -130,13 +130,13 @@ class ExternalAPISettings(BaseModel):
     era5_api_key: str | None = Field(
         default=None, description="Copernicus Climate Data Store API key"
     )
-    era5_api_url: HttpUrl = Field(  # type: ignore[assignment]
+    era5_api_url: HttpUrl = Field(
         default="https://cds.climate.copernicus.eu/api/v2",
         description="ERA5 API base URL",
     )
 
     # CHIRPS Precipitation Data API
-    chirps_api_endpoint: HttpUrl = Field(  # type: ignore[assignment]
+    chirps_api_endpoint: HttpUrl = Field(
         default="https://data.chc.ucsb.edu/api/", description="CHIRPS data API endpoint"
     )
 
@@ -144,17 +144,17 @@ class ExternalAPISettings(BaseModel):
     modis_api_key: str | None = Field(
         default=None, description="NASA EarthData API key"
     )
-    modis_api_url: HttpUrl = Field(  # type: ignore[assignment]
+    modis_api_url: HttpUrl = Field(
         default="https://modis.gsfc.nasa.gov/data/", description="MODIS API base URL"
     )
 
     # WorldPop Population Data API
-    worldpop_api_endpoint: HttpUrl = Field(  # type: ignore[assignment]
+    worldpop_api_endpoint: HttpUrl = Field(
         default="https://hub.worldpop.org/", description="WorldPop API endpoint"
     )
 
     # Malaria Atlas Project API
-    map_api_endpoint: HttpUrl = Field(  # type: ignore[assignment]
+    map_api_endpoint: HttpUrl = Field(
         default="https://malariaatlas.org/",
         description="Malaria Atlas Project API endpoint",
     )
@@ -612,7 +612,7 @@ def load_settings() -> Settings:
         env_files.append(".env")
 
     # Create settings with environment-specific configuration
-    settings = Settings(_env_file=env_files, environment=env)  # type: ignore[call-arg]
+    settings = Settings(_env_file=env_files, environment=env)
 
     return settings
 

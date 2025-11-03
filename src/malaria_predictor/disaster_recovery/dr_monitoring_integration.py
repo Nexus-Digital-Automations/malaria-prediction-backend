@@ -428,7 +428,7 @@ class AlertManager:
         }
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(self.slack_webhook, json=slack_payload)  # type: ignore[arg-type]
+            response = await client.post(self.slack_webhook, json=slack_payload)
             response.raise_for_status()
 
     async def _send_email_alert(self, alert_payload: dict) -> None:

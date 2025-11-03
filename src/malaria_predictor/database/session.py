@@ -55,7 +55,7 @@ def get_engine() -> AsyncEngine:
             pool_config = TESTING_POOL_CONFIG.copy()
             logger.info("Creating database engine with testing pool configuration")
         else:
-            pool_config = PRODUCTION_POOL_CONFIG.copy()  # type: ignore[assignment]
+            pool_config = PRODUCTION_POOL_CONFIG.copy()
             logger.info("Creating database engine with production pool configuration")
 
         # Create engine with enhanced async support and connection pooling
@@ -213,11 +213,11 @@ async def get_connection_pool_status() -> dict:
     if pool:
         pool_status.update(
             {
-                "pool_size": pool.size(),  # type: ignore[attr-defined]
-                "checked_in": pool.checkedin(),  # type: ignore[attr-defined]
-                "checked_out": pool.checkedout(),  # type: ignore[attr-defined]
-                "overflow": pool.overflow(),  # type: ignore[attr-defined]
-                "invalid": pool.invalid(),  # type: ignore[attr-defined]
+                "pool_size": pool.size(),
+                "checked_in": pool.checkedin(),
+                "checked_out": pool.checkedout(),
+                "overflow": pool.overflow(),
+                "invalid": pool.invalid(),
             }
         )
 
@@ -264,7 +264,7 @@ async def check_database_health() -> dict:
                 """
                 )
             )
-            health_status["tables_exist"] = result.scalar() >= 3  # type: ignore[operator]
+            health_status["tables_exist"] = result.scalar() >= 3
 
             # Check TimescaleDB
             try:

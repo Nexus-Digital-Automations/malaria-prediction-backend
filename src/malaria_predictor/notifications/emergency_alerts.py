@@ -183,9 +183,6 @@ class EmergencyAlertSystem:
                     "alert_id": alert.alert_id,
                 }
 
-            # Create template context
-            context = self._create_emergency_context(alert)
-
             # Prepare notification data
             message_data = FCMMessageData(
                 title=alert.title,

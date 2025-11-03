@@ -186,7 +186,7 @@ class TracingMiddleware(BaseHTTPMiddleware):
                         pass
 
                 self.tracer.add_request_metrics(
-                    span,  # type: ignore[arg-type]
+                    span,
                     response.status_code,
                     response_size,
                     processing_time,

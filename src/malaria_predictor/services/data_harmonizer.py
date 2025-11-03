@@ -330,7 +330,7 @@ class TemporalHarmonizer:
                 temporal_index
             )
 
-            for var in interpolated.data_vars:  # type: ignore[assignment]
+            for var in interpolated.data_vars:
                 if "risk" in var or "pr" in var or "incidence" in var:
                     interpolated[var] = interpolated[var] * seasonal_modulation
 
@@ -854,7 +854,7 @@ class SpatialHarmonizer:
                     ),
                     {},
                 ).get("temperature", point.temperature_2m)
-                point.temperature_anomaly = point.temperature_2m - historical_temp  # type: ignore[attr-defined]
+                point.temperature_anomaly = point.temperature_2m - historical_temp
 
             # Rainfall anomaly already included in the model
 

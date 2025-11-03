@@ -24,10 +24,13 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import aiofiles
-import asyncpg  # type: ignore[import-untyped]
-import boto3  # type: ignore[import-untyped]
+import asyncpg  # type: ignore[import-not-found]
+import boto3  # type: ignore[import-not-found]
 import redis.asyncio as redis
-from botocore.exceptions import ClientError, NoCredentialsError  # type: ignore[import-untyped]
+from botocore.exceptions import (  # type: ignore[import-not-found]
+    ClientError,
+    NoCredentialsError,
+)
 from cryptography.fernet import Fernet
 
 # Setup logging

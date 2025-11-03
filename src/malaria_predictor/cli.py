@@ -1,7 +1,8 @@
 """Command-line interface for the malaria prediction system."""
 
+from typing import Any
+
 import typer
-from typing import Any, cast
 
 from . import __version__
 

@@ -850,8 +850,8 @@ class AlertTemplateManager:
         try:
             async with get_session() as db:
                 # Check if template exists
-                existing = db.query(AlertTemplate).filter( # type: ignore[attr-defined]
-                    AlertTemplate.template_id == template.template_id # type: ignore[attr-defined]
+                existing = db.query(AlertTemplate).filter(
+                    AlertTemplate.template_id == template.template_id
                 ).first()
 
                 if existing:
@@ -889,7 +889,7 @@ class AlertTemplateManager:
                     )
                     db.add(db_template)
 
-                db.commit() # type: ignore[unused-coroutine]
+                db.commit()
 
         except Exception as e:
             logger.error(f"Failed to save template to database: {e}")

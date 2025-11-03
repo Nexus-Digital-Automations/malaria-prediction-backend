@@ -20,7 +20,7 @@ from datetime import datetime
 from typing import Any
 
 import httpx
-from kubernetes import client  # type: ignore[import-untyped]
+from kubernetes import client  # type: ignore[import-not-found]
 from kubernetes import config as k8s_config
 
 # Setup logging
@@ -102,7 +102,7 @@ class ServiceHealthChecker:
         Returns:
             Database health status
         """
-        import asyncpg  # type: ignore[import-untyped]
+        import asyncpg  # type: ignore[import-not-found]
 
         health_status: dict[str, Any] = {
             "healthy": False,

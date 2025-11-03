@@ -258,7 +258,7 @@ class ERA5DataProcessor:
         mask_too_hot = temp_celsius > self.config.temp_max_threshold
         suitability = xr.where(mask_too_hot, 0, suitability)
 
-        return suitability  # type: ignore[no-any-return]
+        return suitability
 
     def _calculate_growing_degree_days(
         self, temp_celsius: xr.DataArray, base_temp: float = 16.0
@@ -275,7 +275,7 @@ class ERA5DataProcessor:
         # GDD = max(0, temp - base_temp)
         gdd = temp_celsius - base_temp
         gdd = xr.where(gdd < 0, 0, gdd)
-        return gdd  # type: ignore[no-any-return]
+        return gdd
 
     def _aggregate_to_daily(self, ds: xr.Dataset) -> xr.Dataset:
         """Aggregate hourly data to daily resolution.
@@ -404,7 +404,7 @@ class ERA5DataProcessor:
         mask_excessive = monthly_precip_mm > self.config.precip_optimal * 3
         risk = xr.where(mask_excessive, 0.5, risk)
 
-        return risk  # type: ignore[no-any-return]
+        return risk
 
     def _calculate_relative_humidity(
         self, dewpoint_k: xr.DataArray, temp_k: xr.DataArray
@@ -421,7 +421,7 @@ class ERA5DataProcessor:
 
         # Magnus formula for saturation vapor pressure
         def saturation_vapor_pressure(temp_c: float | xr.DataArray) -> float | xr.DataArray:
-            return 6.112 * np.exp((17.67 * temp_c) / (temp_c + 243.5))  # type: ignore[return-value]
+            return 6.112 * np.exp((17.67 * temp_c) / (temp_c + 243.5))
 
         temp_c = temp_k - 273.15
         dewpoint_c = dewpoint_k - 273.15
@@ -461,7 +461,7 @@ class ERA5DataProcessor:
         mask_optimal = relative_humidity >= self.config.humidity_optimal
         risk = xr.where(mask_optimal, 0.9, risk)
 
-        return risk  # type: ignore[no-any-return]
+        return risk
 
     def extract_location_timeseries(
         self,

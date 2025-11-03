@@ -73,7 +73,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # Add timing header
             response.headers["X-Process-Time"] = str(process_time)
 
-            return response # type: ignore[no-any-return]
+            return response
 
         except Exception as e:
             # Log errors
@@ -164,7 +164,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         response.headers["X-RateLimit-Remaining"] = str(remaining)
         response.headers["X-RateLimit-Period"] = str(self.period)
 
-        return response # type: ignore[no-any-return]
+        return response
 
     def _get_client_ip(self, request: Request) -> str:
         """Extract client IP address."""
@@ -219,7 +219,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
             if response.status_code >= 400:
                 self.error_count[endpoint] += 1
 
-            return response # type: ignore[no-any-return]
+            return response
 
         except Exception as e:
             # Record error
@@ -335,7 +335,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         if self.environment == "production":
             response.headers.pop("Server", None)
 
-        return response # type: ignore[no-any-return]
+        return response
 
 
 class InputValidationMiddleware(BaseHTTPMiddleware):
@@ -414,7 +414,7 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
                     },
                 )
 
-        return await call_next(request) # type: ignore[no-any-return]
+        return await call_next(request)
 
     def _contains_dangerous_content(self, content: str) -> bool:
         """Check if content contains dangerous patterns."""
@@ -448,7 +448,7 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
         # Add request ID to response headers
         response.headers["X-Request-ID"] = request_id
 
-        return response # type: ignore[no-any-return]
+        return response
 
 
 class AuditLoggingMiddleware(BaseHTTPMiddleware):
@@ -510,7 +510,7 @@ class AuditLoggingMiddleware(BaseHTTPMiddleware):
                 },
             )
 
-            return response # type: ignore[no-any-return]
+            return response
 
         except Exception as e:
             # Calculate processing time for failed requests

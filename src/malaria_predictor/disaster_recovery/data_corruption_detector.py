@@ -18,7 +18,7 @@ import statistics
 from datetime import datetime
 from typing import Any
 
-import asyncpg  # type: ignore[import-untyped]
+import asyncpg  # type: ignore[import-not-found]
 from pydantic import BaseModel
 
 # Setup logging
@@ -971,7 +971,7 @@ class DataCorruptionMonitor:
 
             async with httpx.AsyncClient() as client:
                 await client.post(
-                    self.alert_webhook_url,  # type: ignore[arg-type]
+                    self.alert_webhook_url,
                     json={
                         "service": "malaria-prediction-data-corruption",
                         "timestamp": datetime.now().isoformat(),

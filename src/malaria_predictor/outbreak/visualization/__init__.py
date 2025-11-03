@@ -8,8 +8,8 @@ Author: AI Agent - Outbreak Pattern Recognition Specialist
 """
 
 from .charts import EpidemicCurveChart, OutbreakTimelineChart, TransmissionPatternChart
-from .dashboard import SurveillanceDashboard  # type: ignore[import-untyped]
-from .maps import GeographicClusterMap  # type: ignore[import-untyped]
+from .dashboard import SurveillanceDashboard  # type: ignore[import-not-found]
+from .maps import GeographicClusterMap  # type: ignore[import-not-found]
 
 __all__ = [
     "OutbreakTimelineChart",

@@ -537,7 +537,7 @@ class SecurityAuditLogger:
         event_id = f"{self.application_name}_{int(time.time())}_{str(uuid.uuid4())[:8]}"
 
         # Create audit event
-        event = AuditEvent(  # type: ignore[call-arg]
+        event = AuditEvent(
             event_id=event_id,
             event_type=event_type,
             source_system=self.application_name,

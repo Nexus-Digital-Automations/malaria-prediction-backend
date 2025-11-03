@@ -165,10 +165,10 @@ class NotificationTemplateEngine:
             return {
                 "title": rendered_title.strip(),
                 "body": rendered_body.strip(),
-                "deep_link": rendered_deep_link,  # type: ignore[dict-item]
-                "image_url": template.image_url,  # type: ignore[dict-item]
-                "category": template.category,  # type: ignore[dict-item]
-                "priority": template.priority,  # type: ignore[dict-item]
+                "deep_link": rendered_deep_link,
+                "image_url": template.image_url,
+                "category": template.category,
+                "priority": template.priority,
             }
 
         except TemplateError as e:

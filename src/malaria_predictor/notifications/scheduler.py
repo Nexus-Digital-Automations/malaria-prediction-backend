@@ -87,13 +87,13 @@ class NotificationScheduler:
     async def __aenter__(self) -> "NotificationScheduler":
         """Async context manager entry."""
         if self._should_close_session:
-            self.db_session = await get_database_session() # type: ignore[assignment]
+            self.db_session = await get_database_session()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb): # type: ignore[no-untyped-def]
         """Async context manager exit."""
         if self._should_close_session and self.db_session:
-            await self.db_session.close() # type: ignore[func-returns-value]
+            await self.db_session.close()
 
     async def schedule_notification(
         self,
@@ -150,7 +150,7 @@ class NotificationScheduler:
 
             # Set target based on type
             if target_type == "device":
-                device = session.query(DeviceToken).filter( # type: ignore[union-attr]
+                device = session.query(DeviceToken).filter(
                     DeviceToken.token == target_value
                 ).first()
                 if device:
@@ -159,7 +159,7 @@ class NotificationScheduler:
                     logger.error(f"Device not found: {target_value}")
                     return None
             elif target_type == "topic":
-                notification_log.topic = target_value # type: ignore[assignment]
+                notification_log.topic = target_value
             else:
                 logger.error(f"Unsupported target type: {target_type}")
                 return None
@@ -175,7 +175,7 @@ class NotificationScheduler:
                 await self._deliver_notification(int(notification_log.id))
 
             logger.info(f"Scheduled notification {notification_log.id} for {scheduled_time}")
-            return notification_log.id # type: ignore[return-value]
+            return notification_log.id
 
         except Exception as e:
             if session:
@@ -282,7 +282,7 @@ class NotificationScheduler:
 
             # Get pending notifications that are due
             now = datetime.now(UTC)
-            pending_notifications = session.query(NotificationLog).filter( # type: ignore[union-attr]
+            pending_notifications = session.query(NotificationLog).filter(
                 and_(
                     NotificationLog.status == NotificationStatus.PENDING,
                     or_(
@@ -350,7 +350,7 @@ class NotificationScheduler:
             session = self.db_session or await get_database_session()
 
             # Get failed notifications eligible for retry
-            failed_notifications = session.query(NotificationLog).filter( # type: ignore[union-attr]
+            failed_notifications = session.query(NotificationLog).filter(
                 and_(
                     NotificationLog.status == NotificationStatus.FAILED,
                     NotificationLog.retry_count < NotificationLog.max_retries,
@@ -412,7 +412,7 @@ class NotificationScheduler:
         try:
             session = self.db_session or await get_database_session()
 
-            notification = session.query(NotificationLog).filter( # type: ignore[union-attr]
+            notification = session.query(NotificationLog).filter(
                 NotificationLog.id == notification_id
             ).first()
 
@@ -448,7 +448,7 @@ class NotificationScheduler:
 
             if notification.device_id:
                 # Send to specific device
-                device = session.query(DeviceToken).filter( # type: ignore[union-attr]
+                device = session.query(DeviceToken).filter(
                     DeviceToken.id == notification.device_id
                 ).first()
 
@@ -560,7 +560,7 @@ class NotificationScheduler:
 
             # Try to get from database first
             from .models import NotificationTemplate
-            template = session.query(NotificationTemplate).filter( # type: ignore[union-attr]
+            template = session.query(NotificationTemplate).filter(
                 NotificationTemplate.name == template_name
             ).first()
 
@@ -627,7 +627,7 @@ class NotificationScheduler:
                 end_date = datetime.now(UTC)
 
             # Base query
-            base_query = session.query(NotificationLog).filter( # type: ignore[union-attr]
+            base_query = session.query(NotificationLog).filter(
                 and_(
                     NotificationLog.created_at >= start_date,
                     NotificationLog.created_at <= end_date,
@@ -653,7 +653,7 @@ class NotificationScheduler:
                 priority_stats[priority] = count
 
             # Average delivery time
-            avg_delivery_time = session.query( # type: ignore[union-attr]
+            avg_delivery_time = session.query(
                 func.avg(
                     func.extract('epoch', NotificationLog.sent_at - NotificationLog.created_at)
                 )

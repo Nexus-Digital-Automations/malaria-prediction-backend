@@ -216,7 +216,7 @@ class MalariaTrainingPipeline:
         X = np.vstack(all_features)
         y = np.concatenate(all_targets)
         dates = np.array(all_dates)
-        locations = np.array(all_locations)  # type: ignore[assignment]
+        locations = np.array(all_locations)
 
         # Apply feature scaling
         X_scaled = self.scaler.fit_transform(X)
@@ -829,7 +829,7 @@ class MalariaTrainingPipeline:
             )
             pred_classes = [np.argmax(pred["predictions"]) for pred in predictions]
         else:
-            pred_classes = [0] * len(y_val)  # type: ignore[list-item]
+            pred_classes = [0] * len(y_val)
 
         from sklearn.metrics import (
             accuracy_score,
