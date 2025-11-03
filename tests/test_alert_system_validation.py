@@ -42,7 +42,7 @@ def test_alert_data_models_import():
     """Test alert data models can be imported."""
     from src.malaria_predictor.alerts.alert_history_manager import (
         AlertHistoryQuery,
-        AlertSummary,
+        AlertHistorySummary,
     )
     from src.malaria_predictor.alerts.alert_template_manager import AlertTemplate
     from src.malaria_predictor.alerts.enhanced_firebase_service import (
@@ -50,7 +50,7 @@ def test_alert_data_models_import():
     )
 
     assert AlertHistoryQuery is not None
-    assert AlertSummary is not None
+    assert AlertHistorySummary is not None
     assert AlertTemplate is not None
     assert FirebaseNotification is not None
 

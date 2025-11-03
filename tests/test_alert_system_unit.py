@@ -14,7 +14,7 @@ from src.malaria_predictor.alerts.alert_analytics import AlertAnalyticsEngine
 from src.malaria_predictor.alerts.alert_history_manager import (
     AlertHistoryManager,
     AlertHistoryQuery,
-    AlertSummary,
+    AlertHistorySummary,
 )
 from src.malaria_predictor.database.models import Alert, AlertConfiguration, User
 
@@ -209,7 +209,7 @@ class TestAlertHistoryManager:
             period_days=7
         )
 
-        assert isinstance(summary, AlertSummary)
+        assert isinstance(summary, AlertHistorySummary)
         assert summary.total_alerts >= 0
         assert hasattr(summary, 'alerts_by_type')
         assert hasattr(summary, 'delivery_success_rate')
