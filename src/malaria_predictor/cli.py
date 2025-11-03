@@ -1,6 +1,7 @@
 """Command-line interface for the malaria prediction system."""
 
 import typer
+from typing import Any, cast
 
 from . import __version__
 
@@ -483,8 +484,8 @@ def _ingest_era5_data(dry_run: bool) -> None:
             validation = client.validate_downloaded_file(result.file_path)
             if validation["success"]:
                 typer.echo("   ✅ Data validation passed")
-                variables_found = validation.get('variables_found', [])
-                variables_str = [str(v) for v in variables_found] if variables_found else []
+                variables_found: list[Any] = validation.get('variables_found', [])
+                variables_str: list[str] = [str(v) for v in variables_found] if variables_found else []
                 typer.echo(
                     f"   🔍 Variables found: {', '.join(variables_str)}"
                 )
@@ -1623,7 +1624,7 @@ def db_health(
 
     from .database.session import check_database_health
 
-    async def run_health_check() -> None:
+    async def run_health_check() -> bool:
         try:
             typer.echo("🏥 Checking database health...")
             health_status = await check_database_health()
@@ -1712,7 +1713,7 @@ def db_backup(
             sys.executable,
             str(script_path),
             "--database-url",
-            settings.database_url,
+            settings.get_database_url(),
             "--backup-dir",
             output_dir,
             "backup",
@@ -1768,7 +1769,7 @@ def db_restore(
             sys.executable,
             str(script_path),
             "--database-url",
-            settings.database_url,
+            settings.get_database_url(),
             "restore",
             str(backup_path),
         ]
@@ -1839,7 +1840,7 @@ def db_maintenance(
             sys.executable,
             str(script_path),
             "--database-url",
-            settings.database_url,
+            settings.get_database_url(),
             operation,
         ]
 
@@ -2547,8 +2548,8 @@ def validate_harmonization(
     typer.echo(f"   📅 Processed: {metadata['processing_timestamp']}")
 
     # Load feature data
-    harmonized_data = {}
-    feature_groups: dict[str, list[str]] = {}
+    harmonized_data: dict[str, Any] = {}
+    feature_groups: dict[str, dict[str, Any]] = {}
 
     for feature_name in metadata["feature_names"]:
         feature_file = data_path / f"{feature_name}.npy"
