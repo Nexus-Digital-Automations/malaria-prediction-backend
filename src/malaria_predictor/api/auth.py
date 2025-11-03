@@ -8,7 +8,7 @@ and role-based access control.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Annotated
+from typing import Annotated, Callable
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import (
@@ -354,7 +354,7 @@ async def authenticate_user(
         return None
 
 
-def require_scopes(*required_scopes: str) -> callable:
+def require_scopes(*required_scopes: str) -> Callable[..., User | APIKey]:
     """
     Dependency factory for requiring specific scopes.
 
@@ -366,8 +366,8 @@ def require_scopes(*required_scopes: str) -> callable:
     """
 
     def scope_dependency(
-        current_user: Annotated[User, Depends(get_current_user)] = None,
-        current_api_key: Annotated[APIKey, Depends(get_current_api_key)] = None,
+        current_user: Annotated[User | None, Depends(get_current_user)] = None,
+        current_api_key: Annotated[APIKey | None, Depends(get_current_api_key)] = None,
     ) -> User | APIKey:
         """Validate that the authenticated entity has required scopes."""
 
@@ -417,7 +417,7 @@ def require_scopes(*required_scopes: str) -> callable:
     return scope_dependency
 
 
-def require_role(*allowed_roles: str) -> callable:
+def require_role(*allowed_roles: str) -> Callable[..., User]:
     """
     Dependency factory for requiring specific user roles.
 

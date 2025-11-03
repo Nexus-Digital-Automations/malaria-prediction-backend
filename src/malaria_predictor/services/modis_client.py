@@ -673,7 +673,7 @@ class MODISClient:
 
             except Exception as e:
                 logger.warning(f"Failed to apply quality filtering: {e}")
-                quality_flags = {"error": "Quality filtering failed"}
+                quality_flags = {}  # Empty dict on error, error will be logged
 
         # Calculate statistics
         valid_data = vi_data[~np.isnan(vi_data)]
