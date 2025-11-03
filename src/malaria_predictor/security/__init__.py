@@ -251,7 +251,7 @@ def get_hipaa_compliance_config() -> dict:
 
 
 # Security event helpers
-async def log_security_event(
+async def log_security_event(  # type: ignore[no-untyped-def]
     audit_logger: SecurityAuditLogger,
     event_type: AuditEventType,
     description: str,
@@ -280,7 +280,7 @@ async def log_security_event(
 async def handle_api_error(
     error_handler: ErrorHandler,
     exception: Exception,
-    request_context: dict = None,
+    request_context: dict = None,  # type: ignore[assignment]
 ) -> DetailedError:
     """
     Helper function to handle API errors with context.

@@ -294,6 +294,17 @@ warn_unreachable = true
 namespace_packages = true
 explicit_package_bases = true
 mypy_path = "src"
+exclude = [
+    "^malaria_frontend/",
+    "^build/",
+    "^dist/",
+    "^\.venv/",
+    "^venv/",
+    "^\.mypy_cache/",
+    "^development/",
+    "^docs/",
+    "^tests/",
+]
 
 [[tool.mypy.overrides]]
 module = [
