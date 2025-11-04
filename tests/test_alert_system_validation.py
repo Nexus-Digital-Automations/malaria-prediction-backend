@@ -46,13 +46,13 @@ def test_alert_data_models_import():
     )
     from src.malaria_predictor.alerts.alert_template_manager import AlertTemplate
     from src.malaria_predictor.alerts.enhanced_firebase_service import (
-        FirebaseNotification,
+        NotificationTemplate,
     )
 
     assert AlertHistoryQuery is not None
     assert AlertHistorySummary is not None
     assert AlertTemplate is not None
-    assert FirebaseNotification is not None
+    assert NotificationTemplate is not None
 
 
 def test_alert_system_initialization():
@@ -78,36 +78,40 @@ def test_alert_data_model_creation():
     from src.malaria_predictor.alerts.alert_history_manager import AlertHistoryQuery
     from src.malaria_predictor.alerts.alert_template_manager import AlertTemplate
     from src.malaria_predictor.alerts.enhanced_firebase_service import (
-        FirebaseNotification,
+        NotificationTemplate,
     )
 
     # Test AlertHistoryQuery creation
     query = AlertHistoryQuery(
-        user_id=1,
+        user_id="test-user-1",
         start_date=datetime.now() - timedelta(days=7),
         end_date=datetime.now()
     )
-    assert query.user_id == 1
+    assert query.user_id == "test-user-1"
 
     # Test AlertTemplate creation
     template = AlertTemplate(
-        name="Test Template",
-        subject="Test Subject",
-        body="Test Body",
-        template_type="test",
-        variables=["var1"],
-        is_active=True,
-        language="en"
+        template_name="Test Template",
+        template_type="outbreak_risk",
+        channel="push",
+        language_code="en",
+        message_template="Test message: {risk_score}",
+        subject_template="Test Subject",
+        is_active=True
     )
-    assert template.name == "Test Template"
+    assert template.template_name == "Test Template"
 
-    # Test FirebaseNotification creation
-    notification = FirebaseNotification(
-        title="Test Title",
-        body="Test Body",
-        data={"key": "value"}
+    # Test NotificationTemplate creation
+    notification = NotificationTemplate(
+        template_id="test-template-1",
+        name="Test Template",
+        description="Test Description",
+        category="alert",
+        title_template="Test Title: {{alert_level}}",
+        body_template="Test Body: {{message}}",
+        required_variables=["alert_level", "message"]
     )
-    assert notification.title == "Test Title"
+    assert notification.name == "Test Template"
 
 
 def test_alert_system_methods_exist():
@@ -128,7 +132,7 @@ def test_alert_system_methods_exist():
 
     # Check AlertHistoryManager methods
     assert hasattr(history_manager, 'get_alert_history')
-    assert hasattr(history_manager, 'get_alert_summary')
+    assert hasattr(history_manager, 'get_alert_history_summary')
     assert hasattr(history_manager, 'archive_old_alerts')
     assert hasattr(history_manager, 'export_alert_history')
 

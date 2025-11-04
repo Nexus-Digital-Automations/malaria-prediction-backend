@@ -91,7 +91,7 @@ def test_user_id() -> str:
 
 
 @pytest.fixture
-async def sample_alerts(db_session: AsyncSession, test_user_id: str) -> list[Alert]:
+async def sample_alerts(test_db_session: AsyncSession, test_user_id: str) -> list[Alert]:
     """Create sample alerts for testing."""
     # First create an alert configuration
     config = AlertConfiguration(
@@ -104,8 +104,8 @@ async def sample_alerts(db_session: AsyncSession, test_user_id: str) -> list[Ale
         created_at=datetime.now(),
         updated_at=datetime.now()
     )
-    db_session.add(config)
-    await db_session.flush()
+    test_db_session.add(config)
+    await test_db_session.flush()
 
     alerts = []
     for i in range(5):
@@ -125,11 +125,11 @@ async def sample_alerts(db_session: AsyncSession, test_user_id: str) -> list[Ale
             updated_at=datetime.now() - timedelta(hours=i)
         )
         alerts.append(alert)
-        db_session.add(alert)
+        test_db_session.add(alert)
 
-    await db_session.commit()
+    await test_db_session.commit()
     for alert in alerts:
-        await db_session.refresh(alert)
+        await test_db_session.refresh(alert)
 
     return alerts
 
@@ -138,9 +138,9 @@ class TestAlertHistoryManager:
     """Test AlertHistoryManager functionality."""
 
     @pytest.fixture
-    async def history_manager(self, db_session: AsyncSession, mock_redis) -> AlertHistoryManager:
+    async def history_manager(self) -> AlertHistoryManager:
         """Create AlertHistoryManager instance."""
-        return AlertHistoryManager(db_session, mock_redis)
+        return AlertHistoryManager()
 
     async def test_get_alert_history_basic(
         self,
@@ -206,7 +206,7 @@ class TestAlertHistoryManager:
         self,
         history_manager: AlertHistoryManager,
         test_user_id: str,
-        db_session: AsyncSession
+        test_db_session: AsyncSession
     ):
         """Test archiving of old alerts."""
         # Create alert configuration first
@@ -220,8 +220,8 @@ class TestAlertHistoryManager:
             created_at=datetime.now(),
             updated_at=datetime.now()
         )
-        db_session.add(config)
-        await db_session.flush()
+        test_db_session.add(config)
+        await test_db_session.flush()
 
         # Create old alert
         old_alert = Alert(
@@ -237,8 +237,8 @@ class TestAlertHistoryManager:
             longitude=36.8219,
             created_at=datetime.now() - timedelta(days=40)
         )
-        db_session.add(old_alert)
-        await db_session.commit()
+        test_db_session.add(old_alert)
+        await test_db_session.commit()
 
         # Archive alerts older than 30 days
         archived_count = await history_manager.archive_old_alerts(
@@ -270,9 +270,9 @@ class TestAlertAnalyticsEngine:
     """Test AlertAnalyticsEngine functionality."""
 
     @pytest.fixture
-    async def analytics_engine(self, db_session: AsyncSession, mock_redis) -> AlertAnalyticsEngine:
+    async def analytics_engine(self) -> AlertAnalyticsEngine:
         """Create AlertAnalyticsEngine instance."""
-        return AlertAnalyticsEngine(db_session, mock_redis)
+        return AlertAnalyticsEngine()
 
     async def test_get_alert_kpis(
         self,
