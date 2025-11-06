@@ -11,6 +11,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import and_, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...database.security_models import APIKey, RefreshToken, User
@@ -59,11 +60,16 @@ async def register_user(
         HTTPException: If registration fails or user already exists
     """
     try:
-        # Check if username or email already exists
-        existing_user_result = await session.execute(  # type: ignore[call-overload]
-            f"SELECT id FROM users WHERE username = '{user_data.username}' OR email = '{user_data.email}'"
+        # Check if username or email already exists (using ORM to prevent SQL injection)
+        existing_user_result = await session.execute(
+            select(User.id).where(
+                or_(
+                    User.username == user_data.username,
+                    User.email == user_data.email
+                )
+            )
         )
-        existing_user = existing_user_result.fetchone()
+        existing_user = existing_user_result.scalar_one_or_none()
 
         if existing_user:
             SecurityAuditor.log_security_event(
@@ -225,13 +231,18 @@ async def refresh_token(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
             )
 
-        # Check if refresh token exists in database and is not revoked
+        # Check if refresh token exists in database and is not revoked (using ORM to prevent SQL injection)
         token_hash = hash_api_key(refresh_token)
-        result = await session.execute(  # type: ignore[call-overload]
-            f"SELECT * FROM refresh_tokens WHERE token_hash = '{token_hash}' "
-            f"AND is_revoked = false AND expires_at > '{datetime.utcnow()}'"
+        result = await session.execute(
+            select(RefreshToken).where(
+                and_(
+                    RefreshToken.token_hash == token_hash,
+                    RefreshToken.is_revoked == False,  # noqa: E712
+                    RefreshToken.expires_at > datetime.utcnow()
+                )
+            )
         )
-        stored_token = result.fetchone()
+        stored_token = result.scalar_one_or_none()
 
         if not stored_token:
             SecurityAuditor.log_security_event(
@@ -244,34 +255,41 @@ async def refresh_token(
                 detail="Refresh token not found or expired",
             )
 
-        # Get user
-        user_result = await session.execute(  # type: ignore[call-overload]
-            f"SELECT * FROM users WHERE id = '{stored_token.user_id}' AND is_active = true"
+        # Get user (using ORM to prevent SQL injection)
+        user_result = await session.execute(
+            select(User).where(
+                and_(
+                    User.id == stored_token.user_id,
+                    User.is_active == True  # noqa: E712
+                )
+            )
         )
-        user_data = user_result.fetchone()
+        user = user_result.scalar_one_or_none()
 
-        if not user_data:
+        if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
             )
 
         # Create new access token
         access_token = create_access_token(
-            data={"sub": str(user_data.id), "scopes": ["user"]}
+            data={"sub": str(user.id), "scopes": ["user"]}
         )
 
         # Create new refresh token
-        new_refresh_token = create_refresh_token(str(user_data.id))
+        new_refresh_token = create_refresh_token(str(user.id))
 
-        # Revoke old refresh token
-        await session.execute(  # type: ignore[call-overload]
-            f"UPDATE refresh_tokens SET is_revoked = true WHERE id = '{stored_token.id}'"
+        # Revoke old refresh token (using ORM to prevent SQL injection)
+        await session.execute(
+            update(RefreshToken)
+            .where(RefreshToken.id == stored_token.id)
+            .values(is_revoked=True)
         )
 
         # Store new refresh token
         new_refresh_token_obj = RefreshToken(
             token_hash=hash_api_key(new_refresh_token),
-            user_id=user_data.id,
+            user_id=user.id,
             expires_at=datetime.utcnow() + timedelta(days=7),
             client_ip=request.client.host if request.client else None,
             user_agent=request.headers.get("user-agent"),
@@ -284,7 +302,7 @@ async def refresh_token(
         await log_audit_event(
             "token_refreshed",
             session,
-            user_id=str(user_data.id),
+            user_id=str(user.id),
             ip_address=request.client.host if request.client else None,
             user_agent=request.headers.get("user-agent"),
             endpoint="/auth/refresh",
@@ -327,10 +345,16 @@ async def logout(
         dict: Logout confirmation message
     """
     try:
-        # Revoke all active refresh tokens for the user
-        await session.execute(  # type: ignore[call-overload]
-            f"UPDATE refresh_tokens SET is_revoked = true "
-            f"WHERE user_id = '{current_user.id}' AND is_revoked = false"
+        # Revoke all active refresh tokens for the user (using ORM to prevent SQL injection)
+        await session.execute(
+            update(RefreshToken)
+            .where(
+                and_(
+                    RefreshToken.user_id == current_user.id,
+                    RefreshToken.is_revoked == False  # noqa: E712
+                )
+            )
+            .values(is_revoked=True)
         )
         await session.commit()
 
@@ -471,24 +495,27 @@ async def list_api_keys(
         list[APIKeyResponse]: List of user's API keys (excluding key values)
     """
     try:
-        result = await session.execute(  # type: ignore[call-overload]
-            f"SELECT * FROM api_keys WHERE user_id = '{current_user.id}' ORDER BY created_at DESC"
+        # Get API keys using ORM to prevent SQL injection
+        result = await session.execute(
+            select(APIKey)
+            .where(APIKey.user_id == current_user.id)
+            .order_by(APIKey.created_at.desc())
         )
-        api_keys = result.fetchall()
+        api_keys = result.scalars().all()
 
         return [
             APIKeyResponse(
                 id=str(api_key.id),
-                name=api_key.name,
-                description=api_key.description,
-                scopes=api_key.scopes,
-                is_active=api_key.is_active,
-                created_at=api_key.created_at,
-                expires_at=api_key.expires_at,
-                last_used=api_key.last_used,
-                usage_count=api_key.usage_count,
-                rate_limit=api_key.rate_limit,
-                allowed_ips=api_key.allowed_ips,
+                name=api_key.name,  # type: ignore[arg-type]
+                description=api_key.description,  # type: ignore[arg-type]
+                scopes=api_key.scopes,  # type: ignore[arg-type]
+                is_active=api_key.is_active,  # type: ignore[arg-type]
+                created_at=api_key.created_at,  # type: ignore[arg-type]
+                expires_at=api_key.expires_at,  # type: ignore[arg-type]
+                last_used=api_key.last_used,  # type: ignore[arg-type]
+                usage_count=api_key.usage_count,  # type: ignore[arg-type]
+                rate_limit=api_key.rate_limit,  # type: ignore[arg-type]
+                allowed_ips=api_key.allowed_ips,  # type: ignore[arg-type]
             )
             for api_key in api_keys
         ]
@@ -524,20 +551,27 @@ async def revoke_api_key(
         HTTPException: If API key not found or access denied
     """
     try:
-        # Check if API key exists and belongs to current user
-        result = await session.execute(  # type: ignore[call-overload]
-            f"SELECT * FROM api_keys WHERE id = '{api_key_id}' AND user_id = '{current_user.id}'"
+        # Check if API key exists and belongs to current user (using ORM to prevent SQL injection)
+        result = await session.execute(
+            select(APIKey).where(
+                and_(
+                    APIKey.id == api_key_id,
+                    APIKey.user_id == current_user.id
+                )
+            )
         )
-        api_key = result.fetchone()
+        api_key = result.scalar_one_or_none()
 
         if not api_key:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="API key not found"
             )
 
-        # Deactivate API key
-        await session.execute(  # type: ignore[call-overload]
-            f"UPDATE api_keys SET is_active = false WHERE id = '{api_key_id}'"
+        # Deactivate API key (using ORM to prevent SQL injection)
+        await session.execute(
+            update(APIKey)
+            .where(APIKey.id == api_key_id)
+            .values(is_active=False)
         )
         await session.commit()
 
