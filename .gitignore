@@ -356,6 +356,10 @@ bandit-report.json
 .claude-continue-counter
 .validation-performance.json
 
+# MyPy output files (temporary build artifacts)
+mypy_*.txt
+mypy*.txt
+
 # Temporary directories that should not be in root (root-level only)
 /MagicMock/
 /disaster_recovery/
