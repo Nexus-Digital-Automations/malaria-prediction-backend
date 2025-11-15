@@ -8,7 +8,6 @@ conditions, and integration scenarios.
 Target Coverage: 90%+ for risk calculator module (critical business logic)
 """
 
-import math
 from datetime import date
 
 import pytest

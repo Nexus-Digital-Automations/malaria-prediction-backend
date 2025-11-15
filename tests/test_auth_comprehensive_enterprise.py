@@ -8,18 +8,15 @@ session handling, and security edge cases.
 Target Coverage: 90%+ for authentication/security modules
 """
 
-import asyncio
 import time
 from datetime import UTC, datetime, timedelta
-from unittest.mock import Mock, patch
 from uuid import uuid4
 
 import pytest
-from fastapi import HTTPException, status
 from jose import jwt
+from pydantic import ValidationError
 
 from malaria_predictor.api.security import (
-    ACCESS_TOKEN_EXPIRE_MINUTES,
     ALGORITHM,
     REFRESH_TOKEN_EXPIRE_DAYS,
     SECRET_KEY,
@@ -38,7 +35,6 @@ from malaria_predictor.api.security import (
     verify_password,
     verify_token,
 )
-from malaria_predictor.database.security_models import APIKey, RefreshToken, User
 
 
 class TestPasswordHashing:
@@ -435,7 +431,7 @@ class TestPydanticModels:
         ]
 
         for email in invalid_emails:
-            with pytest.raises(Exception):  # Pydantic validation error
+            with pytest.raises(ValidationError):  # Pydantic validation error
                 UserCreate(
                     username="testuser",
                     email=email,
@@ -445,7 +441,7 @@ class TestPydanticModels:
     def test_user_create_model_username_length(self):
         """Test username length validation."""
         # Too short
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             UserCreate(
                 username="ab",  # < 3 chars
                 email="test@example.com",
@@ -453,7 +449,7 @@ class TestPydanticModels:
             )
 
         # Too long
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             UserCreate(
                 username="a" * 51,  # > 50 chars
                 email="test@example.com",
@@ -463,7 +459,7 @@ class TestPydanticModels:
     def test_user_create_model_password_length(self):
         """Test password length validation."""
         # Too short
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             UserCreate(
                 username="testuser",
                 email="test@example.com",
@@ -471,7 +467,7 @@ class TestPydanticModels:
             )
 
         # Too long
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             UserCreate(
                 username="testuser",
                 email="test@example.com",
@@ -499,11 +495,11 @@ class TestPydanticModels:
         from malaria_predictor.api.security import APIKeyCreate
 
         # Too low
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             APIKeyCreate(name="Test", rate_limit=0)
 
         # Too high
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             APIKeyCreate(name="Test", rate_limit=10001)
 
         # Valid boundaries

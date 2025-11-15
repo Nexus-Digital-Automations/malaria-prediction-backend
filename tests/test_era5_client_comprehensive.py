@@ -16,22 +16,20 @@ This module provides extensive testing for the ERA5Client class covering:
 Target: Increase coverage from 14.39% to 80%+ for era5_client.py
 """
 
-import tempfile
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pydantic import ValidationError
 
 from malaria_predictor.services.era5_client import (
     ERA5Client,
-    ERA5DownloadResult,
     ERA5RequestConfig,
 )
-
 
 # ========================================================================================
 # FIXTURES AND TEST DATA
@@ -106,7 +104,7 @@ class TestAuthentication:
 
     def test_initialization_with_config_file(self, temp_download_dir):
         """Test client initialization using ~/.cdsapirc config file."""
-        with patch('malaria_predictor.services.era5_client.cdsapi') as mock_cds:
+        with patch('malaria_predictor.services.era5_client.cdsapi'):
             client = ERA5Client(
                 download_dir=str(temp_download_dir),
                 auth_method='config_file'
@@ -122,7 +120,7 @@ class TestAuthentication:
         monkeypatch.setenv('CDS_URL', 'https://cds.climate.copernicus.eu/api')
         monkeypatch.setenv('CDS_KEY', 'test-uid:test-api-key')
 
-        with patch('malaria_predictor.services.era5_client.cdsapi') as mock_cds:
+        with patch('malaria_predictor.services.era5_client.cdsapi'):
             client = ERA5Client(
                 download_dir=str(temp_download_dir),
                 auth_method='environment'
@@ -491,7 +489,7 @@ class TestEdgeCases:
         mock_cds_client.retrieve.return_value = None
 
         with patch.object(Path, 'exists', return_value=True):
-            result = client.download_climate_data(
+            client.download_climate_data(
                 start_date=single_date,
                 end_date=single_date,
                 variables=['2m_temperature']
@@ -596,7 +594,7 @@ class TestRequestConfig:
             end_date=datetime(2023, 1, 7)
         )
 
-        with pytest.raises(Exception):  # Pydantic ValidationError or AttributeError
+        with pytest.raises((ValidationError, AttributeError, TypeError)):  # Pydantic frozen model error
             config.variables = ['different_variable']
 
     def test_invalid_date_range(self):

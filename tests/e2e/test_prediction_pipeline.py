@@ -449,7 +449,7 @@ class TestBatchPredictionPipeline(IntegrationTestCase):
             )
 
             end_time = time.time()
-            total_time = end_time - start_time
+            end_time - start_time
 
             # Validate response - expecting 401 since endpoint requires authentication
             assert response.status_code == 401
@@ -562,7 +562,7 @@ class TestTimeSeriesPredictionPipeline(IntegrationTestCase):
         )
 
         end_time = time.time()
-        total_time = end_time - start_time
+        end_time - start_time
 
         # Validate response - expecting 401 since endpoint requires authentication
         assert response.status_code == 401
@@ -649,7 +649,7 @@ class TestSpatialGridPredictionPipeline(IntegrationTestCase):
         )
 
         end_time = time.time()
-        total_time = end_time - start_time
+        end_time - start_time
 
         # Validate response - expecting 401 since endpoint requires authentication
         assert response.status_code == 401
@@ -722,7 +722,7 @@ class TestPipelinePerformanceAndScaling(IntegrationTestCase):
         responses = await asyncio.gather(*tasks)
 
         end_time = time.time()
-        total_time = end_time - start_time
+        end_time - start_time
 
         # All requests should return 401 since endpoint requires authentication
         assert all(response.status_code == 401 for response in responses)
@@ -747,7 +747,7 @@ class TestPipelinePerformanceAndScaling(IntegrationTestCase):
         import psutil
 
         process = psutil.Process(os.getpid())
-        initial_memory = process.memory_info().rss / 1024 / 1024  # MB
+        process.memory_info().rss / 1024 / 1024  # MB
 
         # Execute memory-intensive prediction
         large_batch_request = {
@@ -806,7 +806,7 @@ class TestPipelinePerformanceAndScaling(IntegrationTestCase):
             ("Timeout error", 504),
         ]
 
-        for error_message, original_expected_status in error_scenarios:
+        for _error_message, _original_expected_status in error_scenarios:
             response = await test_async_client.post(
                 "/predict/single", json=prediction_request
             )

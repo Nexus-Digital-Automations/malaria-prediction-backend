@@ -168,7 +168,7 @@ class TestSQLInjectionPrevention:
         self, test_client, test_db_session, create_test_user
     ):
         """Test that API key revocation prevents SQL injection in key ID."""
-        user = await create_test_user(
+        await create_test_user(
             username="researcher2",
             email="researcher2@example.com",
             password="SecurePass123!",
@@ -323,7 +323,7 @@ class TestSQLInjectionPrevention:
 
         auth_file = pathlib.Path(__file__).parent.parent / "src" / "malaria_predictor" / "api" / "routers" / "auth.py"
 
-        with open(auth_file, "r") as f:
+        with open(auth_file) as f:
             content = f.read()
 
         # Check for dangerous patterns
