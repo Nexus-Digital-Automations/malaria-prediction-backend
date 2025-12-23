@@ -364,3 +364,23 @@ mypy*.txt
 /MagicMock/
 /disaster_recovery/
 /performance/
+
+# =========================
+# Development Artifacts (Cleanup)
+# =========================
+
+# Development/runtime logs
+logs/
+
+# MLflow experiment tracking (large files)
+mlruns/
+
+# Data source test reports
+data-source-test-reports/
+
+# Backup files
+*.backup
+
+# TODO tracking (managed externally)
+TODO.json
+**/TODO.json
