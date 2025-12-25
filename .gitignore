@@ -64,6 +64,9 @@ env.bak/
 venv.bak/
 *.env
 *.env.*
+# Allow template files for development setup
+!.env.development
+!.env.example
 
 # =========================
 # Notebook / Data Science
