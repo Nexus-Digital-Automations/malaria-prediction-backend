@@ -607,8 +607,17 @@ L4: CDN Cache (Edge)
 
 ## Architecture Decision Records (ADRs)
 
-For detailed architecture decisions and trade-offs, see:
-- [ADR Directory](./decisions/) - Architecture Decision Records
+Key architectural decisions are documented in our ADR directory:
+
+| ADR | Title | Status |
+|-----|-------|--------|
+| [ADR-001](./decisions/adr-001-fastapi-framework.md) | FastAPI as API Framework | Accepted |
+| [ADR-002](./decisions/adr-002-ml-model-architecture.md) | Ensemble ML Model Architecture | Accepted |
+| [ADR-003](./decisions/adr-003-timescaledb-time-series.md) | TimescaleDB for Time-Series Data | Accepted |
+| [ADR-004](./decisions/adr-004-multi-source-data-integration.md) | Multi-Source Environmental Data Integration | Accepted |
+| [ADR-005](./decisions/adr-005-jwt-authentication.md) | JWT-Based Authentication | Accepted |
+
+For the complete ADR catalog and template, see [ADR Directory](./decisions/).
 
 ---
 
