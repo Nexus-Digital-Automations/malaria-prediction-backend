@@ -312,24 +312,39 @@ async def get_cache_status(
     and connection health.
     """
     try:
-        from ...performance.cache_optimization import (  # type: ignore[import-untyped]
-            get_cache_optimizer,  # fmt: skip
-        )
+        import redis
 
-        cache_optimizer = await get_cache_optimizer()
-        cache_stats = await cache_optimizer.get_cache_statistics()
+        # Get Redis connection info from config
+        from ...config import settings
+
+        redis_url = getattr(settings, "redis_url", "redis://localhost:6379")
+        client = redis.from_url(redis_url)
+        info = client.info()
 
         return {
-            "performance_metrics": cache_stats.get("performance_metrics", {}),
-            "memory_usage": cache_stats.get("memory_usage", {}),
-            "connection_status": cache_stats.get("connection_status", "unknown"),
-            "status": (
-                "healthy"
-                if cache_stats.get("connection_status") == "connected"
-                else "unhealthy"
-            ),
+            "performance_metrics": {
+                "hits": info.get("keyspace_hits", 0),
+                "misses": info.get("keyspace_misses", 0),
+                "hit_rate": (
+                    info.get("keyspace_hits", 0)
+                    / max(
+                        info.get("keyspace_hits", 0) + info.get("keyspace_misses", 1), 1
+                    )
+                ),
+            },
+            "memory_usage": {
+                "used_memory_mb": round(info.get("used_memory", 0) / (1024 * 1024), 2),
+                "peak_memory_mb": round(
+                    info.get("used_memory_peak", 0) / (1024 * 1024), 2
+                ),
+            },
+            "connection_status": "connected",
+            "status": "healthy",
         }
 
+    except ImportError:
+        logger.warning("Redis client not available for cache status")
+        return {"status": "unavailable", "message": "Redis client not installed"}
     except Exception as e:
         logger.error(f"Error getting cache status: {e}")
         return {"status": "error", "error": str(e)}
