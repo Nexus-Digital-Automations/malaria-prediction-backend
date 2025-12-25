@@ -273,7 +273,7 @@ Continuous integration and deployment.
 - **ML Questions**: See [ML Documentation](./ml/)
 
 ### Contributing
-- See [CONTRIBUTING.md](../CONTRIBUTING.md) *(coming soon)*
+- See [CONTRIBUTING.md](../CONTRIBUTING.md)
 - Follow [Pre-Commit Guide](./PRE_COMMIT_GUIDE.md)
 - Read [Testing Framework](../tests/README.md)
 
