@@ -37,7 +37,7 @@ from ...database.models import (
 )
 from ...database.security_models import User
 from ...database.session import get_session as get_database
-from ..auth import get_current_user
+from ..auth import get_current_user, require_role
 
 logger = logging.getLogger(__name__)
 
@@ -1320,14 +1320,20 @@ async def export_alert_history(
 # System Administration Endpoints (require admin privileges)
 @router.post("/admin/archive")
 async def archive_old_alerts(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role("admin")),
     dry_run: bool = Query(True, description="Simulate archiving without changes")
 ) -> dict[str, Any]:
-    """Archive old alerts based on retention policy."""
+    """Archive old alerts based on retention policy.
+
+    Requires admin role for access.
+    """
     try:
-        # Note: In production, add admin role check here
         from ...alerts.alert_history_manager import alert_history_manager
 
+        logger.info(
+            "Admin archive request",
+            extra={"user_id": str(current_user.id), "dry_run": dry_run}
+        )
         archive_result = await alert_history_manager.archive_old_alerts(dry_run=dry_run)
         return archive_result
 
@@ -1338,14 +1344,20 @@ async def archive_old_alerts(
 
 @router.post("/admin/cleanup")
 async def cleanup_old_data(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role("admin")),
     dry_run: bool = Query(True, description="Simulate cleanup without changes")
 ) -> dict[str, Any]:
-    """Clean up old alert data based on retention policy."""
+    """Clean up old alert data based on retention policy.
+
+    Requires admin role for access.
+    """
     try:
-        # Note: In production, add admin role check here
         from ...alerts.alert_history_manager import alert_history_manager
 
+        logger.info(
+            "Admin cleanup request",
+            extra={"user_id": str(current_user.id), "dry_run": dry_run}
+        )
         cleanup_result = await alert_history_manager.cleanup_old_data(dry_run=dry_run)
         return cleanup_result
 
